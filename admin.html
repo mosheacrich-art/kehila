@@ -1381,8 +1381,8 @@
     } catch(e) { console.warn('No se pudo subir imagen de prueba:', e.message); }
 
     // Esperar trigger y hacer upsert
-    await new Promise(r => setTimeout(r, 2000));
-    await sb.from('profiles').upsert({
+    await new Promise(r => setTimeout(r, 2500));
+    const upsertPayload = {
       id:              userId,
       telefono:        '+34 6' + String(Math.floor(10000000 + Math.random()*89999999)),
       doc_tipo:        'DNI',
@@ -1400,7 +1400,16 @@
       familiar:        Math.random() > 0.5,
       familiar_nombre: Math.random() > 0.5 ? rand(nombres) + ' ' + rand(apellidos) : null,
       como_conocio:    rand(['Amigo de la comunidad','Redes sociales','Búsqueda en internet','Evento comunitario'])
-    }, { onConflict: 'id', ignoreDuplicates: false });
+    };
+    console.log('Upsert payload:', upsertPayload);
+    const { error: upsertErr } = await sb.from('profiles').upsert(upsertPayload, { onConflict: 'id', ignoreDuplicates: false });
+    if (upsertErr) {
+      console.error('Upsert error:', upsertErr);
+      showToast('Error guardando datos: ' + upsertErr.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Crear cuenta de prueba`;
+      return;
+    }
 
     showToast(`Cuenta de prueba creada: ${email} / ${password}`, 'success');
     btn.disabled = false;
