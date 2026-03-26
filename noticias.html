@@ -250,6 +250,9 @@
       display: flex; gap: var(--space-2); justify-content: flex-end; flex-shrink: 0;
     }
     @media (max-width: 768px) { .drawer { width: 100%; } }
+  .fab-admin { position:fixed; bottom:28px; right:28px; width:54px; height:54px; border-radius:50%; background:#C9A84C; color:#fff; border:none; font-size:1.6rem; cursor:pointer; box-shadow:0 4px 18px rgba(201,168,76,0.45); display:flex; align-items:center; justify-content:center; z-index:100; transition:background 0.15s,transform 0.15s; }
+  .fab-admin:hover { background:#a8892e; transform:scale(1.06); }
+  @media (max-width:768px) { .fab-admin { bottom:80px; right:18px; } }
   </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
@@ -275,6 +278,17 @@
   <script src="js/nav.js"></script>
   <script src="js/noticias.js"></script>
   <script>
+    // FAB móvil para admin
+    (function() {
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (!user || user.role !== 'admin') return;
+      const fab = document.createElement('button');
+      fab.className = 'fab-admin';
+      fab.setAttribute('aria-label', 'Nueva noticia');
+      fab.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:24px;height:24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>';
+      document.body.appendChild(fab);
+      fab.addEventListener('click', () => typeof abrirModalNueva === 'function' && abrirModalNueva());
+    })();
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/kehila/sw.js").catch(()=>{});
     }

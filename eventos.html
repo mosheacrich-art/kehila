@@ -155,6 +155,27 @@
     .cal-event-name { font-size: .875rem; font-weight: 500; color: var(--color-text); }
     .cal-event-place { font-size: .775rem; color: var(--color-text-muted); }
     .cal-empty { text-align: center; color: var(--color-text-light); font-size: .875rem; padding: 24px 0; }
+
+    /* ─── Admin FAB ─── */
+    .fab-admin { position:fixed; bottom:28px; right:28px; width:54px; height:54px; border-radius:50%; background:#C9A84C; color:#fff; border:none; font-size:1.6rem; cursor:pointer; box-shadow:0 4px 18px rgba(201,168,76,0.45); display:flex; align-items:center; justify-content:center; z-index:100; transition:background 0.15s,transform 0.15s; }
+    .fab-admin:hover { background:#a8892e; transform:scale(1.06); }
+    @media (max-width:768px) { .fab-admin { bottom:80px; right:18px; } }
+
+    /* ─── Admin Modal ─── */
+    .admin-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; display:flex; align-items:center; justify-content:center; padding:16px; }
+    .admin-modal-overlay.hidden { display:none; }
+    .admin-modal { background:#fff; border-radius:16px; width:100%; max-width:540px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2); }
+    .admin-modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px 16px; border-bottom:1px solid var(--color-border); }
+    .admin-modal-header h3 { font-size:1.1rem; font-weight:700; }
+    .admin-modal-close { background:none; border:none; cursor:pointer; padding:4px; color:var(--color-text-muted); border-radius:8px; }
+    .admin-modal-close:hover { background:var(--color-bg); }
+    .admin-modal-body { padding:20px 24px; display:flex; flex-direction:column; gap:14px; }
+    .admin-modal-footer { padding:16px 24px; border-top:1px solid var(--color-border); display:flex; gap:10px; justify-content:flex-end; }
+    .form-group { display:flex; flex-direction:column; gap:5px; }
+    .form-group label { font-size:0.78rem; font-weight:600; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+    .form-group input, .form-group textarea, .form-group select { border:1.5px solid var(--color-border); border-radius:8px; padding:9px 12px; font-size:0.9rem; font-family:inherit; outline:none; transition:border-color 0.15s; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--color-primary); }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
@@ -520,7 +541,120 @@
   document.addEventListener('keydown', e => { if (e.key==='Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id)); });
 
   /* ─── Init ─── */
+  // Cargar eventos extra guardados por el admin
+  try {
+    const saved = JSON.parse(localStorage.getItem('admin_eventos') || '[]');
+    saved.forEach(ev => MOCK_EVENTOS.unshift(ev));
+  } catch(e) {}
+
   renderLista();
+
+  /* ─── Admin FAB ─── */
+  (function() {
+    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    if (!user || user.role !== 'admin') return;
+
+    // FAB button
+    const fab = document.createElement('button');
+    fab.className = 'fab-admin';
+    fab.setAttribute('aria-label', 'Añadir evento');
+    fab.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:24px;height:24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>';
+    document.body.appendChild(fab);
+
+    // Modal HTML
+    document.body.insertAdjacentHTML('beforeend', `
+      <div class="admin-modal-overlay hidden" id="modal-add-evento">
+        <div class="admin-modal">
+          <div class="admin-modal-header">
+            <h3>➕ Añadir evento</h3>
+            <button class="admin-modal-close" onclick="document.getElementById('modal-add-evento').classList.add('hidden')">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="admin-modal-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Emoji</label>
+                <input id="ev-emoji" placeholder="🎉" maxlength="4" value="📅">
+              </div>
+              <div class="form-group">
+                <label>Categoría</label>
+                <select id="ev-categoria">
+                  <option>Shabat</option><option>Festividad</option><option>Estudio</option>
+                  <option>Comunidad</option><option>Infantil</option><option>Cultura</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Título</label>
+              <input id="ev-titulo" placeholder="Nombre del evento">
+            </div>
+            <div class="form-group">
+              <label>Descripción</label>
+              <textarea id="ev-desc" rows="3" placeholder="Describe el evento..."></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Fecha</label>
+                <input id="ev-fecha" type="date">
+              </div>
+              <div class="form-group">
+                <label>Hora</label>
+                <input id="ev-hora" type="time" value="19:00">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Lugar</label>
+              <input id="ev-lugar" placeholder="Sinagoga Bet El, Madrid" value="Sinagoga Bet El, C/ Balmes 3, Madrid">
+            </div>
+            <div class="form-group">
+              <label>Aforo máximo</label>
+              <input id="ev-aforo" type="number" placeholder="50" value="50">
+            </div>
+          </div>
+          <div class="admin-modal-footer">
+            <button class="btn btn-ghost" onclick="document.getElementById('modal-add-evento').classList.add('hidden')">Cancelar</button>
+            <button class="btn btn-primary" id="btn-guardar-evento">Publicar evento</button>
+          </div>
+        </div>
+      </div>`);
+
+    fab.addEventListener('click', () => {
+      document.getElementById('ev-fecha').value = new Date().toISOString().split('T')[0];
+      document.getElementById('modal-add-evento').classList.remove('hidden');
+    });
+
+    document.getElementById('btn-guardar-evento').addEventListener('click', () => {
+      const titulo = document.getElementById('ev-titulo').value.trim();
+      const fecha  = document.getElementById('ev-fecha').value;
+      if (!titulo || !fecha) { showToast('Rellena título y fecha', 'warning'); return; }
+
+      const newEv = {
+        id: 'ev' + Date.now(),
+        titulo,
+        descripcion: document.getElementById('ev-desc').value.trim(),
+        fecha,
+        hora: document.getElementById('ev-hora').value,
+        lugar: document.getElementById('ev-lugar').value.trim(),
+        aforo: parseInt(document.getElementById('ev-aforo').value) || 50,
+        inscritos: 0,
+        categoria: document.getElementById('ev-categoria').value,
+        organizador: user.name,
+        emoji: document.getElementById('ev-emoji').value.trim() || '📅'
+      };
+
+      MOCK_EVENTOS.unshift(newEv);
+      try {
+        const saved = JSON.parse(localStorage.getItem('admin_eventos') || '[]');
+        saved.unshift(newEv);
+        localStorage.setItem('admin_eventos', JSON.stringify(saved));
+      } catch(e) {}
+
+      renderLista();
+      document.getElementById('modal-add-evento').classList.add('hidden');
+      showToast('Evento publicado ✓', 'success');
+    });
+  })();
 </script>
   <script>
     if ("serviceWorker" in navigator) {

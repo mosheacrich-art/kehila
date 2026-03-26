@@ -245,13 +245,17 @@
           <h1 class="page-header-title">Siddur</h1>
           <p class="page-header-sub">Libro de rezos — Nusaj Sefaradí</p>
         </div>
-        <div class="page-header-actions">
+        <div class="page-header-actions" style="display:flex;gap:8px;align-items:center;">
           <select id="nusaj-select" class="btn btn-secondary btn-sm" style="font-size:0.83rem;padding:6px 12px;cursor:pointer;" onchange="showToast('Nusaj cambiado a ' + this.value,'info')">
             <option>Nusaj Sefaradí</option>
             <option>Nusaj Ashkenaz</option>
             <option>Nusaj Ari (Jabad)</option>
             <option>Nusaj Italki</option>
           </select>
+          <button id="btn-edit-zmanim" style="display:none;" class="btn btn-secondary btn-sm" onclick="abrirZmanimModal()" title="Editar horarios de tefila">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+            Zmanim
+          </button>
         </div>
       </div>
 
@@ -1490,7 +1494,77 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
       }
     });
 
+    /* ── Zmanim editables (admin) ── */
+    let ZMANIM = JSON.parse(localStorage.getItem('kehila_zmanim') || 'null') || {
+      shajarit: { hora: '8:30', hasta: '10:42', lugar: 'Sinagoga Bet El' },
+      minja:    { hora: '13:45', hasta: 'puesta de sol', lugar: 'Sinagoga Bet El' },
+      arvit:    { hora: '21:15', hasta: '', lugar: 'Sinagoga Bet El' },
+    };
+
+    function getZmanCard(tefila) {
+      const z = ZMANIM[tefila];
+      if (!z) return '';
+      const nombres = { shajarit:'Shajarit', minja:'Minjá', arvit:'Arvit' };
+      const emojis  = { shajarit:'☀️', minja:'🌤', arvit:'🌙' };
+      return `${emojis[tefila]} <strong>${nombres[tefila]} en ${z.lugar}:</strong> ${z.hora}${z.hasta ? ' · hasta las ' + z.hasta : ''}`;
+    }
+
+    function abrirZmanimModal() {
+      const z = ZMANIM;
+      const html = `
+        <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px;" id="zmanim-overlay">
+          <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--color-border);">
+              <h3 style="font-size:1.1rem;font-weight:700;">⏱ Editar horarios de tefila</h3>
+              <button onclick="document.getElementById('zmanim-overlay').remove()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#888;">✕</button>
+            </div>
+            <div style="padding:20px 24px;display:flex;flex-direction:column;gap:20px;">
+              ${['shajarit','minja','arvit'].map(t => {
+                const nombres = { shajarit:'☀️ Shajarit', minja:'🌤 Minjá', arvit:'🌙 Arvit' };
+                return `<div>
+                  <div style="font-weight:600;font-size:0.85rem;margin-bottom:8px;">${nombres[t]}</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
+                    <div><label style="font-size:0.72rem;color:#888;display:block;margin-bottom:3px;">Hora inicio</label>
+                    <input id="z-${t}-hora" value="${z[t]?.hora||''}" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px;font-size:0.9rem;box-sizing:border-box;"></div>
+                    <div><label style="font-size:0.72rem;color:#888;display:block;margin-bottom:3px;">Hasta</label>
+                    <input id="z-${t}-hasta" value="${z[t]?.hasta||''}" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px;font-size:0.9rem;box-sizing:border-box;"></div>
+                  </div>
+                  <div><label style="font-size:0.72rem;color:#888;display:block;margin-bottom:3px;">Lugar</label>
+                  <input id="z-${t}-lugar" value="${z[t]?.lugar||''}" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px;font-size:0.9rem;box-sizing:border-box;"></div>
+                </div>`;
+              }).join('')}
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid var(--color-border);display:flex;gap:10px;justify-content:flex-end;">
+              <button onclick="document.getElementById('zmanim-overlay').remove()" class="btn btn-ghost">Cancelar</button>
+              <button onclick="guardarZmanim()" class="btn btn-primary">Guardar horarios</button>
+            </div>
+          </div>
+        </div>`;
+      document.body.insertAdjacentHTML('beforeend', html);
+    }
+
+    function guardarZmanim() {
+      ['shajarit','minja','arvit'].forEach(t => {
+        ZMANIM[t] = {
+          hora:  document.getElementById('z-'+t+'-hora')?.value.trim()  || '',
+          hasta: document.getElementById('z-'+t+'-hasta')?.value.trim() || '',
+          lugar: document.getElementById('z-'+t+'-lugar')?.value.trim() || 'Sinagoga Bet El',
+        };
+      });
+      localStorage.setItem('kehila_zmanim', JSON.stringify(ZMANIM));
+      document.getElementById('zmanim-overlay')?.remove();
+      showToast('Horarios guardados ✓', 'success');
+    }
+
     /* ── Init ── */
+    // Mostrar botón de zmanim solo a admin
+    (function() {
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (user && user.role === 'admin') {
+        const btn = document.getElementById('btn-edit-zmanim');
+        if (btn) btn.style.display = 'flex';
+      }
+    })();
     // No renderizamos nada — el usuario elige primero en la landing
   </script>
   <script>
