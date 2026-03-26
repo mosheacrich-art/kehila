@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Siddur — Kehilá</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <style>
+    /* ── Siddur layout: sidebar lista + panel texto ── */
+    .siddur-layout {
+      display: grid; grid-template-columns: 280px 1fr; gap: 0;
+      background: #fff; border-radius: var(--radius-xl);
+      border: 1.5px solid var(--color-border); overflow: hidden; min-height: 600px;
+    }
+
+    /* ── Sidebar lista ── */
+    .siddur-sidebar {
+      border-right: 1.5px solid var(--color-border); display: flex; flex-direction: column;
+    }
+    .siddur-tefila-tabs {
+      display: flex; overflow-x: auto; border-bottom: 1.5px solid var(--color-border); padding: 0 var(--space-2);
+    }
+    .siddur-tefila-tabs::-webkit-scrollbar { display: none; }
+    .siddur-tefila-tab {
+      padding: var(--space-3) var(--space-3); font-size: 0.8rem; font-weight: 600; white-space: nowrap;
+      border-bottom: 2px solid transparent; cursor: pointer; color: var(--color-text-muted);
+      transition: color 0.15s, border-color 0.15s; flex-shrink: 0;
+    }
+    .siddur-tefila-tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+    .siddur-section-list { flex: 1; overflow-y: auto; padding: var(--space-2); }
+    .siddur-section-item {
+      display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-3);
+      border-radius: var(--radius-md); cursor: pointer; transition: background 0.15s; margin-bottom: 2px;
+    }
+    .siddur-section-item:hover { background: var(--color-bg); }
+    .siddur-section-item.active { background: rgba(27,46,94,0.08); color: var(--color-primary); }
+    .siddur-section-item.active .section-num { background: var(--color-primary); color: #fff; }
+    .section-num {
+      width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg);
+      border: 1.5px solid var(--color-border); font-size: 0.7rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--color-text-muted);
+    }
+    .section-info { flex: 1; }
+    .section-name-heb { font-family: 'Frank Ruhl Libre', serif; font-size: 1rem; line-height: 1.2; direction: rtl; }
+    .section-name-es { font-size: 0.72rem; color: var(--color-text-muted); }
+    .section-bookmark {
+      width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+      color: var(--color-border); transition: color 0.15s;
+    }
+    .section-bookmark.saved { color: var(--color-gold); }
+    .section-bookmark svg { width: 14px; height: 14px; }
+
+    /* ── Panel de texto principal ── */
+    .siddur-panel { display: flex; flex-direction: column; }
+    .siddur-panel-header {
+      display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-6);
+      border-bottom: 1.5px solid var(--color-border); background: var(--color-bg);
+    }
+    .siddur-panel-title { flex: 1; }
+    .siddur-panel-title h2 { font-family: 'Frank Ruhl Libre', serif; font-size: 1.3rem; direction: rtl; line-height: 1; }
+    .siddur-panel-title span { font-size: 0.8rem; color: var(--color-text-muted); }
+    .siddur-controls { display: flex; align-items: center; gap: var(--space-2); }
+    .ctrl-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-md); border: 1.5px solid var(--color-border);
+      background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--color-text-muted); font-size: 0.8rem; font-weight: 700; transition: all 0.15s;
+    }
+    .ctrl-btn:hover { border-color: var(--color-primary); color: var(--color-primary); background: rgba(27,46,94,0.05); }
+    .ctrl-btn svg { width: 15px; height: 15px; }
+
+    /* ── Modo visualización toggle ── */
+    .view-mode-toggle {
+      display: flex; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden;
+    }
+    .view-mode-btn {
+      padding: 4px 10px; font-size: 0.75rem; font-weight: 500; cursor: pointer; border: none;
+      background: #fff; color: var(--color-text-muted); transition: all 0.15s;
+    }
+    .view-mode-btn.active { background: var(--color-primary); color: #fff; }
+
+    /* ── Texto de tefilá ── */
+    .siddur-text-area { flex: 1; overflow-y: auto; padding: var(--space-8) var(--space-8); }
+    .prayer-block { margin-bottom: var(--space-6); }
+    .prayer-label {
+      display: inline-block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--color-gold); border-bottom: 2px solid rgba(201,168,76,0.3); padding-bottom: 2px; margin-bottom: var(--space-4);
+    }
+    .prayer-columns { display: grid; gap: var(--space-6); }
+    .prayer-columns.col-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .prayer-columns.col-2 { grid-template-columns: 1fr 1fr; }
+    .prayer-columns.col-1 { grid-template-columns: 1fr; }
+    .prayer-col-label {
+      font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--color-text-muted); margin-bottom: var(--space-3); padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .prayer-heb {
+      font-family: 'Frank Ruhl Libre', serif; direction: rtl; text-align: right; line-height: 2.2;
+      color: var(--color-text);
+    }
+    .prayer-transliteration { font-style: italic; color: var(--color-text-secondary); line-height: 1.9; }
+    .prayer-translation { color: var(--color-text-secondary); line-height: 1.9; }
+    .highlight-gold { color: var(--color-gold); font-weight: 700; }
+
+    /* ── Nota halájica ── */
+    .prayer-note {
+      background: rgba(27,46,94,0.04); border-left: 3px solid var(--color-primary);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: var(--space-4);
+      margin: var(--space-5) 0; font-size: 0.83rem; color: var(--color-text-secondary); line-height: 1.6;
+    }
+    .prayer-note strong { color: var(--color-primary); }
+
+    /* ── Zman alert ── */
+    .zman-alert {
+      margin-bottom: var(--space-5); padding: var(--space-3) var(--space-5);
+      background: linear-gradient(90deg, rgba(27,46,94,0.06) 0%, rgba(201,168,76,0.06) 100%);
+      border: 1.5px solid rgba(27,46,94,0.15); border-radius: var(--radius-lg);
+      display: flex; align-items: center; gap: var(--space-3); font-size: 0.85rem;
+    }
+    .zman-alert svg { width: 18px; height: 18px; color: var(--color-primary); flex-shrink: 0; }
+
+    /* ── Progress strip ── */
+    .siddur-progress {
+      padding: var(--space-3) var(--space-6); border-top: 1.5px solid var(--color-border);
+      display: flex; align-items: center; gap: var(--space-4); font-size: 0.8rem; color: var(--color-text-muted);
+    }
+    .siddur-progress-bar { flex: 1; height: 4px; background: var(--color-border); border-radius: 2px; }
+    .siddur-progress-fill { height: 100%; background: var(--color-primary); border-radius: 2px; transition: width 0.3s; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .siddur-layout { grid-template-columns: 1fr; }
+      .siddur-sidebar { border-right: none; border-bottom: 1.5px solid var(--color-border); max-height: 200px; }
+      .prayer-columns.col-3 { grid-template-columns: 1fr; }
+      .prayer-columns.col-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-placeholder"></div>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-header-label">Tefila</div>
+          <h1 class="page-header-title">Siddur</h1>
+          <p class="page-header-sub">Libro de rezos — Nusaj Sefaradí</p>
+        </div>
+        <div class="page-header-actions">
+          <select id="nusaj-select" class="btn btn-secondary btn-sm" style="font-size:0.83rem;padding:6px 12px;cursor:pointer;" onchange="showToast('Nusaj cambiado a ' + this.value,'info')">
+            <option>Nusaj Sefaradí</option>
+            <option>Nusaj Ashkenaz</option>
+            <option>Nusaj Ari (Jabad)</option>
+            <option>Nusaj Italki</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Zman alert -->
+      <div class="zman-alert">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+        <span><strong>Zman Shajarit en Madrid:</strong> hasta las 10:42 · Minján: 8:30 en Bet El · <span style="color:var(--color-primary);font-weight:600">Hoy: Rosh Jódesh</span></span>
+      </div>
+
+      <!-- Siddur layout -->
+      <div class="siddur-layout">
+        <!-- Sidebar de secciones -->
+        <div class="siddur-sidebar">
+          <div class="siddur-tefila-tabs" id="tefila-tabs">
+            <div class="siddur-tefila-tab active" data-tefila="shajarit" onclick="selectTefila(this)">Shajarit</div>
+            <div class="siddur-tefila-tab" data-tefila="minja" onclick="selectTefila(this)">Minjá</div>
+            <div class="siddur-tefila-tab" data-tefila="arvit" onclick="selectTefila(this)">Arvit</div>
+            <div class="siddur-tefila-tab" data-tefila="shabat" onclick="selectTefila(this)">Shabat</div>
+            <div class="siddur-tefila-tab" data-tefila="especiales" onclick="selectTefila(this)">Especiales</div>
+          </div>
+          <div class="siddur-section-list" id="section-list"></div>
+        </div>
+
+        <!-- Panel principal -->
+        <div class="siddur-panel">
+          <div class="siddur-panel-header">
+            <div class="siddur-panel-title">
+              <h2 id="panel-heb-title">מוֹדֶה אֲנִי</h2>
+              <span id="panel-es-title">Modé Aní — Al despertar</span>
+            </div>
+            <div class="siddur-controls">
+              <button class="ctrl-btn" onclick="changeFontSize(-1)" title="Reducir texto">A−</button>
+              <button class="ctrl-btn" onclick="changeFontSize(1)" title="Aumentar texto">A+</button>
+              <div class="view-mode-toggle" id="view-toggle">
+                <button class="view-mode-btn active" onclick="setViewMode('completo',this)">Completo</button>
+                <button class="view-mode-btn" onclick="setViewMode('heb',this)">Hebreo</button>
+                <button class="view-mode-btn" onclick="setViewMode('trad',this)">Traducción</button>
+              </div>
+              <button class="ctrl-btn" id="bookmark-btn" onclick="toggleBookmark()" title="Guardar marcador">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="siddur-text-area" id="text-area"></div>
+
+          <div class="siddur-progress">
+            <span id="progress-label">Sección 1 de 12</span>
+            <div class="siddur-progress-bar"><div class="siddur-progress-fill" id="progress-fill" style="width:8%"></div></div>
+            <div style="display:flex;gap:var(--space-2)">
+              <button class="ctrl-btn" onclick="prevSection()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+              </button>
+              <button class="ctrl-btn" onclick="nextSection()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/data.js"></script>
+  <script>
+    requireAuth();
+    initNav('siddur');
+
+    /* ────────────────────────────────────────────
+       DATOS DEL SIDDUR
+    ──────────────────────────────────────────── */
+    const TEFILA_DATA = {
+      shajarit: {
+        sections: [
+          { id:'mode-ani', heb:'מוֹדֶה אֲנִי', es:'Modé Aní', note: 'Se recita antes de lavarse las manos, al despertar.' },
+          { id:'netilat', heb:'נְטִילַת יָדַיִם', es:'Netilat Iadáim', note: 'Lavado ritual de manos con berajá.' },
+          { id:'shajarit-berajot', heb:'בִּרְכוֹת הַשַּׁחַר', es:'Berajot HaShajar', note: 'Bendiciones de la mañana.' },
+          { id:'pesukey', heb:'פְּסוּקֵי דְזִמְרָה', es:'Pesukéi DeZimrá', note: 'Versículos de alabanza.' },
+          { id:'shema', heb:'קְרִיאַת שְׁמַע', es:'Keriat Shemá', note: 'Lectura del Shemá e Israel.' },
+          { id:'amidá', heb:'עֲמִידָה', es:'Amidá — Shajarit', note: 'La oración central, de pie.' },
+          { id:'tajanunim', heb:'תַּחֲנוּנִים', es:'Tajanunín', note: 'Plegarias de súplica (no en Shabat ni festividades).' },
+          { id:'torá', heb:'קְרִיאַת הַתּוֹרָה', es:'Keriat HaTorá', note: 'Lectura de la Torá (lunes, jueves y Shabat).' },
+          { id:'aleinu', heb:'עָלֵינוּ לְשַׁבֵּחַ', es:'Aleinu LeShabéaj', note: 'Al final de cada tefila.' },
+          { id:'kaddish', heb:'קַדִּישׁ', es:'Kadísh', note: 'Recitado por los en duelo (aveilim).' },
+          { id:'psalm-day', heb:'שִׁיר שֶׁל יוֹם', es:'Shir Shel Yom', note: 'Salmo del día de la semana.' },
+          { id:'musaf', heb:'מוּסָף', es:'Musaf', note: 'Tefila adicional en Shabat, Rosh Jódesh y festividades.' }
+        ]
+      },
+      minja: {
+        sections: [
+          { id:'m-asher', heb:'אַשְׁרֵי', es:'Ashréi', note: 'Salmo 145.' },
+          { id:'m-amida', heb:'עֲמִידָה', es:'Amidá — Minjá', note: 'En días de ayuno incluye Seliját.' },
+          { id:'m-tajanunim', heb:'תַּחֲנוּנִים', es:'Tajanunín', note: 'Después de la Amidá.' },
+          { id:'m-aleinu', heb:'עָלֵינוּ', es:'Aleinu', note: '' },
+          { id:'m-kaddish', heb:'קַדִּישׁ', es:'Kadísh', note: '' }
+        ]
+      },
+      arvit: {
+        sections: [
+          { id:'a-barchu', heb:'בָּרְכוּ', es:'Barjú', note: 'El líder llama a la congregación al rezo.' },
+          { id:'a-shema', heb:'קְרִיאַת שְׁמַע', es:'Keriat Shemá', note: 'Tercera recitación del Shemá del día.' },
+          { id:'a-amida', heb:'עֲמִידָה', es:'Amidá — Arvit', note: 'Amidá nocturna.' },
+          { id:'a-aleinu', heb:'עָלֵינוּ', es:'Aleinu', note: '' },
+          { id:'a-kaddish', heb:'קַדִּישׁ', es:'Kadísh', note: '' }
+        ]
+      },
+      shabat: {
+        sections: [
+          { id:'sh-minha', heb:'מִנְחָה שֶׁל שַׁבָּת', es:'Minjá de Shabat', note: 'Shajarit de Shabat incluye Pesukéi DeZimrá extendido y Musaf.' },
+          { id:'sh-kabbalat', heb:'קַבָּלַת שַׁבָּת', es:'Kabalat Shabat', note: 'Leká Dodí y Salmos.' },
+          { id:'sh-arvit', heb:'עַרְבִית שֶׁל שַׁבָּת', es:'Arvit de Shabat', note: 'Con Amidá de Shabat.' },
+          { id:'sh-kiddush', heb:'קִדּוּשׁ', es:'Kidúsh', note: 'Bendición sobre el vino.' },
+          { id:'sh-shajarit', heb:'שַׁחֲרִית שֶׁל שַׁבָּת', es:'Shajarit de Shabat', note: 'Con Keriat HaTorá y Haftará.' },
+          { id:'sh-musaf', heb:'מוּסָף שֶׁל שַׁבָּת', es:'Musaf de Shabat', note: '' },
+          { id:'sh-havdala', heb:'הַבְדָּלָה', es:'Havdalá', note: 'Al finalizar Shabat.' }
+        ]
+      },
+      especiales: {
+        sections: [
+          { id:'sp-hallel', heb:'הַלֵּל', es:'Halel', note: 'Recitado en Rosh Jódesh y festividades.' },
+          { id:'sp-selichot', heb:'סְלִיחוֹת', es:'Seliját', note: 'Plegarias penitenciales antes de Rosh Hashaná.' },
+          { id:'sp-kol-nidre', heb:'כָּל נִדְרֵי', es:'Kol Nidré', note: 'Inicio de Yom Kipur.' },
+          { id:'sp-yizkor', heb:'יִזְכּוֹר', es:'Yizkor', note: 'Memorial por los difuntos.' },
+          { id:'sp-birkat', heb:'בִּרְכַּת הַמָּזוֹן', es:'Birkat Hamazón', note: 'Gracia después de las comidas con pan.' }
+        ]
+      }
+    };
+
+    /* ────────────────────────────────────────────
+       TEXTOS DE ORACIÓN
+    ──────────────────────────────────────────── */
+    const PRAYER_TEXTS = {
+      'mode-ani': {
+        heb: `מוֹדֶה אֲנִי לְפָנֶיךָ מֶלֶךְ חַי וְקַיָּם, שֶׁהֶחֱזַרְתָּ בִּי נִשְׁמָתִי בְּחֶמְלָה.
+רַבָּה אֱמוּנָתֶךָ.`,
+        trans: `Te agradezco, Rey vivo y eterno,
+que has devuelto mi alma a mí con compasión.
+Grande es Tu fidelidad.`,
+        translit: `Modé aní lefanéja mélej jaí vekayám,
+shehejezárta bi nishmati bejémla.
+Rabá emunatéja.`,
+        note: 'Se recita inmediatamente al despertar, antes de lavarse las manos. No requiere que las manos estén limpias.'
+      },
+      'netilat': {
+        heb: `בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְצִוָּנוּ עַל נְטִילַת יָדָיִם.`,
+        trans: `Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que nos ha santificado con Sus mandamientos
+y nos ha ordenado el lavado de las manos.`,
+        translit: `Baruj atá Adonái Eloheinu mélej haolám,
+asher kideshanu bemitzvotav vetzivanu
+al netilat iadáim.`,
+        note: 'Se vierte agua tres veces alternando sobre cada mano. Se recita la berajá después del lavado.'
+      },
+      'shajarit-berajot': {
+        heb: `בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+אֲשֶׁר נָתַן לַשֶּׂכְוִי בִינָה לְהַבְחִין בֵּין יוֹם וּבֵין לָיְלָה.
+
+בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+שֶׁלֹּא עָשַׂנִי גּוֹי.
+
+בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+שֶׁלֹּא עָשַׂנִי עָבֶד.
+
+בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+פּוֹקֵחַ עִוְרִים.`,
+        trans: `Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que diste al gallo inteligencia para distinguir entre el día y la noche.
+
+Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que no me has hecho no judío.
+
+Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que no me has hecho esclavo.
+
+Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que abre los ojos de los ciegos.`,
+        translit: `Baruj atá Adonái Eloheinu mélej haolám,
+asher natán lasejví biná lehavjín bein yom uvein láila.
+
+Baruj atá Adonái Eloheinu mélej haolám,
+sheló asáni goí.
+
+Baruj atá Adonái Eloheinu mélej haolám,
+sheló asáni avéd.
+
+Baruj atá Adonái Eloheinu mélej haolám,
+pokeaj ivrim.`,
+        note: 'Las Berajot HaShajar son 15 bendiciones que reconocen los dones que Dios nos otorga cada mañana al despertar.'
+      },
+      'shema': {
+        heb: `שְׁמַע יִשְׂרָאֵל יְיָ אֱלֹהֵינוּ יְיָ אֶחָד.
+
+בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד.
+
+וְאָהַבְתָּ אֵת יְיָ אֱלֹהֶיךָ בְּכָל לְבָבְךָ וּבְכָל נַפְשְׁךָ
+וּבְכָל מְאֹדֶךָ. וְהָיוּ הַדְּבָרִים הָאֵלֶּה אֲשֶׁר אָנֹכִי מְצַוְּךָ
+הַיּוֹם עַל לְבָבֶךָ.`,
+        trans: `Escucha, Israel: el Señor es nuestro Dios, el Señor es Uno.
+
+Bendito sea el Nombre de la gloria de Su reino por siempre jamás.
+
+Amarás al Señor tu Dios con todo tu corazón, con toda tu alma
+y con todas tus fuerzas. Estas palabras que Yo te ordeno hoy
+estarán en tu corazón.`,
+        translit: `Shemá Isrá'el Adonái Eloheinu Adonái Ejád.
+
+Baruj shem kevod maljutó leolám vaéd.
+
+Veahavtá et Adonái Elohéja bejol levavjá uvejol nafshejá
+uvejol meodéja. Vehayu hadevarím haéle asher anojí metzavejá
+hayóm al levavéja.`,
+        note: 'El primer versículo se recita en voz alta y con concentración. "Baruj shem..." se dice en voz baja (excepto en Yom Kipur).'
+      },
+      'amidá': {
+        heb: `אֲדֹנָי שְׂפָתַי תִּפְתָּח וּפִי יַגִּיד תְּהִלָּתֶךָ.
+
+בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ וֵאלֹהֵי אֲבוֹתֵינוּ,
+אֱלֹהֵי אַבְרָהָם, אֱלֹהֵי יִצְחָק, וֵאלֹהֵי יַעֲקֹב.
+הָאֵל הַגָּדוֹל הַגִּבּוֹר וְהַנּוֹרָא, אֵל עֶלְיוֹן.`,
+        trans: `Señor, abre mis labios para que mi boca pueda proclamar Tu alabanza.
+
+Bendito eres Tú, Señor nuestro Dios y Dios de nuestros padres,
+Dios de Abraham, Dios de Isaac y Dios de Jacob,
+el Dios grande, poderoso y temible, el Dios altísimo.`,
+        translit: `Adonái sefatái tiftáj ufi yagíd tehilatéja.
+
+Baruj atá Adonái, Eloheinu vElohéi avoteinu,
+Elohéi Avrahám, Elohéi Itzják, vElohéi Yaakóv.
+HaEl hagadól hagibór vehanorá, El Elyón.`,
+        note: 'La Amidá se reza de pie, con los pies juntos, hacia Jerusalem. Consta de 19 bendiciones (Shajarit de días de semana). Se eleva sobre los talones 3 veces al inicio.'
+      },
+      'aleinu': {
+        heb: `עָלֵינוּ לְשַׁבֵּחַ לַאֲדוֹן הַכֹּל, לָתֵת גְּדֻלָּה לְיוֹצֵר בְּרֵאשִׁית,
+שֶׁלֹּא עָשָׂנוּ כְּגוֹיֵי הָאֲרָצוֹת, וְלֹא שָׂמָנוּ כְּמִשְׁפְּחוֹת הָאֲדָמָה.
+שֶׁלֹּא שָׂם חֶלְקֵנוּ כָּהֶם, וְגוֹרָלֵנוּ כְּכָל הֲמוֹנָם.
+
+וַאֲנַחְנוּ כּוֹרְעִים וּמִשְׁתַּחֲוִים וּמוֹדִים,
+לִפְנֵי מֶלֶךְ מַלְכֵי הַמְּלָכִים הַקָּדוֹשׁ בָּרוּךְ הוּא.`,
+        trans: `Nos corresponde alabar al Señor de todo, atribuir grandeza al Creador del universo,
+pues no nos ha hecho como las naciones de las tierras ni nos ha puesto como las familias de la tierra.
+No ha puesto nuestra porción como la de ellos, ni nuestra suerte como la de toda su multitud.
+
+Nosotros nos inclinamos, nos prosternamos y agradecemos
+ante el Rey, Rey de los reyes, el Santo, bendito sea.`,
+        translit: `Aleinu leshabéaj laadón hakol, latéit guedulá leyotzér bereshít,
+sheló asánu kegoyéi haaratzót, veló samánu kemishpejót haadamá.
+Sheló sam jelkeinu kahém, vegoraleinu kejol hamonám.
+
+Vaanájnu korím umishtatjavím umodím,
+lifnéi mélej maljéi hamelajím hakadósh baruj hu.`,
+        note: 'Al decir "vaanajnu korím" nos inclinamos hacia adelante. En muchas comunidades se inclina hasta el piso en Rosh Hashaná y Yom Kipur.'
+      },
+      'sh-kabbalat': {
+        heb: `לְכָה דוֹדִי לִקְרַאת כַּלָּה, פְּנֵי שַׁבָּת נְקַבְּלָה.
+
+שָׁמוֹר וְזָכוֹר בְּדִבּוּר אֶחָד, הִשְׁמִיעָנוּ אֵל הַמְּיוּחָד.
+יְיָ אֶחָד וּשְׁמוֹ אֶחָד, לְשֵׁם וּלְתִפְאֶרֶת וְלִתְהִלָּה.
+
+לְכָה דוֹדִי לִקְרַאת כַּלָּה, פְּנֵי שַׁבָּת נְקַבְּלָה.`,
+        trans: `¡Ven, Amado mío, al encuentro de la novia! ¡Recibamos la presencia del Shabat!
+
+"Guarda" y "Recuerda" en un solo mandato nos proclamó el Dios único.
+El Señor es Uno y Su nombre es Uno, para fama, gloria y alabanza.
+
+¡Ven, Amado mío, al encuentro de la novia! ¡Recibamos la presencia del Shabat!`,
+        translit: `Lejá dodí likrát kalá, pnéi Shabat nekabelá.
+
+Shamór vezajór bedibúr ejád, hishmíanu El hameijuád.
+Adonái ejád ushemó ejád, leshem uletifáret velitehilá.
+
+Lejá dodí likrát kalá, pnéi Shabat nekabelá.`,
+        note: 'El Lejá Dodí fue compuesto por el cabalista Shlomó Alkabétz en Safed en el siglo XVI. Al recitar la última estrofa, la congregación se gira hacia la puerta para "recibir" al Shabat.'
+      },
+      'sh-kiddush': {
+        heb: `וַיְהִי עֶרֶב וַיְהִי בֹקֶר יוֹם הַשִּׁשִּׁי.
+וַיְכֻלּוּ הַשָּׁמַיִם וְהָאָרֶץ וְכָל צְבָאָם.
+
+בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+בּוֹרֵא פְּרִי הַגָּפֶן.
+
+בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְרָצָה בָנוּ...`,
+        trans: `Y fue la tarde y fue la mañana, el sexto día.
+Así quedaron terminados los cielos y la tierra y todo su ejército.
+
+Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que creas el fruto de la vid.
+
+Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que nos has santificado con Sus mandamientos y te has complacido en nosotros...`,
+        translit: `Vayehí erev vayehí vóker yom hashishí.
+Vaijulú hashamáim vehaarétz vejol tzvaám.
+
+Baruj atá Adonái Eloheinu mélej haolám,
+boré perí hagáfen.
+
+Baruj atá Adonái Eloheinu mélej haolám,
+asher kideshanu bemitzvotav veratza vanu...`,
+        note: 'El Kidúsh del viernes por la noche incluye el pasaje de la Torá sobre el fin de la Creación. Se recita sobre vino o zumo de uva kosher.'
+      },
+      'sh-havdala': {
+        heb: `בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+בּוֹרֵא פְּרִי הַגָּפֶן.
+
+בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+בּוֹרֵא מִינֵי בְשָׂמִים.
+
+בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+בּוֹרֵא מְאוֹרֵי הָאֵשׁ.
+
+בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+הַמַּבְדִּיל בֵּין קֹדֶשׁ לְחוֹל...`,
+        trans: `Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que creas el fruto de la vid.
+
+Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que creas diversas especias aromáticas.
+
+Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que creas las luces del fuego.
+
+Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que distingues entre lo sagrado y lo profano...`,
+        translit: `Baruj atá Adonái Eloheinu mélej haolám,
+boré perí hagáfen.
+
+Baruj atá Adonái Eloheinu mélej haolám,
+boré minéi vesamím.
+
+Baruj atá Adonái Eloheinu mélej haolám,
+boré meoréi haésh.
+
+Baruj atá Adonái Eloheinu mélej haolám,
+hamavdíl bein kódesh lejól...`,
+        note: 'La Havdalá se realiza sobre vino, especias (besamin) y una vela de múltiples mechas. Se dice al finalizar Shabat, después de que aparecen tres estrellas.'
+      },
+      'sp-hallel': {
+        heb: `הַלְלוּיָהּ. הַלְלוּ עַבְדֵי יְיָ, הַלְלוּ אֶת שֵׁם יְיָ.
+
+יְהִי שֵׁם יְיָ מְבֹרָךְ, מֵעַתָּה וְעַד עוֹלָם.
+מִמִּזְרַח שֶׁמֶשׁ עַד מְבוֹאוֹ, מְהֻלָּל שֵׁם יְיָ.`,
+        trans: `¡Aleluya! ¡Alabad, siervos del Señor, alabad el Nombre del Señor!
+
+Sea el Nombre del Señor bendecido desde ahora y por siempre.
+Desde el orto del sol hasta su ocaso, alabado sea el Nombre del Señor.`,
+        translit: `Haleluiá. Halelú avdéi Adonái, halelú et shem Adonái.
+
+Yehí shem Adonái mevorájj, méatá veád olám.
+Mimizraj shémesh ad mevoó, mehulál shem Adonái.`,
+        note: 'El Halel completo se recita en Pesaj, Shavuot, Sucot y Janucá. El Halel parcial en Rosh Jódesh y los últimos días de Pesaj.'
+      },
+      'sp-birkat': {
+        heb: `רַבּוֹתַי נְבָרֵךְ.
+
+בָּרוּךְ (אֱלֹהֵינוּ) שֶׁאָכַלְנוּ מִשֶּׁלוֹ וּבְטוּבוֹ חָיִינוּ.
+
+בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,
+הַזָּן אֶת הָעוֹלָם כֻּלּוֹ בְּטוּבוֹ בְּחֵן בְּחֶסֶד וּבְרַחֲמִים.`,
+        trans: `¡Señores, bendigamos!
+
+Bendito (nuestro Dios) de cuyo [alimento] hemos comido y por cuya bondad vivimos.
+
+Bendito eres Tú, Señor nuestro Dios, Rey del universo,
+que alimenta al mundo entero con Su bondad, con gracia, con amor y con misericordia.`,
+        translit: `Rabotái nevàréj.
+
+Baruj (Eloheinu) sheajalnu mishélo uvtuvo jainu.
+
+Baruj atá Adonái Eloheinu mélej haolám,
+hazán et haolám kuló betuvó bején bejésed uverajamím.`,
+        note: 'Birkat Hamazón se recita después de comer pan (mínimo un kazáit). Requiere un mínimo de 3 personas para recitar la introducción responsorial (zimún).'
+      }
+    };
+
+    /* ────────────────────────────────────────────
+       ESTADO
+    ──────────────────────────────────────────── */
+    let currentTefila = 'shajarit';
+    let currentSectionIdx = 0;
+    let fontSize = 1.15; // rem para hebreo
+    let viewMode = 'completo';
+    let bookmarks = JSON.parse(localStorage.getItem('siddur_bookmarks') || '[]');
+
+    function getCurrentSections() { return TEFILA_DATA[currentTefila].sections; }
+    function getCurrentSection() { return getCurrentSections()[currentSectionIdx]; }
+
+    /* ── Render sidebar ── */
+    function renderSectionList() {
+      const sections = getCurrentSections();
+      document.getElementById('section-list').innerHTML = sections.map((s,i) => {
+        const saved = bookmarks.includes(s.id);
+        return `
+          <div class="siddur-section-item ${i===currentSectionIdx?'active':''}" onclick="selectSection(${i})">
+            <div class="section-num">${i+1}</div>
+            <div class="section-info">
+              <div class="section-name-heb">${s.heb}</div>
+              <div class="section-name-es">${s.es}</div>
+            </div>
+            <div class="section-bookmark ${saved?'saved':''}" onclick="toggleBookmarkById(event,'${s.id}')">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="${saved?'currentColor':'none'}" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    /* ── Render texto ── */
+    function renderText() {
+      const sec = getCurrentSection();
+      const pt = PRAYER_TEXTS[sec.id];
+      const sections = getCurrentSections();
+
+      document.getElementById('panel-heb-title').textContent = sec.heb;
+      document.getElementById('panel-es-title').textContent = sec.es;
+
+      // Progress
+      const pct = Math.round(((currentSectionIdx + 1) / sections.length) * 100);
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('progress-label').textContent = `Sección ${currentSectionIdx+1} de ${sections.length}`;
+
+      // Bookmark
+      const saved = bookmarks.includes(sec.id);
+      const bBtn = document.getElementById('bookmark-btn');
+      bBtn.style.color = saved ? 'var(--color-gold)' : '';
+      bBtn.querySelector('svg').setAttribute('fill', saved ? 'var(--color-gold)' : 'none');
+
+      if (!pt) {
+        document.getElementById('text-area').innerHTML = `
+          <div class="prayer-block">
+            <div style="text-align:center;padding:var(--space-12);color:var(--color-text-muted)">
+              <div style="font-size:2.5rem;margin-bottom:var(--space-3)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:40px;height:40px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg></div>
+              <p>El texto completo estará disponible en la versión final del Siddur.</p>
+              ${sec.note ? `<div class="prayer-note" style="text-align:left;margin-top:var(--space-6)"><strong><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg> Nota:</strong> ${sec.note}</div>` : ''}
+            </div>
+          </div>`;
+        return;
+      }
+
+      const colClass = viewMode === 'completo' ? 'col-3' : 'col-1';
+
+      let html = '';
+
+      if (sec.note) {
+        html += `<div class="prayer-note"><strong><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg> Nota halájica:</strong> ${sec.note}</div>`;
+      }
+
+      html += `<div class="prayer-block">`;
+
+      if (viewMode === 'completo') {
+        html += `<div class="prayer-columns col-3">
+          <div>
+            <div class="prayer-col-label">Hebreo</div>
+            <div class="prayer-heb" style="font-size:${fontSize}rem">${pt.heb.replace(/\n/g,'<br>')}</div>
+          </div>
+          <div>
+            <div class="prayer-col-label">Transliteración</div>
+            <div class="prayer-transliteration" style="font-size:0.9rem">${pt.translit.replace(/\n/g,'<br>')}</div>
+          </div>
+          <div>
+            <div class="prayer-col-label">Traducción</div>
+            <div class="prayer-translation" style="font-size:0.9rem">${pt.trans.replace(/\n/g,'<br>')}</div>
+          </div>
+        </div>`;
+      } else if (viewMode === 'heb') {
+        html += `<div class="prayer-columns col-1">
+          <div>
+            <div class="prayer-heb" style="font-size:${fontSize * 1.3}rem; text-align:right;">${pt.heb.replace(/\n/g,'<br>')}</div>
+          </div>
+        </div>`;
+      } else {
+        html += `<div class="prayer-columns col-2">
+          <div>
+            <div class="prayer-col-label">Transliteración</div>
+            <div class="prayer-transliteration">${pt.translit.replace(/\n/g,'<br>')}</div>
+          </div>
+          <div>
+            <div class="prayer-col-label">Traducción</div>
+            <div class="prayer-translation">${pt.trans.replace(/\n/g,'<br>')}</div>
+          </div>
+        </div>`;
+      }
+
+      html += `</div>`;
+      document.getElementById('text-area').innerHTML = html;
+    }
+
+    /* ── Controles ── */
+    function selectTefila(el) {
+      document.querySelectorAll('.siddur-tefila-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      currentTefila = el.dataset.tefila;
+      currentSectionIdx = 0;
+      renderSectionList();
+      renderText();
+    }
+
+    function selectSection(idx) {
+      currentSectionIdx = idx;
+      renderSectionList();
+      renderText();
+    }
+
+    function nextSection() {
+      const max = getCurrentSections().length - 1;
+      if (currentSectionIdx < max) { currentSectionIdx++; renderSectionList(); renderText(); }
+      else { showToast('Has llegado al final de ' + currentTefila.charAt(0).toUpperCase() + currentTefila.slice(1), 'info'); }
+    }
+
+    function prevSection() {
+      if (currentSectionIdx > 0) { currentSectionIdx--; renderSectionList(); renderText(); }
+    }
+
+    function changeFontSize(delta) {
+      fontSize = Math.max(0.9, Math.min(2.2, fontSize + delta * 0.15));
+      renderText();
+    }
+
+    function setViewMode(mode, el) {
+      document.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      viewMode = mode;
+      renderText();
+    }
+
+    function toggleBookmark() {
+      const id = getCurrentSection().id;
+      toggleBookmarkById(null, id);
+    }
+
+    function toggleBookmarkById(e, id) {
+      if (e) e.stopPropagation();
+      const idx = bookmarks.indexOf(id);
+      if (idx === -1) {
+        bookmarks.push(id);
+        showToast('Marcador guardado', 'success');
+      } else {
+        bookmarks.splice(idx, 1);
+        showToast('Marcador eliminado', 'info');
+      }
+      localStorage.setItem('siddur_bookmarks', JSON.stringify(bookmarks));
+      renderSectionList();
+      renderText();
+    }
+
+    /* ── Init ── */
+    renderSectionList();
+    renderText();
+  </script>
+</body>
+</html>

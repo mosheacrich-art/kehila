@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shiurim — Kehilá</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <style>
+    /* ─── Layout ─── */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      background: var(--color-bg);
+    }
+    @media (max-width: 768px) {
+      .main-content { margin-left: 0; }
+    }
+    .shiurim-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 32px 80px;
+    }
+    @media (max-width: 768px) {
+      .shiurim-inner { padding: 20px 16px 96px; }
+    }
+
+    /* ─── Page Header ─── */
+    .page-header {
+      margin-bottom: 28px;
+    }
+    .page-header-title {
+      font-family: 'Frank Ruhl Libre', Georgia, serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--color-text);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .page-header-subtitle {
+      font-size: 0.92rem;
+      color: var(--color-text-muted);
+    }
+
+    /* ─── Search & Filters ─── */
+    .search-row {
+      margin-bottom: 16px;
+    }
+    .search-input-wrap {
+      position: relative;
+      max-width: 480px;
+    }
+    .search-input-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--color-text-muted);
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: var(--font-ui);
+      background: #fff;
+      color: var(--color-text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus {
+      border-color: var(--color-primary);
+    }
+
+    /* ─── Filter Chips ─── */
+    .chips-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 14px;
+      scrollbar-width: none;
+    }
+    .chips-row::-webkit-scrollbar { display: none; }
+    .chip {
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1.5px solid var(--color-border);
+      background: #fff;
+      color: var(--color-text-muted);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      font-family: var(--font-ui);
+    }
+    .chip:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    .chip.active {
+      background: var(--color-primary);
+      color: #fff;
+      border-color: var(--color-primary);
+    }
+
+    /* ─── Filter Row ─── */
+    .filter-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .filter-select {
+      padding: 8px 32px 8px 12px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-family: var(--font-ui);
+      background: #fff;
+      color: var(--color-text);
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24' stroke='%236B7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m19 9-7 7-7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color 0.15s;
+    }
+    .filter-select:focus {
+      border-color: var(--color-primary);
+    }
+    .filter-label {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      align-self: center;
+    }
+    .results-count {
+      font-size: 0.83rem;
+      color: var(--color-text-muted);
+      align-self: center;
+      margin-left: auto;
+    }
+
+    /* ─── Shiurim Grid ─── */
+    .shiurim-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 52px;
+    }
+    @media (max-width: 1024px) {
+      .shiurim-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .shiurim-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    }
+    @media (max-width: 380px) {
+      .shiurim-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Shiur Card ─── */
+    .shiur-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1.5px solid var(--color-border);
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+    .shiur-card:hover {
+      box-shadow: 0 8px 28px rgba(27,46,94,0.12);
+      transform: translateY(-2px);
+    }
+
+    /* Thumbnail */
+    .shiur-thumb {
+      width: 100%;
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .shiur-thumb svg {
+      width: 36px;
+      height: 36px;
+      color: rgba(255,255,255,0.8);
+    }
+    .thumb-badges {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      display: flex;
+      gap: 5px;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+    .badge-cat-Parashá      { background: rgba(59,47,94,0.88); color: #e8d5ff; }
+    .badge-cat-Halaká       { background: rgba(26,71,49,0.88); color: #a7f3d0; }
+    .badge-cat-Majshavá     { background: rgba(30,58,95,0.88); color: #bfdbfe; }
+    .badge-cat-Musar        { background: rgba(74,25,66,0.88); color: #f9a8d4; }
+    .badge-cat-Historia     { background: rgba(107,58,31,0.88); color: #fde68a; }
+    .badge-cat-Yamim-Noraim { background: rgba(107,77,0,0.88); color: #fef08a; }
+
+    .badge-formato {
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+    }
+
+    /* Card body */
+    .shiur-body {
+      padding: 14px 14px 12px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .shiur-cat-row {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      margin-bottom: 7px;
+      flex-wrap: wrap;
+    }
+    .badge-cat-inline {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .cat-color-Parashá      { background: #ede9fe; color: #5b21b6; }
+    .cat-color-Halaká       { background: #d1fae5; color: #065f46; }
+    .cat-color-Majshavá     { background: #dbeafe; color: #1e40af; }
+    .cat-color-Musar        { background: #fce7f3; color: #9d174d; }
+    .cat-color-Historia     { background: #fef3c7; color: #92400e; }
+    .cat-color-Yamim-Noraim { background: #fef9c3; color: #854d0e; }
+
+    .badge-fmt {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .shiur-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--color-text);
+      line-height: 1.38;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 6px;
+      min-height: 2.4em;
+    }
+    .shiur-teacher {
+      font-size: 0.78rem;
+      color: #C9A84C;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .shiur-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.74rem;
+      color: var(--color-text-muted);
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .shiur-meta span {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .shiur-stars {
+      letter-spacing: -1px;
+      font-size: 0.78rem;
+    }
+    .star-filled { color: #C9A84C; }
+    .star-empty  { color: #d1d5db; }
+    .shiur-date {
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      margin-bottom: 10px;
+    }
+    .btn-ver {
+      margin-top: auto;
+      padding: 7px 0;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      transition: background 0.15s;
+      width: 100%;
+    }
+    .btn-ver:hover { background: #12204A; }
+
+    /* ─── Empty state ─── */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 56px 20px;
+      color: var(--color-text-muted);
+    }
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      opacity: 0.35;
+    }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ─── Devar Torah Section ─── */
+    .section-title {
+      font-family: 'Frank Ruhl Libre', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 4px;
+    }
+    .section-subtitle {
+      font-size: 0.84rem;
+      color: var(--color-text-muted);
+      margin-bottom: 18px;
+    }
+    .devar-scroll {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(27,46,94,0.15) transparent;
+    }
+    .devar-scroll::-webkit-scrollbar { height: 4px; }
+    .devar-scroll::-webkit-scrollbar-thumb { background: rgba(27,46,94,0.15); border-radius: 99px; }
+
+    .devar-card {
+      background: var(--color-primary);
+      color: #fff;
+      border-radius: 14px;
+      padding: 20px 22px;
+      flex: 0 0 300px;
+      max-width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .devar-quote {
+      font-size: 0.88rem;
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      opacity: 0.93;
+    }
+    .devar-quote-mark {
+      font-size: 2.4rem;
+      color: #C9A84C;
+      line-height: 0.6;
+      font-family: Georgia, serif;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .devar-footer {
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 10px;
+    }
+    .devar-firma {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #C9A84C;
+    }
+    .devar-parasha {
+      font-size: 0.74rem;
+      color: rgba(255,255,255,0.65);
+      margin-top: 2px;
+    }
+    .devar-fecha {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.45);
+      margin-top: 2px;
+    }
+
+    /* ─── Side Drawer ─── */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 250;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+    .drawer-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .drawer-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 420px;
+      max-width: 100vw;
+      height: 100%;
+      background: #fff;
+      z-index: 260;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 32px rgba(0,0,0,0.14);
+    }
+    .drawer-panel.open {
+      transform: translateX(0);
+    }
+    .drawer-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+    .drawer-thumb {
+      width: 100%;
+      height: 120px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .drawer-thumb svg {
+      width: 40px;
+      height: 40px;
+      color: rgba(255,255,255,0.8);
+    }
+    .drawer-title {
+      font-family: 'Frank Ruhl Libre', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-text);
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+    .drawer-teacher-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #C9A84C;
+      margin-bottom: 2px;
+    }
+    .drawer-teacher-desc {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .drawer-meta-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .drawer-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .drawer-desc {
+      font-size: 0.87rem;
+      color: var(--color-text);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .drawer-media {
+      margin-bottom: 16px;
+    }
+    .drawer-audio-wrap audio {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .drawer-media-note {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      background: var(--color-bg);
+      border-radius: 8px;
+      padding: 8px 12px;
+      border-left: 3px solid var(--color-gold);
+    }
+    .drawer-video-placeholder {
+      width: 100%;
+      height: 170px;
+      background: linear-gradient(135deg, #1B2E5E 0%, #2a4a8e 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    .drawer-video-placeholder svg {
+      width: 44px;
+      height: 44px;
+      color: rgba(255,255,255,0.6);
+    }
+    .drawer-texto-paras p {
+      font-size: 0.86rem;
+      line-height: 1.7;
+      color: var(--color-text);
+      margin-bottom: 12px;
+    }
+    .drawer-texto-fade {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      background: var(--color-bg);
+      border-radius: 8px;
+      padding: 10px 14px;
+      border-left: 3px solid var(--color-gold);
+      margin-top: 4px;
+    }
+    .drawer-footer {
+      padding: 14px 24px 20px;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .btn-drawer {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 9px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      border: 1.5px solid var(--color-border);
+      background: #fff;
+      color: var(--color-text);
+      transition: all 0.15s;
+    }
+    .btn-drawer:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    .btn-drawer.primary {
+      background: var(--color-primary);
+      color: #fff;
+      border-color: var(--color-primary);
+    }
+    .btn-drawer.primary:hover {
+      background: #12204A;
+    }
+
+    /* ─── Admin FAB ─── */
+    .fab-admin {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: #C9A84C;
+      color: #fff;
+      border: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(201,168,76,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .fab-admin:hover {
+      background: #a8892e;
+      transform: scale(1.06);
+    }
+    @media (max-width: 768px) {
+      .fab-admin { bottom: 80px; right: 18px; }
+    }
+
+    /* ─── Publish Modal ─── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.22);
+      transform: scale(0.95);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.open .modal-box {
+      transform: scale(1);
+    }
+    .modal-head {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-head h2 {
+      font-family: 'Frank Ruhl Libre', Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      padding: 4px;
+      display: flex;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: var(--color-bg); }
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 5px;
+    }
+    .form-group label .req { color: var(--color-danger); }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.86rem;
+      font-family: var(--font-ui);
+      color: var(--color-text);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--color-primary);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .textarea-content { min-height: 120px; }
+    .modal-foot {
+      padding: 14px 24px 18px;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .btn-secondary {
+      padding: 10px 20px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--color-text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover {
+      border-color: var(--color-text-muted);
+    }
+    .btn-primary {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 8px;
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: #12204A; }
+
+    /* ─── Toast ─── */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      pointer-events: none;
+    }
+    .toast {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      pointer-events: all;
+      opacity: 1;
+      transition: opacity 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .toast.success { background: #065f46; }
+    .toast.hide { opacity: 0; }
+
+    /* ─── Fade-in animation ─── */
+    @keyframes cardFadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .shiur-card.fade-in {
+      animation: cardFadeIn 0.4s ease forwards;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar-placeholder"></div>
+  <main class="main-content">
+      <div class="shiurim-inner">
+
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1 class="page-header-title">Shiurim — Biblioteca de clases</h1>
+          <p class="page-header-subtitle">Clases de Torah para todos los niveles</p>
+        </div>
+
+        <!-- Search -->
+        <div class="search-row">
+          <div class="search-input-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+            </svg>
+            <input type="text" class="search-input" id="search-input" placeholder="Buscar por título o maestro…" autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Category chips -->
+        <div class="chips-row" id="chips-row">
+          <button class="chip active" data-cat="Todos">Todos</button>
+          <button class="chip" data-cat="Parashá">Parashá</button>
+          <button class="chip" data-cat="Halaká">Halaká</button>
+          <button class="chip" data-cat="Majshavá">Majshavá</button>
+          <button class="chip" data-cat="Musar">Musar</button>
+          <button class="chip" data-cat="Historia">Historia</button>
+          <button class="chip" data-cat="Yamim Noraim">Yamim Noraim</button>
+        </div>
+
+        <!-- Filter row -->
+        <div class="filter-row">
+          <label class="filter-label">Formato:</label>
+          <select class="filter-select" id="filter-formato">
+            <option value="Todo">Todo</option>
+            <option value="Audio">Audio</option>
+            <option value="Video">Video</option>
+            <option value="Texto">Texto</option>
+          </select>
+          <label class="filter-label">Nivel:</label>
+          <select class="filter-select" id="filter-nivel">
+            <option value="0">Todo</option>
+            <option value="1">Introductorio</option>
+            <option value="2">Intermedio</option>
+            <option value="3">Avanzado</option>
+          </select>
+          <span class="results-count" id="results-count"></span>
+        </div>
+
+        <!-- Shiurim grid -->
+        <div class="shiurim-grid" id="shiurim-grid"></div>
+
+        <!-- Devar Torah Section -->
+        <div class="devar-section">
+          <h2 class="section-title">Pensamientos de Torah</h2>
+          <p class="section-subtitle">Devar Torah semanal</p>
+          <div class="devar-scroll" id="devar-scroll"></div>
+        </div>
+
+      </div><!-- /inner -->
+    </main>
+
+  <!-- Side Drawer -->
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <div class="drawer-panel" id="drawer-panel">
+    <div class="drawer-header" id="drawer-header-content"></div>
+    <div class="drawer-body" id="drawer-body-content"></div>
+    <div class="drawer-footer">
+      <button class="btn-drawer" id="btn-save">Guardar en mi lista &#9825;</button>
+      <button class="btn-drawer" id="btn-share">Compartir</button>
+      <button class="btn-drawer primary" id="btn-close-drawer">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Admin Publish Modal -->
+  <div class="modal-overlay" id="publish-modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>Publicar nuevo Shiur</h2>
+        <button class="modal-close" id="close-publish-modal" aria-label="Cerrar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="publish-form" novalidate>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>Título <span class="req">*</span></label>
+              <input type="text" id="pub-titulo" placeholder="Ej: Parashá Bereshit — El inicio de todo" required>
+            </div>
+            <div class="form-group full">
+              <label>Maestro / Ponente <span class="req">*</span></label>
+              <input type="text" id="pub-maestro" placeholder="Ej: HaRav David Levi" required>
+            </div>
+            <div class="form-group">
+              <label>Categoría</label>
+              <select id="pub-categoria">
+                <option value="Parashá">Parashá</option>
+                <option value="Halaká">Halaká</option>
+                <option value="Majshavá">Majshavá</option>
+                <option value="Musar">Musar</option>
+                <option value="Historia">Historia</option>
+                <option value="Yamim Noraim">Yamim Noraim</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Formato</label>
+              <select id="pub-formato">
+                <option value="Audio">Audio</option>
+                <option value="Video">Video</option>
+                <option value="Texto">Texto</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Nivel</label>
+              <select id="pub-nivel">
+                <option value="1">Introductorio</option>
+                <option value="2">Intermedio</option>
+                <option value="3">Avanzado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Duración</label>
+              <input type="text" id="pub-duracion" placeholder="Ej: 45 min">
+            </div>
+            <div class="form-group full">
+              <label>Descripción</label>
+              <textarea id="pub-descripcion" placeholder="Breve descripción del contenido…"></textarea>
+            </div>
+            <div class="form-group full">
+              <label>URL del archivo (opcional)</label>
+              <input type="url" id="pub-url" placeholder="https://…">
+            </div>
+            <div class="form-group full" id="pub-texto-wrap" style="display:none;">
+              <label>Contenido de texto</label>
+              <textarea id="pub-texto" class="textarea-content" placeholder="Escribe aquí el contenido del shiur en formato texto…"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-secondary" id="cancel-publish">Cancelar</button>
+        <button class="btn-primary" id="submit-publish">Publicar Shiur</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/data.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    // ── Helpers ──────────────────────────────────────────────
+
+    const TEACHER_DESCS = {
+      'HaRav Yosef Cohen':  'Rosh Yeshivá de Bet El. Especialista en Talmud y pensamiento judío clásico.',
+      'HaRav David Levi':   'Rabino principal de la comunidad. Especialista en halajá y minhag sefaradí.',
+      'Prof. Sara Mizrahi': 'Doctora en Historia Medieval. Docente universitaria especializada en judaísmo español.',
+      'HaRav Aaron Peretz': 'Dayan del Beit Din comunitario. Experto en Parshanut y comentarios clásicos.'
+    };
+
+    const CAT_COLORS = {
+      'Parashá':      '#3b2f5e',
+      'Halaká':       '#1a4731',
+      'Majshavá':     '#1e3a5f',
+      'Musar':        '#4a1942',
+      'Historia':     '#6b3a1f',
+      'Yamim Noraim': '#6b4d00'
+    };
+
+    const NIVEL_LABELS = { 1: 'Introductorio', 2: 'Intermedio', 3: 'Avanzado' };
+
+    function formatFechaCorta(dateStr) {
+      try {
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+      } catch (e) {
+        return dateStr;
+      }
+    }
+
+    function starsHTML(nivel) {
+      let html = '';
+      for (let i = 1; i <= 3; i++) {
+        html += `<span class="${i <= nivel ? 'star-filled' : 'star-empty'}">&#9733;</span>`;
+      }
+      return html;
+    }
+
+    function thumbIconSVG(formato) {
+      if (formato === 'Audio') {
+        return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z"/>
+        </svg>`;
+      }
+      if (formato === 'Video') {
+        return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z"/>
+        </svg>`;
+      }
+      return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
+      </svg>`;
+    }
+
+    function catBadgeClass(cat) {
+      return 'cat-color-' + cat.replace(/\s+/g, '-');
+    }
+
+    function showToastLocal(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      if (!c) return;
+      const t = document.createElement('div');
+      t.className = 'toast ' + type;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => { t.classList.add('hide'); setTimeout(() => t.remove(), 320); }, 3000);
+    }
+
+    // ── State ────────────────────────────────────────────────
+
+    let activeCategory = 'Todos';
+    let activeFormato  = 'Todo';
+    let activeNivel    = 0;
+    let searchQuery    = '';
+    let shiurimData    = [];
+    let currentShiur   = null;
+
+    // ── Init ─────────────────────────────────────────────────
+
+    try {
+      initNav('shiurim');
+    } catch (e) { console.warn('initNav error', e); }
+
+    try {
+      if (typeof MOCK_SHIURIM_V2 !== 'undefined') {
+        shiurimData = MOCK_SHIURIM_V2.slice();
+      }
+    } catch (e) { console.warn('data.js not loaded', e); }
+
+    // ── Render grid ──────────────────────────────────────────
+
+    function getFiltered() {
+      return shiurimData.filter(s => {
+        const matchCat  = activeCategory === 'Todos' || s.categoria === activeCategory;
+        const matchFmt  = activeFormato === 'Todo' || s.formato === activeFormato;
+        const matchNiv  = activeNivel === 0 || s.nivel === activeNivel;
+        const q         = searchQuery.toLowerCase();
+        const matchQ    = !q || s.titulo.toLowerCase().includes(q) || s.maestro.toLowerCase().includes(q);
+        return matchCat && matchFmt && matchNiv && matchQ;
+      });
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('shiurim-grid');
+      if (!grid) return;
+
+      const filtered = getFiltered();
+      const count = document.getElementById('results-count');
+      if (count) {
+        count.textContent = filtered.length === shiurimData.length
+          ? `${filtered.length} shiurim`
+          : `${filtered.length} de ${shiurimData.length} shiurim`;
+      }
+
+      if (filtered.length === 0) {
+        grid.insertAdjacentHTML('afterbegin',
+          `<div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+            </svg>
+            <p>No se encontraron shiurim con estos filtros.</p>
+          </div>`
+        );
+        return;
+      }
+
+      const html = filtered.map(s => {
+        const bg    = CAT_COLORS[s.categoria] || '#1B2E5E';
+        const stars = starsHTML(s.nivel);
+        const fecha = formatFechaCorta(s.fecha);
+        const catCls = catBadgeClass(s.categoria);
+        return `<div class="shiur-card" data-id="${s.id}">
+          <div class="shiur-thumb" style="background:${bg};">
+            ${thumbIconSVG(s.formato)}
+            <div class="thumb-badges">
+              <span class="badge badge-fmt">${s.formato}</span>
+            </div>
+          </div>
+          <div class="shiur-body">
+            <div class="shiur-cat-row">
+              <span class="badge badge-cat-inline ${catCls}">${s.categoria}</span>
+              <span class="badge-fmt">${s.formato}</span>
+            </div>
+            <div class="shiur-title">${s.titulo}</div>
+            <div class="shiur-teacher">${s.maestro}</div>
+            <div class="shiur-meta">
+              <span>&#128337; ${s.duracion}</span>
+              <span class="shiur-stars">${stars}</span>
+            </div>
+            <div class="shiur-date">&#128197; ${fecha}</div>
+            <button class="btn-ver" data-id="${s.id}">Ver shiur</button>
+          </div>
+        </div>`;
+      }).join('');
+
+      grid.insertAdjacentHTML('afterbegin', html);
+    }
+
+    function refreshGrid() {
+      const grid = document.getElementById('shiurim-grid');
+      if (grid) grid.innerHTML = '';
+      renderGrid();
+    }
+
+    renderGrid();
+
+    // ── Devar Torah ──────────────────────────────────────────
+
+    function renderDevarTorah() {
+      const container = document.getElementById('devar-scroll');
+      if (!container) return;
+      let items;
+      try { items = typeof DEVAR_TORAH !== 'undefined' ? DEVAR_TORAH : []; }
+      catch (e) { items = []; }
+
+      const html = items.map(d =>
+        `<div class="devar-card">
+          <div>
+            <span class="devar-quote-mark">&#8220;</span>
+            <p class="devar-quote">${d.texto}</p>
+          </div>
+          <div class="devar-footer">
+            <div class="devar-firma">${d.firma}</div>
+            <div class="devar-parasha">${d.parasha}</div>
+            <div class="devar-fecha">${formatFechaCorta(d.fecha)}</div>
+          </div>
+        </div>`
+      ).join('');
+
+      container.insertAdjacentHTML('afterbegin', html);
+    }
+
+    renderDevarTorah();
+
+    // ── Filter events ─────────────────────────────────────────
+
+    try {
+      document.getElementById('chips-row').addEventListener('click', function (e) {
+        const chip = e.target.closest('.chip');
+        if (!chip) return;
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeCategory = chip.dataset.cat;
+        refreshGrid();
+      });
+    } catch (e) { console.warn('chips error', e); }
+
+    try {
+      document.getElementById('filter-formato').addEventListener('change', function () {
+        activeFormato = this.value;
+        refreshGrid();
+      });
+    } catch (e) { console.warn('filter-formato error', e); }
+
+    try {
+      document.getElementById('filter-nivel').addEventListener('change', function () {
+        activeNivel = parseInt(this.value, 10);
+        refreshGrid();
+      });
+    } catch (e) { console.warn('filter-nivel error', e); }
+
+    try {
+      let searchTimer;
+      document.getElementById('search-input').addEventListener('input', function () {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+          searchQuery = this.value.trim();
+          refreshGrid();
+        }, 220);
+      });
+    } catch (e) { console.warn('search error', e); }
+
+    // ── Drawer ───────────────────────────────────────────────
+
+    function openDrawer(shiur) {
+      currentShiur = shiur;
+      const bg = CAT_COLORS[shiur.categoria] || '#1B2E5E';
+      const teacherDesc = TEACHER_DESCS[shiur.maestro] || 'Maestro de Torah de la comunidad Bet El.';
+      const stars = starsHTML(shiur.nivel);
+      const nivelLabel = NIVEL_LABELS[shiur.nivel] || '';
+      const catCls = catBadgeClass(shiur.categoria);
+      const fecha = formatFechaCorta(shiur.fecha);
+
+      const headerHTML =
+        `<div class="drawer-thumb" style="background:${bg};">${thumbIconSVG(shiur.formato)}</div>
+         <div class="drawer-title">${shiur.titulo}</div>
+         <div class="drawer-teacher-name">${shiur.maestro}</div>
+         <div class="drawer-teacher-desc">${teacherDesc}</div>
+         <div class="drawer-meta-row">
+           <span class="badge badge-cat-inline ${catCls}">${shiur.categoria}</span>
+           <span class="badge-fmt">${shiur.formato}</span>
+           <span class="badge-fmt">${nivelLabel}</span>
+           <span class="badge-fmt">&#128337; ${shiur.duracion}</span>
+         </div>`;
+
+      let mediaHTML = '';
+      if (shiur.formato === 'Audio') {
+        mediaHTML = `<div class="drawer-media drawer-audio-wrap">
+          <audio controls src="">
+            Tu navegador no soporta el elemento de audio.
+          </audio>
+          <div class="drawer-media-note">Audio disponible en la versi&#243;n completa</div>
+        </div>`;
+      } else if (shiur.formato === 'Video') {
+        mediaHTML = `<div class="drawer-media">
+          <div class="drawer-video-placeholder">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z"/>
+            </svg>
+          </div>
+          <div class="drawer-media-note">Video disponible en la versi&#243;n completa</div>
+        </div>`;
+      } else {
+        mediaHTML = `<div class="drawer-texto-paras">
+          <p>${shiur.descripcion}</p>
+          <p>La Tor&#225; nos ense&#241;a que cada palabra, cada letra, contiene mundos de significado. A trav&#233;s del estudio profundo de los textos cl&#225;sicos encontramos respuestas a las preguntas m&#225;s fundamentales de la existencia humana.</p>
+          <p>Nuestros maestros, los Rishonim y Ajaronim, dejaron un legado inmenso de sabidur&#237;a que sigue iluminando el camino de las generaciones actuales. Este shiur es una invitaci&#243;n a sumergirnos juntos en ese oc&#233;ano de conocimiento.</p>
+          <div class="drawer-texto-fade">Contin&#250;a leyendo en la versi&#243;n completa</div>
+        </div>`;
+      }
+
+      const bodyHTML =
+        `<p class="drawer-desc">${shiur.descripcion}</p>
+         ${shiur.formato !== 'Texto' ? mediaHTML : ''}
+         ${shiur.formato === 'Texto' ? mediaHTML : ''}
+         <div class="shiur-date">Publicado: ${fecha}</div>`;
+
+      try {
+        document.getElementById('drawer-header-content').innerHTML = headerHTML;
+        document.getElementById('drawer-body-content').innerHTML = bodyHTML;
+        document.getElementById('drawer-overlay').classList.add('open');
+        document.getElementById('drawer-panel').classList.add('open');
+        document.body.style.overflow = 'hidden';
+      } catch (e) { console.warn('openDrawer DOM error', e); }
+    }
+
+    function closeDrawer() {
+      try {
+        document.getElementById('drawer-overlay').classList.remove('open');
+        document.getElementById('drawer-panel').classList.remove('open');
+        document.body.style.overflow = '';
+        currentShiur = null;
+      } catch (e) { console.warn('closeDrawer error', e); }
+    }
+
+    try {
+      document.getElementById('shiurim-grid').addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-ver');
+        if (!btn) return;
+        const id = btn.dataset.id;
+        const shiur = shiurimData.find(s => s.id === id);
+        if (shiur) openDrawer(shiur);
+      });
+    } catch (e) { console.warn('grid click error', e); }
+
+    try {
+      document.getElementById('drawer-overlay').addEventListener('click', closeDrawer);
+    } catch (e) { console.warn('overlay click error', e); }
+
+    try {
+      document.getElementById('btn-close-drawer').addEventListener('click', closeDrawer);
+    } catch (e) { console.warn('close drawer btn error', e); }
+
+    try {
+      document.getElementById('btn-save').addEventListener('click', function () {
+        showToastLocal('Guardado en tu lista &#9825;', 'success');
+      });
+    } catch (e) { console.warn('save btn error', e); }
+
+    try {
+      document.getElementById('btn-share').addEventListener('click', function () {
+        if (currentShiur && navigator.share) {
+          navigator.share({ title: currentShiur.titulo, text: currentShiur.descripcion }).catch(() => {});
+        } else {
+          showToastLocal('Enlace copiado al portapapeles', 'success');
+        }
+      });
+    } catch (e) { console.warn('share btn error', e); }
+
+    // ── Admin FAB & Publish Modal ─────────────────────────────
+
+    try {
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (user && user.role === 'admin') {
+        const fab = document.createElement('button');
+        fab.className = 'fab-admin';
+        fab.setAttribute('aria-label', 'Publicar shiur');
+        fab.textContent = '+';
+        document.body.appendChild(fab);
+
+        fab.addEventListener('click', function () {
+          try {
+            document.getElementById('publish-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+          } catch (e) { console.warn('open modal error', e); }
+        });
+      }
+    } catch (e) { console.warn('fab init error', e); }
+
+    try {
+      document.getElementById('close-publish-modal').addEventListener('click', function () {
+        document.getElementById('publish-modal').classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    } catch (e) { console.warn('close modal error', e); }
+
+    try {
+      document.getElementById('cancel-publish').addEventListener('click', function () {
+        document.getElementById('publish-modal').classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    } catch (e) { console.warn('cancel publish error', e); }
+
+    try {
+      document.getElementById('publish-modal').addEventListener('click', function (e) {
+        if (e.target === this) {
+          this.classList.remove('open');
+          document.body.style.overflow = '';
+        }
+      });
+    } catch (e) { console.warn('modal overlay click error', e); }
+
+    try {
+      document.getElementById('pub-formato').addEventListener('change', function () {
+        const wrap = document.getElementById('pub-texto-wrap');
+        if (wrap) wrap.style.display = this.value === 'Texto' ? 'block' : 'none';
+      });
+    } catch (e) { console.warn('pub-formato change error', e); }
+
+    try {
+      document.getElementById('submit-publish').addEventListener('click', function () {
+        try {
+          const titulo   = document.getElementById('pub-titulo').value.trim();
+          const maestro  = document.getElementById('pub-maestro').value.trim();
+          if (!titulo || !maestro) {
+            showToastLocal('Título y maestro son obligatorios', 'error');
+            return;
+          }
+          const categoria = document.getElementById('pub-categoria').value;
+          const formato   = document.getElementById('pub-formato').value;
+          const nivel     = parseInt(document.getElementById('pub-nivel').value, 10);
+          const duracion  = document.getElementById('pub-duracion').value.trim() || '—';
+          const desc      = document.getElementById('pub-descripcion').value.trim() || 'Nuevo shiur publicado en la comunidad.';
+          const today     = new Date().toISOString().slice(0, 10);
+          const newId     = 'sv' + Date.now();
+
+          const newShiur = { id: newId, titulo, maestro, categoria, formato, duracion, nivel, fecha: today, descripcion: desc };
+          shiurimData.unshift(newShiur);
+
+          // Prepend card to grid
+          const grid = document.getElementById('shiurim-grid');
+          if (grid) {
+            const bg    = CAT_COLORS[categoria] || '#1B2E5E';
+            const stars = starsHTML(nivel);
+            const fecha = formatFechaCorta(today);
+            const catCls = catBadgeClass(categoria);
+            const cardHTML =
+              `<div class="shiur-card fade-in" data-id="${newId}">
+                <div class="shiur-thumb" style="background:${bg};">${thumbIconSVG(formato)}
+                  <div class="thumb-badges"><span class="badge badge-fmt">${formato}</span></div>
+                </div>
+                <div class="shiur-body">
+                  <div class="shiur-cat-row">
+                    <span class="badge badge-cat-inline ${catCls}">${categoria}</span>
+                    <span class="badge-fmt">${formato}</span>
+                  </div>
+                  <div class="shiur-title">${titulo}</div>
+                  <div class="shiur-teacher">${maestro}</div>
+                  <div class="shiur-meta">
+                    <span>&#128337; ${duracion}</span>
+                    <span class="shiur-stars">${stars}</span>
+                  </div>
+                  <div class="shiur-date">&#128197; ${fecha}</div>
+                  <button class="btn-ver" data-id="${newId}">Ver shiur</button>
+                </div>
+              </div>`;
+            grid.insertAdjacentHTML('afterbegin', cardHTML);
+          }
+
+          document.getElementById('publish-modal').classList.remove('open');
+          document.body.style.overflow = '';
+          document.getElementById('publish-form').reset();
+          const wrap = document.getElementById('pub-texto-wrap');
+          if (wrap) wrap.style.display = 'none';
+
+          showToastLocal('Shiur publicado correctamente', 'success');
+        } catch (e) { console.warn('submit publish inner error', e); }
+      });
+    } catch (e) { console.warn('submit publish error', e); }
+
+  })();
+  </script>
+</body>
+</html>

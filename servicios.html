@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kehilá — Servicios Comunitarios</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <style>
+    /* ─── Layout ─── */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      background: var(--color-bg);
+    }
+    @media (max-width: 768px) {
+      .main-content { margin-left: 0; }
+    }
+    .servicios-inner {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 32px 32px 80px;
+    }
+    @media (max-width: 768px) {
+      .servicios-inner { padding: 20px 16px 96px; }
+    }
+
+    /* ─── Page Header ─── */
+    .page-header { margin-bottom: 28px; }
+    .page-header-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-gold-dark);
+      margin-bottom: 6px;
+    }
+    .page-title {
+      font-family: var(--font-brand);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1.15;
+    }
+    .page-subtitle {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      margin-top: 6px;
+    }
+
+    /* ─── Tabs ─── */
+    .tabs-nav {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      border-bottom: 2px solid var(--color-border);
+      margin-bottom: 28px;
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--color-primary); background: var(--color-gold-light); }
+    .tab-btn.active {
+      color: var(--color-primary);
+      font-weight: 600;
+      border-bottom-color: var(--color-primary);
+    }
+
+    /* ─── Tab Panels ─── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ─── Section Title ─── */
+    .section-title {
+      font-family: var(--font-brand);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: 6px;
+    }
+    .section-desc {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* ─── Overview Grid ─── */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .overview-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-top: 3px solid var(--color-primary);
+      transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+    }
+    .overview-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .overview-icon { font-size: 2.2rem; line-height: 1; }
+    .overview-name { font-weight: 700; font-size: 1rem; color: var(--color-primary); }
+    .overview-blurb { font-size: 0.85rem; color: var(--color-text-muted); flex: 1; line-height: 1.5; }
+    .overview-btn {
+      align-self: flex-start;
+      margin-top: 4px;
+      padding: 7px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      background: var(--color-gold-light);
+      border: 1px solid var(--color-gold);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    .overview-btn:hover { background: var(--color-gold); color: #fff; }
+
+    /* ─── Toolbar row ─── */
+    .toolbar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .toolbar-search {
+      flex: 1;
+      min-width: 200px;
+      max-width: 320px;
+      padding: 9px 14px;
+      font-size: 0.88rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      outline: none;
+      background: var(--color-white);
+      color: var(--color-text);
+      transition: border-color var(--transition-fast);
+    }
+    .toolbar-search:focus { border-color: var(--color-primary); }
+    .toolbar-action-btn {
+      padding: 9px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-white);
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      white-space: nowrap;
+    }
+    .toolbar-action-btn:hover { background: var(--color-primary-light); }
+
+    /* ─── Filter chips ─── */
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .chip {
+      padding: 5px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .chip.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+
+    /* ─── Object Grid ─── */
+    .objects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    @media (max-width: 480px) {
+      .objects-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    }
+    .object-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 18px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: box-shadow var(--transition-normal);
+    }
+    .object-card:hover { box-shadow: var(--shadow-md); }
+    .object-card.fade-in { animation: fadeInUp 0.4s ease both; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .object-emoji { font-size: 2.6rem; line-height: 1; margin-bottom: 4px; }
+    .object-name { font-weight: 700; font-size: 0.95rem; color: var(--color-text); line-height: 1.3; }
+    .object-desc { font-size: 0.81rem; color: var(--color-text-muted); line-height: 1.45; }
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      width: fit-content;
+    }
+    .badge-green  { background: var(--color-success-light); color: #065f46; }
+    .badge-blue   { background: var(--color-info-light); color: #1e3a8a; }
+    .badge-yellow { background: var(--color-warning-light); color: #92400e; }
+    .badge-gray   { background: #F3F4F6; color: var(--color-text-muted); }
+    .badge-gold   { background: var(--color-gold-light); color: var(--color-gold-dark); }
+    .object-owner { font-size: 0.78rem; color: var(--color-text-muted); }
+    .avail-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin-right: 5px;
+      background: var(--color-success);
+    }
+    .avail-dot.reserved { background: var(--color-warning); }
+    .object-avail { font-size: 0.8rem; font-weight: 500; color: var(--color-text-muted); }
+    .btn-solicit {
+      margin-top: auto;
+      padding: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--color-white);
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      width: 100%;
+    }
+    .btn-solicit:hover { background: var(--color-primary-light); }
+    .btn-solicit:disabled { background: #D1D5DB; color: #9CA3AF; cursor: not-allowed; }
+
+    /* ─── Talmud Torah ─── */
+    .tt-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 36px;
+    }
+    .tt-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tt-card-header { display: flex; align-items: flex-start; gap: 12px; }
+    .tt-avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .tt-group-name { font-weight: 700; font-size: 1rem; color: var(--color-primary); }
+    .tt-age { font-size: 0.8rem; color: var(--color-text-muted); }
+    .tt-teacher { font-size: 0.83rem; color: var(--color-text-muted); }
+    .tt-row {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+    }
+    .tt-row-icon { flex-shrink: 0; margin-top: 2px; }
+    .capacity-bar-wrap { margin-top: 4px; }
+    .capacity-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      margin-bottom: 4px;
+    }
+    .capacity-bar { height: 6px; border-radius: var(--radius-full); background: var(--color-border); overflow: hidden; }
+    .capacity-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: var(--color-primary);
+      transition: width 0.5s ease;
+    }
+    .capacity-fill.full { background: var(--color-danger); }
+    .btn-inscribir {
+      padding: 9px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--color-white);
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+    .btn-inscribir:hover { background: var(--color-primary-light); }
+    .btn-inscribir:disabled { background: #D1D5DB; color: #9CA3AF; cursor: not-allowed; }
+
+    /* ─── Tablón ─── */
+    .tablon-section { margin-top: 12px; }
+    .tablon-list { display: flex; flex-direction: column; gap: 12px; }
+    .tablon-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 16px 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .tablon-class-pill {
+      padding: 3px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--color-primary);
+      color: #fff;
+      border-radius: var(--radius-full);
+      white-space: nowrap;
+      flex-shrink: 0;
+      align-self: flex-start;
+      margin-top: 2px;
+    }
+    .tablon-body { flex: 1; }
+    .tablon-teacher { font-size: 0.78rem; font-weight: 600; color: var(--color-gold-dark); margin-bottom: 4px; }
+    .tablon-msg { font-size: 0.87rem; color: var(--color-text); line-height: 1.5; }
+    .tablon-date { font-size: 0.75rem; color: var(--color-text-light); margin-top: 6px; }
+
+    /* ─── Ezra ─── */
+    .ezra-banner {
+      background: #F3F4F6;
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      font-size: 0.87rem;
+      color: #4B5563;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ezra-banner-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .ezra-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 700px) { .ezra-cols { grid-template-columns: 1fr; } }
+    .ezra-panel {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .ezra-panel-need { border-left: 4px solid #9CA3AF; }
+    .ezra-panel-give { border-left: 4px solid var(--color-gold); }
+    .ezra-panel-title { font-family: var(--font-brand); font-size: 1.1rem; font-weight: 700; color: var(--color-primary); }
+    .ezra-panel-desc { font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5; }
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 0.87rem;
+      color: var(--color-text);
+      cursor: pointer;
+    }
+    .checkbox-label input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--color-primary);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .form-field { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted); }
+    .form-input, .form-textarea, .form-select {
+      padding: 9px 12px;
+      font-size: 0.88rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      outline: none;
+      background: var(--color-white);
+      color: var(--color-text);
+      font-family: var(--font-ui);
+      transition: border-color var(--transition-fast);
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--color-primary); }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .btn-submit {
+      padding: 11px 20px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--color-white);
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+    .btn-submit:hover { background: var(--color-primary-light); }
+    .btn-submit-gold { background: var(--color-gold); }
+    .btn-submit-gold:hover { background: var(--color-gold-dark); }
+    .other-input-wrap { display: none; margin-top: 6px; }
+    .other-input-wrap.visible { display: block; }
+    .link-donativos {
+      color: var(--color-primary);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    /* ─── Bikur Jolim ─── */
+    .bj-intro {
+      background: var(--color-gold-light);
+      border-left: 4px solid var(--color-gold);
+      padding: 14px 18px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.88rem;
+      color: #5c4a1e;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .bj-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+    .bj-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 18px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    @media (max-width: 600px) { .bj-card { flex-direction: column; gap: 12px; } }
+    .bj-card-body { flex: 1; }
+    .bj-zone { font-weight: 600; font-size: 0.92rem; color: var(--color-primary); margin-bottom: 4px; }
+    .bj-tipo { font-size: 0.8rem; font-weight: 600; color: var(--color-gold-dark); margin-bottom: 6px; }
+    .bj-need { font-size: 0.84rem; color: var(--color-text-muted); line-height: 1.5; margin-bottom: 6px; }
+    .bj-disp { font-size: 0.78rem; color: var(--color-text-light); }
+    .btn-bj {
+      padding: 9px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      background: var(--color-gold-light);
+      border: 1px solid var(--color-gold);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    .btn-bj:hover { background: var(--color-gold); color: #fff; }
+    .bj-report-box {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 22px 20px;
+    }
+    .bj-report-title { font-weight: 700; font-size: 0.97rem; color: var(--color-primary); margin-bottom: 14px; }
+    .bj-report-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 500px) { .bj-report-grid { grid-template-columns: 1fr; } }
+
+    /* ─── Gemilut Jasadim ─── */
+    .gj-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    .gj-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: box-shadow var(--transition-normal);
+    }
+    .gj-card:hover { box-shadow: var(--shadow-md); }
+    .gj-card.fade-in { animation: fadeInUp 0.4s ease both; }
+    .gj-card-header { display: flex; align-items: center; gap: 12px; }
+    .gj-avatar {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .gj-name { font-weight: 700; font-size: 1rem; color: var(--color-text); }
+    .gj-desc {
+      font-size: 0.84rem;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .gj-meta { font-size: 0.78rem; color: var(--color-text-light); display: flex; flex-direction: column; gap: 2px; }
+    .btn-gj {
+      padding: 9px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      background: #F0F4FF;
+      border: 1px solid #C7D2FE;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      margin-top: auto;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    .btn-gj:hover { background: var(--color-primary); color: #fff; }
+
+    /* ─── Modal ─── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(17,24,39,0.55);
+      z-index: var(--z-modal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-normal);
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      padding: 28px 26px;
+      width: 100%;
+      max-width: 440px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(16px);
+      transition: transform var(--transition-normal);
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0); }
+    .modal-title {
+      font-family: var(--font-brand);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: 18px;
+    }
+    .modal-body { display: flex; flex-direction: column; gap: 14px; }
+    .modal-footer { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+    .btn-cancel {
+      padding: 9px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      background: #F3F4F6;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+    .btn-cancel:hover { background: var(--color-border); }
+    .btn-confirm {
+      padding: 9px 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+    .btn-confirm:hover { background: var(--color-primary-light); }
+
+    /* ─── Emoji picker ─── */
+    .emoji-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+    .emoji-opt {
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      border: 2px solid transparent;
+      transition: border-color var(--transition-fast);
+    }
+    .emoji-opt.selected { border-color: var(--color-primary); background: var(--color-gold-light); }
+
+    /* ─── Toggle ─── */
+    .toggle-wrap { display: flex; align-items: center; gap: 10px; font-size: 0.87rem; color: var(--color-text); }
+    .toggle { position: relative; width: 40px; height: 22px; cursor: pointer; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #D1D5DB;
+      border-radius: var(--radius-full);
+      transition: background var(--transition-fast);
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      left: 3px; top: 3px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform var(--transition-fast);
+    }
+    .toggle input:checked + .toggle-slider { background: var(--color-primary); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+  </style>
+</head>
+<body>
+  <div id="sidebar-placeholder"></div>
+
+  <main class="main-content">
+    <div class="servicios-inner">
+
+      <!-- Page Header -->
+      <header class="page-header">
+        <div class="page-header-label">Comunidad</div>
+        <h1 class="page-title">Servicios Comunitarios</h1>
+        <p class="page-subtitle">La comunidad cuida de sus miembros</p>
+      </header>
+
+      <!-- Tabs Nav -->
+      <nav class="tabs-nav" id="tabs-nav" role="tablist">
+        <button class="tab-btn active" data-tab="todos">Todos</button>
+        <button class="tab-btn" data-tab="tenyad">Tenyad</button>
+        <button class="tab-btn" data-tab="talmud">Talmud Torah</button>
+        <button class="tab-btn" data-tab="ezra">Ezra</button>
+        <button class="tab-btn" data-tab="bikur">Bikur Jolim</button>
+        <button class="tab-btn" data-tab="gemilut">Gemilut Jasadim</button>
+      </nav>
+
+      <!-- TAB: TODOS -->
+      <section class="tab-panel active" id="panel-todos">
+        <h2 class="section-title">Nuestros servicios comunitarios</h2>
+        <p class="section-desc">Cada servicio está mantenido por voluntarios y la administración de la comunidad.</p>
+        <div class="overview-grid" id="overview-grid"></div>
+      </section>
+
+      <!-- TAB: TENYAD -->
+      <section class="tab-panel" id="panel-tenyad">
+        <div class="toolbar-row">
+          <div style="flex:1">
+            <h2 class="section-title">Tenyad — Préstamo de objetos</h2>
+            <p class="section-desc" style="margin-bottom:0">Biblioteca de objetos comunitarios gratuita. Pide prestado, devuelve con cariño.</p>
+          </div>
+          <button class="toolbar-action-btn" id="btn-ofrecer-objeto">+ Ofrecer objeto</button>
+        </div>
+        <div class="toolbar-row" style="margin-bottom:0">
+          <input type="search" class="toolbar-search" id="tenyad-search" placeholder="Buscar objeto…">
+        </div>
+        <div class="filter-chips" id="tenyad-chips" style="margin-top:14px"></div>
+        <div class="objects-grid" id="tenyad-grid"></div>
+      </section>
+
+      <!-- TAB: TALMUD TORAH -->
+      <section class="tab-panel" id="panel-talmud">
+        <h2 class="section-title">Talmud Torah</h2>
+        <p class="section-desc">Clases de formación judía para los más jóvenes de la comunidad.</p>
+        <div class="tt-grid" id="tt-grid"></div>
+        <div class="tablon-section">
+          <h3 class="section-title" style="font-size:1.05rem;margin-bottom:12px"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg> Tablón de anuncios — Mensajes de los maestros</h3>
+          <div class="tablon-list" id="tablon-list"></div>
+        </div>
+      </section>
+
+      <!-- TAB: EZRA -->
+      <section class="tab-panel" id="panel-ezra">
+        <h2 class="section-title">Ezra — Ayuda económica</h2>
+        <p class="section-desc">Apoyo confidencial para momentos difíciles.</p>
+        <div class="ezra-banner">
+          <span class="ezra-banner-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg></span>
+          <span>Todo lo que se gestiona aquí es <strong>completamente confidencial</strong>. Solo la administración de la comunidad tiene acceso.</span>
+        </div>
+        <div class="ezra-cols">
+          <div class="ezra-panel ezra-panel-need">
+            <div class="ezra-panel-title">Necesito ayuda</div>
+            <p class="ezra-panel-desc">Si estás pasando por un momento difícil, la comunidad está aquí para ayudarte. No estás solo/a.</p>
+            <div class="checkbox-group" id="need-checks">
+              <label class="checkbox-label"><input type="checkbox" value="Cesta de alimentos"> Cesta de alimentos</label>
+              <label class="checkbox-label"><input type="checkbox" value="Ayuda con facturas básicas"> Ayuda con facturas básicas</label>
+              <label class="checkbox-label"><input type="checkbox" value="Apoyo educativo para mis hijos"> Apoyo educativo para mis hijos</label>
+              <label class="checkbox-label"><input type="checkbox" value="Ayuda con medicamentos"> Ayuda con medicamentos</label>
+              <label class="checkbox-label"><input type="checkbox" value="Alojamiento temporal"> Alojamiento temporal</label>
+              <label class="checkbox-label"><input type="checkbox" id="need-otro-check"> Otro</label>
+            </div>
+            <div class="other-input-wrap" id="need-otro-wrap">
+              <input type="text" class="form-input" id="need-otro-text" placeholder="Especifica tu necesidad…">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="need-situacion">Describe tu situación (completamente confidencial)</label>
+              <textarea class="form-textarea" id="need-situacion" placeholder="Cuéntanos cómo podemos ayudarte…" rows="4"></textarea>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="need-phone">Teléfono de contacto</label>
+              <input type="tel" class="form-input" id="need-phone" placeholder="+34 600 000 000">
+            </div>
+            <button class="btn-submit" id="btn-need-submit">Enviar solicitud confidencial</button>
+          </div>
+
+          <div class="ezra-panel ezra-panel-give">
+            <div class="ezra-panel-title">Quiero ayudar</div>
+            <p class="ezra-panel-desc">Tu generosidad hace posible este servicio. Gracias por ser parte de la red de apoyo comunitario.</p>
+            <div class="checkbox-group" id="give-checks">
+              <label class="checkbox-label"><input type="checkbox" value="Donando alimentos"> Donando alimentos</label>
+              <label class="checkbox-label"><input type="checkbox" value="Apoyo económico">
+                Apoyo económico — <a class="link-donativos" href="donativos.html">ir a Donativos</a>
+              </label>
+              <label class="checkbox-label"><input type="checkbox" value="Ofreciendo alojamiento temporal"> Ofreciendo alojamiento temporal</label>
+              <label class="checkbox-label"><input type="checkbox" value="Ayuda con transporte"> Ayuda con transporte</label>
+              <label class="checkbox-label"><input type="checkbox" value="Acompañamiento emocional"> Acompañamiento emocional</label>
+              <label class="checkbox-label"><input type="checkbox" id="give-otro-check"> Otro</label>
+            </div>
+            <div class="other-input-wrap" id="give-otro-wrap">
+              <input type="text" class="form-input" id="give-otro-text" placeholder="¿Cómo quieres ayudar?">
+            </div>
+            <button class="btn-submit btn-submit-gold" id="btn-give-submit">Registrarme como voluntario de Ezra</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: BIKUR JOLIM -->
+      <section class="tab-panel" id="panel-bikur">
+        <h2 class="section-title">Bikur Jolim — Visitas a enfermos</h2>
+        <div class="bj-intro">
+          <strong>Bikur Jolim</strong> (ביקור חולים) — visitar a los enfermos — es una de las más importantes mitzvot de la Torá.
+          Nuestros sabios enseñan que quien visita a un enfermo alivia una parte de su sufrimiento.
+          Esta sección conecta a quienes necesitan compañía y visitas con voluntarios dispuestos a ofrecerlas.
+          Toda la información se publica de forma <strong>anónima</strong> para proteger la privacidad.
+        </div>
+        <h3 class="section-title" style="font-size:1rem;margin-bottom:14px">Solicitudes activas de visita</h3>
+        <div class="bj-list" id="bj-list"></div>
+        <div class="bj-report-box">
+          <div class="bj-report-title">¿Conoces a alguien que necesite visitas?</div>
+          <p style="font-size:0.85rem;color:var(--color-text-muted);margin-bottom:14px">Rellena este formulario y la coordinación de Bikur Jolim lo revisará y publicará de forma anónima.</p>
+          <div class="bj-report-grid">
+            <div class="form-field">
+              <label class="form-label" for="bj-rep-zona">Zona (barrio/ciudad)</label>
+              <input type="text" class="form-input" id="bj-rep-zona" placeholder="Ej. Chamberí, Madrid">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="bj-rep-tipo">Tipo de necesidad</label>
+              <select class="form-select" id="bj-rep-tipo">
+                <option value="">Seleccionar…</option>
+                <option>Compañía y visitas</option>
+                <option>Ayuda con la compra</option>
+                <option>Paseos cortos</option>
+                <option>Lectura en voz alta</option>
+                <option>Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-field" style="margin-bottom:12px">
+            <label class="form-label" for="bj-rep-disp">Disponibilidad preferida</label>
+            <input type="text" class="form-input" id="bj-rep-disp" placeholder="Ej. Tardes entre semana, fines de semana…">
+          </div>
+          <button class="btn-submit" id="btn-bj-report">Reportar necesidad</button>
+        </div>
+      </section>
+
+      <!-- TAB: GEMILUT JASADIM -->
+      <section class="tab-panel" id="panel-gemilut">
+        <div class="toolbar-row">
+          <div style="flex:1">
+            <h2 class="section-title">Gemilut Jasadim — Favores comunitarios</h2>
+            <p class="section-desc" style="margin-bottom:0">Actos de bondad desinteresados. La columna de la comunidad.</p>
+          </div>
+          <button class="toolbar-action-btn" id="btn-ofrecer-favor">+ Ofrecer un favor</button>
+        </div>
+        <div class="filter-chips" id="gj-chips"></div>
+        <div class="gj-grid" id="gj-grid"></div>
+      </section>
+
+    </div>
+  </main>
+
+<!-- MODAL: Solicitar préstamo -->
+<div class="modal-overlay" id="modal-solicitar" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h2 class="modal-title">Solicitar préstamo</h2>
+    <div class="modal-body">
+      <p id="modal-solicitar-obj" style="font-size:0.9rem;font-weight:600;color:var(--color-primary)"></p>
+      <div class="form-field">
+        <label class="form-label" for="sol-start">Fecha de inicio</label>
+        <input type="date" class="form-input" id="sol-start">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="sol-end">Fecha de devolución (máx. 30 días)</label>
+        <input type="date" class="form-input" id="sol-end">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="btn-sol-cancel">Cancelar</button>
+      <button class="btn-confirm" id="btn-sol-confirm">Confirmar solicitud</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Ofrecer objeto -->
+<div class="modal-overlay" id="modal-ofrecer-obj" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h2 class="modal-title">Ofrecer objeto a Tenyad</h2>
+    <div class="modal-body">
+      <div class="form-field">
+        <label class="form-label" for="obj-nombre">Nombre del objeto</label>
+        <input type="text" class="form-input" id="obj-nombre" placeholder="Ej. Sillas plegables x10">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="obj-desc">Descripción breve</label>
+        <textarea class="form-textarea" id="obj-desc" placeholder="Estado, detalles, medidas…" rows="2"></textarea>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="obj-cat">Categoría</label>
+        <select class="form-select" id="obj-cat">
+          <option value="">Seleccionar…</option>
+          <option>Sillas/Mesas</option>
+          <option>Menaje</option>
+          <option>Ropa bebé</option>
+          <option>Libros</option>
+          <option>Electrónica</option>
+          <option>Herramientas</option>
+          <option>Decoración Fiestas</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="obj-condicion">Estado</label>
+        <select class="form-select" id="obj-condicion">
+          <option value="">Seleccionar…</option>
+          <option>Excelente</option>
+          <option>Bueno</option>
+          <option>Aceptable</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Icono</label>
+        <div class="emoji-picker" id="emoji-picker">
+          <span class="emoji-opt selected" data-emoji="📦">📦</span>
+          <span class="emoji-opt" data-emoji="🪑">🪑</span>
+          <span class="emoji-opt" data-emoji="🍽️">🍽️</span>
+          <span class="emoji-opt" data-emoji="📚">📚</span>
+          <span class="emoji-opt" data-emoji="🔧">🔧</span>
+          <span class="emoji-opt" data-emoji="🕎">🕎</span>
+        </div>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle">
+          <input type="checkbox" id="obj-anonimo">
+          <span class="toggle-slider"></span>
+        </label>
+        <span>Publicar como anónimo</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="btn-obj-cancel">Cancelar</button>
+      <button class="btn-confirm" id="btn-obj-confirm">Publicar en Tenyad</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Inscribir hijo/a -->
+<div class="modal-overlay" id="modal-inscribir" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h2 class="modal-title">Inscribir hijo/a</h2>
+    <div class="modal-body">
+      <p id="modal-inscribir-clase" style="font-size:0.9rem;color:var(--color-text-muted)"></p>
+      <div class="form-field">
+        <label class="form-label" for="ins-nombre">Nombre del hijo/a</label>
+        <input type="text" class="form-input" id="ins-nombre" placeholder="Nombre completo">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="ins-edad">Edad</label>
+        <input type="number" class="form-input" id="ins-edad" placeholder="Años" min="3" max="18">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="ins-telefono">Teléfono del padre/madre</label>
+        <input type="tel" class="form-input" id="ins-telefono" placeholder="+34 600 000 000">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="ins-notas">Notas adicionales (opcional)</label>
+        <textarea class="form-textarea" id="ins-notas" placeholder="Alergias, necesidades especiales…" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="btn-ins-cancel">Cancelar</button>
+      <button class="btn-confirm" id="btn-ins-confirm">Confirmar inscripción</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Ofrecerse para visitar -->
+<div class="modal-overlay" id="modal-visitar" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h2 class="modal-title">Ofrecerme para visitar</h2>
+    <div class="modal-body">
+      <p id="modal-visitar-zona" style="font-size:0.88rem;color:var(--color-text-muted)"></p>
+      <div class="form-field">
+        <label class="form-label" for="vis-nombre">Tu nombre</label>
+        <input type="text" class="form-input" id="vis-nombre" placeholder="Nombre y apellido">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="vis-disp">Tu disponibilidad</label>
+        <input type="text" class="form-input" id="vis-disp" placeholder="Ej. Tardes de martes y jueves">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="vis-notas">Notas (opcional)</label>
+        <textarea class="form-textarea" id="vis-notas" placeholder="Cualquier cosa que quieras compartir con la coordinación…" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="btn-vis-cancel">Cancelar</button>
+      <button class="btn-confirm" id="btn-vis-confirm">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Solicitar favor -->
+<div class="modal-overlay" id="modal-favor" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h2 class="modal-title">Solicitar favor</h2>
+    <div class="modal-body">
+      <p id="modal-favor-info" style="font-size:0.9rem;color:var(--color-text-muted)"></p>
+      <div class="form-field">
+        <label class="form-label" for="fav-msg">Cuéntanos brevemente qué necesitas</label>
+        <textarea class="form-textarea" id="fav-msg" placeholder="Sé breve y concreto/a. El/la voluntario/a recibirá tu mensaje." rows="4"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="btn-fav-cancel">Cancelar</button>
+      <button class="btn-confirm" id="btn-fav-confirm">Enviar solicitud</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Ofrecer favor -->
+<div class="modal-overlay" id="modal-ofrecer-fav" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h2 class="modal-title">Ofrecer un favor comunitario</h2>
+    <div class="modal-body">
+      <div class="form-field">
+        <label class="form-label" for="ofav-tipo">Tipo de favor</label>
+        <select class="form-select" id="ofav-tipo">
+          <option value="">Seleccionar…</option>
+          <option>Transporte</option>
+          <option>Recados</option>
+          <option>Cuidado niños</option>
+          <option>Ayuda mudanza</option>
+          <option>Compañía médico</option>
+          <option>Clases de apoyo</option>
+          <option>Cocinar</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="ofav-desc">Descripción</label>
+        <textarea class="form-textarea" id="ofav-desc" placeholder="Explica cómo puedes ayudar, condiciones, etc." rows="3"></textarea>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="ofav-disp">Disponibilidad</label>
+        <input type="text" class="form-input" id="ofav-disp" placeholder="Ej. Tardes entre semana">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="ofav-zona">Zona</label>
+        <input type="text" class="form-input" id="ofav-zona" placeholder="Ej. Madrid Centro">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="btn-ofav-cancel">Cancelar</button>
+      <button class="btn-confirm" id="btn-ofav-confirm">Publicar oferta</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/data.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ── Auth + Nav ── */
+  try {
+    requireAuth();
+    initNav('servicios');
+  } catch (e) { console.error('Auth/Nav:', e); }
+
+  /* ── Constants ── */
+  var AV_COLORS = ['#6366F1','#10B981','#F59E0B','#EF4444','#8B5CF6','#3B82F6','#EC4899','#14B8A6'];
+  var TENYAD_CATS = ['Todos','Sillas/Mesas','Menaje','Ropa bebé','Libros','Electrónica','Herramientas','Decoración Fiestas'];
+  var GJ_CATS = ['Todos','Transporte','Recados','Cuidado niños','Ayuda mudanza','Compañía médico','Clases de apoyo','Cocinar','Otro'];
+
+  /* ── Helpers ── */
+  function fmtDate(iso) {
+    try {
+      if (!iso) return '';
+      return new Date(iso + 'T00:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+    } catch (e) { return iso; }
+  }
+
+  function openModal(id) {
+    try { var el = document.getElementById(id); if (el) el.classList.add('open'); } catch (e) { console.error(e); }
+  }
+  function closeModal(id) {
+    try { var el = document.getElementById(id); if (el) el.classList.remove('open'); } catch (e) { console.error(e); }
+  }
+  function toast(msg, type, dur) {
+    try { showToast(msg, type || 'success', dur || 3500); } catch (e) { console.error(e); }
+  }
+
+  /* Close on backdrop click */
+  try {
+    document.querySelectorAll('.modal-overlay').forEach(function (ov) {
+      ov.addEventListener('click', function (e) {
+        try { if (e.target === ov) ov.classList.remove('open'); } catch (err) { console.error(err); }
+      });
+    });
+  } catch (e) { console.error(e); }
+
+  /* ── TABS ── */
+  try {
+    var tabBtns = document.querySelectorAll('.tab-btn');
+    var tabPanels = document.querySelectorAll('.tab-panel');
+    tabBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        try {
+          tabBtns.forEach(function (b) { b.classList.remove('active'); });
+          tabPanels.forEach(function (p) { p.classList.remove('active'); });
+          btn.classList.add('active');
+          var panel = document.getElementById('panel-' + btn.dataset.tab);
+          if (panel) panel.classList.add('active');
+        } catch (err) { console.error(err); }
+      });
+    });
+  } catch (e) { console.error(e); }
+
+  function switchTab(tabId) {
+    try {
+      document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+      var btn = document.querySelector('.tab-btn[data-tab="' + tabId + '"]');
+      if (btn) btn.classList.add('active');
+      var panel = document.getElementById('panel-' + tabId);
+      if (panel) panel.classList.add('active');
+    } catch (e) { console.error(e); }
+  }
+
+  /* ── TAB: TODOS ── */
+  try {
+    var OVERVIEW = [
+      { tab:'tenyad',  icon:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>', name:'Tenyad',           blurb:'Biblioteca de objetos: sillas, menaje, libros, electrónica y más. Pide prestado gratis a la comunidad.' },
+      { tab:'talmud',  icon:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>', name:'Talmud Torah',      blurb:'Clases de formación judía para niños y jóvenes. Varios grupos por edades con maestros dedicados.' },
+      { tab:'ezra',    icon:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"/></svg>', name:'Ezra',              blurb:'Ayuda económica confidencial para miembros de la comunidad en momentos difíciles.' },
+      { tab:'bikur',   icon:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>', name:'Bikur Jolim',       blurb:'Red de voluntarios que visitan a enfermos y personas mayores que necesitan compañía.' },
+      { tab:'gemilut', icon:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>', name:'Gemilut Jasadim',   blurb:'Favores comunitarios: transporte, cocinar para shiva, clases de apoyo y mucho más.' }
+    ];
+    var ovGrid = document.getElementById('overview-grid');
+    var ovHTML = '';
+    OVERVIEW.forEach(function (item) {
+      ovHTML += '<div class="overview-card">'
+        + '<div class="overview-icon">' + item.icon + '</div>'
+        + '<div class="overview-name">' + item.name + '</div>'
+        + '<div class="overview-blurb">' + item.blurb + '</div>'
+        + '<button class="overview-btn" data-switch="' + item.tab + '">Ver m&aacute;s &rarr;</button>'
+        + '</div>';
+    });
+    ovGrid.insertAdjacentHTML('beforeend', ovHTML);
+    ovGrid.addEventListener('click', function (e) {
+      try {
+        var btn = e.target.closest('.overview-btn');
+        if (btn && btn.dataset.switch) switchTab(btn.dataset.switch);
+      } catch (err) { console.error(err); }
+    });
+  } catch (e) { console.error(e); }
+
+  /* ── TAB: TENYAD ── */
+  var tenyad_cat = 'Todos';
+  var tenyad_q = '';
+
+  function condBadge(c) {
+    if (c === 'Excelente') return '<span class="badge badge-green">Excelente</span>';
+    if (c === 'Bueno')     return '<span class="badge badge-blue">Bueno</span>';
+    return '<span class="badge badge-yellow">Aceptable</span>';
+  }
+
+  function renderTenyad() {
+    try {
+      var grid = document.getElementById('tenyad-grid');
+      var filtered = MOCK_TENYAD.filter(function (obj) {
+        var matchCat = tenyad_cat === 'Todos' || obj.categoria === tenyad_cat;
+        var q = tenyad_q.toLowerCase();
+        var matchQ = !q || obj.nombre.toLowerCase().indexOf(q) !== -1 || obj.descripcion.toLowerCase().indexOf(q) !== -1;
+        return matchCat && matchQ;
+      });
+      var html = '';
+      filtered.forEach(function (obj) {
+        var owner = obj.anonimo ? 'An&oacute;nimo' : obj.propietario;
+        var availHTML = obj.disponible
+          ? '<span class="avail-dot"></span><span>Disponible</span>'
+          : '<span class="avail-dot reserved"></span><span>Reservado hasta ' + fmtDate(obj.hasta) + '</span>';
+        html += '<div class="object-card" data-id="' + obj.id + '">'
+          + '<div class="object-emoji">' + obj.icono + '</div>'
+          + '<div class="object-name">' + obj.nombre + '</div>'
+          + '<div class="object-desc">' + obj.descripcion + '</div>'
+          + condBadge(obj.condicion)
+          + '<div class="object-owner">Cedido por <strong>' + owner + '</strong></div>'
+          + '<div class="object-avail" style="display:flex;align-items:center;gap:4px">' + availHTML + '</div>'
+          + '<button class="btn-solicit" data-obj-id="' + obj.id + '" data-obj-name="' + obj.nombre.replace(/"/g, '&quot;') + '"'
+          + (obj.disponible ? '' : ' disabled') + '>Solicitar pr&eacute;stamo</button>'
+          + '</div>';
+      });
+      grid.innerHTML = '';
+      grid.insertAdjacentHTML('beforeend', html);
+    } catch (e) { console.error(e); }
+  }
+
+  try {
+    var tyChips = document.getElementById('tenyad-chips');
+    var tyChipsHTML = '';
+    TENYAD_CATS.forEach(function (cat) {
+      tyChipsHTML += '<button class="chip' + (cat === 'Todos' ? ' active' : '') + '" data-cat="' + cat + '">' + cat + '</button>';
+    });
+    tyChips.insertAdjacentHTML('beforeend', tyChipsHTML);
+    tyChips.addEventListener('click', function (e) {
+      try {
+        var chip = e.target.closest('.chip');
+        if (!chip) return;
+        tyChips.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
+        chip.classList.add('active');
+        tenyad_cat = chip.dataset.cat;
+        renderTenyad();
+      } catch (err) { console.error(err); }
+    });
+    document.getElementById('tenyad-search').addEventListener('input', function (e) {
+      try { tenyad_q = e.target.value; renderTenyad(); } catch (err) { console.error(err); }
+    });
+    renderTenyad();
+  } catch (e) { console.error(e); }
+
+  /* Solicitar préstamo */
+  var curSolObj = null;
+  try {
+    document.getElementById('tenyad-grid').addEventListener('click', function (e) {
+      try {
+        var btn = e.target.closest('.btn-solicit');
+        if (!btn || btn.disabled) return;
+        curSolObj = { id: btn.dataset.objId, name: btn.dataset.objName };
+        document.getElementById('modal-solicitar-obj').textContent = curSolObj.name;
+        document.getElementById('sol-start').value = new Date().toISOString().split('T')[0];
+        document.getElementById('sol-end').value = '';
+        openModal('modal-solicitar');
+      } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-sol-cancel').addEventListener('click', function () {
+      try { closeModal('modal-solicitar'); } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-sol-confirm').addEventListener('click', function () {
+      try {
+        var start = document.getElementById('sol-start').value;
+        var end = document.getElementById('sol-end').value;
+        if (!start || !end) { toast('Por favor, selecciona las fechas.', 'warning'); return; }
+        var diff = (new Date(end) - new Date(start)) / 86400000;
+        if (diff <= 0) { toast('La fecha de devolución debe ser posterior al inicio.', 'warning'); return; }
+        if (diff > 30) { toast('El préstamo no puede superar 30 días.', 'warning'); return; }
+        closeModal('modal-solicitar');
+        toast('Solicitud enviada al propietario.', 'success');
+      } catch (err) { console.error(err); }
+    });
+  } catch (e) { console.error(e); }
+
+  /* Ofrecer objeto */
+  var selEmoji = '📦';
+  try {
+    document.getElementById('btn-ofrecer-objeto').addEventListener('click', function () {
+      try { openModal('modal-ofrecer-obj'); } catch (err) { console.error(err); }
+    });
+    document.getElementById('emoji-picker').addEventListener('click', function (e) {
+      try {
+        var opt = e.target.closest('.emoji-opt');
+        if (!opt) return;
+        document.querySelectorAll('.emoji-opt').forEach(function (o) { o.classList.remove('selected'); });
+        opt.classList.add('selected');
+        selEmoji = opt.dataset.emoji;
+      } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-obj-cancel').addEventListener('click', function () {
+      try { closeModal('modal-ofrecer-obj'); } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-obj-confirm').addEventListener('click', function () {
+      try {
+        var nombre = document.getElementById('obj-nombre').value.trim();
+        var desc = document.getElementById('obj-desc').value.trim();
+        var cat = document.getElementById('obj-cat').value;
+        var cond = document.getElementById('obj-condicion').value;
+        if (!nombre || !desc || !cat || !cond) { toast('Por favor, rellena todos los campos.', 'warning'); return; }
+        var anonimo = document.getElementById('obj-anonimo').checked;
+        var user = getCurrentUser();
+        var owner = anonimo ? 'An&oacute;nimo' : (user ? user.name : 'T&uacute;');
+        var newCard = document.createElement('div');
+        newCard.className = 'object-card fade-in';
+        newCard.innerHTML = '<div class="object-emoji">' + selEmoji + '</div>'
+          + '<div class="object-name">' + nombre + '</div>'
+          + '<div class="object-desc">' + desc + '</div>'
+          + condBadge(cond)
+          + '<div class="object-owner">Cedido por <strong>' + owner + '</strong></div>'
+          + '<div class="object-avail" style="display:flex;align-items:center;gap:4px"><span class="avail-dot"></span><span>Disponible</span></div>'
+          + '<button class="btn-solicit" data-obj-id="new-' + Date.now() + '" data-obj-name="' + nombre.replace(/"/g,'&quot;') + '">Solicitar pr&eacute;stamo</button>';
+        document.getElementById('tenyad-grid').insertAdjacentElement('afterbegin', newCard);
+        closeModal('modal-ofrecer-obj');
+        document.getElementById('obj-nombre').value = '';
+        document.getElementById('obj-desc').value = '';
+        document.getElementById('obj-cat').value = '';
+        document.getElementById('obj-condicion').value = '';
+        toast('¡Objeto publicado en Tenyad!', 'success');
+      } catch (err) { console.error(err); }
+    });
+  } catch (e) { console.error(e); }
+
+  /* ── TAB: TALMUD TORAH ── */
+  try {
+    var ttGrid = document.getElementById('tt-grid');
+    var ttHTML = '';
+    MOCK_TALMUD_TORAH.forEach(function (g) {
+      var pct = Math.round((g.inscritos / g.plazas) * 100);
+      var full = g.inscritos >= g.plazas;
+      var parts = g.maestro.split(' ');
+      var initials = parts.map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+      var color = AV_COLORS[g.maestro.charCodeAt(0) % AV_COLORS.length];
+      ttHTML += '<div class="tt-card">'
+        + '<div class="tt-card-header">'
+        + '<div class="tt-avatar" style="background:' + color + '">' + initials + '</div>'
+        + '<div><div class="tt-group-name">' + g.grupo + '</div><div class="tt-age">' + g.edades + '</div></div>'
+        + '</div>'
+        + '<div class="tt-teacher">Maestro/a: <strong>' + g.maestro + '</strong></div>'
+        + '<div class="tt-row"><span class="tt-row-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg></span><span>' + g.horario + '</span></div>'
+        + '<div class="tt-row"><span class="tt-row-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205 3 1m1.5.5-1.5-.5M6.75 7.364V3h-3v18m3-13.636 10.5-3.819"/></svg></span><span>' + g.aula + '</span></div>'
+        + '<div class="capacity-bar-wrap">'
+        + '<div class="capacity-label"><span>Plazas ocupadas</span><span>' + g.inscritos + '/' + g.plazas + '</span></div>'
+        + '<div class="capacity-bar"><div class="capacity-fill' + (full ? ' full' : '') + '" style="width:' + pct + '%"></div></div>'
+        + '</div>'
+        + '<button class="btn-inscribir" data-tt-grupo="' + g.grupo.replace(/"/g,'&quot;') + '"'
+        + (full ? ' disabled' : '') + '>'
+        + (full ? 'Clase completa' : 'Inscribir hijo/a')
+        + '</button>'
+        + '</div>';
+    });
+    ttGrid.insertAdjacentHTML('beforeend', ttHTML);
+
+    var tablonList = document.getElementById('tablon-list');
+    var tablonHTML = '';
+    MOCK_TT_MENSAJES.forEach(function (m) {
+      tablonHTML += '<div class="tablon-card">'
+        + '<span class="tablon-class-pill">' + m.clase + '</span>'
+        + '<div class="tablon-body">'
+        + '<div class="tablon-teacher">' + m.maestro + '</div>'
+        + '<div class="tablon-msg">' + m.mensaje + '</div>'
+        + '<div class="tablon-date">' + fmtDate(m.fecha) + '</div>'
+        + '</div></div>';
+    });
+    tablonList.insertAdjacentHTML('beforeend', tablonHTML);
+  } catch (e) { console.error(e); }
+
+  /* Inscribir modal */
+  try {
+    document.getElementById('tt-grid').addEventListener('click', function (e) {
+      try {
+        var btn = e.target.closest('.btn-inscribir');
+        if (!btn || btn.disabled) return;
+        document.getElementById('modal-inscribir-clase').textContent = btn.dataset.ttGrupo;
+        document.getElementById('ins-nombre').value = '';
+        document.getElementById('ins-edad').value = '';
+        document.getElementById('ins-telefono').value = '';
+        document.getElementById('ins-notas').value = '';
+        openModal('modal-inscribir');
+      } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-ins-cancel').addEventListener('click', function () {
+      try { closeModal('modal-inscribir'); } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-ins-confirm').addEventListener('click', function () {
+      try {
+        var n = document.getElementById('ins-nombre').value.trim();
+        var a = document.getElementById('ins-edad').value.trim();
+        var t = document.getElementById('ins-telefono').value.trim();
+        if (!n || !a || !t) { toast('Por favor, rellena nombre, edad y teléfono.', 'warning'); return; }
+        closeModal('modal-inscribir');
+        toast('¡Inscripción realizada! Os contactaremos para confirmar.', 'success');
+      } catch (err) { console.error(err); }
+    });
+  } catch (e) { console.error(e); }
+
+  /* ── TAB: EZRA ── */
+  try {
+    document.getElementById('need-otro-check').addEventListener('change', function () {
+      try { document.getElementById('need-otro-wrap').classList.toggle('visible', this.checked); } catch (err) { console.error(err); }
+    });
+    document.getElementById('give-otro-check').addEventListener('change', function () {
+      try { document.getElementById('give-otro-wrap').classList.toggle('visible', this.checked); } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-need-submit').addEventListener('click', function () {
+      try {
+        var phone = document.getElementById('need-phone').value.trim();
+        if (!phone) { toast('Por favor, introduce tu teléfono de contacto.', 'warning'); return; }
+        toast('Tu solicitud ha llegado a la administración. Te contactaremos en máximo 48 horas. Jazak uvaruj.', 'success', 5000);
+        document.getElementById('need-situacion').value = '';
+        document.getElementById('need-phone').value = '';
+        document.querySelectorAll('#need-checks input[type=checkbox]').forEach(function (c) { c.checked = false; });
+        document.getElementById('need-otro-wrap').classList.remove('visible');
+        document.getElementById('need-otro-text').value = '';
+      } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-give-submit').addEventListener('click', function () {
+      try {
+        toast('¡Gracias! Te hemos añadido a la lista de voluntarios de Ezra.', 'success');
+        document.querySelectorAll('#give-checks input[type=checkbox]').forEach(function (c) { c.checked = false; });
+        document.getElementById('give-otro-wrap').classList.remove('visible');
+        document.getElementById('give-otro-text').value = '';
+      } catch (err) { console.error(err); }
+    });
+  } catch (e) { console.error(e); }
+
+  /* ── TAB: BIKUR JOLIM ── */
+  try {
+    var bjList = document.getElementById('bj-list');
+    var bjHTML = '';
+    MOCK_BIKUR_JOLIM.forEach(function (item) {
+      bjHTML += '<div class="bj-card">'
+        + '<div class="bj-card-body">'
+        + '<div class="bj-zone"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg> ' + item.zona + '</div>'
+        + '<div class="bj-tipo">' + item.tipo + '</div>'
+        + '<div class="bj-need">' + item.necesidad + '</div>'
+        + '<div class="bj-disp"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg> ' + item.disponibilidad + '</div>'
+        + '</div>'
+        + '<button class="btn-bj" data-bj-zona="' + item.zona.replace(/"/g,'&quot;') + '">Ofrecerme para visitar</button>'
+        + '</div>';
+    });
+    bjList.insertAdjacentHTML('beforeend', bjHTML);
+  } catch (e) { console.error(e); }
+
+  try {
+    document.getElementById('bj-list').addEventListener('click', function (e) {
+      try {
+        var btn = e.target.closest('.btn-bj');
+        if (!btn) return;
+        document.getElementById('modal-visitar-zona').textContent = 'Zona: ' + btn.dataset.bjZona;
+        document.getElementById('vis-nombre').value = '';
+        document.getElementById('vis-disp').value = '';
+        document.getElementById('vis-notas').value = '';
+        openModal('modal-visitar');
+      } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-vis-cancel').addEventListener('click', function () {
+      try { closeModal('modal-visitar'); } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-vis-confirm').addEventListener('click', function () {
+      try {
+        var n = document.getElementById('vis-nombre').value.trim();
+        if (!n) { toast('Por favor, introduce tu nombre.', 'warning'); return; }
+        closeModal('modal-visitar');
+        toast('¡Gracias! La coordinación de Bikur Jolim te contactará.', 'success');
+      } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-bj-report').addEventListener('click', function () {
+      try {
+        var zona = document.getElementById('bj-rep-zona').value.trim();
+        var tipo = document.getElementById('bj-rep-tipo').value;
+        if (!zona || !tipo) { toast('Por favor, indica la zona y el tipo de necesidad.', 'warning'); return; }
+        toast('Gracias. La coordinación revisará y publicará de forma anónima.', 'success');
+        document.getElementById('bj-rep-zona').value = '';
+        document.getElementById('bj-rep-tipo').value = '';
+        document.getElementById('bj-rep-disp').value = '';
+      } catch (err) { console.error(err); }
+    });
+  } catch (e) { console.error(e); }
+
+  /* ── TAB: GEMILUT JASADIM ── */
+  var gj_filter = 'Todos';
+
+  function renderGemilut() {
+    try {
+      var grid = document.getElementById('gj-grid');
+      var filtered = MOCK_GEMILUT.filter(function (g) {
+        return gj_filter === 'Todos' || g.favor.toLowerCase().indexOf(gj_filter.toLowerCase()) !== -1;
+      });
+      var html = '';
+      filtered.forEach(function (g) {
+        var initial = g.nombre[0].toUpperCase();
+        var color = AV_COLORS[g.color % AV_COLORS.length];
+        html += '<div class="gj-card">'
+          + '<div class="gj-card-header">'
+          + '<div class="gj-avatar" style="background:' + color + '">' + initial + '</div>'
+          + '<div><div class="gj-name">' + g.nombre + '</div><span class="badge badge-gold">' + g.favor + '</span></div>'
+          + '</div>'
+          + '<div class="gj-desc">' + g.descripcion + '</div>'
+          + '<div class="gj-meta"><span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg> ' + g.disponibilidad + '</span><span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg> ' + g.zona + '</span></div>'
+          + '<button class="btn-gj" data-gj-nombre="' + g.nombre.replace(/"/g,'&quot;') + '">Solicitar este favor</button>'
+          + '</div>';
+      });
+      grid.innerHTML = '';
+      grid.insertAdjacentHTML('beforeend', html);
+    } catch (e) { console.error(e); }
+  }
+
+  try {
+    var gjChips = document.getElementById('gj-chips');
+    var gjChipsHTML = '';
+    GJ_CATS.forEach(function (cat) {
+      gjChipsHTML += '<button class="chip' + (cat === 'Todos' ? ' active' : '') + '" data-gjcat="' + cat + '">' + cat + '</button>';
+    });
+    gjChips.insertAdjacentHTML('beforeend', gjChipsHTML);
+    gjChips.addEventListener('click', function (e) {
+      try {
+        var chip = e.target.closest('.chip');
+        if (!chip) return;
+        gjChips.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
+        chip.classList.add('active');
+        gj_filter = chip.dataset.gjcat;
+        renderGemilut();
+      } catch (err) { console.error(err); }
+    });
+    renderGemilut();
+  } catch (e) { console.error(e); }
+
+  /* Solicitar favor modal */
+  var curGJNombre = '';
+  try {
+    document.getElementById('gj-grid').addEventListener('click', function (e) {
+      try {
+        var btn = e.target.closest('.btn-gj');
+        if (!btn) return;
+        curGJNombre = btn.dataset.gjNombre;
+        document.getElementById('modal-favor-info').textContent = 'Enviando mensaje a ' + curGJNombre + '.';
+        document.getElementById('fav-msg').value = '';
+        openModal('modal-favor');
+      } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-fav-cancel').addEventListener('click', function () {
+      try { closeModal('modal-favor'); } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-fav-confirm').addEventListener('click', function () {
+      try {
+        var msg = document.getElementById('fav-msg').value.trim();
+        if (!msg) { toast('Por favor, escribe un mensaje.', 'warning'); return; }
+        closeModal('modal-favor');
+        toast('Solicitud enviada. ' + curGJNombre + ' recibirá tu mensaje.', 'success');
+      } catch (err) { console.error(err); }
+    });
+  } catch (e) { console.error(e); }
+
+  /* Ofrecer favor modal */
+  try {
+    document.getElementById('btn-ofrecer-favor').addEventListener('click', function () {
+      try { openModal('modal-ofrecer-fav'); } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-ofav-cancel').addEventListener('click', function () {
+      try { closeModal('modal-ofrecer-fav'); } catch (err) { console.error(err); }
+    });
+    document.getElementById('btn-ofav-confirm').addEventListener('click', function () {
+      try {
+        var tipo = document.getElementById('ofav-tipo').value;
+        var desc = document.getElementById('ofav-desc').value.trim();
+        var disp = document.getElementById('ofav-disp').value.trim();
+        var zona = document.getElementById('ofav-zona').value.trim();
+        if (!tipo || !desc || !disp || !zona) { toast('Por favor, rellena todos los campos.', 'warning'); return; }
+        var user = getCurrentUser();
+        var nombre = user ? user.name.split(' ')[0] : 'T&uacute;';
+        var initial = nombre[0].toUpperCase();
+        var color = AV_COLORS[nombre.charCodeAt(0) % AV_COLORS.length];
+        var newCard = document.createElement('div');
+        newCard.className = 'gj-card fade-in';
+        newCard.innerHTML = '<div class="gj-card-header">'
+          + '<div class="gj-avatar" style="background:' + color + '">' + initial + '</div>'
+          + '<div><div class="gj-name">' + nombre + '</div><span class="badge badge-gold">' + tipo + '</span></div>'
+          + '</div>'
+          + '<div class="gj-desc">' + desc + '</div>'
+          + '<div class="gj-meta"><span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg> ' + disp + '</span><span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg> ' + zona + '</span></div>'
+          + '<button class="btn-gj" data-gj-nombre="' + nombre.replace(/"/g,'&quot;') + '">Solicitar este favor</button>';
+        document.getElementById('gj-grid').insertAdjacentElement('afterbegin', newCard);
+        closeModal('modal-ofrecer-fav');
+        document.getElementById('ofav-tipo').value = '';
+        document.getElementById('ofav-desc').value = '';
+        document.getElementById('ofav-disp').value = '';
+        document.getElementById('ofav-zona').value = '';
+        toast('¡Gracias! Tu oferta de favor aparece en la lista.', 'success');
+      } catch (err) { console.error(err); }
+    });
+  } catch (e) { console.error(e); }
+
+})();
+</script>
+</body>
+</html>

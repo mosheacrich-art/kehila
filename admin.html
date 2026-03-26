@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kehilá — Panel Admin</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <style>
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      background: var(--color-bg);
+    }
+    @media (max-width: 768px) { .main-content { margin-left: 0; } }
+
+    .admin-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 32px 60px;
+    }
+    @media (max-width: 768px) { .admin-inner { padding: 20px 14px 88px; } }
+
+    /* ─── Tabs ─── */
+    .admin-tabs {
+      display: flex;
+      gap: 2px;
+      border-bottom: 2px solid var(--color-border);
+      margin-bottom: 28px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .admin-tabs::-webkit-scrollbar { display: none; }
+
+    .admin-tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: all var(--transition-fast);
+    }
+    .admin-tab svg { width: 16px; height: 16px; }
+    .admin-tab:hover { color: var(--color-text); }
+    .admin-tab.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .tab-badge {
+      background: var(--color-danger);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Tab content */
+    .tab-panel { display: none; animation: fadeIn .2s ease; }
+    .tab-panel.active { display: block; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px);} to { opacity:1; transform:translateY(0);} }
+
+    /* ─── Métricas ─── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 900px) { .metrics-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 480px) { .metrics-grid { grid-template-columns: 1fr 1fr; gap: 10px; } }
+
+    .metric-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .metric-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--color-text-muted);
+      margin-bottom: 8px;
+    }
+    .metric-value {
+      font-family: var(--font-brand);
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--color-primary);
+      margin-bottom: 6px;
+    }
+    .metric-value.warning { color: var(--color-warning); }
+    .metric-value.success { color: var(--color-success); }
+    .metric-change {
+      font-size: 0.775rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .metric-change.up   { color: var(--color-success); }
+    .metric-change.warn { color: var(--color-warning); }
+
+    /* ─── Activity table ─── */
+    .table-wrap {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .table-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .table-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--color-text-muted);
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--color-border-light);
+      background: var(--color-bg);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 12px 16px;
+      font-size: 0.875rem;
+      color: var(--color-text);
+      border-bottom: 1px solid var(--color-border-light);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--color-bg); }
+
+    /* ─── Toolbar filtros ─── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .toolbar .search-box { flex: 1; min-width: 200px; }
+
+    .filter-select {
+      padding: 9px 12px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      color: var(--color-text);
+      background: var(--color-white);
+      outline: none;
+      cursor: pointer;
+      transition: border-color var(--transition-fast);
+    }
+    .filter-select:focus { border-color: var(--color-primary); }
+
+    .results-count {
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    /* ─── User row acciones ─── */
+    .action-btns { display: flex; gap: 6px; }
+
+    /* ─── Pending banner ─── */
+    .pending-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--color-warning-light);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .pending-banner-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #92400E;
+    }
+
+    /* ─── Events list ─── */
+    .events-admin-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .event-admin-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .event-admin-date {
+      background: var(--color-primary);
+      color: var(--color-white);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      text-align: center;
+      min-width: 52px;
+      flex-shrink: 0;
+    }
+    .event-admin-day {
+      font-family: var(--font-brand);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--color-gold);
+      line-height: 1;
+    }
+    .event-admin-mon {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.7;
+    }
+    .event-admin-info { flex: 1; min-width: 0; }
+    .event-admin-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 4px;
+    }
+    .event-admin-meta {
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .event-admin-meta span { display: flex; align-items: center; gap: 4px; }
+    .event-admin-meta svg { width: 12px; height: 12px; }
+
+    /* ─── Progress aforo ─── */
+    .aforo-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.775rem;
+      color: var(--color-text-muted);
+      margin-top: 6px;
+    }
+    .aforo-bar .progress-bar { flex: 1; height: 5px; max-width: 120px; }
+
+    /* ─── News list admin ─── */
+    .news-admin-list { display: flex; flex-direction: column; gap: 10px; }
+    .news-admin-row {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .news-admin-emoji { font-size: 1.75rem; flex-shrink: 0; }
+    .news-admin-info { flex: 1; min-width: 0; }
+    .news-admin-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--color-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .news-admin-meta { font-size: 0.775rem; color: var(--color-text-muted); }
+
+    /* Pin toggle */
+    .pin-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 4px;
+      border-radius: var(--radius-xs);
+      transition: transform var(--transition-fast), opacity var(--transition-fast);
+      opacity: 0.35;
+    }
+    .pin-btn.pinned { opacity: 1; }
+    .pin-btn:hover { transform: scale(1.2); opacity: 0.8; }
+
+    /* ─── Marketplace table ─── */
+    .price-text { font-weight: 600; color: var(--color-primary); }
+    .price-text.free { color: var(--color-success); font-size: 0.8rem; }
+
+    /* ─── Modales ─── */
+    /* Reutiliza clases de components.css */
+
+    /* Input de textarea en modal */
+    .form-textarea-sm {
+      min-height: 70px;
+      resize: none;
+    }
+
+    /* Checkbox group */
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .checkbox-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      transition: all var(--transition-fast);
+    }
+    .checkbox-pill input { display: none; }
+    .checkbox-pill:has(input:checked) {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-white);
+    }
+
+    /* Toggle switch */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .toggle-switch {
+      width: 40px;
+      height: 22px;
+      background: var(--color-border);
+      border-radius: 11px;
+      position: relative;
+      transition: background var(--transition-fast);
+      flex-shrink: 0;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--color-white);
+      transition: transform var(--transition-fast);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+    input[type="checkbox"].toggle-input { display: none; }
+    input[type="checkbox"].toggle-input:checked + .toggle-switch {
+      background: var(--color-success);
+    }
+    input[type="checkbox"].toggle-input:checked + .toggle-switch::after {
+      transform: translateX(18px);
+    }
+    .toggle-label { font-size: 0.875rem; color: var(--color-text); }
+
+    /* Date grid en modal evento */
+    .date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 480px) { .date-grid { grid-template-columns: 1fr; } }
+
+    /* Motivo baneo */
+    #ban-reason-wrap {
+      margin-top: 12px;
+    }
+
+    /* Avatar inline */
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .user-cell-info { min-width: 0; }
+    .user-cell-name { font-weight: 500; font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-cell-email { font-size: 0.775rem; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+
+    @media (max-width: 900px) {
+      .hide-md { display: none !important; }
+    }
+    @media (max-width: 600px) {
+      .hide-sm { display: none !important; }
+      .admin-tab { padding: 10px 12px; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar-placeholder"></div>
+
+<div class="main-content">
+  <div class="admin-inner">
+
+    <!-- Page header -->
+    <div class="page-header mb-xl">
+      <div class="page-header-left">
+        <p class="page-header-label">Administración</p>
+        <h1 class="page-title">Panel de Control</h1>
+        <p class="page-subtitle">Gestiona tu comunidad desde aquí</p>
+      </div>
+    </div>
+
+    <!-- ═══ TABS ═══ -->
+    <div class="admin-tabs" id="admin-tabs">
+      <button class="admin-tab active" data-tab="resumen">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+        Resumen
+      </button>
+      <button class="admin-tab" data-tab="usuarios">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+        Usuarios
+        <span class="tab-badge" id="pending-count-badge"></span>
+      </button>
+      <button class="admin-tab" data-tab="eventos">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5"/></svg>
+        Eventos
+      </button>
+      <button class="admin-tab" data-tab="noticias">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z"/></svg>
+        Noticias
+      </button>
+      <button class="admin-tab" data-tab="marketplace">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72"/></svg>
+        Marketplace
+      </button>
+    </div>
+
+    <!-- ════════════════════════════════
+         TAB: RESUMEN
+    ════════════════════════════════ -->
+    <div class="tab-panel active" id="panel-resumen">
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <p class="metric-label">Usuarios activos</p>
+          <p class="metric-value" id="metric-activos">—</p>
+          <p class="metric-change up">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"/></svg>
+            3 esta semana
+          </p>
+        </div>
+        <div class="metric-card">
+          <p class="metric-label">Pendientes aprobación</p>
+          <p class="metric-value warning" id="metric-pendientes">—</p>
+          <p class="metric-change warn">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/></svg>
+            Requieren revisión
+          </p>
+        </div>
+        <div class="metric-card">
+          <p class="metric-label">Eventos este mes</p>
+          <p class="metric-value" id="metric-eventos">—</p>
+          <p class="metric-change">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5"/></svg>
+            Abril 2024
+          </p>
+        </div>
+        <div class="metric-card">
+          <p class="metric-label">Donativos recibidos</p>
+          <p class="metric-value success" id="metric-donativos">—</p>
+          <p class="metric-change up">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"/></svg>
+            3 campañas activas
+          </p>
+        </div>
+      </div>
+
+      <!-- Actividad reciente -->
+      <div class="table-wrap">
+        <div class="table-header-row">
+          <p class="table-title">Actividad reciente</p>
+          <span class="caption">Últimas 48 horas</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="activity-table">
+            <thead>
+              <tr>
+                <th>Acción</th>
+                <th>Usuario</th>
+                <th class="hide-sm">Fecha</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="activity-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         TAB: USUARIOS
+    ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-usuarios">
+
+      <!-- Banner pendientes -->
+      <div class="pending-banner" id="pending-banner" style="display:none;">
+        <span class="pending-banner-text">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+          <span id="pending-banner-text">Tienes 2 solicitudes pendientes de aprobación</span>
+        </span>
+        <button class="btn btn-sm" style="background:#92400E;color:#fff;border-color:#92400E;" onclick="filterPending()">Revisar ahora</button>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <svg class="search-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+          <input type="text" id="user-search" placeholder="Buscar por nombre o email…" oninput="filterUsers()">
+        </div>
+        <select class="filter-select" id="filter-status" onchange="filterUsers()">
+          <option value="">Todos los estados</option>
+          <option value="active">Activos</option>
+          <option value="pending">Pendientes</option>
+          <option value="banned">Baneados</option>
+        </select>
+        <select class="filter-select" id="filter-role" onchange="filterUsers()">
+          <option value="">Todos los roles</option>
+          <option value="admin">Admin</option>
+          <option value="mod">Moderador</option>
+          <option value="miembro">Miembro</option>
+        </select>
+        <span class="results-count" id="user-count"></span>
+      </div>
+
+      <div class="table-wrap">
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th class="hide-sm">Rol</th>
+                <th>Estado</th>
+                <th class="hide-md">Registro</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         TAB: EVENTOS
+    ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-eventos">
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
+        <button class="btn btn-primary" onclick="openModal('modal-evento')">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:17px;height:17px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Nuevo evento
+        </button>
+      </div>
+
+      <div class="events-admin-list" id="events-admin-list"></div>
+    </div>
+
+    <!-- ════════════════════════════════
+         TAB: NOTICIAS
+    ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-noticias">
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
+        <button class="btn btn-primary" onclick="openModal('modal-noticia')">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:17px;height:17px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Nueva noticia
+        </button>
+      </div>
+
+      <div class="news-admin-list" id="news-admin-list"></div>
+    </div>
+
+    <!-- ════════════════════════════════
+         TAB: MARKETPLACE
+    ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-marketplace">
+
+      <div class="toolbar" style="margin-bottom:16px;">
+        <div class="search-box" style="flex:1;min-width:180px;">
+          <svg class="search-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+          <input type="text" id="wp-search" placeholder="Buscar listado…" oninput="filterWallap()">
+        </div>
+        <select class="filter-select" id="wp-cat" onchange="filterWallap()">
+          <option value="">Todas las categorías</option>
+          <option value="Judaica">Judaica</option>
+          <option value="Inmuebles">Inmuebles</option>
+          <option value="Educación">Educación</option>
+          <option value="Gastronomía">Gastronomía</option>
+          <option value="Libros">Libros</option>
+          <option value="Profesionales">Profesionales</option>
+        </select>
+        <select class="filter-select" id="wp-tipo" onchange="filterWallap()">
+          <option value="">Todos los tipos</option>
+          <option value="venta">Venta</option>
+          <option value="alquiler">Alquiler</option>
+          <option value="servicio">Servicio</option>
+        </select>
+        <span class="results-count" id="wp-count"></span>
+      </div>
+
+      <div class="table-wrap">
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th class="hide-sm">Vendedor</th>
+                <th class="hide-md">Categoría</th>
+                <th>Precio</th>
+                <th class="hide-md">Tipo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="wallap-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /admin-inner -->
+</div><!-- /main-content -->
+
+<!-- ══════════════════════════════════
+     MODAL: Aprobar usuario
+══════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-aprobar">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">Aprobar solicitud</h3>
+      <button class="modal-close" onclick="closeModal('modal-aprobar')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.9375rem;color:var(--color-text);margin-bottom:10px;">
+        ¿Aprobar a <strong id="aprobar-nombre"></strong>?
+      </p>
+      <div class="auth-info-banner" style="margin-bottom:0;">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:17px;height:17px;flex-shrink:0;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0"/>
+        </svg>
+        <span>Se enviará un email de bienvenida automáticamente al usuario.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-aprobar')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirm-aprobar">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+        Aprobar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     MODAL: Banear usuario
+══════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-banear">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title" style="color:var(--color-danger);">Banear usuario</h3>
+      <button class="modal-close" onclick="closeModal('modal-banear')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.9375rem;margin-bottom:16px;">
+        Vas a banear a <strong id="banear-nombre"></strong>. Esta acción es reversible.
+      </p>
+      <div class="form-group">
+        <label class="form-label required" for="ban-reason">Motivo del baneo</label>
+        <textarea id="ban-reason" class="form-textarea form-textarea-sm" placeholder="Describe el motivo…"></textarea>
+        <span class="form-error" id="ban-reason-error" style="display:none;">El motivo es obligatorio.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-banear')">Cancelar</button>
+      <button class="btn btn-danger" id="btn-confirm-banear">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+        Confirmar baneo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     MODAL: Nuevo evento
+══════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-evento">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title">Nuevo evento</h3>
+      <button class="modal-close" onclick="closeModal('modal-evento')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="form-evento" novalidate>
+        <div class="flex-col gap-md">
+          <div class="form-group">
+            <label class="form-label required">Título del evento</label>
+            <input type="text" class="form-input" id="ev-titulo" placeholder="Ej. Shabat Shalom — Cena comunitaria">
+            <span class="form-error" id="ev-titulo-err" style="display:none;">El título es obligatorio.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-textarea" id="ev-desc" placeholder="Describe el evento…"></textarea>
+          </div>
+          <div class="date-grid">
+            <div class="form-group">
+              <label class="form-label required">Fecha y hora de inicio</label>
+              <input type="datetime-local" class="form-input" id="ev-inicio">
+              <span class="form-error" id="ev-inicio-err" style="display:none;">La fecha es obligatoria.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Fecha y hora de fin</label>
+              <input type="datetime-local" class="form-input" id="ev-fin">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Ubicación</label>
+            <input type="text" class="form-input" id="ev-lugar" placeholder="Ej. Sinagoga Bet El, C/ Balmes 3, Madrid">
+            <span class="form-error" id="ev-lugar-err" style="display:none;">La ubicación es obligatoria.</span>
+          </div>
+          <div class="date-grid">
+            <div class="form-group">
+              <label class="form-label">Aforo máximo</label>
+              <input type="number" class="form-input" id="ev-aforo" placeholder="Ej. 80 (dejar vacío = sin límite)" min="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Precio (€)</label>
+              <input type="number" class="form-input" id="ev-precio" placeholder="0 = gratuito" min="0" value="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dirigido a</label>
+            <div class="checkbox-group">
+              <label class="checkbox-pill"><input type="checkbox" value="todos" checked> Todos</label>
+              <label class="checkbox-pill"><input type="checkbox" value="ninos"> Niños</label>
+              <label class="checkbox-pill"><input type="checkbox" value="jovenes"> Jóvenes</label>
+              <label class="checkbox-pill"><input type="checkbox" value="adultos"> Adultos</label>
+              <label class="checkbox-pill"><input type="checkbox" value="mayores"> Mayores</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Membresía requerida</label>
+            <select class="form-select" id="ev-membresia">
+              <option value="todos">Todos los miembros</option>
+              <option value="basica">Básica</option>
+              <option value="premium">Premium</option>
+              <option value="familia">Familiar</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-evento')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEvento()">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg>
+        Guardar evento
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     MODAL: Nueva noticia
+══════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-noticia">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title">Nueva noticia</h3>
+      <button class="modal-close" onclick="closeModal('modal-noticia')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="form-noticia" novalidate>
+        <div class="flex-col gap-md">
+          <div class="form-group">
+            <label class="form-label required">Título</label>
+            <input type="text" class="form-input" id="news-titulo" placeholder="Título de la noticia">
+            <span class="form-error" id="news-titulo-err" style="display:none;">El título es obligatorio.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Extracto</label>
+            <textarea class="form-textarea form-textarea-sm" id="news-extracto" placeholder="Breve resumen (aparece en listados)…" style="min-height:65px;"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Contenido completo</label>
+            <textarea class="form-textarea" id="news-contenido" placeholder="Escribe el contenido de la noticia…" style="min-height:140px;"></textarea>
+            <span class="form-error" id="news-cont-err" style="display:none;">El contenido es obligatorio.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">URL de imagen <span style="color:var(--color-text-light);font-weight:400;">(opcional)</span></label>
+            <input type="url" class="form-input" id="news-img" placeholder="https://…">
+          </div>
+          <div class="form-group">
+            <label class="toggle-wrap">
+              <input type="checkbox" class="toggle-input" id="news-pin">
+              <span class="toggle-switch"></span>
+              <span class="toggle-label">Fijar en portada</span>
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-noticia')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveNoticia()">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Publicar noticia
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     MODAL: Eliminar noticia (confirmación)
+══════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-del-noticia">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title" style="color:var(--color-danger);">Eliminar noticia</h3>
+      <button class="modal-close" onclick="closeModal('modal-del-noticia')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.9375rem;">¿Seguro que quieres eliminar "<strong id="del-noticia-titulo"></strong>"? Esta acción no se puede deshacer.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-del-noticia')">Cancelar</button>
+      <button class="btn btn-danger" id="btn-confirm-del-noticia">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script>
+  /* ─── Init ─── */
+  requireAdmin();
+  buildSidebar('admin');
+
+  /* ══════════════════════════════
+     TABS
+  ══════════════════════════════ */
+  document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById('panel-' + this.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ══════════════════════════════
+     MODALES
+  ══════════════════════════════ */
+  function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+  // Cerrar al click en overlay
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function (e) {
+      if (e.target === this) closeModal(this.id);
+    });
+  });
+  // Cerrar con Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id));
+    }
+  });
+
+  /* ══════════════════════════════
+     HELPERS
+  ══════════════════════════════ */
+  const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  function getAvatarColorLocal(name) {
+    if (!name) return '0';
+    const code = name.charCodeAt(0) + (name.charCodeAt(1) || 0);
+    return String(code % 8);
+  }
+
+  function avatarHTML(user, size = 'sm') {
+    const color = getAvatarColorLocal(user.name);
+    return `<div class="avatar avatar-${size}" data-color="${color}">${user.initials}</div>`;
+  }
+
+  function badgeStatus(status) {
+    const map = {
+      active:  '<span class="badge badge-active">Activo</span>',
+      pending: '<span class="badge badge-pending">Pendiente</span>',
+      banned:  '<span class="badge badge-banned">Baneado</span>',
+    };
+    return map[status] || `<span class="badge">${status}</span>`;
+  }
+
+  function badgeRole(role) {
+    const map = {
+      admin:   '<span class="badge badge-admin">Admin</span>',
+      mod:     '<span class="badge badge-mod">Moderador</span>',
+      miembro: '<span class="badge" style="background:var(--color-bg);color:var(--color-text-muted);border:1px solid var(--color-border);">Miembro</span>',
+    };
+    return map[role] || `<span class="badge">${role}</span>`;
+  }
+
+  function formatDate(str) {
+    const d = new Date(str + 'T00:00:00');
+    return `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  /* ══════════════════════════════
+     TAB RESUMEN
+  ══════════════════════════════ */
+  (function initResumen() {
+    const activos   = MOCK_USERS.filter(u => u.status === 'active').length;
+    const pendientes = MOCK_USERS.filter(u => u.status === 'pending').length;
+    const totalDonativos = MOCK_DONATIVOS.reduce((s, d) => s + d.recaudado, 0);
+
+    document.getElementById('metric-activos').textContent    = activos;
+    document.getElementById('metric-pendientes').textContent = pendientes;
+    document.getElementById('metric-eventos').textContent    = MOCK_EVENTOS.length;
+    document.getElementById('metric-donativos').textContent  = formatEuros(totalDonativos);
+
+    // Badge tab pendientes
+    if (pendientes > 0) {
+      const badge = document.getElementById('pending-count-badge');
+      badge.textContent = pendientes;
+      badge.style.display = '';
+    }
+
+    // Actividad mock
+    const activity = [
+      { accion: 'Nuevo registro',       usuario: 'Sara Mizrahi',       fecha: 'Hace 2h',   estado: 'pending' },
+      { accion: 'Evento publicado',      usuario: 'Rabino David Levi',  fecha: 'Hace 4h',   estado: 'active'  },
+      { accion: 'Noticia publicada',     usuario: 'Rabino David Levi',  fecha: 'Hace 5h',   estado: 'active'  },
+      { accion: 'Nuevo registro',        usuario: 'Carlos Nuevo',       fecha: 'Hace 1d',   estado: 'pending' },
+      { accion: 'Usuario aprobado',      usuario: 'Moshe Goldstein',    fecha: 'Hace 1d',   estado: 'active'  },
+      { accion: 'Listado Wallap creado', usuario: 'Miriam Toledano',    fecha: 'Hace 2d',   estado: 'active'  },
+      { accion: 'Donativo recibido',     usuario: 'Anónimo',            fecha: 'Hace 2d',   estado: 'active'  },
+      { accion: 'Usuario suspendido',    usuario: 'Avi Peretz',         fecha: 'Hace 3d',   estado: 'banned'  },
+    ];
+
+    const tbody = document.getElementById('activity-body');
+    tbody.innerHTML = activity.map(a => `
+      <tr>
+        <td style="font-weight:500;">${a.accion}</td>
+        <td>${a.usuario}</td>
+        <td class="hide-sm" style="color:var(--color-text-muted);font-size:.8rem;">${a.fecha}</td>
+        <td>${badgeStatus(a.estado)}</td>
+      </tr>`).join('');
+  })();
+
+  /* ══════════════════════════════
+     TAB USUARIOS
+  ══════════════════════════════ */
+  // Estado mutable de usuarios para el prototipo
+  let usersState = MOCK_USERS.map(u => ({ ...u }));
+  let pendingTarget = null; // userId en cola para acción
+
+  function initPendingBanner() {
+    const count = usersState.filter(u => u.status === 'pending').length;
+    const banner = document.getElementById('pending-banner');
+    if (count > 0) {
+      banner.style.display = 'flex';
+      document.getElementById('pending-banner-text').textContent =
+        `Tienes ${count} solicitud${count > 1 ? 'es' : ''} pendiente${count > 1 ? 's' : ''} de aprobación`;
+    } else {
+      banner.style.display = 'none';
+    }
+    // Tab badge
+    const badge = document.getElementById('pending-count-badge');
+    if (count > 0) { badge.textContent = count; badge.style.display = ''; }
+    else { badge.style.display = 'none'; }
+    // métrica resumen
+    document.getElementById('metric-pendientes').textContent = count;
+  }
+
+  function filterPending() {
+    document.getElementById('filter-status').value = 'pending';
+    document.querySelector('[data-tab="usuarios"]').click();
+    filterUsers();
+  }
+
+  function filterUsers() {
+    const q      = document.getElementById('user-search').value.toLowerCase();
+    const status = document.getElementById('filter-status').value;
+    const role   = document.getElementById('filter-role').value;
+
+    const filtered = usersState.filter(u => {
+      const matchQ = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+      const matchS = !status || u.status === status;
+      const matchR = !role || u.role === role;
+      return matchQ && matchS && matchR;
+    });
+
+    document.getElementById('user-count').textContent =
+      `Mostrando ${filtered.length} de ${usersState.length} usuarios`;
+    renderUsersTable(filtered);
+  }
+
+  function renderUsersTable(users) {
+    const tbody = document.getElementById('users-table-body');
+    tbody.innerHTML = users.map(u => {
+      let actions = '';
+      if (u.status === 'pending') {
+        actions = `
+          <div class="action-btns">
+            <button class="btn btn-sm" style="background:#065F46;color:#fff;border-color:#065F46;"
+              onclick="promptAprobar('${u.userId}')">✓ Aprobar</button>
+            <button class="btn btn-sm btn-danger"
+              onclick="promptBanear('${u.userId}')">✗ Rechazar</button>
+          </div>`;
+      } else if (u.status === 'active') {
+        actions = `
+          <div class="action-btns">
+            <button class="btn btn-sm" style="background:var(--color-warning-light);color:#92400E;border-color:var(--color-warning);"
+              onclick="suspenderUser('${u.userId}')">Suspender</button>
+            <button class="btn btn-sm btn-danger"
+              onclick="promptBanear('${u.userId}')">Banear</button>
+          </div>`;
+      } else {
+        actions = `
+          <div class="action-btns">
+            <button class="btn btn-sm" style="background:var(--color-success-light);color:#065F46;border-color:var(--color-success);"
+              onclick="reactivarUser('${u.userId}')">↺ Reactivar</button>
+          </div>`;
+      }
+
+      return `
+        <tr id="user-row-${u.userId}">
+          <td>
+            <div class="user-cell">
+              ${avatarHTML(u, 'sm')}
+              <div class="user-cell-info">
+                <div class="user-cell-name">${u.name}</div>
+                <div class="user-cell-email">${u.email}</div>
+              </div>
+            </div>
+          </td>
+          <td class="hide-sm">${badgeRole(u.role)}</td>
+          <td id="status-cell-${u.userId}">${badgeStatus(u.status)}</td>
+          <td class="hide-md" style="font-size:.8rem;color:var(--color-text-muted);">${formatDate(u.joinDate)}</td>
+          <td>${actions}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  function promptAprobar(userId) {
+    const user = usersState.find(u => u.userId === userId);
+    pendingTarget = userId;
+    document.getElementById('aprobar-nombre').textContent = user.name;
+    openModal('modal-aprobar');
+  }
+
+  document.getElementById('btn-confirm-aprobar').addEventListener('click', () => {
+    if (!pendingTarget) return;
+    const user = usersState.find(u => u.userId === pendingTarget);
+    user.status = 'active';
+    closeModal('modal-aprobar');
+    filterUsers();
+    initPendingBanner();
+    showToast(`Usuario aprobado. Email de bienvenida enviado a ${user.email}.`, 'success');
+    pendingTarget = null;
+  });
+
+  function promptBanear(userId) {
+    const user = usersState.find(u => u.userId === userId);
+    pendingTarget = userId;
+    document.getElementById('banear-nombre').textContent = user.name;
+    document.getElementById('ban-reason').value = '';
+    document.getElementById('ban-reason-error').style.display = 'none';
+    openModal('modal-banear');
+  }
+
+  document.getElementById('btn-confirm-banear').addEventListener('click', () => {
+    const reason = document.getElementById('ban-reason').value.trim();
+    if (!reason) {
+      document.getElementById('ban-reason-error').style.display = '';
+      return;
+    }
+    const user = usersState.find(u => u.userId === pendingTarget);
+    user.status = 'banned';
+    closeModal('modal-banear');
+    filterUsers();
+    initPendingBanner();
+    showToast(`${user.name} ha sido baneado.`, 'error');
+    pendingTarget = null;
+  });
+
+  function suspenderUser(userId) {
+    const user = usersState.find(u => u.userId === userId);
+    user.status = 'banned';
+    filterUsers();
+    showToast(`${user.name} ha sido suspendido.`, 'warning');
+  }
+
+  function reactivarUser(userId) {
+    const user = usersState.find(u => u.userId === userId);
+    user.status = 'active';
+    filterUsers();
+    initPendingBanner();
+    showToast(`${user.name} ha sido reactivado.`, 'success');
+  }
+
+  // Init usuarios
+  initPendingBanner();
+  filterUsers();
+
+  /* ══════════════════════════════
+     TAB EVENTOS
+  ══════════════════════════════ */
+  let eventsState = MOCK_EVENTOS.map(e => ({ ...e, cancelado: false }));
+
+  function renderEventosAdmin() {
+    const container = document.getElementById('events-admin-list');
+    container.innerHTML = eventsState.map(ev => {
+      const fecha = new Date(ev.fecha + 'T00:00:00');
+      const dia = fecha.getDate();
+      const mes = MESES[fecha.getMonth()];
+      const pct = Math.round((ev.inscritos / ev.aforo) * 100);
+      const fillColor = pct >= 90 ? 'var(--color-danger)' : pct >= 60 ? 'var(--color-warning)' : 'var(--color-success)';
+
+      return `
+        <div class="event-admin-card" id="ev-card-${ev.id}" style="${ev.cancelado ? 'opacity:.5;' : ''}">
+          <div class="event-admin-date">
+            <div class="event-admin-day">${dia}</div>
+            <div class="event-admin-mon">${mes}</div>
+          </div>
+          <div class="event-admin-info">
+            <p class="event-admin-title">${ev.titulo}</p>
+            <div class="event-admin-meta">
+              <span>
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                ${ev.hora}
+              </span>
+              <span>
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+                ${ev.lugar.split(',')[0]}
+              </span>
+            </div>
+            <div class="aforo-bar">
+              <div class="progress-bar" style="max-width:100px;">
+                <div class="progress-fill" style="width:${pct}%;background:${fillColor};"></div>
+              </div>
+              <span>${ev.inscritos}/${ev.aforo} inscritos</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;">
+            ${ev.cancelado
+              ? `<span class="badge badge-banned">Cancelado</span>`
+              : `<span class="badge badge-active">Activo</span>`}
+            <button class="btn btn-sm btn-secondary" onclick="showToast('Edición de eventos próximamente','info')">Editar</button>
+            <button class="btn btn-sm btn-danger" onclick="cancelarEvento('${ev.id}')" ${ev.cancelado ? 'disabled' : ''}>Cancelar</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function cancelarEvento(id) {
+    const ev = eventsState.find(e => e.id === id);
+    ev.cancelado = true;
+    renderEventosAdmin();
+    showToast(`Evento "${ev.titulo}" cancelado.`, 'warning');
+  }
+
+  function saveEvento() {
+    const titulo = document.getElementById('ev-titulo').value.trim();
+    const inicio = document.getElementById('ev-inicio').value;
+    const lugar  = document.getElementById('ev-lugar').value.trim();
+    let valid = true;
+
+    ['ev-titulo-err','ev-inicio-err','ev-lugar-err'].forEach(id =>
+      document.getElementById(id).style.display = 'none');
+    ['ev-titulo','ev-inicio','ev-lugar'].forEach(id =>
+      document.getElementById(id).classList.remove('error'));
+
+    if (!titulo) {
+      document.getElementById('ev-titulo-err').style.display = '';
+      document.getElementById('ev-titulo').classList.add('error');
+      valid = false;
+    }
+    if (!inicio) {
+      document.getElementById('ev-inicio-err').style.display = '';
+      document.getElementById('ev-inicio').classList.add('error');
+      valid = false;
+    }
+    if (!lugar) {
+      document.getElementById('ev-lugar-err').style.display = '';
+      document.getElementById('ev-lugar').classList.add('error');
+      valid = false;
+    }
+    if (!valid) return;
+
+    const newEv = {
+      id: 'ev_' + Date.now(),
+      titulo,
+      descripcion: document.getElementById('ev-desc').value,
+      fecha: inicio.split('T')[0],
+      hora: inicio.split('T')[1] || '00:00',
+      lugar,
+      aforo: parseInt(document.getElementById('ev-aforo').value) || 50,
+      inscritos: 0,
+      categoria: 'Comunidad',
+      organizador: getCurrentUser()?.name || 'Admin',
+      emoji: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>',
+      cancelado: false
+    };
+    eventsState.unshift(newEv);
+    renderEventosAdmin();
+    closeModal('modal-evento');
+    document.getElementById('form-evento').reset();
+    showToast(`Evento "${titulo}" creado correctamente.`, 'success');
+  }
+
+  renderEventosAdmin();
+
+  /* ══════════════════════════════
+     TAB NOTICIAS
+  ══════════════════════════════ */
+  let newsState = MOCK_NOTICIAS.map(n => ({ ...n }));
+  let delNoticiaTarget = null;
+
+  function renderNewsAdmin() {
+    const container = document.getElementById('news-admin-list');
+    container.innerHTML = newsState.map(n => `
+      <div class="news-admin-row" id="news-row-${n.id}">
+        <div class="news-admin-emoji">${n.emoji}</div>
+        <div class="news-admin-info">
+          <p class="news-admin-title">${n.titulo}</p>
+          <p class="news-admin-meta">${n.categoria} · ${formatDate(n.fecha)} · ${n.autor}</p>
+        </div>
+        <button class="pin-btn ${n.destacada ? 'pinned' : ''}"
+          title="${n.destacada ? 'Quitar de portada' : 'Fijar en portada'}"
+          onclick="togglePin('${n.id}')"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg></button>
+        <button class="btn btn-sm btn-secondary" onclick="showToast('Edición próximamente','info')">Editar</button>
+        <button class="btn btn-sm btn-danger" onclick="promptDelNoticia('${n.id}')">Eliminar</button>
+      </div>`).join('');
+  }
+
+  function togglePin(id) {
+    const n = newsState.find(n => n.id === id);
+    n.destacada = !n.destacada;
+    renderNewsAdmin();
+    showToast(n.destacada ? `"${n.titulo}" fijada en portada.` : `"${n.titulo}" desmarcada.`, 'info');
+  }
+
+  function promptDelNoticia(id) {
+    delNoticiaTarget = id;
+    const n = newsState.find(n => n.id === id);
+    document.getElementById('del-noticia-titulo').textContent = n.titulo;
+    openModal('modal-del-noticia');
+  }
+
+  document.getElementById('btn-confirm-del-noticia').addEventListener('click', () => {
+    newsState = newsState.filter(n => n.id !== delNoticiaTarget);
+    closeModal('modal-del-noticia');
+    renderNewsAdmin();
+    showToast('Noticia eliminada.', 'warning');
+    delNoticiaTarget = null;
+  });
+
+  function saveNoticia() {
+    const titulo    = document.getElementById('news-titulo').value.trim();
+    const contenido = document.getElementById('news-contenido').value.trim();
+    let valid = true;
+
+    ['news-titulo-err','news-cont-err'].forEach(id =>
+      document.getElementById(id).style.display = 'none');
+
+    if (!titulo) { document.getElementById('news-titulo-err').style.display = ''; valid = false; }
+    if (!contenido) { document.getElementById('news-cont-err').style.display = ''; valid = false; }
+    if (!valid) return;
+
+    const newN = {
+      id: 'n_' + Date.now(),
+      titulo,
+      resumen: document.getElementById('news-extracto').value || contenido.slice(0, 120) + '…',
+      categoria: 'Comunidad',
+      fecha: new Date().toISOString().split('T')[0],
+      autor: getCurrentUser()?.name || 'Admin',
+      emoji: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z"/></svg>',
+      destacada: document.getElementById('news-pin').checked
+    };
+    newsState.unshift(newN);
+    renderNewsAdmin();
+    closeModal('modal-noticia');
+    document.getElementById('form-noticia').reset();
+    showToast(`Noticia "${titulo}" publicada.`, 'success');
+  }
+
+  renderNewsAdmin();
+
+  /* ══════════════════════════════
+     TAB MARKETPLACE
+  ══════════════════════════════ */
+  let wallapState = MOCK_WALLAP.map(w => ({ ...w }));
+
+  function filterWallap() {
+    const q    = document.getElementById('wp-search').value.toLowerCase();
+    const cat  = document.getElementById('wp-cat').value;
+    const tipo = document.getElementById('wp-tipo').value;
+
+    const filtered = wallapState.filter(w => {
+      const matchQ = !q || w.titulo.toLowerCase().includes(q) || w.vendedor.toLowerCase().includes(q);
+      const matchC = !cat  || w.categoria === cat;
+      const matchT = !tipo || w.tipo === tipo;
+      return matchQ && matchC && matchT;
+    });
+
+    document.getElementById('wp-count').textContent =
+      `Mostrando ${filtered.length} de ${wallapState.length} listados`;
+    renderWallapTable(filtered);
+  }
+
+  function renderWallapTable(items) {
+    const tbody = document.getElementById('wallap-table-body');
+    const tipoBadge = { venta: 'Venta', alquiler: 'Alquiler', servicio: 'Servicio' };
+    tbody.innerHTML = items.map(w => `
+      <tr id="wp-row-${w.id}">
+        <td style="max-width:200px;">
+          <div style="font-weight:500;font-size:.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            ${w.emoji} ${w.titulo}
+          </div>
+        </td>
+        <td class="hide-sm" style="font-size:.8125rem;color:var(--color-text-muted);">${w.vendedor}</td>
+        <td class="hide-md"><span style="font-size:.75rem;background:var(--color-bg);padding:2px 8px;border-radius:999px;color:var(--color-text-muted);">${w.categoria}</span></td>
+        <td>
+          ${w.precio === 0
+            ? '<span class="price-text free">Consultar</span>'
+            : `<span class="price-text">${formatEuros(w.precio)}</span>`}
+        </td>
+        <td class="hide-md" style="font-size:.8125rem;">${tipoBadge[w.tipo] || w.tipo}</td>
+        <td>${w.estado === 'disponible'
+          ? '<span class="badge badge-active">Disponible</span>'
+          : '<span class="badge badge-banned">Oculto</span>'}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-sm btn-ghost" onclick="showToast('Vista previa próximamente','info')">Ver</button>
+            <button class="btn btn-sm btn-secondary" onclick="toggleWallap('${w.id}')">
+              ${w.estado === 'disponible' ? 'Ocultar' : 'Mostrar'}
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="deleteWallap('${w.id}')">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function toggleWallap(id) {
+    const item = wallapState.find(w => w.id === id);
+    item.estado = item.estado === 'disponible' ? 'oculto' : 'disponible';
+    filterWallap();
+    showToast(`Listado ${item.estado === 'disponible' ? 'visible' : 'oculto'}.`, 'info');
+  }
+
+  function deleteWallap(id) {
+    const item = wallapState.find(w => w.id === id);
+    wallapState = wallapState.filter(w => w.id !== id);
+    filterWallap();
+    showToast(`Listado "${item.titulo}" eliminado.`, 'warning');
+  }
+
+  filterWallap();
+</script>
+</body>
+</html>

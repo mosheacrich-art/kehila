@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kehilá — Wallap</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <style>
+    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
+    @media (max-width: 768px) { .main-content { margin-left: 0; } }
+    .wallap-inner { max-width: 1060px; margin: 0 auto; padding: 32px 32px 60px; }
+    @media (max-width: 768px) { .wallap-inner { padding: 20px 14px 88px; } }
+
+    /* ─── Header wallap ─── */
+    .wallap-search-bar {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--color-white); border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md); padding: 8px 8px 8px 20px;
+      margin-bottom: 20px;
+    }
+    .wallap-search-bar svg { width: 20px; height: 20px; color: var(--color-text-muted); flex-shrink: 0; }
+    .wallap-search-bar input {
+      flex: 1; border: none; outline: none; font-size: 1rem;
+      color: var(--color-text); background: transparent;
+    }
+    .wallap-search-bar input::placeholder { color: var(--color-text-light); }
+
+    /* ─── Tabs tipo ─── */
+    .wallap-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 16px; scrollbar-width: none; }
+    .wallap-tabs::-webkit-scrollbar { display: none; }
+    .wp-tab {
+      padding: 8px 18px; border-radius: var(--radius-full);
+      font-size: .875rem; font-weight: 500; cursor: pointer;
+      border: 1.5px solid var(--color-border); background: var(--color-white);
+      color: var(--color-text-muted); white-space: nowrap;
+      transition: all var(--transition-fast);
+    }
+    .wp-tab:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .wp-tab.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+
+    /* ─── Filtros secundarios ─── */
+    .wp-filters-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .wp-filter-select {
+      padding: 7px 12px; border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm); font-size: .8125rem;
+      background: var(--color-white); color: var(--color-text);
+      outline: none; cursor: pointer;
+      transition: border-color var(--transition-fast);
+    }
+    .wp-filter-select:focus { border-color: var(--color-primary); }
+    .wp-results { font-size: .8125rem; color: var(--color-text-muted); margin-left: auto; }
+
+    /* ─── Grid ─── */
+    .wallap-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 900px) { .wallap-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 480px) { .wallap-grid { grid-template-columns: repeat(2,1fr); gap: 10px; } }
+
+    /* ─── Card ─── */
+    .wp-card {
+      background: var(--color-white); border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm); overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: all var(--transition-normal); cursor: default;
+    }
+    .wp-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+    .wp-card-img {
+      height: 110px; display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; position: relative;
+      background: var(--color-gold-light);
+    }
+    .wp-card-img.color-0 { background: #EDE9FE; }
+    .wp-card-img.color-1 { background: #D1FAE5; }
+    .wp-card-img.color-2 { background: #DBEAFE; }
+    .wp-card-img.color-3 { background: #FEF3C7; }
+    .wp-card-img.color-4 { background: var(--color-gold-light); }
+    .wp-card-img.color-5 { background: #FCE7F3; }
+    .wp-card-img.color-6 { background: #CCFBF1; }
+    .wp-card-img.color-7 { background: #FEE2E2; }
+
+    .wp-type-badge {
+      position: absolute; top: 8px; left: 8px;
+      font-size: .625rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+      padding: 3px 8px; border-radius: var(--radius-full);
+    }
+    .wp-type-venta    { background: #1B2E5E; color: #C9A84C; }
+    .wp-type-alquiler { background: #1E40AF; color: #BFDBFE; }
+    .wp-type-servicio { background: #065F46; color: #A7F3D0; }
+    .wp-type-busco    { background: #78350F; color: #FDE68A; }
+
+    .wp-card-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .wp-cat-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--color-gold-dark); }
+    .wp-title { font-size: .9rem; font-weight: 600; color: var(--color-text); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .wp-price { font-family: var(--font-brand); font-size: 1.15rem; font-weight: 800; color: var(--color-primary); margin-top: 2px; }
+    .wp-price.consultar { font-size: .875rem; font-weight: 500; color: var(--color-text-muted); font-family: var(--font-ui); }
+    .wp-price.gratis { color: var(--color-success); font-size: .9rem; }
+
+    .wp-seller { display: flex; align-items: center; gap: 7px; margin-top: 6px; }
+    .wp-seller-name { font-size: .775rem; font-weight: 500; color: var(--color-text-muted); }
+    .wp-meta { display: flex; align-items: center; gap: 4px; font-size: .725rem; color: var(--color-text-light); }
+    .wp-meta svg { width: 12px; height: 12px; }
+    .wp-meta-row { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+
+    .wp-card-footer { padding: 10px 14px; border-top: 1px solid var(--color-border-light); }
+
+    /* Iniciales del vendedor como imagen */
+    .wp-seller-avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .6rem; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* ─── Foto preview ─── */
+    .photo-previews { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .photo-preview {
+      width: 60px; height: 60px; border-radius: var(--radius-sm);
+      object-fit: cover; border: 2px solid var(--color-border);
+    }
+    .photo-placeholder {
+      width: 60px; height: 60px; border-radius: var(--radius-sm);
+      background: var(--color-bg); border: 2px dashed var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; color: var(--color-text-light);
+    }
+  </style>
+</head>
+<body>
+<div id="sidebar-placeholder"></div>
+<div class="main-content">
+  <div class="wallap-inner">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <p class="page-header-label">Comunidad</p>
+        <h1 class="page-title">Wallap</h1>
+        <p class="page-subtitle">Marketplace judío de confianza</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-primary" onclick="openModal('modal-publicar')">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:17px;height:17px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Publicar
+        </button>
+      </div>
+    </div>
+
+    <!-- Buscador -->
+    <div class="wallap-search-bar">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+      <input type="text" id="wp-main-search" placeholder="Busca productos, servicios, inmuebles…" oninput="filterWallap()">
+      <button class="btn btn-primary" onclick="openModal('modal-publicar')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Publicar anuncio
+      </button>
+    </div>
+
+    <!-- Tabs tipo -->
+    <div class="wallap-tabs">
+      <button class="wp-tab active" data-tipo="" onclick="setWpTab(this,'')">Todo</button>
+      <button class="wp-tab" data-tipo="venta" onclick="setWpTab(this,'venta')">Venta</button>
+      <button class="wp-tab" data-tipo="alquiler" onclick="setWpTab(this,'alquiler')">Alquiler</button>
+      <button class="wp-tab" data-tipo="servicio" onclick="setWpTab(this,'servicio')">Servicios</button>
+      <button class="wp-tab" data-tipo="busco" onclick="setWpTab(this,'busco')"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg> Busco</button>
+    </div>
+
+    <!-- Filtros secundarios -->
+    <div class="wp-filters-bar">
+      <select class="wp-filter-select" id="wp-precio-max" onchange="filterWallap()">
+        <option value="">Cualquier precio</option>
+        <option value="50">Hasta €50</option>
+        <option value="200">Hasta €200</option>
+        <option value="500">Hasta €500</option>
+        <option value="1000">Hasta €1.000</option>
+      </select>
+      <select class="wp-filter-select" id="wp-loc" onchange="filterWallap()">
+        <option value="">Toda España</option>
+        <option value="Madrid">Madrid</option>
+        <option value="Barcelona">Barcelona</option>
+        <option value="Marbella">Marbella</option>
+        <option value="Online">Online</option>
+      </select>
+      <select class="wp-filter-select" id="wp-order" onchange="filterWallap()">
+        <option value="reciente">Más recientes</option>
+        <option value="precio-asc">Precio: menor a mayor</option>
+        <option value="precio-desc">Precio: mayor a menor</option>
+      </select>
+      <span class="wp-results" id="wp-results-count"></span>
+    </div>
+
+    <!-- Grid -->
+    <div class="wallap-grid" id="wallap-grid"></div>
+
+  </div>
+</div>
+
+<!-- Modal contactar -->
+<div class="modal-overlay hidden" id="modal-contactar">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Contactar con <span id="contact-vendor-name"></span></h3>
+      <button class="modal-close" onclick="closeModal('modal-contactar')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-info-banner" style="margin-bottom:16px;">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:17px;height:17px;flex-shrink:0;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/>
+        </svg>
+        <span>Tu mensaje llegará directamente al vendedor dentro de la comunidad Kehilá.</span>
+      </div>
+      <p style="font-size:.875rem;font-weight:600;color:var(--color-text);margin-bottom:6px;" id="contact-item-title"></p>
+      <div class="form-group">
+        <label class="form-label">Tu mensaje</label>
+        <textarea id="contact-message" class="form-textarea" placeholder="Escribe tu mensaje al vendedor…" style="min-height:110px;"></textarea>
+        <span class="form-error" id="contact-msg-err" style="display:none;">El mensaje no puede estar vacío.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-contactar')">Cancelar</button>
+      <button class="btn btn-primary" onclick="enviarMensaje()">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"/></svg>
+        Enviar mensaje
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal publicar -->
+<div class="modal-overlay hidden" id="modal-publicar">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title">Publicar anuncio</h3>
+      <button class="modal-close" onclick="closeModal('modal-publicar')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="form-publicar" novalidate>
+        <div class="flex-col gap-md">
+          <div class="form-group">
+            <label class="form-label required">Tipo de anuncio</label>
+            <select class="form-select" id="pub-tipo">
+              <option value="venta">Vendo</option>
+              <option value="alquiler">Alquilo</option>
+              <option value="servicio">Ofrezco servicio</option>
+              <option value="busco">Busco socio / colaboración</option>
+              <option value="busco2">Busco (producto o servicio)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Título</label>
+            <input type="text" id="pub-titulo" class="form-input" placeholder="Ej. Candelabros de plata — Par">
+            <span class="form-error" id="pub-titulo-err" style="display:none;">El título es obligatorio.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-textarea" id="pub-desc" placeholder="Describe el artículo o servicio con detalle…"></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group">
+              <label class="form-label">Precio (€) <span style="color:var(--color-text-light);font-weight:400;">(0 = gratuito)</span></label>
+              <input type="number" id="pub-precio" class="form-input" placeholder="0" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Categoría</label>
+              <select class="form-select" id="pub-cat">
+                <option>Judaica</option>
+                <option>Inmuebles</option>
+                <option>Educación</option>
+                <option>Gastronomía</option>
+                <option>Libros</option>
+                <option>Profesionales</option>
+                <option>Tecnología</option>
+                <option>Ropa y moda</option>
+                <option>Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Localización</label>
+            <input type="text" id="pub-loc" class="form-input" placeholder="Ej. Madrid, Barrio Salamanca">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fotos <span style="color:var(--color-text-light);font-weight:400;">(opcional)</span></label>
+            <input type="file" id="pub-fotos" class="form-input" multiple accept="image/*" onchange="previewFotos(this)" style="padding:7px;">
+            <div class="photo-previews" id="photo-previews-container"></div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-publicar')">Cancelar</button>
+      <button class="btn btn-primary" onclick="publicarAnuncio()">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Publicar anuncio
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script>
+  requireAuth();
+  initNav('wallap');
+
+  let wallapItems = MOCK_WALLAP.map(w => ({ ...w }));
+  let activeTipo = '';
+  let contactTarget = null;
+
+  const avatarColors = ['#EDE9FE','#D1FAE5','#DBEAFE','#FEF3C7','#F5EDD6','#FCE7F3','#CCFBF1','#FEE2E2'];
+  const avatarTextColors = ['#7C3AED','#065F46','#1E40AF','#92400E','#A8892E','#9D174D','#134E4A','#991B1B'];
+
+  function colorIndex(name) {
+    const c = (name.charCodeAt(0) + (name.charCodeAt(1)||0)) % 8;
+    return c;
+  }
+
+  function daysAgo(dateStr) {
+    const d = Math.floor((new Date() - new Date(dateStr)) / 86400000);
+    if (d === 0) return 'Hoy';
+    if (d === 1) return 'Ayer';
+    return `Hace ${d} días`;
+  }
+
+  function setWpTab(el, tipo) {
+    document.querySelectorAll('.wp-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    activeTipo = tipo;
+    filterWallap();
+  }
+
+  function filterWallap() {
+    const q       = (document.getElementById('wp-main-search').value || '').toLowerCase();
+    const maxPrecio = parseFloat(document.getElementById('wp-precio-max').value) || Infinity;
+    const loc     = document.getElementById('wp-loc').value.toLowerCase();
+    const order   = document.getElementById('wp-order').value;
+
+    let items = wallapItems.filter(w => {
+      const matchQ   = !q || w.titulo.toLowerCase().includes(q) || w.descripcion.toLowerCase().includes(q);
+      const matchT   = !activeTipo || w.tipo === activeTipo;
+      const matchP   = w.precio <= maxPrecio || w.precio === 0;
+      const matchL   = !loc || w.ubicacion.toLowerCase().includes(loc);
+      return matchQ && matchT && matchP && matchL;
+    });
+
+    if (order === 'precio-asc') items = [...items].sort((a,b) => a.precio - b.precio);
+    if (order === 'precio-desc') items = [...items].sort((a,b) => b.precio - a.precio);
+
+    document.getElementById('wp-results-count').textContent = `${items.length} anuncio${items.length !== 1 ? 's' : ''}`;
+    renderGrid(items);
+  }
+
+  function renderGrid(items) {
+    const grid = document.getElementById('wallap-grid');
+    if (!items.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;"><div class="empty-state">
+        <svg class="empty-state-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36"/></svg>
+        <p class="empty-state-title">Sin resultados</p>
+        <p class="empty-state-desc">Prueba con otros filtros o busca algo diferente.</p>
+      </div></div>`;
+      return;
+    }
+
+    const typeBadge = { venta:'wp-type-venta', alquiler:'wp-type-alquiler', servicio:'wp-type-servicio', busco:'wp-type-busco', busco2:'wp-type-busco' };
+    const typeLabel = { venta:'Venta', alquiler:'Alquiler', servicio:'Servicio', busco:'Busco socio', busco2:'Busco' };
+
+    grid.innerHTML = items.map(w => {
+      const ci = colorIndex(w.vendedor);
+      const initials = w.vendedor.split(' ').map(x => x[0]).join('').slice(0,2).toUpperCase();
+      const priceHTML = w.precio === 0
+        ? `<span class="wp-price consultar">A consultar</span>`
+        : `<span class="wp-price">${formatEuros(w.precio)}</span>`;
+
+      return `
+        <div class="wp-card">
+          <div class="wp-card-img color-${ci}">
+            <span class="wp-type-badge ${typeBadge[w.tipo]||'wp-type-venta'}">${typeLabel[w.tipo]||w.tipo}</span>
+          </div>
+          <div class="wp-card-body">
+            <span class="wp-cat-label">${w.categoria}</span>
+            <p class="wp-title">${w.titulo}</p>
+            ${priceHTML}
+            <div class="wp-seller">
+              <div class="wp-seller-avatar" style="background:${avatarColors[ci]};color:${avatarTextColors[ci]};">${initials}</div>
+              <span class="wp-seller-name">${w.vendedor}</span>
+            </div>
+            <div class="wp-meta-row">
+              <div class="wp-meta">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+                ${w.ubicacion.split(' - ')[0]}
+              </div>
+              <span style="font-size:.7rem;color:var(--color-text-light);">${daysAgo(w.fecha)}</span>
+            </div>
+          </div>
+          <div class="wp-card-footer">
+            <button class="btn btn-primary w-full btn-sm" onclick="openContactar('${w.id}')">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>
+              Contactar
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function openContactar(id) {
+    const item = wallapItems.find(w => w.id === id);
+    contactTarget = id;
+    document.getElementById('contact-vendor-name').textContent = item.vendedor;
+    document.getElementById('contact-item-title').textContent = item.titulo;
+    document.getElementById('contact-message').value = '';
+    document.getElementById('contact-msg-err').style.display = 'none';
+    openModal('modal-contactar');
+  }
+
+  function enviarMensaje() {
+    const msg = document.getElementById('contact-message').value.trim();
+    if (!msg) { document.getElementById('contact-msg-err').style.display = ''; return; }
+    const item = wallapItems.find(w => w.id === contactTarget);
+    closeModal('modal-contactar');
+    showToast(`Mensaje enviado a ${item.vendedor}. Te responderá pronto.`, 'success');
+  }
+
+  function previewFotos(input) {
+    const container = document.getElementById('photo-previews-container');
+    container.innerHTML = '';
+    Array.from(input.files).slice(0, 6).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.className = 'photo-preview';
+        container.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function publicarAnuncio() {
+    const titulo = document.getElementById('pub-titulo').value.trim();
+    if (!titulo) { document.getElementById('pub-titulo-err').style.display = ''; return; }
+    document.getElementById('pub-titulo-err').style.display = 'none';
+
+    const user = getCurrentUser();
+    const newItem = {
+      id: 'wp_' + Date.now(),
+      titulo,
+      tipo: document.getElementById('pub-tipo').value,
+      precio: parseFloat(document.getElementById('pub-precio').value) || 0,
+      categoria: document.getElementById('pub-cat').value,
+      descripcion: document.getElementById('pub-desc').value || 'Sin descripción.',
+      vendedor: user?.name || 'Miembro',
+      fecha: new Date().toISOString().split('T')[0],
+      ubicacion: document.getElementById('pub-loc').value || 'España',
+      emoji: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>',
+      estado: 'disponible'
+    };
+    wallapItems.unshift(newItem);
+    closeModal('modal-publicar');
+    document.getElementById('form-publicar').reset();
+    document.getElementById('photo-previews-container').innerHTML = '';
+    filterWallap();
+    showToast(`Anuncio "${titulo}" publicado correctamente.`, 'success');
+  }
+
+  function openModal(id)  { document.getElementById(id).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target===o) closeModal(o.id); }));
+  document.addEventListener('keydown', e => { if (e.key==='Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id)); });
+
+  filterWallap();
+</script>
+</body>
+</html>

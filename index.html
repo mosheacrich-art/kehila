@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kehilá — Acceso</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    /* ─── Página de acceso ─── */
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      background: var(--color-bg);
+      overflow: hidden;
+    }
+
+    /* ─── Panel hero (izquierda) ─── */
+    .auth-hero {
+      flex: 0 0 42%;
+      background: var(--color-primary);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 56px 52px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-hero::before {
+      content: '';
+      position: absolute;
+      top: -120px;
+      right: -80px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .auth-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      left: -60px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 380px;
+    }
+
+    /* Logo en hero */
+    .hero-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+
+    .hero-logo-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(201,168,76,0.15);
+      border: 1.5px solid var(--color-gold);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-logo-icon svg {
+      width: 28px;
+      height: 28px;
+      color: var(--color-gold);
+    }
+
+    .hero-logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero-logo-name {
+      font-family: var(--font-brand);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-white);
+      line-height: 1;
+    }
+
+    .hero-logo-sub {
+      font-size: 0.6875rem;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 3px;
+    }
+
+    .hero-tagline {
+      font-family: var(--font-brand);
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: var(--color-white);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .hero-tagline span {
+      color: var(--color-gold);
+    }
+
+    .hero-desc {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.7;
+      margin-bottom: 44px;
+    }
+
+    .hero-features {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .hero-feature {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .hero-feature-dot {
+      width: 36px;
+      height: 36px;
+      background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .hero-feature-dot svg {
+      width: 17px;
+      height: 17px;
+      color: var(--color-gold);
+    }
+
+    .hero-feature-text {
+      font-size: 0.9375rem;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.4;
+    }
+
+    .hero-feature-text strong {
+      color: var(--color-white);
+      font-weight: 500;
+      display: block;
+      font-size: 0.9rem;
+    }
+
+    .hero-feature-text span {
+      font-size: 0.8125rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ─── Panel formulario (derecha) ─── */
+    .auth-form-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--color-white);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .auth-form-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 52px;
+      overflow-y: auto;
+    }
+
+    .auth-form-inner {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* Alternancia de estados con animación */
+    .auth-view {
+      width: 100%;
+      animation: viewIn 0.32s ease forwards;
+    }
+
+    @keyframes viewIn {
+      from { opacity: 0; transform: translateX(24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes viewInReverse {
+      from { opacity: 0; transform: translateX(-24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .auth-view.reverse {
+      animation: viewInReverse 0.32s ease forwards;
+    }
+
+    /* Cabecera del formulario */
+    .auth-form-header {
+      margin-bottom: 28px;
+    }
+
+    .auth-form-pretitle {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-gold-dark);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .auth-form-pretitle::before {
+      content: '';
+      width: 14px;
+      height: 2px;
+      background: var(--color-gold);
+      border-radius: 1px;
+      display: block;
+    }
+
+    .auth-form-title {
+      font-family: var(--font-brand);
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--color-text);
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+
+    .auth-form-subtitle {
+      font-size: 0.9375rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Campos del formulario */
+    .input-with-icon {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-with-icon .input-icon {
+      position: absolute;
+      left: 13px;
+      width: 18px;
+      height: 18px;
+      color: var(--color-text-light);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .input-with-icon .form-input {
+      padding-left: 42px;
+    }
+
+    .input-with-icon .input-toggle {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-light);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      border-radius: var(--radius-xs);
+      transition: color var(--transition-fast);
+    }
+
+    .input-with-icon .input-toggle:hover {
+      color: var(--color-text);
+    }
+
+    .input-with-icon .input-toggle svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    /* Prefijo teléfono */
+    .input-prefix {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .input-prefix-label {
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      background: var(--color-bg);
+      border: 1.5px solid var(--color-border);
+      border-right: none;
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .input-prefix .form-input {
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      flex: 1;
+    }
+
+    /* Indicador de fortaleza de contraseña */
+    .password-strength {
+      margin-top: 6px;
+    }
+
+    .strength-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+
+    .strength-segment {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--color-border);
+      transition: background 0.3s ease;
+    }
+
+    .strength-segment.filled.weak   { background: var(--color-danger); }
+    .strength-segment.filled.medium { background: var(--color-warning); }
+    .strength-segment.filled.strong { background: var(--color-success); }
+
+    .strength-label {
+      font-size: 0.725rem;
+      font-weight: 500;
+      color: var(--color-text-light);
+    }
+
+    .strength-label.weak   { color: var(--color-danger); }
+    .strength-label.medium { color: var(--color-warning); }
+    .strength-label.strong { color: var(--color-success); }
+
+    /* Mensajes de estado */
+    .auth-message {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      animation: fadeSlideDown 0.25s ease;
+    }
+
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-message.error {
+      background: var(--color-danger-light);
+      color: #991B1B;
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+
+    .auth-message.warning {
+      background: var(--color-warning-light);
+      color: #92400E;
+      border: 1px solid rgba(245,158,11,0.2);
+    }
+
+    .auth-message svg {
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Banner info registro */
+    .auth-info-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--color-info-light);
+      color: #1E40AF;
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .auth-info-banner svg {
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Checkbox custom */
+    .checkbox-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      cursor: pointer;
+      accent-color: var(--color-primary);
+    }
+
+    .checkbox-label a {
+      color: var(--color-primary);
+      font-weight: 500;
+      text-decoration: underline;
+      text-decoration-color: transparent;
+      transition: text-decoration-color var(--transition-fast);
+    }
+
+    .checkbox-label a:hover {
+      text-decoration-color: var(--color-primary);
+    }
+
+    /* Link alternar vista */
+    .auth-switch {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+    }
+
+    .auth-switch button {
+      background: none;
+      border: none;
+      color: var(--color-primary);
+      font-weight: 600;
+      cursor: pointer;
+      font-size: inherit;
+      padding: 0;
+      transition: color var(--transition-fast);
+      text-decoration: underline;
+      text-decoration-color: transparent;
+    }
+
+    .auth-switch button:hover {
+      color: var(--color-gold-dark);
+      text-decoration-color: var(--color-gold-dark);
+    }
+
+    /* ─── Pantalla de éxito ─── */
+    .success-view {
+      text-align: center;
+      padding: 20px 0;
+      animation: viewIn 0.4s ease;
+    }
+
+    .success-check {
+      width: 80px;
+      height: 80px;
+      background: var(--color-success-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      animation: checkBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+    }
+
+    @keyframes checkBounce {
+      from { opacity: 0; transform: scale(0.5); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .success-check svg {
+      width: 40px;
+      height: 40px;
+      color: var(--color-success);
+    }
+
+    .success-title {
+      font-family: var(--font-brand);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 10px;
+    }
+
+    .success-desc {
+      color: var(--color-text-muted);
+      font-size: 0.9375rem;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    /* ─── Footer ─── */
+    .auth-footer {
+      padding: 14px 52px;
+      border-top: 1px solid var(--color-border-light);
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--color-text-light);
+      background: var(--color-white);
+      flex-shrink: 0;
+    }
+
+    /* ─── Logo mobile (solo visible en móvil) ─── */
+    .mobile-logo {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 24px 20px 8px;
+    }
+
+    .mobile-logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mobile-logo-icon svg {
+      width: 22px;
+      height: 22px;
+      color: var(--color-gold);
+    }
+
+    .mobile-logo-name {
+      font-family: var(--font-brand);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+      .auth-hero { flex: 0 0 38%; padding: 40px 36px; }
+      .hero-tagline { font-size: 1.75rem; }
+      .auth-form-wrapper { padding: 32px 36px; }
+    }
+
+    @media (max-width: 768px) {
+      body { overflow: auto; flex-direction: column; }
+      .auth-hero { display: none; }
+      .auth-form-panel { min-height: 100vh; }
+      .auth-form-wrapper { padding: 16px 20px 32px; align-items: flex-start; }
+      .auth-form-inner { max-width: 100%; }
+      .auth-footer { padding: 14px 20px; }
+      .mobile-logo { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── PANEL HERO ─── -->
+  <div class="auth-hero">
+    <div class="hero-content">
+
+      <div class="hero-logo" data-action="ir-login" style="cursor:pointer">
+        <div class="hero-logo-icon">
+          <!-- Estrella de David simplificada -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12,2 15.5,8.5 22,9.5 17,14.5 18.5,21 12,17.5 5.5,21 7,14.5 2,9.5 8.5,8.5"/>
+          </svg>
+        </div>
+        <div class="hero-logo-text">
+          <span class="hero-logo-name">Kehilá</span>
+          <span class="hero-logo-sub">App Comunidades</span>
+        </div>
+      </div>
+
+      <h1 class="hero-tagline">
+        La plataforma de<br>
+        <span>tu comunidad</span>
+      </h1>
+      <p class="hero-desc">
+        Todo lo que necesita tu kehilá en un solo lugar.
+        Conecta, celebra y crece junto a tu comunidad.
+      </p>
+
+      <div class="hero-features">
+        <div class="hero-feature">
+          <div class="hero-feature-dot">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5"/>
+            </svg>
+          </div>
+          <div class="hero-feature-text">
+            <strong>Eventos y Shabatot</strong>
+            <span>Calendario comunal, inscripciones y recordatorios</span>
+          </div>
+        </div>
+        <div class="hero-feature">
+          <div class="hero-feature-dot">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/>
+            </svg>
+          </div>
+          <div class="hero-feature-text">
+            <strong>Kosher & Wallap</strong>
+            <span>Guía kosher y marketplace judío de confianza</span>
+          </div>
+        </div>
+        <div class="hero-feature">
+          <div class="hero-feature-dot">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+            </svg>
+          </div>
+          <div class="hero-feature-text">
+            <strong>Siddur & Shiurim</strong>
+            <span>Rezos, clases del Rav y recursos de estudio</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── PANEL FORMULARIO ─── -->
+  <div class="auth-form-panel">
+
+    <!-- Logo mobile -->
+    <div class="mobile-logo" data-action="ir-login" style="cursor:pointer">
+      <div class="mobile-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12,2 15.5,8.5 22,9.5 17,14.5 18.5,21 12,17.5 5.5,21 7,14.5 2,9.5 8.5,8.5"/>
+        </svg>
+      </div>
+      <span class="mobile-logo-name">Kehilá</span>
+    </div>
+
+    <div class="auth-form-wrapper">
+      <div class="auth-form-inner" id="form-container">
+
+        <!-- ═══ VISTA: LOGIN ═══ -->
+        <div id="view-login" class="auth-view">
+
+          <div class="auth-form-header">
+            <p class="auth-form-pretitle">Acceso</p>
+            <h2 class="auth-form-title">Bienvenido de nuevo</h2>
+            <p class="auth-form-subtitle">Accede a tu comunidad</p>
+          </div>
+
+          <!-- Mensaje de estado (error / warning) -->
+          <div id="login-message" class="auth-message" style="display:none;"></div>
+
+          <form id="login-form" novalidate>
+            <div class="flex-col gap-md">
+
+              <!-- Email -->
+              <div class="form-group">
+                <label class="form-label required" for="login-email">Correo electrónico</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+                  </svg>
+                  <input
+                    type="email"
+                    id="login-email"
+                    class="form-input"
+                    placeholder="tu@email.com"
+                    autocomplete="email"
+                    value=""
+                  >
+                </div>
+                <span class="form-error" id="login-email-error" style="display:none;"></span>
+              </div>
+
+              <!-- Password -->
+              <div class="form-group">
+                <label class="form-label required" for="login-password">Contraseña</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+                  </svg>
+                  <input
+                    type="password"
+                    id="login-password"
+                    class="form-input"
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                  >
+                  <button type="button" class="input-toggle" id="toggle-login-pw" aria-label="Mostrar contraseña">
+                    <svg id="eye-show-login" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                    </svg>
+                    <svg id="eye-hide-login" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="display:none;">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/>
+                    </svg>
+                  </button>
+                </div>
+                <span class="form-error" id="login-pw-error" style="display:none;"></span>
+              </div>
+
+              <!-- Botón entrar -->
+              <button type="submit" class="btn btn-primary btn-lg w-full mt-sm" id="btn-login">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:18px;height:18px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"/>
+                </svg>
+                Entrar
+              </button>
+
+            </div>
+          </form>
+
+          <div class="auth-switch mt-lg">
+            ¿Aún no eres miembro?
+            <button type="button" onclick="showRegister()">Solicitar acceso →</button>
+          </div>
+
+          <!-- Credenciales demo -->
+          <div style="margin-top:28px; padding:14px 16px; background:var(--color-bg); border-radius:var(--radius-sm); border:1px dashed var(--color-border);">
+            <p style="font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-text-muted); margin-bottom:8px;">Cuentas de prueba</p>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <button type="button" class="demo-fill" data-email="admin@kehila.es" data-pw="admin123"
+                style="text-align:left; font-size:0.8rem; color:var(--color-primary); background:none; border:none; cursor:pointer; padding:2px 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"/></svg> admin@kehila.es / admin123
+              </button>
+              <button type="button" class="demo-fill" data-email="moshe@kehila.es" data-pw="moshe123"
+                style="text-align:left; font-size:0.8rem; color:var(--color-primary); background:none; border:none; cursor:pointer; padding:2px 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg> moshe@kehila.es / moshe123
+              </button>
+              <button type="button" class="demo-fill" data-email="nuevo@kehila.es" data-pw="nuevo123"
+                style="text-align:left; font-size:0.8rem; color:var(--color-text-muted); background:none; border:none; cursor:pointer; padding:2px 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z"/></svg> nuevo@kehila.es / nuevo123 (pendiente)
+              </button>
+            </div>
+          </div>
+
+        </div>
+        <!-- FIN VISTA LOGIN -->
+
+        <!-- ═══ VISTA: REGISTRO ═══ -->
+        <div id="view-register" class="auth-view" style="display:none;">
+
+          <a data-action="ir-login" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#718096;cursor:pointer;margin-bottom:1.5rem;text-decoration:none;transition:color 0.15s ease" onmouseover="this.style.color='#1B2E5E'" onmouseout="this.style.color='#718096'">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
+            Bienvenido de nuevo
+          </a>
+          <div class="auth-form-header">
+            <p class="auth-form-pretitle">Nueva solicitud</p>
+            <h2 class="auth-form-title">Solicitar acceso</h2>
+            <p class="auth-form-subtitle">El acceso requiere aprobación del administrador</p>
+          </div>
+
+          <!-- Banner informativo -->
+          <div class="auth-info-banner">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+            </svg>
+            <span>Tu solicitud será revisada en <strong>24–48h</strong>. Recibirás un email de confirmación cuando sea aprobada.</span>
+          </div>
+
+          <form id="register-form" novalidate>
+            <div class="flex-col gap-md">
+
+              <!-- Nombre + Apellidos en grid -->
+              <div class="grid-2 gap-sm">
+                <div class="form-group">
+                  <label class="form-label required" for="reg-nombre">Nombre</label>
+                  <input type="text" id="reg-nombre" class="form-input" placeholder="Ej. Moshe" autocomplete="given-name">
+                  <span class="form-error" id="err-nombre" style="display:none;"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label required" for="reg-apellidos">Apellidos</label>
+                  <input type="text" id="reg-apellidos" class="form-input" placeholder="Ej. Cohen Levi" autocomplete="family-name">
+                  <span class="form-error" id="err-apellidos" style="display:none;"></span>
+                </div>
+              </div>
+
+              <!-- Email -->
+              <div class="form-group">
+                <label class="form-label required" for="reg-email">Correo electrónico</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+                  </svg>
+                  <input type="email" id="reg-email" class="form-input" placeholder="tu@email.com" autocomplete="email">
+                </div>
+                <span class="form-error" id="err-email" style="display:none;"></span>
+              </div>
+
+              <!-- Teléfono -->
+              <div class="form-group">
+                <label class="form-label" for="reg-telefono">Teléfono <span style="color:var(--color-text-light);font-weight:400;">(opcional)</span></label>
+                <div class="input-prefix">
+                  <span class="input-prefix-label">+34</span>
+                  <input type="tel" id="reg-telefono" class="form-input" placeholder="612 345 678" autocomplete="tel">
+                </div>
+              </div>
+
+              <!-- Password -->
+              <div class="form-group">
+                <label class="form-label required" for="reg-password">Contraseña</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+                  </svg>
+                  <input type="password" id="reg-password" class="form-input" placeholder="Mín. 8 caracteres" autocomplete="new-password">
+                  <button type="button" class="input-toggle" id="toggle-reg-pw" aria-label="Mostrar contraseña">
+                    <svg id="eye-show-reg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                    </svg>
+                    <svg id="eye-hide-reg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="display:none;">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/>
+                    </svg>
+                  </button>
+                </div>
+                <!-- Indicador de fortaleza -->
+                <div class="password-strength" id="strength-container" style="display:none;">
+                  <div class="strength-bar">
+                    <div class="strength-segment" id="seg1"></div>
+                    <div class="strength-segment" id="seg2"></div>
+                    <div class="strength-segment" id="seg3"></div>
+                  </div>
+                  <span class="strength-label" id="strength-label"></span>
+                </div>
+                <span class="form-error" id="err-password" style="display:none;"></span>
+              </div>
+
+              <!-- Confirmar password -->
+              <div class="form-group">
+                <label class="form-label required" for="reg-confirm">Confirmar contraseña</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
+                  </svg>
+                  <input type="password" id="reg-confirm" class="form-input" placeholder="Repite la contraseña" autocomplete="new-password">
+                </div>
+                <span class="form-error" id="err-confirm" style="display:none;"></span>
+              </div>
+
+              <!-- Checkbox términos -->
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="reg-terms">
+                  <span>Acepto las <a href="#">condiciones de uso</a> y la <a href="#">política de privacidad</a> de Kehilá</span>
+                </label>
+                <span class="form-error" id="err-terms" style="display:none;"></span>
+              </div>
+
+              <!-- Botón enviar -->
+              <button type="submit" class="btn btn-primary btn-lg w-full mt-xs">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:18px;height:18px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"/>
+                </svg>
+                Enviar solicitud
+              </button>
+
+            </div>
+          </form>
+
+          <div class="auth-switch mt-lg">
+            ¿Ya tienes cuenta?
+            <button type="button" onclick="showLogin()">← Iniciar sesión</button>
+          </div>
+
+        </div>
+        <!-- FIN VISTA REGISTRO -->
+
+        <!-- ═══ VISTA: ÉXITO ═══ -->
+        <div id="view-success" class="auth-view" style="display:none;">
+          <div class="success-view">
+            <div class="success-check">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+              </svg>
+            </div>
+            <h2 class="success-title">¡Solicitud enviada!</h2>
+            <p class="success-desc">
+              Revisaremos tu perfil y te contactaremos en breve.<br>
+              <strong>Shalom!</strong>
+            </p>
+            <button type="button" class="btn btn-primary btn-lg" onclick="showLogin()">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:18px;height:18px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+              </svg>
+              Volver al inicio
+            </button>
+          </div>
+        </div>
+        <!-- FIN VISTA ÉXITO -->
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="auth-footer">
+      Kehilá © 2025 &middot; Comunidades Judías de España
+    </footer>
+
+  </div>
+  <!-- FIN PANEL FORMULARIO -->
+
+  <script src="js/auth.js"></script>
+  <script src="js/data.js"></script>
+  <script>
+    /* ─── Estado actual ─── */
+    let currentView = 'login'; // 'login' | 'register' | 'success'
+
+    /* ─── Helpers de UI ─── */
+    function show(id)  { document.getElementById(id).style.display = ''; }
+    function hide(id)  { document.getElementById(id).style.display = 'none'; }
+    function setText(id, text) { document.getElementById(id).textContent = text; }
+    function setHTML(id, html) { document.getElementById(id).innerHTML = html; }
+
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.style.display = '';
+    }
+
+    function clearError(id) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = ''; el.style.display = 'none'; }
+    }
+
+    function markInput(id, hasError) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle('error', hasError);
+    }
+
+    /* ─── ir-login desde logo o back link ─── */
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-action="ir-login"]');
+      if (trigger) showLogin();
+    });
+
+    /* ─── Cambio de vistas ─── */
+    function showLogin(reverse = true) {
+      const login = document.getElementById('view-login');
+      const reg   = document.getElementById('view-register');
+      const succ  = document.getElementById('view-success');
+
+      [reg, succ].forEach(v => { v.style.display = 'none'; });
+      login.style.display = '';
+      login.className = 'auth-view' + (reverse ? ' reverse' : '');
+      currentView = 'login';
+      clearLoginMessage();
+    }
+
+    function showRegister() {
+      const login = document.getElementById('view-login');
+      const reg   = document.getElementById('view-register');
+      const succ  = document.getElementById('view-success');
+
+      [login, succ].forEach(v => { v.style.display = 'none'; });
+      reg.style.display = '';
+      reg.className = 'auth-view';
+      currentView = 'register';
+    }
+
+    function showSuccess() {
+      const login = document.getElementById('view-login');
+      const reg   = document.getElementById('view-register');
+      const succ  = document.getElementById('view-success');
+
+      [login, reg].forEach(v => { v.style.display = 'none'; });
+      succ.style.display = '';
+      succ.className = 'auth-view';
+      currentView = 'success';
+    }
+
+    /* ─── Mensajes de login ─── */
+    function showLoginMessage(type, html) {
+      const el = document.getElementById('login-message');
+      el.className = `auth-message ${type}`;
+      el.innerHTML = html;
+      el.style.display = 'flex';
+    }
+
+    function clearLoginMessage() {
+      const el = document.getElementById('login-message');
+      el.style.display = 'none';
+    }
+
+    /* ─── Toggle visibilidad contraseña ─── */
+    function setupPasswordToggle(inputId, toggleId, showId, hideId) {
+      document.getElementById(toggleId).addEventListener('click', function () {
+        const input = document.getElementById(inputId);
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        document.getElementById(showId).style.display = isPassword ? 'none' : '';
+        document.getElementById(hideId).style.display = isPassword ? '' : 'none';
+      });
+    }
+
+    setupPasswordToggle('login-password', 'toggle-login-pw', 'eye-show-login', 'eye-hide-login');
+    setupPasswordToggle('reg-password', 'toggle-reg-pw', 'eye-show-reg', 'eye-hide-reg');
+
+    /* ─── Indicador de fortaleza ─── */
+    function getPasswordStrength(pw) {
+      let score = 0;
+      if (pw.length >= 8) score++;
+      if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+      if (/\d/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+      if (pw.length >= 12) score++;
+      if (score <= 1) return 'weak';
+      if (score <= 3) return 'medium';
+      return 'strong';
+    }
+
+    const strengthLabels = { weak: 'Débil', medium: 'Media', strong: 'Fuerte' };
+
+    document.getElementById('reg-password').addEventListener('input', function () {
+      const pw = this.value;
+      const container = document.getElementById('strength-container');
+      if (!pw) { container.style.display = 'none'; return; }
+      container.style.display = '';
+
+      const level = getPasswordStrength(pw);
+      const segments = [document.getElementById('seg1'), document.getElementById('seg2'), document.getElementById('seg3')];
+      const filled = level === 'weak' ? 1 : level === 'medium' ? 2 : 3;
+
+      segments.forEach((seg, i) => {
+        seg.className = 'strength-segment' + (i < filled ? ` filled ${level}` : '');
+      });
+
+      const label = document.getElementById('strength-label');
+      label.textContent = strengthLabels[level];
+      label.className = `strength-label ${level}`;
+    });
+
+    /* ─── Rellenar demo ─── */
+    document.querySelectorAll('.demo-fill').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.getElementById('login-email').value = this.dataset.email;
+        document.getElementById('login-password').value = this.dataset.pw;
+        clearLoginMessage();
+      });
+    });
+
+    /* ─── FORMULARIO LOGIN ─── */
+    document.getElementById('login-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearLoginMessage();
+
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      // Validación básica
+      let hasError = false;
+
+      if (!email) {
+        showError('login-email-error', 'El correo es obligatorio.');
+        markInput('login-email', true);
+        hasError = true;
+      } else {
+        clearError('login-email-error');
+        markInput('login-email', false);
+      }
+
+      if (!password) {
+        showError('login-pw-error', 'La contraseña es obligatoria.');
+        markInput('login-password', true);
+        hasError = true;
+      } else {
+        clearError('login-pw-error');
+        markInput('login-password', false);
+      }
+
+      if (hasError) return;
+
+      // Login usando USERS_DB de auth.js
+      const result = login(email, password);
+
+      if (!result.ok) {
+        const msg = `
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+          </svg>
+          <span>${result.error}</span>
+        `;
+        showLoginMessage('error', msg);
+        return;
+      }
+
+      if (result.status === 'pending') {
+        const msg = `
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+          </svg>
+          <span>Tu solicitud está siendo revisada. Te avisaremos cuando sea aprobada.</span>
+        `;
+        showLoginMessage('warning', msg);
+        return;
+      }
+
+      // Login correcto — redirigir
+      const user = getCurrentUser();
+      if (user && user.role === 'admin') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'home.html';
+      }
+    });
+
+    /* ─── FORMULARIO REGISTRO ─── */
+    document.getElementById('register-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const nombre    = document.getElementById('reg-nombre').value.trim();
+      const apellidos = document.getElementById('reg-apellidos').value.trim();
+      const email     = document.getElementById('reg-email').value.trim();
+      const password  = document.getElementById('reg-password').value;
+      const confirm   = document.getElementById('reg-confirm').value;
+      const terms     = document.getElementById('reg-terms').checked;
+
+      // Limpiar errores previos
+      ['err-nombre','err-apellidos','err-email','err-password','err-confirm','err-terms'].forEach(clearError);
+      ['reg-nombre','reg-apellidos','reg-email','reg-password','reg-confirm'].forEach(id => markInput(id, false));
+
+      let valid = true;
+
+      if (!nombre) {
+        showError('err-nombre', 'El nombre es obligatorio.');
+        markInput('reg-nombre', true);
+        valid = false;
+      }
+
+      if (!apellidos) {
+        showError('err-apellidos', 'Los apellidos son obligatorios.');
+        markInput('reg-apellidos', true);
+        valid = false;
+      }
+
+      if (!email) {
+        showError('err-email', 'El correo es obligatorio.');
+        markInput('reg-email', true);
+        valid = false;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError('err-email', 'Introduce un correo válido.');
+        markInput('reg-email', true);
+        valid = false;
+      }
+
+      if (!password) {
+        showError('err-password', 'La contraseña es obligatoria.');
+        markInput('reg-password', true);
+        valid = false;
+      } else if (password.length < 8) {
+        showError('err-password', 'La contraseña debe tener al menos 8 caracteres.');
+        markInput('reg-password', true);
+        valid = false;
+      }
+
+      if (!confirm) {
+        showError('err-confirm', 'Debes confirmar la contraseña.');
+        markInput('reg-confirm', true);
+        valid = false;
+      } else if (password && confirm !== password) {
+        showError('err-confirm', 'Las contraseñas no coinciden.');
+        markInput('reg-confirm', true);
+        valid = false;
+      }
+
+      if (!terms) {
+        showError('err-terms', 'Debes aceptar las condiciones de uso para continuar.');
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      // Todo correcto → mostrar pantalla de éxito
+      showSuccess();
+    });
+
+    /* ─── Limpiar error al escribir ─── */
+    document.getElementById('login-email').addEventListener('input', function () {
+      clearError('login-email-error');
+      markInput('login-email', false);
+      clearLoginMessage();
+    });
+    document.getElementById('login-password').addEventListener('input', function () {
+      clearError('login-pw-error');
+      markInput('login-password', false);
+      clearLoginMessage();
+    });
+
+    ['reg-nombre','reg-apellidos','reg-email','reg-password','reg-confirm'].forEach(id => {
+      document.getElementById(id).addEventListener('input', function () {
+        const errMap = {
+          'reg-nombre':    'err-nombre',
+          'reg-apellidos': 'err-apellidos',
+          'reg-email':     'err-email',
+          'reg-password':  'err-password',
+          'reg-confirm':   'err-confirm'
+        };
+        clearError(errMap[id]);
+        markInput(id, false);
+      });
+    });
+
+    /* ─── Si ya hay sesión activa, redirigir ─── */
+    (function checkExistingSession() {
+      try {
+        const raw = localStorage.getItem('kehila_user');
+        if (raw) {
+          const user = JSON.parse(raw);
+          if (user && user.status === 'active') {
+            window.location.href = user.role === 'admin' ? 'admin.html' : 'home.html';
+          }
+        }
+      } catch (e) { /* ignorar */ }
+    })();
+  </script>
+</body>
+</html>

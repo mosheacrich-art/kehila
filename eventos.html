@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kehilá — Eventos</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <style>
+    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
+    @media (max-width: 768px) { .main-content { margin-left: 0; } }
+    .eventos-inner { max-width: 960px; margin: 0 auto; padding: 32px 32px 60px; }
+    @media (max-width: 768px) { .eventos-inner { padding: 20px 14px 88px; } }
+
+    /* ─── Vista toggle ─── */
+    .view-toggle {
+      display: flex;
+      background: var(--color-bg);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 2px;
+    }
+    .view-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 6px;
+      font-size: .8125rem; font-weight: 500;
+      color: var(--color-text-muted); cursor: pointer;
+      border: none; background: none; transition: all var(--transition-fast);
+    }
+    .view-btn svg { width: 15px; height: 15px; }
+    .view-btn.active {
+      background: var(--color-white); color: var(--color-primary);
+      box-shadow: var(--shadow-sm); font-weight: 600;
+    }
+
+    /* ─── Filtro chips ─── */
+    .filter-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .filter-chips::-webkit-scrollbar { display: none; }
+    .chip {
+      padding: 6px 16px; border-radius: var(--radius-full);
+      font-size: .8125rem; font-weight: 500;
+      border: 1.5px solid var(--color-border);
+      color: var(--color-text-muted); cursor: pointer;
+      background: var(--color-white); white-space: nowrap;
+      transition: all var(--transition-fast);
+    }
+    .chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .chip.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+
+    /* ─── Lista de eventos ─── */
+    .eventos-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 640px) { .eventos-grid { grid-template-columns: 1fr; } }
+
+    .evento-card-full {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all var(--transition-normal);
+      border-left: 4px solid var(--color-primary);
+    }
+    .evento-card-full:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .ev-cat-shabat  { border-left-color: #7C3AED; }
+    .ev-cat-estudio { border-left-color: var(--color-info); }
+    .ev-cat-festividad { border-left-color: var(--color-gold); }
+    .ev-cat-educacion  { border-left-color: var(--color-success); }
+    .ev-cat-cultura    { border-left-color: #EC4899; }
+    .ev-cat-comunidad  { border-left-color: var(--color-primary); }
+
+    .ev-card-header {
+      padding: 16px 16px 0;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+    }
+    .ev-date-block {
+      display: flex; flex-direction: column; align-items: center;
+      background: var(--color-bg); border-radius: var(--radius-sm);
+      padding: 8px 12px; min-width: 52px; text-align: center; flex-shrink: 0;
+    }
+    .ev-day { font-family: var(--font-brand); font-size: 1.75rem; font-weight: 900; color: var(--color-primary); line-height: 1; }
+    .ev-month { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); }
+    .ev-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    .ev-card-body { padding: 12px 16px; flex: 1; }
+    .ev-title { font-size: .9375rem; font-weight: 700; color: var(--color-text); margin-bottom: 6px; line-height: 1.35; }
+    .ev-desc {
+      font-size: .8125rem; color: var(--color-text-muted); line-height: 1.55;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .ev-meta-row { display: flex; align-items: center; gap: 14px; font-size: .775rem; color: var(--color-text-muted); flex-wrap: wrap; }
+    .ev-meta-item { display: flex; align-items: center; gap: 4px; }
+    .ev-meta-item svg { width: 13px; height: 13px; color: var(--color-text-light); }
+
+    .ev-card-footer {
+      padding: 12px 16px 14px;
+      border-top: 1px solid var(--color-border-light);
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      flex-wrap: wrap;
+    }
+    .price-badge-green { background: var(--color-success-light); color: #065F46; font-size: .75rem; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full); }
+    .price-badge-blue  { background: var(--color-info-light); color: #1E40AF; font-size: .75rem; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full); }
+    .audience-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+    .aud-badge { font-size: .65rem; font-weight: 600; padding: 2px 7px; background: var(--color-bg); color: var(--color-text-muted); border-radius: var(--radius-full); border: 1px solid var(--color-border); }
+
+    .btn-inscrito { background: var(--color-success-light); color: #065F46; border-color: var(--color-success); }
+    .btn-inscrito:hover { background: var(--color-success); color: #fff; }
+    .btn-espera  { background: var(--color-warning-light); color: #92400E; border-color: var(--color-warning); }
+
+    /* ─── Calendario ─── */
+    .cal-wrap { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+    @media (max-width: 768px) { .cal-wrap { grid-template-columns: 1fr; } }
+
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .cal-month-label { font-family: var(--font-brand); font-size: 1.2rem; font-weight: 700; color: var(--color-text); }
+    .cal-nav-btn {
+      width: 34px; height: 34px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      background: var(--color-white); border: 1.5px solid var(--color-border);
+      cursor: pointer; transition: all var(--transition-fast);
+      color: var(--color-text);
+    }
+    .cal-nav-btn:hover { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+    .cal-nav-btn svg { width: 16px; height: 16px; }
+
+    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+    .cal-header-day { text-align: center; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--color-text-muted); padding: 8px 0; }
+    .cal-day {
+      aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border-radius: var(--radius-sm); cursor: pointer; position: relative;
+      transition: background var(--transition-fast); font-size: .875rem; font-weight: 400;
+      color: var(--color-text); padding: 4px;
+    }
+    .cal-day:hover { background: var(--color-bg); }
+    .cal-day.other { color: var(--color-text-light); }
+    .cal-day.today { background: var(--color-primary); color: #fff; font-weight: 700; }
+    .cal-day.today:hover { background: var(--color-primary-dark); }
+    .cal-day.selected { background: var(--color-gold-light); border: 2px solid var(--color-gold); font-weight: 600; }
+    .cal-dot { width: 5px; height: 5px; border-radius: 50%; position: absolute; bottom: 4px; }
+    .cal-day.today .cal-dot { background: var(--color-gold); }
+    .cal-dot-color { background: var(--color-gold); }
+
+    .cal-side { background: var(--color-white); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); padding: 20px; }
+    .cal-side-title { font-size: .9375rem; font-weight: 700; color: var(--color-text); margin-bottom: 14px; }
+    .cal-event-item { padding: 10px 0; border-bottom: 1px solid var(--color-border-light); }
+    .cal-event-item:last-child { border-bottom: none; }
+    .cal-event-time { font-size: .75rem; font-weight: 600; color: var(--color-gold-dark); margin-bottom: 2px; }
+    .cal-event-name { font-size: .875rem; font-weight: 500; color: var(--color-text); }
+    .cal-event-place { font-size: .775rem; color: var(--color-text-muted); }
+    .cal-empty { text-align: center; color: var(--color-text-light); font-size: .875rem; padding: 24px 0; }
+  </style>
+</head>
+<body>
+<div id="sidebar-placeholder"></div>
+<div class="main-content">
+  <div class="eventos-inner">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <p class="page-header-label">Calendario</p>
+        <h1 class="page-title">Eventos</h1>
+        <p class="page-subtitle">Actividades y celebraciones de la comunidad</p>
+      </div>
+      <div class="page-header-actions">
+        <div class="view-toggle">
+          <button class="view-btn active" id="btn-lista" onclick="setView('lista')">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+            Lista
+          </button>
+          <button class="view-btn" id="btn-cal" onclick="setView('calendario')">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5"/></svg>
+            Calendario
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── VISTA LISTA ─── -->
+    <div id="view-lista">
+      <div class="filter-chips mb-lg" id="chips-container">
+        <button class="chip active" data-filter="todos" onclick="setChip(this,'todos')">Todos</button>
+        <button class="chip" data-filter="semana" onclick="setChip(this,'semana')">Esta semana</button>
+        <button class="chip" data-filter="mes" onclick="setChip(this,'mes')">Este mes</button>
+        <button class="chip" data-filter="gratis" onclick="setChip(this,'gratis')">Gratuitos</button>
+        <button class="chip" data-filter="para-mi" onclick="setChip(this,'para-mi')">Para mí</button>
+      </div>
+      <div class="eventos-grid" id="eventos-list"></div>
+    </div>
+
+    <!-- ─── VISTA CALENDARIO ─── -->
+    <div id="view-calendario" style="display:none;">
+      <div class="cal-wrap">
+        <div>
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="calPrev()">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+            </button>
+            <span class="cal-month-label" id="cal-label"></span>
+            <button class="cal-nav-btn" onclick="calNext()">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+            </button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div class="cal-side">
+          <p class="cal-side-title" id="cal-side-title">Selecciona un día</p>
+          <div id="cal-side-events"><p class="cal-empty">Haz click en un día para ver sus eventos</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal inscripción -->
+<div class="modal-overlay hidden" id="modal-inscripcion">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">Confirmar inscripción</h3>
+      <button class="modal-close" onclick="closeModal('modal-inscripcion')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.875rem;color:var(--color-text-muted);margin-bottom:14px;">¿Confirmar inscripción a:</p>
+      <p style="font-size:1rem;font-weight:700;color:var(--color-text);margin-bottom:8px;" id="modal-ev-titulo"></p>
+      <div style="background:var(--color-bg);border-radius:var(--radius-sm);padding:12px 14px;font-size:.875rem;color:var(--color-text-muted);display:flex;flex-direction:column;gap:4px;">
+        <span id="modal-ev-fecha"></span>
+        <span id="modal-ev-lugar"></span>
+        <span id="modal-ev-precio"></span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-inscripcion')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirm-inscripcion">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+        Confirmar inscripción
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal lista espera -->
+<div class="modal-overlay hidden" id="modal-espera">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">Lista de espera</h3>
+      <button class="modal-close" onclick="closeModal('modal-espera')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-info-banner">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:17px;height:17px;flex-shrink:0;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+        </svg>
+        <span>El evento está completo. Puedes apuntarte a la lista de espera y te avisaremos si se libera una plaza.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-espera')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmEspera()">Apuntarme a la lista</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script>
+  requireAuth();
+  initNav('eventos');
+
+  /* ─── Inscripciones (estado local) ─── */
+  const inscrito = new Set();
+  let pendingEv = null;
+  let activeFilter = 'todos';
+
+  const MESES_FULL = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const MESES_S = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const DIAS_S  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+
+  const catClass = { Shabat:'ev-cat-shabat', Estudio:'ev-cat-estudio', Festividad:'ev-cat-festividad', Educación:'ev-cat-educacion', Cultura:'ev-cat-cultura', Comunidad:'ev-cat-comunidad' };
+
+  /* ─── Vista toggle ─── */
+  function setView(v) {
+    document.getElementById('view-lista').style.display = v === 'lista' ? '' : 'none';
+    document.getElementById('view-calendario').style.display = v === 'calendario' ? '' : 'none';
+    document.getElementById('btn-lista').classList.toggle('active', v === 'lista');
+    document.getElementById('btn-cal').classList.toggle('active', v === 'calendario');
+    if (v === 'calendario') renderCal();
+  }
+
+  /* ─── Filtro chips ─── */
+  function setChip(el, filter) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    activeFilter = filter;
+    renderLista();
+  }
+
+  function filterEventos(evs) {
+    if (activeFilter === 'todos') return evs;
+    if (activeFilter === 'gratis') return evs.filter(e => !e.precio);
+    const hoy = new Date();
+    if (activeFilter === 'semana') {
+      const fin = new Date(hoy); fin.setDate(hoy.getDate() + 7);
+      return evs.filter(e => { const d = new Date(e.fecha); return d >= hoy && d <= fin; });
+    }
+    if (activeFilter === 'mes') {
+      return evs.filter(e => { const d = new Date(e.fecha); return d.getMonth() === hoy.getMonth(); });
+    }
+    return evs;
+  }
+
+  /* ─── Lista ─── */
+  function renderLista() {
+    const container = document.getElementById('eventos-list');
+    const evs = filterEventos(MOCK_EVENTOS);
+
+    if (!evs.length) {
+      container.innerHTML = `<div style="grid-column:1/-1;"><div class="empty-state"><svg class="empty-state-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5"/></svg><p class="empty-state-title">Sin eventos</p><p class="empty-state-desc">No hay eventos con este filtro.</p></div></div>`;
+      return;
+    }
+
+    container.innerHTML = evs.map(ev => {
+      const fecha = new Date(ev.fecha + 'T00:00:00');
+      const plazasLibres = ev.aforo - ev.inscritos;
+      const lleno = plazasLibres <= 0;
+      const estaInscrito = inscrito.has(ev.id);
+
+      let footerBtn = '';
+      if (estaInscrito) {
+        footerBtn = `
+          <button class="btn btn-sm btn-inscrito" onclick="cancelarInscripcion('${ev.id}')">✓ Inscrito</button>
+          <button class="btn btn-sm btn-ghost" style="font-size:.75rem;color:var(--color-danger);" onclick="cancelarInscripcion('${ev.id}')">Cancelar</button>`;
+      } else if (lleno) {
+        footerBtn = `<button class="btn btn-sm btn-espera" onclick="openEspera('${ev.id}')">Lista de espera</button>`;
+      } else {
+        footerBtn = `<button class="btn btn-sm btn-primary" onclick="openInscripcion('${ev.id}')">Inscribirse</button>`;
+      }
+
+      const cat = catClass[ev.categoria] || '';
+      return `
+        <div class="evento-card-full ${cat}" id="evcard-${ev.id}">
+          <div class="ev-card-header">
+            <div class="ev-date-block">
+              <span class="ev-day">${fecha.getDate()}</span>
+              <span class="ev-month">${MESES_S[fecha.getMonth()]}</span>
+            </div>
+            <div class="ev-badges">
+              <span style="font-size:.7rem;font-weight:600;background:var(--color-bg);padding:3px 8px;border-radius:999px;color:var(--color-text-muted);">${ev.categoria}</span>
+            </div>
+          </div>
+          <div class="ev-card-body">
+            <p class="ev-title">${ev.titulo}</p>
+            <p class="ev-desc">${ev.descripcion}</p>
+            <div class="ev-meta-row">
+              <div class="ev-meta-item">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                ${ev.hora}
+              </div>
+              <div class="ev-meta-item">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+                ${ev.lugar.split(',')[0]}
+              </div>
+              <div class="ev-meta-item">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+                ${ev.inscritos}/${ev.aforo}
+              </div>
+            </div>
+          </div>
+          <div class="ev-card-footer">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span class="${ev.precio ? 'price-badge-blue' : 'price-badge-green'}">${ev.precio ? `€${ev.precio}` : 'Gratuito'}</span>
+              <div class="audience-badges">
+                <span class="aud-badge">Todos</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;">${footerBtn}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  /* ─── Modal inscripción ─── */
+  function openInscripcion(id) {
+    const ev = MOCK_EVENTOS.find(e => e.id === id);
+    pendingEv = id;
+    const fecha = new Date(ev.fecha + 'T00:00:00');
+    document.getElementById('modal-ev-titulo').textContent = ev.titulo;
+    document.getElementById('modal-ev-fecha').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg> ${fecha.getDate()} de ${MESES_FULL[fecha.getMonth()]} · ${ev.hora}`;
+    document.getElementById('modal-ev-lugar').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg> ${ev.lugar}`;
+    document.getElementById('modal-ev-precio').innerHTML = ev.precio ? `€${ev.precio}` : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg> Gratuito';
+    openModal('modal-inscripcion');
+  }
+
+  document.getElementById('btn-confirm-inscripcion').addEventListener('click', () => {
+    inscrito.add(pendingEv);
+    const ev = MOCK_EVENTOS.find(e => e.id === pendingEv);
+    closeModal('modal-inscripcion');
+    renderLista();
+    showToast(`¡Inscripción confirmada en "${ev.titulo}"!`, 'success');
+    pendingEv = null;
+  });
+
+  function cancelarInscripcion(id) {
+    inscrito.delete(id);
+    const ev = MOCK_EVENTOS.find(e => e.id === id);
+    renderLista();
+    showToast(`Inscripción cancelada en "${ev.titulo}".`, 'warning');
+  }
+
+  function openEspera(id) { pendingEv = id; openModal('modal-espera'); }
+  function confirmEspera() {
+    const ev = MOCK_EVENTOS.find(e => e.id === pendingEv);
+    closeModal('modal-espera');
+    showToast(`Apuntado a la lista de espera de "${ev.titulo}". Te avisaremos.`, 'info');
+    pendingEv = null;
+  }
+
+  /* ─── Calendario ─── */
+  let calYear  = new Date().getFullYear();
+  let calMonth = new Date().getMonth();
+  let selectedDay = null;
+
+  function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCal(); }
+  function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCal(); }
+
+  function eventsOnDay(d) {
+    return MOCK_EVENTOS.filter(ev => {
+      const fd = new Date(ev.fecha + 'T00:00:00');
+      return fd.getFullYear() === calYear && fd.getMonth() === calMonth && fd.getDate() === d;
+    });
+  }
+
+  function renderCal() {
+    document.getElementById('cal-label').textContent = `${MESES_FULL[calMonth]} ${calYear}`;
+    const grid = document.getElementById('cal-grid');
+    const today = new Date();
+
+    // Headers lun-dom
+    grid.innerHTML = DIAS_S.map(d => `<div class="cal-header-day">${d}</div>`).join('');
+
+    const firstDay = new Date(calYear, calMonth, 1);
+    let startDow = firstDay.getDay(); // 0=dom
+    startDow = startDow === 0 ? 6 : startDow - 1; // ajustar a lun=0
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const prevDays = new Date(calYear, calMonth, 0).getDate();
+
+    // Días prev
+    for (let i = startDow - 1; i >= 0; i--) {
+      grid.innerHTML += `<div class="cal-day other">${prevDays - i}</div>`;
+    }
+
+    // Días del mes
+    for (let d = 1; d <= daysInMonth; d++) {
+      const isToday = today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === d;
+      const isSel   = selectedDay === d;
+      const hasEv   = eventsOnDay(d).length > 0;
+      grid.innerHTML += `
+        <div class="cal-day ${isToday ? 'today' : ''} ${isSel ? 'selected' : ''}" onclick="selectDay(${d})">
+          ${d}
+          ${hasEv ? `<span class="cal-dot ${isToday ? '' : 'cal-dot-color'}"></span>` : ''}
+        </div>`;
+    }
+
+    // Relleno final
+    const total = startDow + daysInMonth;
+    const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+    for (let i = 1; i <= remaining; i++) {
+      grid.innerHTML += `<div class="cal-day other">${i}</div>`;
+    }
+
+    if (selectedDay) renderCalSide(selectedDay);
+  }
+
+  function selectDay(d) {
+    selectedDay = d;
+    renderCal();
+    renderCalSide(d);
+  }
+
+  function renderCalSide(d) {
+    const meses = MESES_FULL;
+    document.getElementById('cal-side-title').textContent = `${d} de ${meses[calMonth]}`;
+    const evs = eventsOnDay(d);
+    const side = document.getElementById('cal-side-events');
+    if (!evs.length) {
+      side.innerHTML = `<p class="cal-empty">Sin eventos este día</p>`;
+      return;
+    }
+    side.innerHTML = evs.map(ev => `
+      <div class="cal-event-item">
+        <p class="cal-event-time">${ev.hora} · ${ev.categoria}</p>
+        <p class="cal-event-name">${ev.titulo}</p>
+        <p class="cal-event-place"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg> ${ev.lugar.split(',')[0]}</p>
+      </div>`).join('');
+  }
+
+  /* ─── Modal helpers ─── */
+  function openModal(id)  { document.getElementById(id).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target===o) closeModal(o.id); }));
+  document.addEventListener('keydown', e => { if (e.key==='Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id)); });
+
+  /* ─── Init ─── */
+  renderLista();
+</script>
+</body>
+</html>

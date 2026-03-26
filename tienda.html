@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kehilá — Tienda</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <style>
+    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; background: var(--color-bg); }
+    @media (max-width: 768px) { .main-content { margin-left: 0; } }
+    .page-inner { max-width: 1100px; margin: 0 auto; padding: 32px 32px 80px; }
+    @media (max-width: 768px) { .page-inner { padding: 20px 16px 88px; } }
+
+    /* Header */
+    .tienda-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; gap: 16px; }
+    .tienda-header-text h1 { font-family: var(--font-brand); font-size: 2rem; font-weight: 700; color: var(--color-primary); margin-bottom: 4px; }
+    .tienda-header-text p { color: var(--color-text-muted); font-size: 0.9rem; }
+    .cart-btn { position: relative; width: 48px; height: 48px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--color-text); box-shadow: var(--shadow-sm); transition: all var(--transition-fast); flex-shrink: 0; }
+    .cart-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .cart-btn svg { width: 22px; height: 22px; }
+    .cart-count { position: absolute; top: -6px; right: -6px; background: var(--color-danger); color: white; font-size: 0.65rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; display: none; }
+    .cart-count.visible { display: flex; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 4px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+    .tab-btn { flex: 1; padding: 10px 16px; border: none; border-radius: var(--radius-sm); background: transparent; font-family: var(--font-ui); font-size: 0.875rem; font-weight: 600; color: var(--color-text-muted); cursor: pointer; transition: all var(--transition-fast); }
+    .tab-btn.active { background: var(--color-primary); color: white; }
+
+    /* Filtros */
+    .filters-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-select { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: var(--font-ui); font-size: 0.875rem; color: var(--color-text); background: white; outline: none; cursor: pointer; }
+    .filter-select:focus { border-color: var(--color-primary); }
+
+    /* Grid productos */
+    .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    @media (max-width: 900px) { .products-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .products-grid { grid-template-columns: 1fr; } }
+
+    /* Card producto */
+    .product-card { background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); transition: box-shadow var(--transition-fast), transform var(--transition-fast); }
+    .product-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .product-cover { height: 140px; display: flex; align-items: center; justify-content: center; position: relative; }
+    .product-cover-book { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .product-cover-book-title { font-family: var(--font-brand); font-size: 0.85rem; font-weight: 700; color: white; text-align: center; line-height: 1.3; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .product-cover-judaica { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+    .product-badge { position: absolute; top: 10px; right: 10px; font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: var(--radius-full); }
+    .product-badge.mas-vendido { background: var(--color-gold); color: var(--color-primary-dark); }
+    .product-badge.nuevo { background: var(--color-success); color: white; }
+    .product-badge.hecho-a-mano { background: var(--color-gold); color: var(--color-primary-dark); }
+    .product-body { padding: 16px; }
+    .product-title { font-size: 0.9rem; font-weight: 700; color: var(--color-text); margin-bottom: 4px; line-height: 1.3; }
+    .product-author { font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 6px; }
+    .product-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .product-tag { font-size: 0.68rem; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-full); }
+    .product-tag.idioma { background: var(--color-info-light); color: var(--color-info); }
+    .product-tag.tipo { background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text-muted); }
+    .product-footer { display: flex; align-items: center; justify-content: space-between; }
+    .product-price { font-size: 1.1rem; font-weight: 700; color: var(--color-primary); }
+    .btn-cart { padding: 8px 14px; border: none; border-radius: var(--radius-sm); background: var(--color-primary); color: white; font-family: var(--font-ui); font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: background var(--transition-fast); display: flex; align-items: center; gap: 5px; }
+    .btn-cart:hover { background: var(--color-primary-dark); }
+    .btn-cart svg { width: 14px; height: 14px; }
+
+    /* Vinos */
+    .vino-card { background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .vino-cover { height: 120px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+    .vino-tinto { background: linear-gradient(135deg, #6B1A1A, #3D0D0D); }
+    .vino-blanco { background: linear-gradient(135deg, #D4C06A, #A89040); }
+    .vino-rosado { background: linear-gradient(135deg, #C47A8A, #8B3A4A); }
+    .vino-espumoso { background: linear-gradient(135deg, #C0B86A, #8B8040); }
+
+    /* Carrito panel */
+    .cart-panel { position: fixed; right: 0; top: 0; height: 100vh; width: 380px; background: white; box-shadow: -4px 0 24px rgba(27,46,94,0.15); z-index: 350; transform: translateX(100%); transition: transform 0.3s ease; display: flex; flex-direction: column; }
+    .cart-panel.open { transform: translateX(0); }
+    .cart-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 340; }
+    .cart-overlay.visible { display: block; }
+    @media (max-width: 480px) { .cart-panel { width: 100vw; } }
+    .cart-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between; }
+    .cart-header h3 { font-family: var(--font-brand); font-size: 1.2rem; font-weight: 700; color: var(--color-primary); }
+    .cart-close { width: 32px; height: 32px; border: none; background: var(--color-bg); border-radius: 50%; cursor: pointer; font-size: 1.1rem; color: var(--color-text-muted); transition: background var(--transition-fast); }
+    .cart-close:hover { background: var(--color-border); }
+    .cart-items { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+    .cart-item { display: flex; gap: 12px; align-items: center; }
+    .cart-item-cover { width: 44px; height: 44px; border-radius: var(--radius-sm); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 0.82rem; font-weight: 600; color: var(--color-text); line-height: 1.3; }
+    .cart-item-price { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 2px; }
+    .cart-item-qty { display: flex; align-items: center; gap: 6px; }
+    .qty-btn { width: 24px; height: 24px; border: 1px solid var(--color-border); border-radius: 4px; background: white; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: var(--color-text); display: flex; align-items: center; justify-content: center; transition: all var(--transition-fast); }
+    .qty-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .qty-num { font-size: 0.85rem; font-weight: 600; min-width: 16px; text-align: center; }
+    .cart-item-del { background: none; border: none; cursor: pointer; color: var(--color-text-light); font-size: 1rem; padding: 4px; transition: color var(--transition-fast); }
+    .cart-item-del:hover { color: var(--color-danger); }
+    .cart-empty { text-align: center; padding: 40px 20px; color: var(--color-text-muted); }
+    .cart-empty svg { width: 40px; height: 40px; margin: 0 auto 12px; display: block; opacity: 0.3; }
+    .cart-footer { padding: 16px 20px; border-top: 1px solid var(--color-border); }
+    .cart-subtotal { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 6px; }
+    .cart-envio { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--color-text-muted); margin-bottom: 10px; }
+    .cart-total { display: flex; justify-content: space-between; font-size: 1rem; font-weight: 700; color: var(--color-text); margin-bottom: 16px; padding-top: 10px; border-top: 1px solid var(--color-border); }
+    .btn-checkout { width: 100%; padding: 12px; border: none; border-radius: var(--radius-sm); background: var(--color-gold); color: var(--color-primary-dark); font-family: var(--font-ui); font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: opacity var(--transition-fast); margin-bottom: 8px; }
+    .btn-checkout:hover { opacity: 0.9; }
+    .btn-vaciar { background: none; border: none; cursor: pointer; color: var(--color-danger); font-size: 0.8rem; text-decoration: underline; display: block; margin: 0 auto; }
+
+    /* Modal checkout */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 400; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: white; border-radius: var(--radius-lg); max-width: 460px; width: 100%; padding: 32px; text-align: center; box-shadow: var(--shadow-xl); }
+    .modal h3 { font-family: var(--font-brand); font-size: 1.4rem; font-weight: 700; color: var(--color-primary); margin-bottom: 12px; }
+    .modal p { font-size: 0.9rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 20px; }
+    .btn-modal-ok { padding: 12px 32px; border: none; border-radius: var(--radius-sm); background: var(--color-primary); color: white; font-family: var(--font-ui); font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="sidebar-placeholder"></div>
+  <div class="main-content">
+    <div class="page-inner">
+
+      <!-- Header -->
+      <div class="tienda-header">
+        <div class="tienda-header-text">
+          <h1>Tienda Kehilá</h1>
+          <p>Libros, judaica y artículos para el hogar judío</p>
+        </div>
+        <button class="cart-btn" onclick="toggleCart()" title="Ver carrito">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"/></svg>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('libros', this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg> Librería</button>
+        <button class="tab-btn" onclick="switchTab('judaica', this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg> Judaica &amp; Artículos</button>
+        <button class="tab-btn" onclick="switchTab('vinos', this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15M14.25 3.104c.251.023.501.05.75.082M19.8 15a2.25 2.25 0 0 1 2.144 1.684 2.25 2.25 0 0 1-2.144 2.816H4.2a2.25 2.25 0 0 1-2.144-2.816A2.25 2.25 0 0 1 4.2 15h15.6ZM12 12.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"/></svg> Vinos &amp; Bebidas</button>
+      </div>
+
+      <!-- Tab Libros -->
+      <div id="tab-libros">
+        <div class="filters-bar">
+          <select class="filter-select" id="libroIdioma" onchange="renderLibros()">
+            <option value="">Todos los idiomas</option>
+            <option>ES</option><option>HE</option><option>EN</option>
+          </select>
+          <select class="filter-select" id="libroCat" onchange="renderLibros()">
+            <option value="">Todas las categorías</option>
+            <option>Torah y Tanaj</option><option>Talmud</option><option>Halajá</option>
+            <option>Majshavá</option><option>Historia</option><option>Hebreo</option>
+            <option>Infantil</option><option>Novela</option>
+          </select>
+        </div>
+        <div class="products-grid" id="librosGrid"></div>
+      </div>
+
+      <!-- Tab Judaica -->
+      <div id="tab-judaica" style="display:none">
+        <div class="products-grid" id="judaicaGrid"></div>
+      </div>
+
+      <!-- Tab Vinos -->
+      <div id="tab-vinos" style="display:none">
+        <div class="filters-bar">
+          <select class="filter-select" id="vinoTipo" onchange="renderVinos()">
+            <option value="">Todos los tipos</option>
+            <option>Tinto</option><option>Blanco</option><option>Rosado</option><option>Espumoso</option>
+          </select>
+          <select class="filter-select" id="vinoMevushal" onchange="renderVinos()">
+            <option value="">Todos</option>
+            <option value="1">Solo Mevushal</option>
+          </select>
+        </div>
+        <div class="products-grid" id="vinosGrid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Cart Panel -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <div class="cart-panel" id="cartPanel">
+    <div class="cart-header">
+      <h3><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"/></svg> Tu carrito</h3>
+      <button class="cart-close" onclick="toggleCart()">×</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer" id="cartFooter"></div>
+  </div>
+
+  <!-- Modal Checkout -->
+  <div class="modal-overlay" id="modalCheckout">
+    <div class="modal">
+      <div style="font-size:3rem;margin-bottom:8px"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:48px;height:48px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg></div>
+      <h3>Pago seguro</h3>
+      <p>En la versión completa esta pantalla conectaría con <strong>Stripe</strong> para procesar el pago de forma segura.<br><br>¡Gracias por tu compra desde la comunidad Kehilá!</p>
+      <button class="btn-modal-ok" onclick="document.getElementById('modalCheckout').classList.remove('open')">Entendido</button>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    const LIBROS = [
+      { id:'l1', titulo:'Shulján Aruj completo', autor:'Rav Yosef Karo', editorial:'Machon Yerushalayim', categoria:'Halajá', idioma:'HE/ES', precio:45.00, badge:'', portadaColor:'#1B2E5E' },
+      { id:'l2', titulo:'Historia de los judíos en España', autor:'Haim Beinart', editorial:'Riopiedras', categoria:'Historia', idioma:'ES', precio:28.00, badge:'', portadaColor:'#2A4080' },
+      { id:'l3', titulo:'Aprende Hebreo Bíblico', autor:'Thomas Lambdin', editorial:'Verbo Divino', categoria:'Hebreo', idioma:'ES', precio:22.00, badge:'mas-vendido', portadaColor:'#C9A84C' },
+      { id:'l4', titulo:'El Tania', autor:'Rabi Schneur Zalman', editorial:'Kehot', categoria:'Majshavá', idioma:'ES', precio:18.00, badge:'', portadaColor:'#4A5568' },
+      { id:'l5', titulo:'Cuentos del Baal Shem Tov', autor:'Sifrei Hasidim', editorial:'Kehilá Ed.', categoria:'Infantil', idioma:'ES', precio:15.00, badge:'nuevo', portadaColor:'#1B2E5E' },
+      { id:'l6', titulo:'Responsa contemporánea', autor:'Rav Ovadia Yosef', editorial:'Yavia Omer', categoria:'Halajá', idioma:'ES', precio:35.00, badge:'', portadaColor:'#2A4080' },
+      { id:'l7', titulo:'La Hagadá ilustrada', autor:'Varios autores', editorial:'Koren', categoria:'Torah y Tanaj', idioma:'ES/HE', precio:32.00, badge:'mas-vendido', portadaColor:'#C9A84C' },
+      { id:'l8', titulo:'Mishná Berurá resumida', autor:'Jafetz Jaim', editorial:'Feldheim ES', categoria:'Halajá', idioma:'ES', precio:29.00, badge:'nuevo', portadaColor:'#4A5568' }
+    ];
+
+    const JUDAICA = [
+      { id:'j1', titulo:'Tefilim Beit Yosef', desc:'Pergamino kasher certificado', categoria:'Tefilim', precio:280.00, emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg>', badge:'hecho-a-mano', bgColor:'#1B2E5E' },
+      { id:'j2', titulo:'Mezuzá grabada plateada', desc:'Plata 925, grabado personalizable', categoria:'Mezuzot', precio:85.00, emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>', badge:'', bgColor:'#6B7280' },
+      { id:'j3', titulo:'Jánukiá artesanal Jerusalem', desc:'Latón trabajado a mano, 30cm', categoria:'Jánukiot', precio:120.00, emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/></svg>', badge:'hecho-a-mano', bgColor:'#C9A84C' },
+      { id:'j4', titulo:'Kidush de plata', desc:'Plata bañada, capacidad 250ml', categoria:'Candelabros', precio:65.00, emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15M14.25 3.104c.251.023.501.05.75.082M19.8 15a2.25 2.25 0 0 1 2.144 1.684 2.25 2.25 0 0 1-2.144 2.816H4.2a2.25 2.25 0 0 1-2.144-2.816A2.25 2.25 0 0 1 4.2 15h15.6ZM12 12.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"/></svg>', badge:'', bgColor:'#2A4080' },
+      { id:'j5', titulo:'Pulsera Chai dorada', desc:'Oro 18k, símbolo Chai', categoria:'Joyas', precio:95.00, emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>', badge:'nuevo', bgColor:'#A8892E' },
+      { id:'j6', titulo:'Tallit Beit Yosef', desc:'Lana merino, ataroth plateado', categoria:'Ropa festiva', precio:180.00, emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>', badge:'hecho-a-mano', bgColor:'#1B2E5E' }
+    ];
+
+    const VINOS = [
+      { id:'v1', nombre:'Yarden Cabernet Sauvignon', bodega:'Golan Heights Winery', pais:'Israel', tipo:'Tinto', hashgaja:'OU Kosher', precio:28.50, mevushal:false },
+      { id:'v2', nombre:'Bartenura Moscato', bodega:'Bartenura', pais:'Italia', tipo:'Espumoso', hashgaja:'OU Kosher', precio:18.00, mevushal:true },
+      { id:'v3', nombre:'Psagot Edom', bodega:'Psagot Winery', pais:'Israel', tipo:'Tinto', hashgaja:'Badatz', precio:32.00, mevushal:false },
+      { id:'v4', nombre:'Elvi Herenza Blanco', bodega:'Elvi Wines', pais:'España', tipo:'Blanco', hashgaja:'OU Kosher', precio:22.00, mevushal:true },
+      { id:'v5', nombre:'Ramon Cardova Rioja', bodega:'Ramon Cardova', pais:'España', tipo:'Tinto', hashgaja:'OU Kosher', precio:19.50, mevushal:true },
+      { id:'v6', nombre:'Pacifica Chardonnay', bodega:'Hagafen', pais:'USA', tipo:'Blanco', hashgaja:'OU Kosher', precio:24.00, mevushal:false }
+    ];
+
+    // Carrito
+    let cart = JSON.parse(localStorage.getItem('kehila_cart') || '[]');
+
+    function saveCart() { localStorage.setItem('kehila_cart', JSON.stringify(cart)); updateCartUI(); }
+
+    function addToCart(id, type) {
+      const items = type === 'libro' ? LIBROS : type === 'judaica' ? JUDAICA : VINOS;
+      const item = items.find(x => x.id === id);
+      if (!item) return;
+      const existing = cart.find(c => c.id === id);
+      if (existing) { existing.qty++; } else { cart.push({ id, type, qty:1, name: item.titulo || item.nombre, precio: item.precio, emoji: item.emoji || '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>', bgColor: item.portadaColor || item.bgColor || '#1B2E5E' }); }
+      saveCart();
+      showToast('Añadido al carrito', 'success');
+    }
+
+    function updateQty(id, delta) {
+      const item = cart.find(c => c.id === id);
+      if (!item) return;
+      item.qty = Math.max(1, item.qty + delta);
+      saveCart();
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(c => c.id !== id);
+      saveCart();
+    }
+
+    function updateCartUI() {
+      const total = cart.reduce((s, c) => s + c.qty, 0);
+      const countEl = document.getElementById('cartCount');
+      countEl.textContent = total;
+      countEl.classList.toggle('visible', total > 0);
+      renderCartPanel();
+    }
+
+    function renderCartPanel() {
+      const itemsEl = document.getElementById('cartItems');
+      const footerEl = document.getElementById('cartFooter');
+      if (cart.length === 0) {
+        itemsEl.innerHTML = `<div class="cart-empty"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"/></svg><p>Tu carrito está vacío</p></div>`;
+        footerEl.innerHTML = '';
+        return;
+      }
+      itemsEl.innerHTML = cart.map(c => `
+        <div class="cart-item">
+          <div class="cart-item-cover" style="background:${c.bgColor}">${c.emoji || ''}</div>
+          <div class="cart-item-info">
+            <div class="cart-item-name">${c.name}</div>
+            <div class="cart-item-price">€${c.precio.toFixed(2)}</div>
+          </div>
+          <div class="cart-item-qty">
+            <button class="qty-btn" onclick="updateQty('${c.id}',-1)">−</button>
+            <span class="qty-num">${c.qty}</span>
+            <button class="qty-btn" onclick="updateQty('${c.id}',1)">+</button>
+          </div>
+          <button class="cart-item-del" onclick="removeFromCart('${c.id}')">×</button>
+        </div>
+      `).join('');
+      const subtotal = cart.reduce((s, c) => s + c.qty * c.precio, 0);
+      footerEl.innerHTML = `
+        <div class="cart-subtotal"><span>Subtotal</span><span>€${subtotal.toFixed(2)}</span></div>
+        <div class="cart-envio"><span>Gastos de envío</span><span style="color:var(--color-text-muted)">A calcular</span></div>
+        <div class="cart-total"><span>Total</span><span>€${subtotal.toFixed(2)}</span></div>
+        <button class="btn-checkout" onclick="checkout()">Finalizar compra</button>
+        <button class="btn-vaciar" onclick="vaciarCarrito()">Vaciar carrito</button>
+      `;
+    }
+
+    function toggleCart() {
+      document.getElementById('cartPanel').classList.toggle('open');
+      document.getElementById('cartOverlay').classList.toggle('visible');
+    }
+
+    function checkout() {
+      document.getElementById('modalCheckout').classList.add('open');
+    }
+
+    function vaciarCarrito() {
+      cart = [];
+      saveCart();
+      showToast('Carrito vaciado', 'info');
+    }
+
+    function switchTab(name, btn) {
+      ['libros','judaica','vinos'].forEach(t => {
+        document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
+      });
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function renderLibros() {
+      const idioma = document.getElementById('libroIdioma').value;
+      const cat = document.getElementById('libroCat').value;
+      const filtered = LIBROS.filter(l => (!idioma || l.idioma.includes(idioma)) && (!cat || l.categoria === cat));
+      document.getElementById('librosGrid').innerHTML = filtered.map(l => `
+        <div class="product-card">
+          <div class="product-cover product-cover-book" style="background:${l.portadaColor}">
+            <span class="product-cover-book-title">${l.titulo}</span>
+            ${l.badge ? `<span class="product-badge ${l.badge}">${l.badge === 'mas-vendido' ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg> Más vendido' : 'Nuevo'}</span>` : ''}
+          </div>
+          <div class="product-body">
+            <div class="product-title">${l.titulo}</div>
+            <div class="product-author">${l.autor} · ${l.editorial}</div>
+            <div class="product-tags">
+              <span class="product-tag idioma">${l.idioma}</span>
+              <span class="product-tag tipo">${l.categoria}</span>
+            </div>
+            <div class="product-footer">
+              <span class="product-price">€${l.precio.toFixed(2)}</span>
+              <button class="btn-cart" onclick="addToCart('${l.id}','libro')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                Añadir
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderJudaica() {
+      document.getElementById('judaicaGrid').innerHTML = JUDAICA.map(j => `
+        <div class="product-card">
+          <div class="product-cover" style="background:${j.bgColor}">
+            <div class="product-cover-judaica">${j.emoji}</div>
+            ${j.badge ? `<span class="product-badge ${j.badge}">${j.badge === 'hecho-a-mano' ? 'Hecho a mano' : 'Nuevo'}</span>` : ''}
+          </div>
+          <div class="product-body">
+            <div class="product-title">${j.titulo}</div>
+            <div class="product-author">${j.desc}</div>
+            <div class="product-tags"><span class="product-tag tipo">${j.categoria}</span></div>
+            <div class="product-footer">
+              <span class="product-price">€${j.precio.toFixed(2)}</span>
+              <button class="btn-cart" onclick="addToCart('${j.id}','judaica')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                Añadir
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderVinos() {
+      const tipo = document.getElementById('vinoTipo').value;
+      const mevushal = document.getElementById('vinoMevushal').value;
+      const filtered = VINOS.filter(v => (!tipo || v.tipo === tipo) && (!mevushal || v.mevushal));
+      const colorClass = { Tinto:'vino-tinto', Blanco:'vino-blanco', Rosado:'vino-rosado', Espumoso:'vino-espumoso' };
+      document.getElementById('vinosGrid').innerHTML = filtered.map(v => `
+        <div class="product-card">
+          <div class="product-cover ${colorClass[v.tipo] || 'vino-tinto'}">
+            <span style="font-size:2.5rem"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:40px;height:40px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15M14.25 3.104c.251.023.501.05.75.082M19.8 15a2.25 2.25 0 0 1 2.144 1.684 2.25 2.25 0 0 1-2.144 2.816H4.2a2.25 2.25 0 0 1-2.144-2.816A2.25 2.25 0 0 1 4.2 15h15.6ZM12 12.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"/></svg></span>
+          </div>
+          <div class="product-body">
+            <div class="product-title">${v.nombre}</div>
+            <div class="product-author">${v.bodega} · ${v.pais}</div>
+            <div class="product-tags">
+              <span class="product-tag tipo">${v.tipo}</span>
+              <span class="product-tag idioma">${v.hashgaja}</span>
+              ${v.mevushal ? '<span class="product-tag tipo">Mevushal</span>' : ''}
+            </div>
+            <div class="product-footer">
+              <span class="product-price">€${v.precio.toFixed(2)}</span>
+              <button class="btn-cart" onclick="addToCart('${v.id}','vino')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                Añadir
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    initNav('tienda');
+    renderLibros();
+    renderJudaica();
+    renderVinos();
+    updateCartUI();
+  </script>
+</body>
+</html>
