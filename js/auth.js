@@ -144,7 +144,7 @@ async function register(email, password, name) {
   });
 
   if (error) return { ok: false, error: error.message };
-  return { ok: true, data };
+  return { ok: true, userId: data.user?.id, data };
 }
 
 // ─── Logout ───────────────────────────────────

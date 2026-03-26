@@ -351,8 +351,11 @@ async function regSubmit() {
     }
     // ── Guardar campos extra en profiles ──
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
-    if (sb) {
-      await sb.from('profiles').update({
+    if (sb && result.userId) {
+      // Esperamos un momento para que el trigger de Supabase cree la fila primero
+      await new Promise(r => setTimeout(r, 1500));
+      await sb.from('profiles').upsert({
+        id:              result.userId,
         telefono:        (REG.data.telefonoPrefijo || '+34') + ' ' + (REG.data.telefono || ''),
         doc_tipo:        REG.data.docTipo        || null,
         doc_numero:      REG.data.docNumero      || null,
@@ -368,7 +371,7 @@ async function regSubmit() {
         familiar:        REG.data.familiar       || false,
         familiar_nombre: REG.data.familiarNombre || null,
         como_conocio:    REG.data.comoConocio    || null
-      }).eq('email', REG.data.email);
+      }, { onConflict: 'id', ignoreDuplicates: false });
     }
   }
 

@@ -1126,10 +1126,8 @@
           <td id="status-cell-${u.userId}">${badgeStatus(u.status)}</td>
           <td class="hide-md" style="font-size:.8rem;color:var(--color-text-muted);">${formatDate(u.joinDate)}</td>
           <td>
-            <div class="action-btns" style="flex-wrap:wrap;">
-              ${actions.replace('<div class="action-btns">', '').replace('</div>', '')}
-              ${u.source === 'real' ? `<button class="btn btn-sm btn-ghost" onclick="verPerfil('${u.userId}')">👁 Ver</button>` : ''}
-            </div>
+            ${actions}
+            ${u.source === 'real' ? `<button class="btn btn-sm btn-ghost" style="margin-top:4px;display:block;" onclick="verPerfil('${u.userId}')">👁 Ver perfil</button>` : ''}
           </td>
         </tr>`;
     }).join('');
