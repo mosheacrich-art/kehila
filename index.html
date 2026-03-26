@@ -905,6 +905,7 @@
   </div>
   <!-- FIN PANEL FORMULARIO -->
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/auth.js"></script>
   <script src="js/data.js"></script>
   <script>
@@ -1076,38 +1077,44 @@
 
       if (hasError) return;
 
-      // Login usando USERS_DB de auth.js
-      const result = login(email, password);
+      // Deshabilitar botón mientras carga
+      const submitBtn = this.querySelector('button[type="submit"]');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Entrando...'; }
 
-      if (!result.ok) {
-        const msg = `
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
-          </svg>
-          <span>${result.error}</span>
-        `;
-        showLoginMessage('error', msg);
-        return;
-      }
+      // Login (async: soporta Supabase y mock)
+      login(email, password).then(result => {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Entrar'; }
 
-      if (result.status === 'pending') {
-        const msg = `
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-          </svg>
-          <span>Tu solicitud está siendo revisada. Te avisaremos cuando sea aprobada.</span>
-        `;
-        showLoginMessage('warning', msg);
-        return;
-      }
+        if (!result.ok) {
+          const msg = `
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+            </svg>
+            <span>${result.error}</span>
+          `;
+          showLoginMessage('error', msg);
+          return;
+        }
 
-      // Login correcto — redirigir
-      const user = getCurrentUser();
-      if (user && user.role === 'admin') {
-        window.location.href = 'admin.html';
-      } else {
-        window.location.href = 'home.html';
-      }
+        if (result.status === 'pending') {
+          const msg = `
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+            <span>Tu solicitud está siendo revisada. Te avisaremos cuando sea aprobada.</span>
+          `;
+          showLoginMessage('warning', msg);
+          return;
+        }
+
+        // Login correcto — redirigir
+        const user = getCurrentUser();
+        if (user && user.role === 'admin') {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'home.html';
+        }
+      });
     });
 
     /* ─── FORMULARIO REGISTRO ─── */

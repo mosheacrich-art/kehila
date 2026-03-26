@@ -1,8 +1,23 @@
 /* =============================================
    KEHILÁ — auth.js
-   Simulación de autenticación sin backend
+   Autenticación real con Supabase + fallback mock
    ============================================= */
 
+// ─── Configuración Supabase ───────────────────
+const SUPABASE_URL = 'https://vvrvuhugpvqytelhsdnk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2cnZ1aHVncHZxeXRlbGhzZG5rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjczOTIsImV4cCI6MjA5MDEwMzM5Mn0.R14q9fe0zcaXDvZgTcan4yerg7hYfBfaxWs1kN-zIl0';
+
+// Cliente Supabase (se inicializa si la librería está disponible)
+let _supabase = null;
+function getSupabase() {
+  if (_supabase) return _supabase;
+  if (typeof window !== 'undefined' && window.supabase) {
+    _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+  return _supabase;
+}
+
+// ─── Datos mock (siguen funcionando) ─────────
 const USERS_DB = {
   'admin@kehila.es': {
     userId: 'u001',
@@ -38,36 +53,58 @@ const USERS_DB = {
 
 const SESSION_KEY = 'kehila_user';
 
+// ─── Login ────────────────────────────────────
 /**
- * Intenta hacer login con email y contraseña.
- * @returns {{ ok: boolean, error?: string }}
+ * Login: intenta Supabase primero, si falla usa mock.
  */
-function login(email, password) {
+async function login(email, password) {
+  const sb = getSupabase();
+
+  // ── Supabase real ──
+  if (sb) {
+    try {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (!error && data.user) {
+        // Obtener perfil
+        const { data: profile } = await sb
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profile && profile.status === 'banned') {
+          await sb.auth.signOut();
+          return { ok: false, error: 'Tu cuenta ha sido suspendida. Contacta al administrador.' };
+        }
+
+        const sessionData = {
+          userId: data.user.id,
+          name: profile?.name || email.split('@')[0],
+          email: data.user.email,
+          role: profile?.role || 'miembro',
+          status: profile?.status || 'pending',
+          comunidad: profile?.comunidad || 'Bet El Madrid',
+          initials: profile?.initials || email.slice(0, 2).toUpperCase(),
+          loginAt: new Date().toISOString(),
+          source: 'supabase'
+        };
+        localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+        return { ok: true, status: profile?.status || 'active' };
+      }
+      // Si el error es de credenciales, no caer al mock
+      if (error && (error.message.includes('Invalid') || error.message.includes('invalid'))) {
+        return { ok: false, error: 'Email o contraseña incorrectos.' };
+      }
+    } catch (e) {
+      console.warn('Supabase no disponible, usando mock:', e.message);
+    }
+  }
+
+  // ── Fallback mock ──
   const user = USERS_DB[email.toLowerCase().trim()];
-  if (!user) {
-    return { ok: false, error: 'No existe una cuenta con este correo electrónico.' };
-  }
-  if (user.password !== password) {
-    return { ok: false, error: 'Contraseña incorrecta. Inténtalo de nuevo.' };
-  }
-  if (user.status === 'banned') {
-    return { ok: false, error: 'Tu cuenta ha sido suspendida. Contacta al administrador.' };
-  }
-  if (user.status === 'pending') {
-    // Sí se permite entrar pero con rol limitado
-    const sessionData = {
-      userId: user.userId,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      status: user.status,
-      comunidad: user.comunidad,
-      initials: user.initials,
-      loginAt: new Date().toISOString()
-    };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-    return { ok: true, status: 'pending' };
-  }
+  if (!user) return { ok: false, error: 'No existe una cuenta con este correo electrónico.' };
+  if (user.password !== password) return { ok: false, error: 'Contraseña incorrecta. Inténtalo de nuevo.' };
+  if (user.status === 'banned') return { ok: false, error: 'Tu cuenta ha sido suspendida. Contacta al administrador.' };
 
   const sessionData = {
     userId: user.userId,
@@ -77,23 +114,44 @@ function login(email, password) {
     status: user.status,
     comunidad: user.comunidad,
     initials: user.initials,
-    loginAt: new Date().toISOString()
+    loginAt: new Date().toISOString(),
+    source: 'mock'
   };
   localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-  return { ok: true, status: 'active' };
+  return { ok: true, status: user.status };
 }
 
+// ─── Registro ─────────────────────────────────
 /**
- * Cierra la sesión y redirige a login.
+ * Registro de nuevo usuario en Supabase.
  */
-function logout() {
+async function register(email, password, name) {
+  const sb = getSupabase();
+  if (!sb) return { ok: false, error: 'Registro solo disponible con conexión a internet.' };
+
+  const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password,
+    options: { data: { name, initials } }
+  });
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, data };
+}
+
+// ─── Logout ───────────────────────────────────
+async function logout() {
+  const sb = getSupabase();
+  if (sb) {
+    try { await sb.auth.signOut(); } catch (e) {}
+  }
   localStorage.removeItem(SESSION_KEY);
   window.location.href = 'index.html';
 }
 
-/**
- * Devuelve el usuario de la sesión actual o null.
- */
+// ─── Sesión actual ────────────────────────────
 function getCurrentUser() {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
@@ -104,10 +162,7 @@ function getCurrentUser() {
   }
 }
 
-/**
- * Redirige a login si no hay sesión activa.
- * Llámalo al inicio de cada página protegida.
- */
+// ─── Guards ───────────────────────────────────
 function requireAuth() {
   const user = getCurrentUser();
   if (!user) {
@@ -117,9 +172,6 @@ function requireAuth() {
   return user;
 }
 
-/**
- * Redirige a home si el usuario no es admin.
- */
 function requireAdmin() {
   const user = requireAuth();
   if (!user) return null;
@@ -130,33 +182,25 @@ function requireAdmin() {
   return user;
 }
 
-/**
- * Devuelve true si el usuario actual es admin.
- */
 function isAdmin() {
   const user = getCurrentUser();
   return user && user.role === 'admin';
 }
 
-/**
- * Genera el color de avatar según el nombre (0-7).
- */
+// ─── Helpers ──────────────────────────────────
 function getAvatarColor(name) {
   if (!name) return '0';
   const code = name.charCodeAt(0) + (name.charCodeAt(1) || 0);
   return String(code % 8);
 }
 
-/**
- * Crea el HTML de un avatar con iniciales.
- */
 function renderAvatar(user, size = 'md') {
   const color = getAvatarColor(user.name || user.initials || 'U');
   const initials = user.initials || (user.name ? user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '??');
   return `<div class="avatar avatar-${size}" data-color="${color}">${initials}</div>`;
 }
 
-// Auto-inicializar requireAuth en todas las páginas excepto index.html
+// ─── Auto-init ────────────────────────────────
 (function () {
   const isLoginPage = window.location.pathname.endsWith('index.html') ||
                       window.location.pathname === '/' ||
