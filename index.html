@@ -1346,39 +1346,7 @@
     setupPasswordToggle('login-password', 'toggle-login-pw', 'eye-show-login', 'eye-hide-login');
     setupPasswordToggle('reg-password', 'toggle-reg-pw', 'eye-show-reg', 'eye-hide-reg');
 
-    /* ─── Indicador de fortaleza ─── */
-    function getPasswordStrength(pw) {
-      let score = 0;
-      if (pw.length >= 8) score++;
-      if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
-      if (/\d/.test(pw)) score++;
-      if (/[^A-Za-z0-9]/.test(pw)) score++;
-      if (pw.length >= 12) score++;
-      if (score <= 1) return 'weak';
-      if (score <= 3) return 'medium';
-      return 'strong';
-    }
-
-    const strengthLabels = { weak: 'Débil', medium: 'Media', strong: 'Fuerte' };
-
-    document.getElementById('reg-password').addEventListener('input', function () {
-      const pw = this.value;
-      const container = document.getElementById('strength-container');
-      if (!pw) { container.style.display = 'none'; return; }
-      container.style.display = '';
-
-      const level = getPasswordStrength(pw);
-      const segments = [document.getElementById('seg1'), document.getElementById('seg2'), document.getElementById('seg3')];
-      const filled = level === 'weak' ? 1 : level === 'medium' ? 2 : 3;
-
-      segments.forEach((seg, i) => {
-        seg.className = 'strength-segment' + (i < filled ? ` filled ${level}` : '');
-      });
-
-      const label = document.getElementById('strength-label');
-      label.textContent = strengthLabels[level];
-      label.className = `strength-label ${level}`;
-    });
+    /* Indicador de fortaleza gestionado por registro.js */
 
     /* ─── Rellenar demo ─── */
     document.querySelectorAll('.demo-fill').forEach(btn => {
@@ -1460,90 +1428,7 @@
       });
     });
 
-    /* ─── FORMULARIO REGISTRO ─── */
-    document.getElementById('register-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const nombre    = document.getElementById('reg-nombre').value.trim();
-      const apellidos = document.getElementById('reg-apellidos').value.trim();
-      const email     = document.getElementById('reg-email').value.trim();
-      const password  = document.getElementById('reg-password').value;
-      const confirm   = document.getElementById('reg-confirm').value;
-      const terms     = document.getElementById('reg-terms').checked;
-
-      // Limpiar errores previos
-      ['err-nombre','err-apellidos','err-email','err-password','err-confirm','err-terms'].forEach(clearError);
-      ['reg-nombre','reg-apellidos','reg-email','reg-password','reg-confirm'].forEach(id => markInput(id, false));
-
-      let valid = true;
-
-      if (!nombre) {
-        showError('err-nombre', 'El nombre es obligatorio.');
-        markInput('reg-nombre', true);
-        valid = false;
-      }
-
-      if (!apellidos) {
-        showError('err-apellidos', 'Los apellidos son obligatorios.');
-        markInput('reg-apellidos', true);
-        valid = false;
-      }
-
-      if (!email) {
-        showError('err-email', 'El correo es obligatorio.');
-        markInput('reg-email', true);
-        valid = false;
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showError('err-email', 'Introduce un correo válido.');
-        markInput('reg-email', true);
-        valid = false;
-      }
-
-      if (!password) {
-        showError('err-password', 'La contraseña es obligatoria.');
-        markInput('reg-password', true);
-        valid = false;
-      } else if (password.length < 8) {
-        showError('err-password', 'La contraseña debe tener al menos 8 caracteres.');
-        markInput('reg-password', true);
-        valid = false;
-      }
-
-      if (!confirm) {
-        showError('err-confirm', 'Debes confirmar la contraseña.');
-        markInput('reg-confirm', true);
-        valid = false;
-      } else if (password && confirm !== password) {
-        showError('err-confirm', 'Las contraseñas no coinciden.');
-        markInput('reg-confirm', true);
-        valid = false;
-      }
-
-      if (!terms) {
-        showError('err-terms', 'Debes aceptar las condiciones de uso para continuar.');
-        valid = false;
-      }
-
-      if (!valid) return;
-
-      // Deshabilitar botón mientras registra
-      const regBtn = this.querySelector('button[type="submit"]');
-      if (regBtn) { regBtn.disabled = true; regBtn.textContent = 'Registrando...'; }
-
-      const fullName = nombre + ' ' + apellidos;
-
-      register(email, password, fullName).then(result => {
-        if (regBtn) { regBtn.disabled = false; regBtn.textContent = 'Solicitar membresía'; }
-
-        if (!result.ok) {
-          showError('err-terms', result.error);
-          return;
-        }
-
-        // Éxito → mostrar pantalla de confirmación
-        showSuccess();
-      });
-    });
+    /* ─── FORMULARIO REGISTRO: gestionado por js/registro.js ─── */
 
     /* ─── Limpiar error al escribir ─── */
     document.getElementById('login-email').addEventListener('input', function () {
