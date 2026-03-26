@@ -370,8 +370,15 @@ async function regSubmit() {
         }
       }
 
+      const initials = fullName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
       const { error: upsertErr } = await sb.from('profiles').upsert({
         id:              result.userId,
+        name:            fullName,
+        email:           REG.data.email,
+        initials:        initials,
+        role:            'miembro',
+        status:          'pending',
+        comunidad:       'Bet El Madrid',
         telefono:        (REG.data.telefonoPrefijo || '+34') + ' ' + (REG.data.telefono || ''),
         doc_tipo:        REG.data.docTipo        || null,
         doc_numero:      REG.data.docNumero      || null,
