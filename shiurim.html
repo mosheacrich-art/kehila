@@ -931,6 +931,14 @@
               <label>URL del archivo (opcional)</label>
               <input type="url" id="pub-url" placeholder="https://…">
             </div>
+            <div class="form-group full">
+              <label>Foto del shiur</label>
+              <div style="border:2px dashed #ddd;border-radius:10px;padding:20px;text-align:center;cursor:pointer;" onclick="document.getElementById('pub-img-file').click()">
+                <img id="pub-img-preview" style="display:none;max-height:130px;border-radius:8px;margin-bottom:8px;max-width:100%;">
+                <div id="pub-img-ph" style="color:#888;font-size:0.85rem;">📷 Toca para subir foto</div>
+              </div>
+              <input type="file" id="pub-img-file" accept="image/*" style="display:none;">
+            </div>
             <div class="form-group full" id="pub-texto-wrap" style="display:none;">
               <label>Contenido de texto</label>
               <textarea id="pub-texto" class="textarea-content" placeholder="Escribe aquí el contenido del shiur en formato texto…"></textarea>
@@ -949,9 +957,11 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/data.js"></script>
+  <script src="js/media.js"></script>
   <script>
   (function () {
     'use strict';
@@ -1044,6 +1054,19 @@
         shiurimData = MOCK_SHIURIM_V2.slice();
       }
     } catch (e) { console.warn('data.js not loaded', e); }
+
+    // Cargar shiurim desde Supabase
+    (async function() {
+      try {
+        const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+        if (!sb) return;
+        const { data } = await sb.from('shiurim').select('*').order('created_at', { ascending: false });
+        if (data?.length) {
+          data.forEach(s => shiurimData.unshift(s));
+          renderGrid();
+        }
+      } catch(e) { console.warn('shiurim supabase:', e); }
+    })();
 
     // ── Render grid ──────────────────────────────────────────
 
@@ -1346,8 +1369,22 @@
       });
     } catch (e) { console.warn('pub-formato change error', e); }
 
+    // Preview imagen shiur
     try {
-      document.getElementById('submit-publish').addEventListener('click', function () {
+      document.getElementById('pub-img-file').addEventListener('change', function() {
+        const file = this.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          document.getElementById('pub-img-preview').src = e.target.result;
+          document.getElementById('pub-img-preview').style.display = 'block';
+          document.getElementById('pub-img-ph').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      });
+    } catch(e) {}
+
+    try {
+      document.getElementById('submit-publish').addEventListener('click', async function () {
         try {
           const titulo   = document.getElementById('pub-titulo').value.trim();
           const maestro  = document.getElementById('pub-maestro').value.trim();
@@ -1355,16 +1392,35 @@
             showToastLocal('Título y maestro son obligatorios', 'error');
             return;
           }
+
+          const submitBtn = document.getElementById('submit-publish');
+          submitBtn.textContent = 'Publicando...'; submitBtn.disabled = true;
+
           const categoria = document.getElementById('pub-categoria').value;
           const formato   = document.getElementById('pub-formato').value;
           const nivel     = parseInt(document.getElementById('pub-nivel').value, 10);
           const duracion  = document.getElementById('pub-duracion').value.trim() || '—';
           const desc      = document.getElementById('pub-descripcion').value.trim() || 'Nuevo shiur publicado en la comunidad.';
           const today     = new Date().toISOString().slice(0, 10);
-          const newId     = 'sv' + Date.now();
 
-          const newShiur = { id: newId, titulo, maestro, categoria, formato, duracion, nivel, fecha: today, descripcion: desc };
+          // Subir imagen
+          const imgFile = document.getElementById('pub-img-file')?.files[0];
+          const imagen_url = (imgFile && typeof uploadMedia === 'function') ? await uploadMedia(imgFile, 'shiurim') : null;
+
+          const newShiur = { titulo, maestro, categoria, formato, duracion, nivel, fecha: today, descripcion: desc, imagen_url };
+
+          // Guardar en Supabase
+          const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+          if (sb) {
+            const { data, error } = await sb.from('shiurim').insert(newShiur).select().single();
+            if (!error && data) newShiur.id = data.id;
+            else if (error) { showToastLocal('Error: ' + error.message, 'error'); submitBtn.textContent = 'Publicar'; submitBtn.disabled = false; return; }
+          } else {
+            newShiur.id = 'sv' + Date.now();
+          }
+
           shiurimData.unshift(newShiur);
+          submitBtn.textContent = 'Publicar'; submitBtn.disabled = false;
 
           // Prepend card to grid
           const grid = document.getElementById('shiurim-grid');
@@ -1374,8 +1430,9 @@
             const fecha = formatFechaCorta(today);
             const catCls = catBadgeClass(categoria);
             const cardHTML =
-              `<div class="shiur-card fade-in" data-id="${newId}">
-                <div class="shiur-thumb" style="background:${bg};">${thumbIconSVG(formato)}
+              `<div class="shiur-card fade-in" data-id="${newShiur.id}">
+                <div class="shiur-thumb" style="background:${newShiur.imagen_url ? 'none' : bg};">
+                  ${newShiur.imagen_url ? `<img src="${newShiur.imagen_url}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">` : thumbIconSVG(formato)}
                   <div class="thumb-badges"><span class="badge badge-fmt">${formato}</span></div>
                 </div>
                 <div class="shiur-body">
@@ -1390,7 +1447,7 @@
                     <span class="shiur-stars">${stars}</span>
                   </div>
                   <div class="shiur-date">&#128197; ${fecha}</div>
-                  <button class="btn-ver" data-id="${newId}">Ver shiur</button>
+                  <button class="btn-ver" data-id="${newShiur.id}">Ver shiur</button>
                 </div>
               </div>`;
             grid.insertAdjacentHTML('afterbegin', cardHTML);

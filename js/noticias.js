@@ -2,11 +2,13 @@
    KEHILÁ — noticias.js
    ============================================= */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   try {
     requireAuth();
     initNav('noticias');
     renderPageHeader();
+    // Cargar noticias desde Supabase
+    await loadNoticiasSupabase();
     renderDestacadas();
     renderFiltros();
     renderGrid('todas');
@@ -15,6 +17,17 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error('Error iniciando noticias:', e);
   }
 });
+
+async function loadNoticiasSupabase() {
+  try {
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return;
+    const { data } = await sb.from('noticias').select('*').order('created_at', { ascending: false });
+    if (data?.length && typeof MOCK_NOTICIAS_V2 !== 'undefined') {
+      data.forEach(n => MOCK_NOTICIAS_V2.unshift(n));
+    }
+  } catch(e) { console.warn('noticias supabase:', e); }
+}
 
 /* ── Helpers ── */
 
@@ -315,6 +328,14 @@ function abrirModalNueva() {
             <label class="form-label">Contenido completo</label>
             <textarea class="form-input" id="nueva-contenido" rows="5" placeholder="Texto completo de la noticia..."></textarea>
           </div>
+          <div class="form-group">
+            <label class="form-label">Foto de la noticia</label>
+            <div style="border:2px dashed #ddd;border-radius:10px;padding:20px;text-align:center;cursor:pointer;" onclick="document.getElementById('nueva-img-file').click()">
+              <img id="nueva-img-preview" style="display:none;max-height:130px;border-radius:8px;margin-bottom:8px;max-width:100%;">
+              <div id="nueva-img-ph" style="color:#888;font-size:0.85rem;">📷 Toca para subir foto</div>
+            </div>
+            <input type="file" id="nueva-img-file" accept="image/*" style="display:none;">
+          </div>
           <label style="display:flex;align-items:center;gap:var(--space-2);cursor:pointer;font-size:var(--text-sm)">
             <input type="checkbox" id="nueva-pinned"> Fijar como noticia destacada
           </label>
@@ -326,29 +347,64 @@ function abrirModalNueva() {
       </div>`;
     document.body.appendChild(modal);
 
-    document.getElementById('btn-publicar').addEventListener('click', () => {
+    // Preview de imagen
+    document.getElementById('nueva-img-file').addEventListener('change', function() {
+      const file = this.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('nueva-img-preview').src = e.target.result;
+        document.getElementById('nueva-img-preview').style.display = 'block';
+        document.getElementById('nueva-img-ph').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('btn-publicar').addEventListener('click', async () => {
       try {
         const titulo = document.getElementById('nueva-titulo')?.value?.trim();
         const excerpt = document.getElementById('nueva-excerpt')?.value?.trim();
         if (!titulo || !excerpt) { showToast('El título y el resumen son obligatorios', 'error'); return; }
+
+        const btn = document.getElementById('btn-publicar');
+        btn.textContent = 'Publicando...'; btn.disabled = true;
+
+        // Subir imagen
+        const imgFile = document.getElementById('nueva-img-file')?.files[0];
+        let imagen_url = null;
+        if (imgFile && typeof uploadMedia === 'function') {
+          imagen_url = await uploadMedia(imgFile, 'noticias');
+        }
+
         const categoria = document.getElementById('nueva-categoria')?.value ?? 'comunidad';
         const nuevaNoticia = {
-          id: 'n' + Date.now(),
           isPinned: document.getElementById('nueva-pinned')?.checked ?? false,
+          is_pinned: document.getElementById('nueva-pinned')?.checked ?? false,
           categoria,
           titulo, excerpt,
           contenido: document.getElementById('nueva-contenido')?.value?.trim() ?? excerpt,
           autor: getCurrentUser?.()?.name ?? 'Administrador',
           fecha: new Date().toISOString().split('T')[0],
           tiempoLectura: '2 min',
-          colorCategoria: getCfg()[categoria]?.color ?? '#1B2E5E'
+          colorCategoria: getCfg()[categoria]?.color ?? '#1B2E5E',
+          imagen_url
         };
+
+        // Guardar en Supabase
+        const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+        if (sb) {
+          const { data, error } = await sb.from('noticias').insert(nuevaNoticia).select().single();
+          if (!error && data) nuevaNoticia.id = data.id;
+          else if (error) { showToast('Error: ' + error.message, 'error'); btn.textContent = 'Publicar noticia'; btn.disabled = false; return; }
+        } else {
+          nuevaNoticia.id = 'n' + Date.now();
+        }
+
         MOCK_NOTICIAS_V2.unshift(nuevaNoticia);
         cerrarModal();
         renderDestacadas();
         renderFiltros();
         renderGrid('todas');
-        showToast('Noticia publicada correctamente', 'success');
+        showToast('Noticia publicada para toda la comunidad ✓', 'success');
       } catch (err) { console.error('publicar:', err); showToast('Error al publicar', 'error'); }
     });
   } catch (e) { console.error('abrirModalNueva:', e); }

@@ -300,9 +300,11 @@
 </div>
 
 <div class="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/data.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
+<script src="js/media.js"></script>
 <script>
   requireAuth();
   initNav('eventos');
@@ -379,6 +381,7 @@
       const cat = catClass[ev.categoria] || '';
       return `
         <div class="evento-card-full ${cat}" id="evcard-${ev.id}">
+          ${ev.imagen_url ? `<img src="${ev.imagen_url}" alt="${ev.titulo}" style="width:100%;height:180px;object-fit:cover;border-radius:14px 14px 0 0;display:block;">` : ''}
           <div class="ev-card-header">
             <div class="ev-date-block">
               <span class="ev-day">${fecha.getDate()}</span>
@@ -540,14 +543,18 @@
   document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target===o) closeModal(o.id); }));
   document.addEventListener('keydown', e => { if (e.key==='Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id)); });
 
-  /* ─── Init ─── */
-  // Cargar eventos extra guardados por el admin
-  try {
-    const saved = JSON.parse(localStorage.getItem('admin_eventos') || '[]');
-    saved.forEach(ev => MOCK_EVENTOS.unshift(ev));
-  } catch(e) {}
-
-  renderLista();
+  /* ─── Init: cargar eventos desde Supabase ─── */
+  async function loadEventos() {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { data } = await sb.from('eventos').select('*').order('fecha', { ascending: true });
+        if (data?.length) data.forEach(ev => MOCK_EVENTOS.unshift(ev));
+      } catch(e) {}
+    }
+    renderLista();
+  }
+  loadEventos();
 
   /* ─── Admin FAB ─── */
   (function() {
@@ -611,6 +618,14 @@
               <label>Aforo máximo</label>
               <input id="ev-aforo" type="number" placeholder="50" value="50">
             </div>
+            <div class="form-group">
+              <label>Foto del evento</label>
+              <div style="border:2px dashed var(--color-border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;" onclick="document.getElementById('ev-img-file').click()">
+                <img id="ev-img-preview" style="display:none;max-height:130px;border-radius:8px;margin-bottom:8px;max-width:100%;">
+                <div id="ev-img-ph" style="color:var(--color-text-muted);font-size:0.85rem;">📷 Toca para subir foto</div>
+              </div>
+              <input type="file" id="ev-img-file" accept="image/*" style="display:none;">
+            </div>
           </div>
           <div class="admin-modal-footer">
             <button class="btn btn-ghost" onclick="document.getElementById('modal-add-evento').classList.add('hidden')">Cancelar</button>
@@ -624,13 +639,21 @@
       document.getElementById('modal-add-evento').classList.remove('hidden');
     });
 
-    document.getElementById('btn-guardar-evento').addEventListener('click', () => {
+    initImagePicker('ev-img-file', 'ev-img-preview', 'ev-img-ph');
+
+    document.getElementById('btn-guardar-evento').addEventListener('click', async () => {
       const titulo = document.getElementById('ev-titulo').value.trim();
       const fecha  = document.getElementById('ev-fecha').value;
       if (!titulo || !fecha) { showToast('Rellena título y fecha', 'warning'); return; }
 
+      const btn = document.getElementById('btn-guardar-evento');
+      btn.textContent = 'Publicando...'; btn.disabled = true;
+
+      // Subir imagen si hay una
+      const imgFile = document.getElementById('ev-img-file').files[0];
+      const imagen_url = imgFile ? await uploadMedia(imgFile, 'eventos') : null;
+
       const newEv = {
-        id: 'ev' + Date.now(),
         titulo,
         descripcion: document.getElementById('ev-desc').value.trim(),
         fecha,
@@ -640,19 +663,25 @@
         inscritos: 0,
         categoria: document.getElementById('ev-categoria').value,
         organizador: user.name,
-        emoji: document.getElementById('ev-emoji').value.trim() || '📅'
+        emoji: document.getElementById('ev-emoji').value.trim() || '📅',
+        imagen_url
       };
 
-      MOCK_EVENTOS.unshift(newEv);
-      try {
-        const saved = JSON.parse(localStorage.getItem('admin_eventos') || '[]');
-        saved.unshift(newEv);
-        localStorage.setItem('admin_eventos', JSON.stringify(saved));
-      } catch(e) {}
+      // Guardar en Supabase
+      const sb = getSupabase();
+      if (sb) {
+        const { data, error } = await sb.from('eventos').insert(newEv).select().single();
+        if (!error && data) newEv.id = data.id;
+        else if (error) { showToast('Error al guardar: ' + error.message, 'error'); btn.textContent = 'Publicar evento'; btn.disabled = false; return; }
+      } else {
+        newEv.id = 'ev' + Date.now();
+      }
 
+      MOCK_EVENTOS.unshift(newEv);
       renderLista();
       document.getElementById('modal-add-evento').classList.add('hidden');
-      showToast('Evento publicado ✓', 'success');
+      btn.textContent = 'Publicar evento'; btn.disabled = false;
+      showToast('Evento publicado para toda la comunidad ✓', 'success');
     });
   })();
 </script>
