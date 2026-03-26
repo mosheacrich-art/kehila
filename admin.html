@@ -1173,7 +1173,7 @@
       const reales = profiles.map(p => ({
         userId: p.id,
         name: p.name || p.id.slice(0, 8),
-        email: '(email en Supabase)',
+        email: p.email || '—',
         role: p.role || 'miembro',
         status: p.status || 'pending',
         comunidad: p.comunidad || 'Bet El Madrid',
