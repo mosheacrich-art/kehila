@@ -1332,7 +1332,9 @@
 
     /* ─── Toggle visibilidad contraseña ─── */
     function setupPasswordToggle(inputId, toggleId, showId, hideId) {
-      document.getElementById(toggleId).addEventListener('click', function () {
+      const toggleEl = document.getElementById(toggleId);
+      if (!toggleEl) return;
+      toggleEl.addEventListener('click', function () {
         const input = document.getElementById(inputId);
         const isPassword = input.type === 'password';
         input.type = isPassword ? 'text' : 'password';
