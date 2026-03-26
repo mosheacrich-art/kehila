@@ -207,6 +207,10 @@
       <div class="siddur-inner" style="padding:32px 32px 60px;max-width:1100px;margin:0 auto;">
       <div class="page-header">
         <div>
+          <button id="global-back-btn" onclick="goBack()" style="display:none;background:none;border:none;cursor:pointer;display:none;align-items:center;gap:6px;font-size:0.8rem;color:var(--color-text-muted);padding:0;margin-bottom:6px;transition:color 0.15s;" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--color-text-muted)'">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+            <span id="global-back-label">Volver</span>
+          </button>
           <div class="page-header-label">Tefila</div>
           <h1 class="page-header-title">Siddur</h1>
           <p class="page-header-sub">Libro de rezos — Nusaj Sefaradí</p>
@@ -1377,11 +1381,11 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
     /* ── Controles ── */
     function abrirSeccion(idx) {
       currentSectionIdx = idx;
-      // Reset view mode buttons
       document.querySelectorAll('.view-mode-btn').forEach((b,i) => b.classList.toggle('active', i===0));
       viewMode = 'completo';
       document.getElementById('siddur-sections').style.display = 'none';
       document.getElementById('siddur-prayer').style.display = '';
+      setBackBtn(true, 'Secciones');
       renderText();
     }
 
@@ -1427,12 +1431,30 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
     }
 
     /* ── Navegación entre pantallas ── */
+    /* ── Navegación ── */
+    function setBackBtn(show, label) {
+      const btn = document.getElementById('global-back-btn');
+      btn.style.display = show ? 'flex' : 'none';
+      if (label) document.getElementById('global-back-label').textContent = label;
+    }
+
+    function goBack() {
+      const sections = document.getElementById('siddur-sections');
+      const prayer   = document.getElementById('siddur-prayer');
+      if (prayer.style.display !== 'none' && prayer.style.display !== '') {
+        volverSecciones();
+      } else if (sections.style.display !== 'none' && sections.style.display !== '') {
+        volverLanding();
+      }
+    }
+
     function abrirTefila(tefila) {
       currentTefila = tefila;
       currentSectionIdx = 0;
       document.getElementById('siddur-landing').style.display   = 'none';
       document.getElementById('siddur-sections').style.display  = '';
       document.getElementById('siddur-prayer').style.display    = 'none';
+      setBackBtn(true, 'Inicio');
       renderSectionsList();
     }
 
@@ -1440,12 +1462,22 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
       document.getElementById('siddur-landing').style.display   = '';
       document.getElementById('siddur-sections').style.display  = 'none';
       document.getElementById('siddur-prayer').style.display    = 'none';
+      setBackBtn(false);
     }
 
     function volverSecciones() {
       document.getElementById('siddur-sections').style.display  = '';
       document.getElementById('siddur-prayer').style.display    = 'none';
+      setBackBtn(true, 'Inicio');
     }
+
+    /* ── Tecla Espacio → volver ── */
+    document.addEventListener('keydown', function(e) {
+      if (e.code === 'Space' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        goBack();
+      }
+    });
 
     /* ── Init ── */
     // No renderizamos nada — el usuario elige primero en la landing
