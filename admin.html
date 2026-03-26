@@ -1179,6 +1179,7 @@
         .select('*')
         .order('created_at', { ascending: false });
 
+      console.log('Supabase profiles:', profiles, 'error:', error);
       if (error || !profiles || profiles.length === 0) return;
 
       // Convertir al formato de usersState y marcar como 'real'
