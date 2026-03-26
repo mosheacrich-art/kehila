@@ -7,12 +7,17 @@
 const SUPABASE_URL = 'https://vvrvuhugpvqytelhsdnk.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2cnZ1aHVncHZxeXRlbGhzZG5rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjczOTIsImV4cCI6MjA5MDEwMzM5Mn0.R14q9fe0zcaXDvZgTcan4yerg7hYfBfaxWs1kN-zIl0';
 
-// Cliente Supabase (se inicializa si la librería está disponible)
+// Cliente Supabase
 let _supabase = null;
 function getSupabase() {
   if (_supabase) return _supabase;
-  if (typeof window !== 'undefined' && window.supabase) {
-    _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // El CDN de Supabase v2 expone supabase.createClient en window
+  const lib = window.supabase || (window.supabaseJs) || null;
+  if (lib && lib.createClient) {
+    _supabase = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Supabase conectado');
+  } else {
+    console.warn('⚠️ SDK Supabase no encontrado, usando mock');
   }
   return _supabase;
 }
