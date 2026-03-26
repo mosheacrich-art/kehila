@@ -731,6 +731,26 @@
 </div>
 
 <!-- ══════════════════════════════════
+     MODAL: Ver perfil completo
+══════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-perfil">
+  <div class="modal" style="max-width:580px;width:95%;">
+    <div class="modal-header">
+      <h3 class="modal-title">Perfil del usuario</h3>
+      <button class="modal-close" onclick="closeModal('modal-perfil')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="perfil-modal-body" style="max-height:70vh;overflow-y:auto;">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-perfil')">Cerrar</button>
+      <button class="btn btn-primary" id="perfil-btn-aprobar" style="display:none;" onclick="aprobarDesdeModal()">✓ Aprobar acceso</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
      MODAL: Nuevo evento
 ══════════════════════════════════ -->
 <div class="modal-overlay hidden" id="modal-evento">
@@ -1105,9 +1125,68 @@
           <td class="hide-sm">${badgeRole(u.role)}</td>
           <td id="status-cell-${u.userId}">${badgeStatus(u.status)}</td>
           <td class="hide-md" style="font-size:.8rem;color:var(--color-text-muted);">${formatDate(u.joinDate)}</td>
-          <td>${actions}</td>
+          <td>
+            <div class="action-btns" style="flex-wrap:wrap;">
+              ${actions.replace('<div class="action-btns">', '').replace('</div>', '')}
+              ${u.source === 'real' ? `<button class="btn btn-sm btn-ghost" onclick="verPerfil('${u.userId}')">👁 Ver</button>` : ''}
+            </div>
+          </td>
         </tr>`;
     }).join('');
+  }
+
+  function verPerfil(userId) {
+    const u = usersState.find(x => x.userId === userId);
+    if (!u) return;
+    const row = (label, value) => value ? `
+      <div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--color-border-light);">
+        <div style="width:140px;flex-shrink:0;font-size:.8rem;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.04em;">${label}</div>
+        <div style="font-size:.9rem;color:var(--color-text);">${value}</div>
+      </div>` : '';
+    const body = document.getElementById('perfil-modal-body');
+    body.innerHTML = `
+      <div style="display:flex;align-items:center;gap:14px;padding-bottom:18px;margin-bottom:18px;border-bottom:2px solid var(--color-border);">
+        ${avatarHTML(u, 'lg')}
+        <div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--color-primary);">${u.name}</div>
+          <div style="font-size:.85rem;color:var(--color-text-muted);">${u.email}</div>
+          <div style="margin-top:6px;">${badgeStatus(u.status)}</div>
+        </div>
+      </div>
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gold);margin-bottom:8px;">Contacto</div>
+      ${row('Teléfono', u.telefono)}
+      ${row('Comunidad', u.comunidad)}
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gold);margin:14px 0 8px;">Identidad</div>
+      ${row('Tipo doc.', u.doc_tipo)}
+      ${row('Nº documento', u.doc_numero)}
+      ${row('Fecha nac.', u.fecha_nac)}
+      ${row('Nacionalidad', u.nacionalidad)}
+      ${row('País nacimiento', u.pais_nac)}
+      ${u.doc_filename ? row('Documento', `<span style="color:#16a34a;">✓ ${u.doc_filename}</span>`) : row('Documento', '<span style="color:#ef4444;">No adjuntado</span>')}
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gold);margin:14px 0 8px;">Dirección</div>
+      ${row('País', u.pais)}
+      ${row('Ciudad / CP', u.ciudad ? u.ciudad + (u.cp ? ' (' + u.cp + ')' : '') : '')}
+      ${row('Dirección', u.direccion)}
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gold);margin:14px 0 8px;">Comunidad</div>
+      ${row('Práctica judía', u.practica)}
+      ${row('Familiar en kehilá', u.familiar ? (u.familiar_nombre || 'Sí') : 'No')}
+      ${row('Cómo conoció Kehilá', u.como_conocio)}
+      ${row('Fecha registro', u.joinDate)}
+    `;
+    const btnAprobar = document.getElementById('perfil-btn-aprobar');
+    if (u.status === 'pending') {
+      btnAprobar.style.display = '';
+      btnAprobar.dataset.userId = userId;
+    } else {
+      btnAprobar.style.display = 'none';
+    }
+    openModal('modal-perfil');
+  }
+
+  function aprobarDesdeModal() {
+    const userId = document.getElementById('perfil-btn-aprobar').dataset.userId;
+    closeModal('modal-perfil');
+    promptAprobar(userId);
   }
 
   function promptAprobar(userId) {
@@ -1184,15 +1263,31 @@
 
       // Convertir al formato de usersState y marcar como 'real'
       const reales = profiles.map(p => ({
-        userId: p.id,
-        name: p.name || p.id.slice(0, 8),
-        email: p.email || '—',
-        role: p.role || 'miembro',
-        status: p.status || 'pending',
-        comunidad: p.comunidad || 'Bet El Madrid',
-        initials: p.initials || p.name?.slice(0,2).toUpperCase() || '??',
-        joinDate: p.created_at?.slice(0,10) || new Date().toISOString().slice(0,10),
-        source: 'real'  // badge distintivo
+        userId:          p.id,
+        name:            p.name || p.id.slice(0, 8),
+        email:           p.email || '—',
+        role:            p.role || 'miembro',
+        status:          p.status || 'pending',
+        comunidad:       p.comunidad || 'Bet El Madrid',
+        initials:        p.initials || p.name?.slice(0,2).toUpperCase() || '??',
+        joinDate:        p.created_at?.slice(0,10) || new Date().toISOString().slice(0,10),
+        source:          'real',
+        // campos extra del formulario de registro
+        telefono:        p.telefono        || null,
+        doc_tipo:        p.doc_tipo        || null,
+        doc_numero:      p.doc_numero      || null,
+        fecha_nac:       p.fecha_nac       || null,
+        nacionalidad:    p.nacionalidad    || null,
+        pais_nac:        p.pais_nac        || null,
+        doc_filename:    p.doc_filename    || null,
+        pais:            p.pais            || null,
+        ciudad:          p.ciudad          || null,
+        cp:              p.cp              || null,
+        direccion:       p.direccion       || null,
+        practica:        p.practica        || null,
+        familiar:        p.familiar        || false,
+        familiar_nombre: p.familiar_nombre || null,
+        como_conocio:    p.como_conocio    || null
       }));
 
       // Añadir al principio de usersState (sin duplicar)

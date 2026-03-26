@@ -349,6 +349,27 @@ async function regSubmit() {
       if (errEl) { errEl.textContent = result.error || 'Error al registrar. Inténtalo de nuevo.'; errEl.style.display = 'block'; }
       return;
     }
+    // ── Guardar campos extra en profiles ──
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) {
+      await sb.from('profiles').update({
+        telefono:        (REG.data.telefonoPrefijo || '+34') + ' ' + (REG.data.telefono || ''),
+        doc_tipo:        REG.data.docTipo        || null,
+        doc_numero:      REG.data.docNumero      || null,
+        fecha_nac:       REG.data.fechaNac       || null,
+        nacionalidad:    REG.data.nacionalidad   || null,
+        pais_nac:        REG.data.paisNac        || null,
+        doc_filename:    REG.data.docFileName    || null,
+        pais:            REG.data.pais           || null,
+        ciudad:          REG.data.ciudad         || null,
+        cp:              REG.data.cp             || null,
+        direccion:       REG.data.direccion      || null,
+        practica:        REG.data.practica       || null,
+        familiar:        REG.data.familiar       || false,
+        familiar_nombre: REG.data.familiarNombre || null,
+        como_conocio:    REG.data.comoConocio    || null
+      }).eq('email', REG.data.email);
+    }
   }
 
   // Generar número de solicitud
