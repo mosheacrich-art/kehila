@@ -251,6 +251,12 @@
     }
     @media (max-width: 768px) { .drawer { width: 100%; } }
   </style>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1b2e5e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kehilá">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
 </head>
 <body>
   <div id="sidebar-placeholder"></div>
@@ -268,5 +274,10 @@
   <script src="js/data.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/noticias.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/kehila/sw.js").catch(()=>{});
+    }
+  </script>
 </body>
 </html>

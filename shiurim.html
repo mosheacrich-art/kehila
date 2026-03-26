@@ -787,6 +787,12 @@
       animation: cardFadeIn 0.4s ease forwards;
     }
   </style>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1b2e5e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kehilá">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
 </head>
 <body>
   <div id="sidebar-placeholder"></div>
@@ -1402,6 +1408,11 @@
     } catch (e) { console.warn('submit publish error', e); }
 
   })();
+  </script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/kehila/sw.js").catch(()=>{});
+    }
   </script>
 </body>
 </html>

@@ -110,6 +110,12 @@
     .modal p { font-size: 0.9rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 20px; }
     .btn-modal-ok { padding: 12px 32px; border: none; border-radius: var(--radius-sm); background: var(--color-primary); color: white; font-family: var(--font-ui); font-size: 0.9rem; font-weight: 700; cursor: pointer; }
   </style>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1b2e5e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kehilá">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
 </head>
 <body>
   <div id="sidebar-placeholder"></div>
@@ -407,6 +413,11 @@
     renderJudaica();
     renderVinos();
     updateCartUI();
+  </script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/kehila/sw.js").catch(()=>{});
+    }
   </script>
 </body>
 </html>

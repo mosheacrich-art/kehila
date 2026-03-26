@@ -222,6 +222,12 @@
       padding-top: 10px;
     }
   </style>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1b2e5e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kehilá">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
 </head>
 <body>
   <div class="app-layout">
@@ -1486,6 +1492,11 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
 
     /* ── Init ── */
     // No renderizamos nada — el usuario elige primero en la landing
+  </script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/kehila/sw.js").catch(()=>{});
+    }
   </script>
 </body>
 </html>

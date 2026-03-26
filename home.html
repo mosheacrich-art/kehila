@@ -607,6 +607,12 @@
     .ev-bg-4 { background: linear-gradient(135deg, #1E40AF 0%, #1D4ED8 100%); }
     .ev-bg-5 { background: linear-gradient(135deg, #9D174D 0%, #831843 100%); }
   </style>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1b2e5e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kehilá">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
 </head>
 <body>
 
@@ -1031,6 +1037,11 @@
         }
       });
     });
+  </script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/kehila/sw.js").catch(()=>{});
+    }
   </script>
 </body>
 </html>
