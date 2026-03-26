@@ -21,9 +21,14 @@
 
     /* ── Siddur layout: panel texto (sin sidebar) ── */
     .siddur-layout {
-      background: #fff; border-radius: var(--radius-xl);
-      border: 1.5px solid var(--color-border); overflow: hidden;
-      display: flex; flex-direction: column;
+      background: #fff;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 520px;
     }
 
     /* ── Lista de secciones ── */
@@ -75,62 +80,81 @@
     }
     .view-mode-btn.active { background: var(--color-primary); color: #fff; }
 
-    /* ── Texto de tefilá ── */
-    .siddur-text-area { flex: 1; overflow-y: auto; padding: var(--space-8) var(--space-8); }
-    .prayer-block { margin-bottom: var(--space-6); }
-    .prayer-label {
-      display: inline-block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
-      color: var(--color-gold); border-bottom: 2px solid rgba(201,168,76,0.3); padding-bottom: 2px; margin-bottom: var(--space-4);
+    /* ── Panel header ── */
+    .siddur-panel-header {
+      display: flex; align-items: center; padding: 14px 24px;
+      border-bottom: 1px solid var(--color-border); background: #fff; gap: 12px; flex-wrap: wrap;
     }
-    .prayer-columns { display: grid; gap: var(--space-6); }
-    .prayer-columns.col-3 { grid-template-columns: 1fr 1fr 1fr; }
-    .prayer-columns.col-2 { grid-template-columns: 1fr 1fr; }
-    .prayer-columns.col-1 { grid-template-columns: 1fr; }
-    .prayer-col-label {
-      font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
-      color: var(--color-text-muted); margin-bottom: var(--space-3); padding-bottom: var(--space-2);
+
+    /* ── Área de texto ── */
+    .siddur-text-area {
+      flex: 1; overflow-y: auto;
+      padding: 48px 72px;
+    }
+    @media (max-width: 768px) { .siddur-text-area { padding: 28px 20px; } }
+
+    /* ── Bloque de texto apilado (estilo Sefaria) ── */
+    .prayer-heb-block {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.45rem;
+      line-height: 2.15;
+      direction: rtl;
+      text-align: right;
+      color: var(--color-text);
+      margin-bottom: 32px;
+      padding-bottom: 28px;
       border-bottom: 1px solid var(--color-border);
     }
-    .prayer-heb {
-      font-family: 'Frank Ruhl Libre', serif; direction: rtl; text-align: right; line-height: 2.2;
+    .prayer-translit-block {
+      font-style: italic;
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      line-height: 2;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #f0f2f5;
+    }
+    .prayer-trans-block {
+      color: #374151;
+      font-size: 1rem;
+      line-height: 1.9;
+    }
+
+    /* ── Solo hebreo (modo Hebreo) ── */
+    .prayer-heb-only {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.7rem;
+      line-height: 2.3;
+      direction: rtl;
+      text-align: center;
       color: var(--color-text);
     }
-    .prayer-transliteration { font-style: italic; color: var(--color-text-secondary); line-height: 1.9; }
-    .prayer-translation { color: var(--color-text-secondary); line-height: 1.9; }
-    .highlight-gold { color: var(--color-gold); font-weight: 700; }
+
+    /* ── Solo traducción (modo Traducción) ── */
+    .prayer-trad-cols {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+    }
+    .prayer-col-head {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em;
+      color: var(--color-text-muted); margin-bottom: 16px;
+    }
+    @media (max-width: 700px) { .prayer-trad-cols { grid-template-columns: 1fr; gap: 24px; } }
 
     /* ── Nota halájica ── */
     .prayer-note {
-      background: rgba(27,46,94,0.04); border-left: 3px solid var(--color-primary);
-      border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: var(--space-4);
-      margin: var(--space-5) 0; font-size: 0.83rem; color: var(--color-text-secondary); line-height: 1.6;
+      background: rgba(27,46,94,0.03); border-left: 3px solid var(--color-primary);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 12px 16px;
+      margin-bottom: 32px; font-size: 0.82rem; color: var(--color-text-secondary); line-height: 1.6;
     }
     .prayer-note strong { color: var(--color-primary); }
 
-    /* ── Zman alert ── */
-    .zman-alert {
-      margin-bottom: var(--space-5); padding: var(--space-3) var(--space-5);
-      background: linear-gradient(90deg, rgba(27,46,94,0.06) 0%, rgba(201,168,76,0.06) 100%);
-      border: 1.5px solid rgba(27,46,94,0.15); border-radius: var(--radius-lg);
-      display: flex; align-items: center; gap: var(--space-3); font-size: 0.85rem;
-    }
-    .zman-alert svg { width: 18px; height: 18px; color: var(--color-primary); flex-shrink: 0; }
-
     /* ── Progress strip ── */
     .siddur-progress {
-      padding: var(--space-3) var(--space-6); border-top: 1.5px solid var(--color-border);
-      display: flex; align-items: center; gap: var(--space-4); font-size: 0.8rem; color: var(--color-text-muted);
+      padding: 10px 24px; border-top: 1px solid var(--color-border);
+      display: flex; align-items: center; gap: 16px; font-size: 0.78rem; color: var(--color-text-muted);
     }
-    .siddur-progress-bar { flex: 1; height: 4px; background: var(--color-border); border-radius: 2px; }
-    .siddur-progress-fill { height: 100%; background: var(--color-primary); border-radius: 2px; transition: width 0.3s; }
-
-    /* ── Responsive ── */
-    @media (max-width: 900px) {
-      .siddur-layout { grid-template-columns: 1fr; }
-      .siddur-sidebar { border-right: none; border-bottom: 1.5px solid var(--color-border); max-height: 200px; }
-      .prayer-columns.col-3 { grid-template-columns: 1fr; }
-      .prayer-columns.col-2 { grid-template-columns: 1fr; }
-    }
+    .siddur-progress-bar { flex: 1; height: 3px; background: var(--color-border); border-radius: 2px; }
+    .siddur-progress-fill { height: 100%; background: var(--color-primary); border-radius: 2px; transition: width 0.4s; }
 
     /* ── Inner wrapper ── */
     .siddur-inner {
@@ -204,7 +228,7 @@
     <div id="sidebar-placeholder"></div>
 
     <main class="main-content">
-      <div class="siddur-inner" style="padding:32px 32px 60px;max-width:1100px;margin:0 auto;">
+      <div class="siddur-inner">
       <div class="page-header">
         <div>
           <button id="global-back-btn" onclick="goBack()" style="display:none;background:none;border:none;cursor:pointer;display:none;align-items:center;gap:6px;font-size:0.8rem;color:var(--color-text-muted);padding:0;margin-bottom:6px;transition:color 0.15s;" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--color-text-muted)'">
@@ -1330,51 +1354,32 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
         return;
       }
 
-      const colClass = viewMode === 'completo' ? 'col-3' : 'col-1';
-
       let html = '';
 
       if (sec.note) {
-        html += `<div class="prayer-note"><strong><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg> Nota halájica:</strong> ${sec.note}</div>`;
+        html += `<div class="prayer-note"><strong>Nota halájica:</strong> ${sec.note}</div>`;
       }
-
-      html += `<div class="prayer-block">`;
 
       if (viewMode === 'completo') {
-        html += `<div class="prayer-columns col-3">
-          <div>
-            <div class="prayer-col-label">Hebreo</div>
-            <div class="prayer-heb" style="font-size:${fontSize}rem">${pt.heb.replace(/\n/g,'<br>')}</div>
-          </div>
-          <div>
-            <div class="prayer-col-label">Transliteración</div>
-            <div class="prayer-transliteration" style="font-size:0.9rem">${pt.translit.replace(/\n/g,'<br>')}</div>
-          </div>
-          <div>
-            <div class="prayer-col-label">Traducción</div>
-            <div class="prayer-translation" style="font-size:0.9rem">${pt.trans.replace(/\n/g,'<br>')}</div>
-          </div>
-        </div>`;
+        html += `
+          <div class="prayer-heb-block" style="font-size:${fontSize}rem">${pt.heb.replace(/\n/g,'<br>')}</div>
+          <div class="prayer-translit-block">${pt.translit.replace(/\n/g,'<br>')}</div>
+          <div class="prayer-trans-block">${pt.trans.replace(/\n/g,'<br>')}</div>`;
       } else if (viewMode === 'heb') {
-        html += `<div class="prayer-columns col-1">
-          <div>
-            <div class="prayer-heb" style="font-size:${fontSize * 1.3}rem; text-align:right;">${pt.heb.replace(/\n/g,'<br>')}</div>
-          </div>
-        </div>`;
+        html += `<div class="prayer-heb-only" style="font-size:${fontSize * 1.15}rem">${pt.heb.replace(/\n/g,'<br>')}</div>`;
       } else {
-        html += `<div class="prayer-columns col-2">
+        html += `<div class="prayer-trad-cols">
           <div>
-            <div class="prayer-col-label">Transliteración</div>
-            <div class="prayer-transliteration">${pt.translit.replace(/\n/g,'<br>')}</div>
+            <div class="prayer-col-head">Transliteración</div>
+            <div style="font-style:italic;color:#555;line-height:2;font-size:0.92rem">${pt.translit.replace(/\n/g,'<br>')}</div>
           </div>
           <div>
-            <div class="prayer-col-label">Traducción</div>
-            <div class="prayer-translation">${pt.trans.replace(/\n/g,'<br>')}</div>
+            <div class="prayer-col-head">Traducción</div>
+            <div style="color:#374151;line-height:1.9">${pt.trans.replace(/\n/g,'<br>')}</div>
           </div>
         </div>`;
       }
 
-      html += `</div>`;
       document.getElementById('text-area').innerHTML = html;
     }
 
