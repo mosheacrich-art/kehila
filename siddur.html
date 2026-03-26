@@ -19,49 +19,33 @@
     }
     @media (max-width: 768px) { .main-content { margin-left: 0; width: 100vw; } }
 
-    /* ── Siddur layout: sidebar lista + panel texto ── */
+    /* ── Siddur layout: panel texto (sin sidebar) ── */
     .siddur-layout {
-      display: grid; grid-template-columns: 280px 1fr; gap: 0;
       background: #fff; border-radius: var(--radius-xl);
-      border: 1.5px solid var(--color-border); overflow: hidden; min-height: 600px;
+      border: 1.5px solid var(--color-border); overflow: hidden;
+      display: flex; flex-direction: column;
     }
 
-    /* ── Sidebar lista ── */
-    .siddur-sidebar {
-      border-right: 1.5px solid var(--color-border); display: flex; flex-direction: column;
+    /* ── Lista de secciones ── */
+    .sections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin-top: 4px;
     }
-    .siddur-tefila-tabs {
-      display: flex; overflow-x: auto; border-bottom: 1.5px solid var(--color-border); padding: 0 var(--space-2);
+    .section-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 20px; background: #fff;
+      border: 1.5px solid var(--color-border); border-radius: var(--radius-lg);
+      cursor: pointer; transition: all 0.15s;
     }
-    .siddur-tefila-tabs::-webkit-scrollbar { display: none; }
-    .siddur-tefila-tab {
-      padding: var(--space-3) var(--space-3); font-size: 0.8rem; font-weight: 600; white-space: nowrap;
-      border-bottom: 2px solid transparent; cursor: pointer; color: var(--color-text-muted);
-      transition: color 0.15s, border-color 0.15s; flex-shrink: 0;
-    }
-    .siddur-tefila-tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
-    .siddur-section-list { flex: 1; overflow-y: auto; padding: var(--space-2); }
-    .siddur-section-item {
-      display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-3);
-      border-radius: var(--radius-md); cursor: pointer; transition: background 0.15s; margin-bottom: 2px;
-    }
-    .siddur-section-item:hover { background: var(--color-bg); }
-    .siddur-section-item.active { background: rgba(27,46,94,0.08); color: var(--color-primary); }
-    .siddur-section-item.active .section-num { background: var(--color-primary); color: #fff; }
-    .section-num {
-      width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg);
-      border: 1.5px solid var(--color-border); font-size: 0.7rem; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--color-text-muted);
-    }
-    .section-info { flex: 1; }
-    .section-name-heb { font-family: 'Frank Ruhl Libre', serif; font-size: 1rem; line-height: 1.2; direction: rtl; }
-    .section-name-es { font-size: 0.72rem; color: var(--color-text-muted); }
-    .section-bookmark {
-      width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
-      color: var(--color-border); transition: color 0.15s;
-    }
-    .section-bookmark.saved { color: var(--color-gold); }
-    .section-bookmark svg { width: 14px; height: 14px; }
+    .section-item:hover { border-color: var(--color-primary); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+    .section-item-body { flex: 1; min-width: 0; }
+    .section-item-heb { font-family: 'Frank Ruhl Libre', serif; font-size: 1.1rem; direction: rtl; color: var(--color-text); }
+    .section-item-es { font-size: 0.78rem; color: var(--color-text-muted); margin-top: 2px; }
+    .section-item-note { font-size: 0.72rem; color: var(--color-text-muted); margin-top: 5px; font-style: italic; line-height: 1.4; }
+    .section-item-arrow { color: var(--color-border); flex-shrink: 0; transition: color 0.15s; }
+    .section-item:hover .section-item-arrow { color: var(--color-primary); }
 
     /* ── Panel de texto principal ── */
     .siddur-panel { display: flex; flex-direction: column; }
@@ -237,7 +221,7 @@
         </div>
       </div>
 
-      <!-- Pantalla de selección -->
+      <!-- Pantalla 1: Selección de tefila -->
       <div id="siddur-landing">
         <div class="siddur-landing" style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
           <div class="tefila-card" onclick="abrirTefila('shajarit')">
@@ -271,42 +255,37 @@
         </div>
       </div>
 
-      <!-- Zman alert (oculto hasta seleccionar) -->
-      <div class="zman-alert" id="zman-alert" style="display:none;">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-        <span id="zman-text"></span>
+      <!-- Pantalla 2: Secciones de la tefila -->
+      <div id="siddur-sections" style="display:none;">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;">
+          <button onclick="volverLanding()" class="btn btn-secondary btn-sm" style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+            Volver
+          </button>
+          <div>
+            <div class="page-header-label" id="sections-label" style="margin-bottom:2px;"></div>
+            <div id="sections-heb" style="font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;direction:rtl;color:var(--color-primary);line-height:1.1;"></div>
+          </div>
+        </div>
+        <div class="sections-grid" id="sections-list"></div>
       </div>
 
-      <!-- Siddur layout (oculto hasta seleccionar) -->
-      <div class="siddur-layout" id="siddur-layout" style="display:none;">
-        <!-- Sidebar de secciones -->
-        <div class="siddur-sidebar">
-          <div style="display:flex;align-items:center;padding:8px 12px 0;gap:8px;">
-            <button onclick="volverLanding()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;font-size:0.78rem;color:var(--color-text-muted);padding:4px 8px;border-radius:var(--radius-md);transition:background 0.15s;" onmouseover="this.style.background='var(--color-bg)'" onmouseout="this.style.background='none'">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
-              Volver
-            </button>
-          </div>
-          <div class="siddur-tefila-tabs" id="tefila-tabs">
-            <div class="siddur-tefila-tab active" data-tefila="shajarit" onclick="selectTefila(this)">Shajarit</div>
-            <div class="siddur-tefila-tab" data-tefila="minja" onclick="selectTefila(this)">Minjá</div>
-            <div class="siddur-tefila-tab" data-tefila="arvit" onclick="selectTefila(this)">Arvit</div>
-            <div class="siddur-tefila-tab" data-tefila="birkat" onclick="selectTefila(this)">Bircat Hamazón</div>
-          </div>
-          <div class="siddur-section-list" id="section-list"></div>
-        </div>
-
-        <!-- Panel principal -->
-        <div class="siddur-panel">
+      <!-- Pantalla 3: Texto del rezo -->
+      <div id="siddur-prayer" style="display:none;">
+        <div class="siddur-layout">
           <div class="siddur-panel-header">
-            <div class="siddur-panel-title">
-              <h2 id="panel-heb-title">מוֹדֶה אֲנִי</h2>
-              <span id="panel-es-title">Modé Aní — Al despertar</span>
+            <button onclick="volverSecciones()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:0.8rem;color:var(--color-text-muted);padding:4px 8px;border-radius:var(--radius-md);transition:background 0.15s;white-space:nowrap;flex-shrink:0;" onmouseover="this.style.background='var(--color-bg)'" onmouseout="this.style.background='none'">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+              Secciones
+            </button>
+            <div class="siddur-panel-title" style="margin:0 16px;">
+              <h2 id="panel-heb-title" style="font-family:'Frank Ruhl Libre',serif;font-size:1.3rem;direction:rtl;line-height:1;"></h2>
+              <span id="panel-es-title" style="font-size:0.8rem;color:var(--color-text-muted);"></span>
             </div>
             <div class="siddur-controls">
               <button class="ctrl-btn" onclick="changeFontSize(-1)" title="Reducir texto">A−</button>
               <button class="ctrl-btn" onclick="changeFontSize(1)" title="Aumentar texto">A+</button>
-              <div class="view-mode-toggle" id="view-toggle">
+              <div class="view-mode-toggle">
                 <button class="view-mode-btn active" onclick="setViewMode('completo',this)">Completo</button>
                 <button class="view-mode-btn" onclick="setViewMode('heb',this)">Hebreo</button>
                 <button class="view-mode-btn" onclick="setViewMode('trad',this)">Traducción</button>
@@ -320,8 +299,8 @@
           <div class="siddur-text-area" id="text-area"></div>
 
           <div class="siddur-progress">
-            <span id="progress-label">Sección 1 de 12</span>
-            <div class="siddur-progress-bar"><div class="siddur-progress-fill" id="progress-fill" style="width:8%"></div></div>
+            <span id="progress-label"></span>
+            <div class="siddur-progress-bar"><div class="siddur-progress-fill" id="progress-fill" style="width:0%"></div></div>
             <div style="display:flex;gap:var(--space-2)">
               <button class="ctrl-btn" onclick="prevSection()">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
@@ -1295,23 +1274,24 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
     function getCurrentSections() { return TEFILA_DATA[currentTefila].sections; }
     function getCurrentSection() { return getCurrentSections()[currentSectionIdx]; }
 
-    /* ── Render sidebar ── */
-    function renderSectionList() {
-      const sections = getCurrentSections();
-      document.getElementById('section-list').innerHTML = sections.map((s,i) => {
-        const saved = bookmarks.includes(s.id);
-        return `
-          <div class="siddur-section-item ${i===currentSectionIdx?'active':''}" onclick="selectSection(${i})">
-            <div class="section-num">${i+1}</div>
-            <div class="section-info">
-              <div class="section-name-heb">${s.heb}</div>
-              <div class="section-name-es">${s.es}</div>
-            </div>
-            <div class="section-bookmark ${saved?'saved':''}" onclick="toggleBookmarkById(event,'${s.id}')">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="${saved?'currentColor':'none'}" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg>
-            </div>
-          </div>`;
-      }).join('');
+    /* ── Render lista de secciones (pantalla 2) ── */
+    function renderSectionsList() {
+      const td = TEFILA_DATA[currentTefila];
+      const tefilaNames = { shajarit:'Shajarit', minja:'Minjá', arvit:'Arvit', birkat:'Bircat Hamazón' };
+      const tefilaHeb   = { shajarit:'שַׁחֲרִית', minja:'מִנְחָה', arvit:'עַרְבִית', birkat:'בִּרְכַּת הַמָּזוֹן' };
+      document.getElementById('sections-label').textContent = tefilaNames[currentTefila] || '';
+      document.getElementById('sections-heb').textContent   = tefilaHeb[currentTefila]   || '';
+      document.getElementById('sections-list').innerHTML = td.sections.map((s,i) => `
+        <div class="section-item" onclick="abrirSeccion(${i})">
+          <div class="section-item-body">
+            <div class="section-item-heb">${s.heb}</div>
+            <div class="section-item-es">${s.es}</div>
+            ${s.note ? `<div class="section-item-note">${s.note}</div>` : ''}
+          </div>
+          <div class="section-item-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+          </div>
+        </div>`).join('');
     }
 
     /* ── Render texto ── */
@@ -1395,29 +1375,24 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
     }
 
     /* ── Controles ── */
-    function selectTefila(el) {
-      document.querySelectorAll('.siddur-tefila-tab').forEach(t => t.classList.remove('active'));
-      el.classList.add('active');
-      currentTefila = el.dataset.tefila;
-      currentSectionIdx = 0;
-      renderSectionList();
-      renderText();
-    }
-
-    function selectSection(idx) {
+    function abrirSeccion(idx) {
       currentSectionIdx = idx;
-      renderSectionList();
+      // Reset view mode buttons
+      document.querySelectorAll('.view-mode-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+      viewMode = 'completo';
+      document.getElementById('siddur-sections').style.display = 'none';
+      document.getElementById('siddur-prayer').style.display = '';
       renderText();
     }
 
     function nextSection() {
       const max = getCurrentSections().length - 1;
-      if (currentSectionIdx < max) { currentSectionIdx++; renderSectionList(); renderText(); }
-      else { showToast('Has llegado al final de ' + currentTefila.charAt(0).toUpperCase() + currentTefila.slice(1), 'info'); }
+      if (currentSectionIdx < max) { currentSectionIdx++; renderText(); }
+      else { showToast('Has llegado al final de esta tefila', 'info'); }
     }
 
     function prevSection() {
-      if (currentSectionIdx > 0) { currentSectionIdx--; renderSectionList(); renderText(); }
+      if (currentSectionIdx > 0) { currentSectionIdx--; renderText(); }
     }
 
     function changeFontSize(delta) {
@@ -1448,41 +1423,28 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
         showToast('Marcador eliminado', 'info');
       }
       localStorage.setItem('siddur_bookmarks', JSON.stringify(bookmarks));
-      renderSectionList();
       renderText();
     }
 
-    /* ── Landing ── */
-    const ZMAN_INFO = {
-      shajarit: '☀️ <strong>Zman Shajarit en Madrid:</strong> hasta las 10:42 · Minján: 8:30 en Bet El',
-      minja:    '🌤 <strong>Zman Minjá en Madrid:</strong> desde las 13:45 · Antes de la puesta de sol',
-      arvit:    '🌙 <strong>Arvit en Madrid:</strong> desde las 21:15 · Después de tres estrellas',
-      birkat:   '🍞 <strong>Bircat Hamazón</strong> — Después de comer pan (mínimo un kazáit)'
-    };
-
+    /* ── Navegación entre pantallas ── */
     function abrirTefila(tefila) {
       currentTefila = tefila;
       currentSectionIdx = 0;
-
-      // Activar tab correcto
-      document.querySelectorAll('.siddur-tefila-tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.tefila === tefila);
-      });
-
-      // Mostrar siddur, ocultar landing
-      document.getElementById('siddur-landing').style.display = 'none';
-      document.getElementById('siddur-layout').style.display = '';
-      document.getElementById('zman-alert').style.display = '';
-      document.getElementById('zman-text').innerHTML = ZMAN_INFO[tefila] || '';
-
-      renderSectionList();
-      renderText();
+      document.getElementById('siddur-landing').style.display   = 'none';
+      document.getElementById('siddur-sections').style.display  = '';
+      document.getElementById('siddur-prayer').style.display    = 'none';
+      renderSectionsList();
     }
 
     function volverLanding() {
-      document.getElementById('siddur-landing').style.display = '';
-      document.getElementById('siddur-layout').style.display = 'none';
-      document.getElementById('zman-alert').style.display = 'none';
+      document.getElementById('siddur-landing').style.display   = '';
+      document.getElementById('siddur-sections').style.display  = 'none';
+      document.getElementById('siddur-prayer').style.display    = 'none';
+    }
+
+    function volverSecciones() {
+      document.getElementById('siddur-sections').style.display  = '';
+      document.getElementById('siddur-prayer').style.display    = 'none';
     }
 
     /* ── Init ── */
