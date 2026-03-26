@@ -874,6 +874,7 @@
 
 <div class="toast-container" id="toast-container"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/data.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
@@ -1081,7 +1082,10 @@
             <div class="user-cell">
               ${avatarHTML(u, 'sm')}
               <div class="user-cell-info">
-                <div class="user-cell-name">${u.name}</div>
+                <div class="user-cell-name">
+                  ${u.name}
+                  ${u.source === 'real' ? '<span style="display:inline-block;margin-left:6px;background:#1B2E5E;color:#fff;font-size:0.6rem;font-weight:700;padding:1px 6px;border-radius:99px;vertical-align:middle;letter-spacing:.04em;">REAL</span>' : ''}
+                </div>
                 <div class="user-cell-email">${u.email}</div>
               </div>
             </div>
@@ -1105,6 +1109,7 @@
     if (!pendingTarget) return;
     const user = usersState.find(u => u.userId === pendingTarget);
     user.status = 'active';
+    if (user.source === 'real') aprobarEnSupabase(user.userId);
     closeModal('modal-aprobar');
     filterUsers();
     initPendingBanner();
@@ -1129,6 +1134,7 @@
     }
     const user = usersState.find(u => u.userId === pendingTarget);
     user.status = 'banned';
+    if (user.source === 'real') banearEnSupabase(user.userId);
     closeModal('modal-banear');
     filterUsers();
     initPendingBanner();
@@ -1151,9 +1157,63 @@
     showToast(`${user.name} ha sido reactivado.`, 'success');
   }
 
+  // ── Cargar usuarios reales de Supabase ──────────────────────────
+  async function cargarUsuariosReales() {
+    const sb = getSupabase();
+    if (!sb) return;
+    try {
+      const { data: profiles, error } = await sb
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error || !profiles || profiles.length === 0) return;
+
+      // Convertir al formato de usersState y marcar como 'real'
+      const reales = profiles.map(p => ({
+        userId: p.id,
+        name: p.name || p.id.slice(0, 8),
+        email: '(email en Supabase)',
+        role: p.role || 'miembro',
+        status: p.status || 'pending',
+        comunidad: p.comunidad || 'Bet El Madrid',
+        initials: p.initials || p.name?.slice(0,2).toUpperCase() || '??',
+        joinDate: p.created_at?.slice(0,10) || new Date().toISOString().slice(0,10),
+        source: 'real'  // badge distintivo
+      }));
+
+      // Añadir al principio de usersState (sin duplicar)
+      const idsReales = reales.map(r => r.userId);
+      usersState = [
+        ...reales,
+        ...usersState.filter(u => !idsReales.includes(u.userId))
+      ];
+
+      initPendingBanner();
+      filterUsers();
+    } catch(e) {
+      console.warn('Error cargando usuarios reales:', e);
+    }
+  }
+
+  // Aprobar usuario real en Supabase
+  async function aprobarEnSupabase(userId) {
+    const sb = getSupabase();
+    if (!sb) return;
+    await sb.from('profiles').update({ status: 'active' }).eq('id', userId);
+  }
+
+  // Banear usuario real en Supabase
+  async function banearEnSupabase(userId) {
+    const sb = getSupabase();
+    if (!sb) return;
+    await sb.from('profiles').update({ status: 'banned' }).eq('id', userId);
+  }
+
   // Init usuarios
   initPendingBanner();
   filterUsers();
+  cargarUsuariosReales();
 
   /* ══════════════════════════════
      TAB EVENTOS
