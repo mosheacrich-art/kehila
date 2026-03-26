@@ -146,13 +146,13 @@
       .prayer-columns.col-2 { grid-template-columns: 1fr; }
     }
 
-    /* ── Wrapper contenido ── */
-    #siddur-landing {
-      padding: 0 32px 60px;
+    /* ── Inner wrapper ── */
+    .siddur-inner {
       max-width: 1100px;
       margin: 0 auto;
+      padding: 32px 32px 60px;
     }
-    @media (max-width: 768px) { #siddur-landing { padding: 0 14px 88px; } }
+    @media (max-width: 768px) { .siddur-inner { padding: 20px 14px 88px; } }
 
     /* ── Landing pantalla de selección ── */
     .siddur-landing {
@@ -219,6 +219,7 @@
     <div id="sidebar-placeholder"></div>
 
     <main class="main-content">
+      <div class="siddur-inner">
       <div class="page-header">
         <div>
           <div class="page-header-label">Tefila</div>
@@ -331,6 +332,7 @@
           </div>
         </div>
       </div>
+      </div><!-- /siddur-inner -->
     </main>
   </div>
 
