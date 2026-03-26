@@ -1183,8 +1183,23 @@
 
       if (!valid) return;
 
-      // Todo correcto → mostrar pantalla de éxito
-      showSuccess();
+      // Deshabilitar botón mientras registra
+      const regBtn = this.querySelector('button[type="submit"]');
+      if (regBtn) { regBtn.disabled = true; regBtn.textContent = 'Registrando...'; }
+
+      const fullName = nombre + ' ' + apellidos;
+
+      register(email, password, fullName).then(result => {
+        if (regBtn) { regBtn.disabled = false; regBtn.textContent = 'Solicitar membresía'; }
+
+        if (!result.ok) {
+          showError('err-terms', result.error);
+          return;
+        }
+
+        // Éxito → mostrar pantalla de confirmación
+        showSuccess();
+      });
     });
 
     /* ─── Limpiar error al escribir ─── */
