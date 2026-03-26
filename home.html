@@ -637,19 +637,17 @@
           </p>
         </div>
 
-        <div class="tefila-card">
-          <p class="tefila-card-label">Hoy en la sinagoga</p>
-          <div class="tefila-row">
-            <span class="tefila-name">Shajarit</span>
-            <span class="tefila-time">07:30</span>
+        <div class="tefila-card" id="tefila-horarios-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <p class="tefila-card-label" style="margin:0;">Hoy en la sinagoga</p>
+            <button id="btn-edit-horarios" onclick="abrirEditHorarios()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:var(--color-text-muted);transition:color 0.15s;" title="Editar horarios">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+            </button>
           </div>
-          <div class="tefila-row">
-            <span class="tefila-name">Minjá</span>
-            <span class="tefila-time">19:30</span>
-          </div>
-          <div class="tefila-row">
-            <span class="tefila-name">Entrada Shabat</span>
-            <span class="tefila-time">19:42</span>
+          <div id="horarios-rows">
+            <div class="tefila-row"><span class="tefila-name">Shajarit</span><span class="tefila-time">07:30</span></div>
+            <div class="tefila-row"><span class="tefila-name">Minjá</span><span class="tefila-time">19:30</span></div>
+            <div class="tefila-row"><span class="tefila-name">Entrada Shabat</span><span class="tefila-time">19:42</span></div>
           </div>
         </div>
       </div>
@@ -1037,6 +1035,134 @@
         }
       });
     });
+
+    /* ══════════════════════════════════════
+       HORARIOS DE TEFILA — dinámicos
+    ══════════════════════════════════════ */
+    const HORARIOS_DEFAULT = [
+      { nombre: 'Shajarit',       hora: '07:30' },
+      { nombre: 'Minjá',          hora: '19:30' },
+      { nombre: 'Entrada Shabat', hora: '19:42' }
+    ];
+
+    function renderHorarios(items) {
+      const container = document.getElementById('horarios-rows');
+      if (!container) return;
+      container.innerHTML = items.map(it =>
+        `<div class="tefila-row">
+           <span class="tefila-name">${it.nombre}</span>
+           <span class="tefila-time">${it.hora}</span>
+         </div>`
+      ).join('');
+    }
+
+    async function loadHorarios() {
+      // Mostrar botón de edición si es admin
+      if (user && user.role === 'admin') {
+        const btn = document.getElementById('btn-edit-horarios');
+        if (btn) btn.style.display = 'flex';
+      }
+
+      const sb = getSupabase();
+      if (!sb) return; // usa los valores por defecto del HTML
+
+      try {
+        const { data, error } = await sb
+          .from('horarios')
+          .select('items')
+          .eq('id', 'sinagoga')
+          .single();
+
+        if (!error && data?.items?.length) {
+          renderHorarios(data.items);
+        }
+      } catch (e) {
+        console.warn('horarios: usando valores por defecto');
+      }
+    }
+
+    async function guardarHorarios(items) {
+      const sb = getSupabase();
+      if (!sb) { showToast('Sin conexión a internet', 'error'); return false; }
+
+      const { error } = await sb
+        .from('horarios')
+        .upsert({ id: 'sinagoga', items, updated_by: user?.name || 'admin' },
+                 { onConflict: 'id' });
+
+      if (error) { showToast('Error al guardar: ' + error.message, 'error'); return false; }
+      return true;
+    }
+
+    function abrirEditHorarios() {
+      // Leer filas actuales del DOM
+      const rows = Array.from(document.querySelectorAll('#horarios-rows .tefila-row')).map(row => ({
+        nombre: row.querySelector('.tefila-name')?.textContent || '',
+        hora:   row.querySelector('.tefila-time')?.textContent || ''
+      }));
+
+      const makeRow = (it, i) => `
+        <div class="hedit-row" id="hedit-${i}" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <input value="${it.nombre}" placeholder="Nombre (ej: Shajarit)" style="flex:1;border:1.5px solid #ddd;border-radius:8px;padding:8px 10px;font-size:0.88rem;font-family:inherit;outline:none;">
+          <input value="${it.hora}" placeholder="Hora" style="width:80px;border:1.5px solid #ddd;border-radius:8px;padding:8px 10px;font-size:0.88rem;font-family:inherit;outline:none;text-align:center;">
+          <button onclick="this.closest('.hedit-row').remove()" style="background:none;border:none;cursor:pointer;color:#aaa;padding:4px;border-radius:6px;font-size:1.1rem;" title="Eliminar">✕</button>
+        </div>`;
+
+      const overlay = document.createElement('div');
+      overlay.id = 'horarios-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px;';
+      overlay.innerHTML = `
+        <div style="background:#fff;border-radius:16px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid #eee;">
+            <h3 style="font-size:1.05rem;font-weight:700;">✏️ Editar horarios de tefila</h3>
+            <button onclick="document.getElementById('horarios-overlay').remove()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#888;">✕</button>
+          </div>
+          <div style="padding:20px 24px;">
+            <div id="hedit-list">
+              ${rows.map((it, i) => makeRow(it, i)).join('')}
+            </div>
+            <button onclick="
+              const list = document.getElementById('hedit-list');
+              const n = list.children.length;
+              list.insertAdjacentHTML('beforeend', \`<div class='hedit-row' id='hedit-\${n}' style='display:flex;align-items:center;gap:8px;margin-bottom:8px;'><input placeholder='Nombre' style='flex:1;border:1.5px solid #ddd;border-radius:8px;padding:8px 10px;font-size:0.88rem;font-family:inherit;outline:none;'><input placeholder='Hora' style='width:80px;border:1.5px solid #ddd;border-radius:8px;padding:8px 10px;font-size:0.88rem;font-family:inherit;outline:none;text-align:center;'><button onclick='this.closest(&quot;.hedit-row&quot;).remove()' style='background:none;border:none;cursor:pointer;color:#aaa;padding:4px;border-radius:6px;font-size:1.1rem;'>✕</button></div>\`);
+            " style="width:100%;margin-top:4px;padding:9px;border:1.5px dashed #ccc;border-radius:8px;background:none;cursor:pointer;font-size:0.85rem;color:#888;transition:border-color 0.15s;" onmouseover="this.style.borderColor='#1b2e5e'" onmouseout="this.style.borderColor='#ccc'">
+              + Añadir fila
+            </button>
+          </div>
+          <div style="padding:16px 24px;border-top:1px solid #eee;display:flex;gap:10px;justify-content:flex-end;">
+            <button onclick="document.getElementById('horarios-overlay').remove()" class="btn btn-ghost">Cancelar</button>
+            <button id="btn-save-horarios" class="btn btn-primary">Guardar para todos</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      document.getElementById('btn-save-horarios').addEventListener('click', async () => {
+        const filas = Array.from(document.querySelectorAll('#hedit-list .hedit-row'));
+        const items = filas.map(row => {
+          const inputs = row.querySelectorAll('input');
+          return { nombre: inputs[0]?.value.trim(), hora: inputs[1]?.value.trim() };
+        }).filter(it => it.nombre && it.hora);
+
+        if (!items.length) { showToast('Añade al menos un horario', 'warning'); return; }
+
+        const btn = document.getElementById('btn-save-horarios');
+        btn.textContent = 'Guardando...';
+        btn.disabled = true;
+
+        const ok = await guardarHorarios(items);
+        if (ok) {
+          renderHorarios(items);
+          document.getElementById('horarios-overlay').remove();
+          showToast('Horarios actualizados para toda la comunidad ✓', 'success');
+        } else {
+          btn.textContent = 'Guardar para todos';
+          btn.disabled = false;
+        }
+      });
+    }
+
+    // Cargar horarios al inicio
+    loadHorarios();
   </script>
   <script>
     if ("serviceWorker" in navigator) {
