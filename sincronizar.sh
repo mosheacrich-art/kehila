@@ -8,7 +8,7 @@
 cd "$(dirname "$0")"
 
 echo "⬇  Descargando versión más reciente de GitHub..."
-git pull origin master --rebase 2>&1
+git pull origin master --no-rebase -X ours 2>&1
 
 echo ""
 echo "📦 Preparando cambios locales..."
