@@ -352,9 +352,8 @@ async function regSubmit() {
     // ── Guardar campos extra en profiles ──
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (sb && result.userId) {
-      // Esperamos un momento para que el trigger de Supabase cree la fila primero
-      await new Promise(r => setTimeout(r, 1500));
-      await sb.from('profiles').upsert({
+      await new Promise(r => setTimeout(r, 2000));
+      const { error: upsertErr } = await sb.from('profiles').upsert({
         id:              result.userId,
         telefono:        (REG.data.telefonoPrefijo || '+34') + ' ' + (REG.data.telefono || ''),
         doc_tipo:        REG.data.docTipo        || null,
@@ -372,6 +371,7 @@ async function regSubmit() {
         familiar_nombre: REG.data.familiarNombre || null,
         como_conocio:    REG.data.comoConocio    || null
       }, { onConflict: 'id', ignoreDuplicates: false });
+      if (upsertErr) console.error('Error guardando perfil:', upsertErr.message);
     }
   }
 
