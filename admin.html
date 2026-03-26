@@ -535,6 +535,18 @@
         <button class="btn btn-sm" style="background:#92400E;color:#fff;border-color:#92400E;" onclick="filterPending()">Revisar ahora</button>
       </div>
 
+      <!-- Solicitudes pendientes de registro (localStorage) -->
+      <div id="pending-solicitudes-section" style="margin-bottom:28px;display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <h3 style="font-size:1rem;font-weight:700;color:var(--color-text);margin-bottom:2px;">Solicitudes de acceso pendientes</h3>
+            <p style="font-size:13px;color:var(--color-text-muted);">Nuevas solicitudes de registro que requieren revisión manual.</p>
+          </div>
+          <span id="sol-count-badge" class="badge badge-pending" style="font-size:13px;padding:4px 12px;"></span>
+        </div>
+        <div id="pending-solicitudes-list"></div>
+      </div>
+
       <!-- Toolbar -->
       <div class="toolbar">
         <div class="search-box">
@@ -1471,6 +1483,125 @@
   }
 
   filterWallap();
+
+  /* ─── Solicitudes de registro (localStorage) ─── */
+  function renderPendingSolicitudes() {
+    const list = JSON.parse(localStorage.getItem('kehila_pending') || '[]');
+    const section = document.getElementById('pending-solicitudes-section');
+    const container = document.getElementById('pending-solicitudes-list');
+    const badge = document.getElementById('sol-count-badge');
+    if (!section || !container) return;
+
+    const activas = list.filter(s => s.status === 'PENDING');
+    if (activas.length === 0) { section.style.display = 'none'; return; }
+
+    section.style.display = '';
+    if (badge) badge.textContent = `${activas.length} pendiente${activas.length !== 1 ? 's' : ''}`;
+
+    container.innerHTML = activas.map((s, idx) => {
+      const initials = ((s.nombre || '?')[0] + (s.apellidos || '?')[0]).toUpperCase();
+      const docMask = s.docNumero ? s.docNumero.slice(0,-3).replace(/[A-Za-z0-9]/g,'*') + s.docNumero.slice(-3) : '—';
+      const fecha = s.timestamp ? new Date(s.timestamp).toLocaleDateString('es-ES', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+      const riesgo = s.docFileName ? 'amarillo' : 'rojo';
+      const riesgoLabel = riesgo === 'amarillo' ? 'Revisar documento' : 'Sin documento';
+      return `
+      <div class="pending-card" id="sol-card-${idx}">
+        <div class="pending-card-header" onclick="toggleSolCard(${idx})">
+          <div class="avatar avatar-md" data-color="3">${initials}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;color:var(--color-text);font-size:14px;">${s.nombre || ''} ${s.apellidos || ''}</div>
+            <div style="font-size:12px;color:var(--color-text-muted);">${s.email || ''} &middot; ${s.solicitudNum || ''}</div>
+          </div>
+          <span class="risk-badge ${riesgo}">${riesgoLabel}</span>
+          <span style="font-size:11px;color:var(--color-text-light);white-space:nowrap;">${fecha}</span>
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="flex-shrink:0;color:#9ca3af;"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+        </div>
+        <div class="pending-card-body" id="sol-body-${idx}">
+          <div class="pending-detail-grid">
+            <div class="pending-detail-row"><div class="label">Teléfono</div><div class="value">${s.telefonoPrefijo || ''} ${s.telefono || '—'}</div></div>
+            <div class="pending-detail-row"><div class="label">Tipo de doc.</div><div class="value">${s.docTipo || '—'}</div></div>
+            <div class="pending-detail-row"><div class="label">Núm. documento</div><div class="value">${docMask}</div></div>
+            <div class="pending-detail-row"><div class="label">Fecha nacimiento</div><div class="value">${s.fechaNac || '—'}</div></div>
+            <div class="pending-detail-row"><div class="label">Nacionalidad</div><div class="value">${s.nacionalidad || '—'}</div></div>
+            <div class="pending-detail-row"><div class="label">País nacimiento</div><div class="value">${s.paisNac || '—'}</div></div>
+            <div class="pending-detail-row"><div class="label">País residencia</div><div class="value">${s.pais || '—'}</div></div>
+            <div class="pending-detail-row"><div class="label">Ciudad / CP</div><div class="value">${s.ciudad || '—'} ${s.cp ? '('+s.cp+')' : ''}</div></div>
+            <div class="pending-detail-row"><div class="label">Dirección</div><div class="value">${s.direccion || '—'}</div></div>
+            <div class="pending-detail-row"><div class="label">Comunidad solicitada</div><div class="value">${s.comunidad || '—'}</div></div>
+            <div class="pending-detail-row"><div class="label">Práctica judía</div><div class="value">${s.practica || '—'}</div></div>
+            <div class="pending-detail-row"><div class="label">Familiar en comunidad</div><div class="value">${s.familiar ? (s.familiarNombre || 'Sí') : 'No'}</div></div>
+            <div class="pending-detail-row"><div class="label">Cómo conoció Kehilá</div><div class="value">${s.comoConocio || '—'}</div></div>
+            <div class="pending-detail-row"><div class="label">Documento adjunto</div><div class="value">${s.docFileName ? `<span style="color:#16a34a;font-weight:600;">&#10003; ${s.docFileName}</span>` : '<span style="color:#ef4444;">No adjuntado</span>'}</div></div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--color-border-light);">
+            <button class="btn btn-sm btn-primary" onclick="aprobarSolicitud(${idx})" style="background:#15803d;border-color:#15803d;">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+              Aprobar acceso
+            </button>
+            <button class="btn btn-sm" onclick="rechazarSolicitud(${idx})" style="border-color:#ef4444;color:#ef4444;">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+              Rechazar
+            </button>
+            <button class="btn btn-sm btn-ghost" onclick="solicitarInfo(${idx})">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+              Solicitar información
+            </button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function toggleSolCard(idx) {
+    const body = document.getElementById(`sol-body-${idx}`);
+    if (body) body.classList.toggle('open');
+  }
+
+  function aprobarSolicitud(idx) {
+    const list = JSON.parse(localStorage.getItem('kehila_pending') || '[]');
+    const activas = list.filter(s => s.status === 'PENDING');
+    if (!activas[idx]) return;
+    const nombre = `${activas[idx].nombre} ${activas[idx].apellidos}`;
+    if (!confirm(`¿Aprobar acceso a ${nombre}?\n\nSe marcará como aprobado en el sistema.`)) return;
+    activas[idx].status = 'APPROVED';
+    activas[idx].approvedAt = new Date().toISOString();
+    // Reemplazar en lista original
+    let i = 0;
+    const updated = list.map(s => (s.status === 'PENDING' && s.email === activas[idx].email) ? activas[idx] : s);
+    localStorage.setItem('kehila_pending', JSON.stringify(updated));
+    showToast(`Solicitud de ${nombre} aprobada correctamente.`, 'success');
+    renderPendingSolicitudes();
+  }
+
+  function rechazarSolicitud(idx) {
+    const list = JSON.parse(localStorage.getItem('kehila_pending') || '[]');
+    const activas = list.filter(s => s.status === 'PENDING');
+    if (!activas[idx]) return;
+    const nombre = `${activas[idx].nombre} ${activas[idx].apellidos}`;
+    const motivo = prompt(`Motivo del rechazo para ${nombre}:\n(Este motivo se registra internamente)`);
+    if (motivo === null) return;
+    activas[idx].status = 'REJECTED';
+    activas[idx].rejectedAt = new Date().toISOString();
+    activas[idx].motivoRechazo = motivo;
+    const updated = list.map(s => (s.status === 'PENDING' && s.email === activas[idx].email) ? activas[idx] : s);
+    localStorage.setItem('kehila_pending', JSON.stringify(updated));
+    showToast(`Solicitud de ${nombre} rechazada.`, 'warning');
+    renderPendingSolicitudes();
+  }
+
+  function solicitarInfo(idx) {
+    const list = JSON.parse(localStorage.getItem('kehila_pending') || '[]');
+    const activas = list.filter(s => s.status === 'PENDING');
+    if (!activas[idx]) return;
+    const nombre = `${activas[idx].nombre} ${activas[idx].apellidos}`;
+    alert(`Se notificaría a ${nombre} (${activas[idx].email}) que se requiere información adicional.\n\nEn producción esto enviaría un email automático.`);
+  }
+
+  // Cargar solicitudes al abrir el tab de usuarios
+  document.addEventListener('DOMContentLoaded', function() {
+    renderPendingSolicitudes();
+  });
+
 </script>
 </body>
 </html>
