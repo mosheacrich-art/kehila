@@ -338,7 +338,18 @@ async function regSubmit() {
   btn.disabled = true;
   label.innerHTML = `<span class="reg-spinner"></span> Enviando solicitud...`;
 
-  await new Promise(r => setTimeout(r, 2000));
+  // ── Registrar en Supabase ──
+  const fullName = (REG.data.nombre + ' ' + REG.data.apellidos).trim();
+  if (typeof register === 'function') {
+    const result = await register(REG.data.email, REG.data.password, fullName);
+    if (!result.ok) {
+      btn.disabled = false;
+      label.innerHTML = 'Enviar solicitud';
+      const errEl = document.getElementById('r4-submit-err');
+      if (errEl) { errEl.textContent = result.error || 'Error al registrar. Inténtalo de nuevo.'; errEl.style.display = 'block'; }
+      return;
+    }
+  }
 
   // Generar número de solicitud
   const now = new Date();
