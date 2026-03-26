@@ -1428,9 +1428,7 @@
       });
     });
 
-    /* ─── FORMULARIO REGISTRO: gestionado por js/registro.js ─── */
-
-    /* ─── Limpiar error al escribir ─── */
+    /* ─── Limpiar error al escribir (login) ─── */
     document.getElementById('login-email').addEventListener('input', function () {
       clearError('login-email-error');
       markInput('login-email', false);
@@ -1440,20 +1438,6 @@
       clearError('login-pw-error');
       markInput('login-password', false);
       clearLoginMessage();
-    });
-
-    ['reg-nombre','reg-apellidos','reg-email','reg-password','reg-confirm'].forEach(id => {
-      document.getElementById(id).addEventListener('input', function () {
-        const errMap = {
-          'reg-nombre':    'err-nombre',
-          'reg-apellidos': 'err-apellidos',
-          'reg-email':     'err-email',
-          'reg-password':  'err-password',
-          'reg-confirm':   'err-confirm'
-        };
-        clearError(errMap[id]);
-        markInput(id, false);
-      });
     });
 
     /* ─── Si ya hay sesión activa, redirigir ─── */
