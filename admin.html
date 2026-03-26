@@ -547,6 +547,14 @@
         <div id="pending-solicitudes-list"></div>
       </div>
 
+      <!-- Botón cuenta de prueba -->
+      <div style="margin-bottom:14px;text-align:right;">
+        <button class="btn btn-ghost btn-sm" id="btn-crear-prueba" onclick="crearCuentaPrueba()" style="border-style:dashed;color:var(--color-text-muted);">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Crear cuenta de prueba
+        </button>
+      </div>
+
       <!-- Toolbar -->
       <div class="toolbar">
         <div class="search-box">
@@ -1328,6 +1336,76 @@
     const sb = getSupabase();
     if (!sb) return;
     await sb.from('profiles').update({ status: 'banned' }).eq('id', userId);
+  }
+
+  // ── Crear cuenta de prueba ──────────────────────────────────────
+  async function crearCuentaPrueba() {
+    const btn = document.getElementById('btn-crear-prueba');
+    btn.disabled = true;
+    btn.textContent = 'Creando...';
+
+    const nombres = ['David','Moshe','Sara','Miriam','Yosef','Rachel','Aron','Leah','Shlomo','Rivka'];
+    const apellidos = ['Cohen','Levi','Mizrahi','Goldstein','Ben-David','Katz','Shapiro','Rosenberg','Friedman','Klein'];
+    const ciudades = ['Madrid','Barcelona','Valencia','Sevilla','Bilbao'];
+    const practicas = ['Ortodoxo','Conservador','Liberal','Tradicional','Secular'];
+    const rand = a => a[Math.floor(Math.random() * a.length)];
+    const nombre = rand(nombres);
+    const apellido = rand(apellidos);
+    const ts = Date.now();
+    const email = `test.${nombre.toLowerCase()}.${ts}@kehila-test.com`;
+    const password = 'Test1234!';
+
+    const sb = getSupabase();
+    if (!sb) { showToast('Supabase no disponible', 'error'); btn.disabled = false; btn.textContent = '+ Crear cuenta de prueba'; return; }
+
+    // Registrar usuario
+    const { data, error } = await sb.auth.signUp({ email, password,
+      options: { data: { name: nombre + ' ' + apellido, initials: (nombre[0]+apellido[0]).toUpperCase() } }
+    });
+    if (error) { showToast('Error: ' + error.message, 'error'); btn.disabled = false; btn.textContent = '+ Crear cuenta de prueba'; return; }
+
+    const userId = data.user?.id;
+    if (!userId) { showToast('No se pudo obtener el ID del usuario', 'error'); btn.disabled = false; btn.textContent = '+ Crear cuenta de prueba'; return; }
+
+    // Descargar imagen placeholder y subirla a Storage
+    let doc_url = null;
+    try {
+      const imgResp = await fetch(`https://picsum.photos/seed/${ts}/600/400`);
+      const blob = await imgResp.blob();
+      const path = `${userId}/doc.jpg`;
+      const { error: upErr } = await sb.storage.from('documentos').upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+      if (!upErr) {
+        const { data: urlData } = sb.storage.from('documentos').getPublicUrl(path);
+        doc_url = urlData?.publicUrl || null;
+      }
+    } catch(e) { console.warn('No se pudo subir imagen de prueba:', e.message); }
+
+    // Esperar trigger y hacer upsert
+    await new Promise(r => setTimeout(r, 2000));
+    await sb.from('profiles').upsert({
+      id:              userId,
+      telefono:        '+34 6' + String(Math.floor(10000000 + Math.random()*89999999)),
+      doc_tipo:        'DNI',
+      doc_numero:      String(Math.floor(10000000 + Math.random()*89999999)) + rand(['A','B','C','D','E','F','G','H','J','K','L','M','N','P','Q','R','S','T','V','W','X','Y','Z']),
+      fecha_nac:       `${1970 + Math.floor(Math.random()*35)}-${String(1+Math.floor(Math.random()*12)).padStart(2,'0')}-${String(1+Math.floor(Math.random()*28)).padStart(2,'0')}`,
+      nacionalidad:    'Española',
+      pais_nac:        'España',
+      doc_filename:    'doc.jpg',
+      doc_url,
+      pais:            'España',
+      ciudad:          rand(ciudades),
+      cp:              String(10000 + Math.floor(Math.random()*89999)),
+      direccion:       'Calle ' + rand(['Mayor','Real','Gran Vía','Alcalá','Serrano']) + ' ' + Math.floor(1+Math.random()*99),
+      practica:        rand(practicas),
+      familiar:        Math.random() > 0.5,
+      familiar_nombre: Math.random() > 0.5 ? rand(nombres) + ' ' + rand(apellidos) : null,
+      como_conocio:    rand(['Amigo de la comunidad','Redes sociales','Búsqueda en internet','Evento comunitario'])
+    }, { onConflict: 'id', ignoreDuplicates: false });
+
+    showToast(`Cuenta de prueba creada: ${email} / ${password}`, 'success');
+    btn.disabled = false;
+    btn.innerHTML = `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Crear cuenta de prueba`;
+    setTimeout(() => cargarUsuariosReales(), 500);
   }
 
   // Init usuarios
