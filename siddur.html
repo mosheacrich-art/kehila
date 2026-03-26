@@ -12,10 +12,12 @@
   <style>
     .main-content {
       margin-left: var(--sidebar-width);
+      width: calc(100vw - var(--sidebar-width));
       min-height: 100vh;
       background: var(--color-bg);
+      box-sizing: border-box;
     }
-    @media (max-width: 768px) { .main-content { margin-left: 0; } }
+    @media (max-width: 768px) { .main-content { margin-left: 0; width: 100vw; } }
 
     /* ── Siddur layout: sidebar lista + panel texto ── */
     .siddur-layout {
