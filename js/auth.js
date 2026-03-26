@@ -63,12 +63,34 @@ const SESSION_KEY = 'kehila_user';
  * Login: intenta Supabase primero, si falla usa mock.
  */
 async function login(email, password) {
+  const normalizedEmail = email.toLowerCase().trim();
+
+  // ── Si es usuario mock, usar mock directamente ──
+  if (USERS_DB[normalizedEmail]) {
+    const user = USERS_DB[normalizedEmail];
+    if (user.password !== password) return { ok: false, error: 'Contraseña incorrecta. Inténtalo de nuevo.' };
+    if (user.status === 'banned') return { ok: false, error: 'Tu cuenta ha sido suspendida. Contacta al administrador.' };
+    const sessionData = {
+      userId: user.userId,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      comunidad: user.comunidad,
+      initials: user.initials,
+      loginAt: new Date().toISOString(),
+      source: 'mock'
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+    return { ok: true, status: user.status };
+  }
+
   const sb = getSupabase();
 
-  // ── Supabase real ──
+  // ── Supabase real (solo para usuarios no-mock) ──
   if (sb) {
     try {
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      const { data, error } = await sb.auth.signInWithPassword({ email: normalizedEmail, password });
       if (!error && data.user) {
         // Obtener perfil
         const { data: profile } = await sb
@@ -84,46 +106,25 @@ async function login(email, password) {
 
         const sessionData = {
           userId: data.user.id,
-          name: profile?.name || email.split('@')[0],
+          name: profile?.name || normalizedEmail.split('@')[0],
           email: data.user.email,
           role: profile?.role || 'miembro',
           status: profile?.status || 'pending',
           comunidad: profile?.comunidad || 'Bet El Madrid',
-          initials: profile?.initials || email.slice(0, 2).toUpperCase(),
+          initials: profile?.initials || normalizedEmail.slice(0, 2).toUpperCase(),
           loginAt: new Date().toISOString(),
           source: 'supabase'
         };
         localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
         return { ok: true, status: profile?.status || 'active' };
       }
-      // Si el error es de credenciales, no caer al mock
-      if (error && (error.message.includes('Invalid') || error.message.includes('invalid'))) {
-        return { ok: false, error: 'Email o contraseña incorrectos.' };
-      }
+      if (error) return { ok: false, error: 'Email o contraseña incorrectos.' };
     } catch (e) {
-      console.warn('Supabase no disponible, usando mock:', e.message);
+      console.warn('Supabase no disponible:', e.message);
     }
   }
 
-  // ── Fallback mock ──
-  const user = USERS_DB[email.toLowerCase().trim()];
-  if (!user) return { ok: false, error: 'No existe una cuenta con este correo electrónico.' };
-  if (user.password !== password) return { ok: false, error: 'Contraseña incorrecta. Inténtalo de nuevo.' };
-  if (user.status === 'banned') return { ok: false, error: 'Tu cuenta ha sido suspendida. Contacta al administrador.' };
-
-  const sessionData = {
-    userId: user.userId,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    status: user.status,
-    comunidad: user.comunidad,
-    initials: user.initials,
-    loginAt: new Date().toISOString(),
-    source: 'mock'
-  };
-  localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-  return { ok: true, status: user.status };
+  return { ok: false, error: 'No existe una cuenta con este correo electrónico.' };
 }
 
 // ─── Registro ─────────────────────────────────
