@@ -1160,7 +1160,20 @@
       ${row('Fecha nac.', u.fecha_nac)}
       ${row('Nacionalidad', u.nacionalidad)}
       ${row('País nacimiento', u.pais_nac)}
-      ${u.doc_filename ? row('Documento', `<span style="color:#16a34a;">✓ ${u.doc_filename}</span>`) : row('Documento', '<span style="color:#ef4444;">No adjuntado</span>')}
+      ${u.doc_url
+        ? `<div style="padding:10px 0;border-bottom:1px solid var(--color-border-light);">
+             <div style="font-size:.8rem;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Documento adjunto</div>
+             <a href="${u.doc_url}" target="_blank">
+               <img src="${u.doc_url}" alt="Documento de identidad"
+                 style="max-width:100%;max-height:260px;border-radius:8px;border:1px solid var(--color-border);cursor:pointer;"
+                 onerror="this.style.display='none';this.nextSibling.style.display=''">
+               <span style="display:none;color:#16a34a;font-size:.85rem;">✓ ${u.doc_filename || 'Ver documento'}</span>
+             </a>
+           </div>`
+        : row('Documento', u.doc_filename
+            ? `<span style="color:#f59e0b;">⚠ Subido antes del sistema de fotos: ${u.doc_filename}</span>`
+            : '<span style="color:#ef4444;">No adjuntado</span>')
+      }
       <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gold);margin:14px 0 8px;">Dirección</div>
       ${row('País', u.pais)}
       ${row('Ciudad / CP', u.ciudad ? u.ciudad + (u.cp ? ' (' + u.cp + ')' : '') : '')}
@@ -1262,6 +1275,7 @@
       // Convertir al formato de usersState y marcar como 'real'
       const reales = profiles.map(p => ({
         userId:          p.id,
+        doc_url:         p.doc_url          || null,
         name:            p.name || p.id.slice(0, 8),
         email:           p.email || '—',
         role:            p.role || 'miembro',

@@ -353,6 +353,23 @@ async function regSubmit() {
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (sb && result.userId) {
       await new Promise(r => setTimeout(r, 2000));
+
+      // ── Subir foto del documento a Storage ──
+      let doc_url = null;
+      if (REG.data.docFile) {
+        const ext = REG.data.docFileName.split('.').pop();
+        const path = `${result.userId}/doc.${ext}`;
+        const { error: uploadErr } = await sb.storage
+          .from('documentos')
+          .upload(path, REG.data.docFile, { upsert: true });
+        if (!uploadErr) {
+          const { data: urlData } = sb.storage.from('documentos').getPublicUrl(path);
+          doc_url = urlData?.publicUrl || null;
+        } else {
+          console.error('Error subiendo foto:', uploadErr.message);
+        }
+      }
+
       const { error: upsertErr } = await sb.from('profiles').upsert({
         id:              result.userId,
         telefono:        (REG.data.telefonoPrefijo || '+34') + ' ' + (REG.data.telefono || ''),
@@ -362,6 +379,7 @@ async function regSubmit() {
         nacionalidad:    REG.data.nacionalidad   || null,
         pais_nac:        REG.data.paisNac        || null,
         doc_filename:    REG.data.docFileName    || null,
+        doc_url:         doc_url,
         pais:            REG.data.pais           || null,
         ciudad:          REG.data.ciudad         || null,
         cp:              REG.data.cp             || null,
