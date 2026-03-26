@@ -62,8 +62,6 @@ function regRenderStep() {
 function regUpdateProgress() {
   for (let i = 1; i <= 4; i++) {
     const circle = document.getElementById(`step-circle-${i}`);
-    const label = document.getElementById(`step-label-${i}`);
-    const line = document.getElementById(`step-line-${i}`);
     if (!circle) continue;
     const parent = circle.closest('.step');
     if (i < REG.step) {
@@ -76,9 +74,11 @@ function regUpdateProgress() {
       parent.className = 'step';
       circle.textContent = i;
     }
-    if (line) {
-      line.className = 'step-line' + (i < REG.step ? ' completed' : '');
-    }
+  }
+  // Avanzar la franja dorada: (paso actual - 1) / 3 * 100%
+  const fill = document.getElementById('steps-track-fill');
+  if (fill) {
+    fill.style.width = ((REG.step - 1) / 3 * 100) + '%';
   }
 }
 
