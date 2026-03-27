@@ -10,18 +10,18 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
   <style>
-    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
+    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; display: flex; flex-direction: column; }
     @media (max-width: 768px) { .main-content { margin-left: 0; padding-bottom: 80px; } }
-    .cal-heb-inner { max-width: 1000px; margin: 0 auto; padding: 32px 32px 60px; }
+    .cal-heb-inner { flex: 1; padding: 32px 36px 60px; display: flex; flex-direction: column; }
     @media (max-width: 768px) { .cal-heb-inner { padding: 20px 14px 88px; } }
 
     /* ── Grid principal ── */
-    .cal-wrap { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    .cal-wrap { display: grid; grid-template-columns: 1fr 380px; gap: 28px; flex: 1; align-items: start; }
     @media (max-width: 768px) { .cal-wrap { grid-template-columns: 1fr; } }
 
     /* ── Nav mes ── */
     .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .cal-month-label { font-family: var(--font-brand); font-size: 1.2rem; font-weight: 700; color: var(--color-text); }
+    .cal-month-label { font-family: var(--font-brand); font-size: 1.5rem; font-weight: 700; color: var(--color-text); }
     .cal-nav-btn {
       width: 34px; height: 34px; border-radius: var(--radius-sm);
       display: flex; align-items: center; justify-content: center;
@@ -33,11 +33,11 @@
 
     /* ── Grid días ── */
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-    .cal-header-day { text-align: center; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--color-text-muted); padding: 8px 0; }
+    .cal-header-day { text-align: center; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--color-text-muted); padding: 10px 0; }
     .cal-day {
       aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
       border-radius: var(--radius-sm); cursor: pointer; position: relative;
-      transition: background var(--transition-fast); font-size: .875rem; font-weight: 400;
+      transition: background var(--transition-fast); font-size: 1rem; font-weight: 400;
       color: var(--color-text); padding: 4px;
     }
     .cal-day:hover { background: var(--color-bg); }
