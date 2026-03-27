@@ -84,40 +84,9 @@ function renderPageHeader() {
   } catch (e) { console.error('renderPageHeader:', e); }
 }
 
-/* ── Destacadas ── */
+/* ── Destacadas (no-op, las destacadas se mezclan en el grid con badge) ── */
 
-function featuredCard(n) {
-  const color = catColor(n);
-  return `
-    <div class="noticia-featured" data-id="${n.id}" data-action="abrir-noticia">
-      <div class="noticia-featured-visual">
-        <div class="noticia-featured-visual-bg" style="background:linear-gradient(150deg,${color} 0%,${color}dd 100%)"></div>
-        <div class="noticia-featured-visual-pattern"></div>
-        <span class="noticia-featured-pin">★</span>
-        <span class="noticia-featured-visual-badge">${catLabel(n.categoria)}</span>
-      </div>
-      <div class="noticia-featured-body">
-        <h2>${n.titulo ?? ''}</h2>
-        <p>${n.excerpt ?? ''}</p>
-        <div class="noticia-featured-footer">
-          <span class="noticia-featured-autor">${n.autor ?? ''}</span>
-          <span class="noticia-featured-meta">${formatearFechaCorta(n.fecha)} · ${n.tiempoLectura ?? ''}</span>
-        </div>
-      </div>
-    </div>`;
-}
-
-function renderDestacadas() {
-  try {
-    const pinned = getNoticias().filter(n => n?.isPinned === true);
-    const container = document.getElementById('noticias-destacadas');
-    if (!container) return;
-    if (!pinned.length) { container.innerHTML = ''; return; }
-
-    const cards = pinned.slice(0, 2).map(featuredCard).join('');
-    container.innerHTML = `<div class="destacadas-grid">${cards}</div>`;
-  } catch (e) { console.error('renderDestacadas:', e); }
-}
+function renderDestacadas() {}
 
 /* ── Filtros ── */
 
@@ -133,17 +102,16 @@ function renderFiltros() {
       { key: 'evento',    label: 'Eventos' },
       { key: 'kashrut',   label: 'Kashrut' }
     ];
-    const noPinned = getNoticias().filter(n => !n?.isPinned);
-    const total = noPinned.length;
+    const total = getNoticias().length;
     const chips = cats.map((c, i) =>
-      `<button class="filtro-chip${i === 0 ? ' filtro-activo' : ''}" data-categoria="${c.key}">${c.label}</button>`
+      `<button class="chip${i === 0 ? ' active' : ''}" data-categoria="${c.key}">${c.label}</button>`
     ).join('');
     container.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <h2 style="font-size:1rem;font-weight:600;color:var(--color-text)">Últimas noticias</h2>
         <span id="noticias-count" style="font-size:0.8rem;color:var(--color-text-muted)">${total} artículos</span>
       </div>
-      <div class="filtros-bar">${chips}</div>`;
+      <div class="filter-chips">${chips}</div>`;
   } catch (e) { console.error('renderFiltros:', e); }
 }
 
@@ -154,7 +122,7 @@ function renderGrid(filtro) {
     const container = document.getElementById('noticias-grid');
     if (!container) return;
 
-    let lista = getNoticias().filter(n => !n?.isPinned);
+    let lista = getNoticias();
     if (filtro && filtro !== 'todas') lista = lista.filter(n => n?.categoria === filtro);
 
     const countEl = document.getElementById('noticias-count');
@@ -170,26 +138,46 @@ function renderGrid(filtro) {
     }
 
     container.innerHTML = lista.map(n => {
-      const color = catColor(n);
-      const cat = catLabel(n.categoria);
-      const letra = (n.titulo ?? 'N').charAt(0);
+      const fecha = n.fecha ? new Date(n.fecha + 'T12:00:00') : new Date();
+      const day   = fecha.getDate();
+      const month = fecha.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase().replace('.', '');
+      const cat   = catLabel(n.categoria);
+      const pinnedBadge = n.isPinned
+        ? `<span class="chip" style="font-size:.7rem;padding:3px 8px;background:#FEF9C3;color:#92400E;border-color:#FDE68A">★ Dest.</span>`
+        : '';
+      const imgHTML = n.imagen_url
+        ? `<img src="${n.imagen_url}" style="width:100%;height:120px;object-fit:cover;" alt="">`
+        : '';
       return `
-        <div class="noticia-card" data-id="${n.id ?? ''}">
-          <div class="noticia-card-top">
-            <div class="noticia-card-avatar" style="background:${color}">${letra}</div>
-            <div class="noticia-card-info">
-              <h3>${n.titulo ?? ''}</h3>
-              <span class="noticia-card-sub">
-                ${n.autor ?? ''} · ${formatearFechaCorta(n.fecha)}
+        <div class="noticia-card-new nc-cat-${n.categoria ?? 'comunidad'}" data-id="${n.id ?? ''}" data-action="abrir-noticia">
+          ${imgHTML}
+          <div class="ev-card-header">
+            <div class="ev-date-block">
+              <span class="ev-day">${day}</span>
+              <span class="ev-month">${month}</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start">
+              <span class="chip" style="font-size:.7rem;padding:3px 10px;cursor:default">${cat}</span>
+              ${pinnedBadge}
+            </div>
+          </div>
+          <div class="ev-card-body">
+            <div class="ev-title">${n.titulo ?? ''}</div>
+            <div class="ev-desc">${n.excerpt ?? ''}</div>
+            <div class="ev-meta-row">
+              <span class="ev-meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+                ${n.autor ?? ''}
+              </span>
+              <span class="ev-meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                ${n.tiempoLectura ?? ''} lectura
               </span>
             </div>
           </div>
-          <div class="noticia-card-tags">
-            <span class="badge" style="font-size:10px;padding:2px 8px">${cat}</span>
-            <span class="badge" style="font-size:10px;padding:2px 8px;background:rgba(201,168,76,0.1);color:#92580a;border-color:rgba(201,168,76,0.3)">${n.tiempoLectura ?? ''} lectura</span>
-          </div>
-          <div class="noticia-card-footer">
-            <button class="btn-leer" data-id="${n.id ?? ''}" data-action="abrir-noticia">Leer noticia</button>
+          <div class="ev-card-footer">
+            <span></span>
+            <button class="btn btn-sm btn-primary" data-id="${n.id ?? ''}" data-action="abrir-noticia">Leer noticia</button>
           </div>
         </div>`;
     }).join('');
@@ -204,10 +192,10 @@ function initDelegation() {
       const card = e.target.closest('[data-action="abrir-noticia"]');
       if (card) { abrirNoticia(card.dataset.id); return; }
 
-      const filtro = e.target.closest('[data-categoria]');
+      const filtro = e.target.closest('.filter-chips [data-categoria]');
       if (filtro) {
-        document.querySelectorAll('[data-categoria]').forEach(b => b.classList.remove('filtro-activo'));
-        filtro.classList.add('filtro-activo');
+        document.querySelectorAll('.filter-chips [data-categoria]').forEach(b => b.classList.remove('active'));
+        filtro.classList.add('active');
         renderGrid(filtro.dataset.categoria);
         return;
       }
