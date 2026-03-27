@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kehilá — Mi Perfil</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <style>
+    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; background: var(--color-bg); }
+    @media (max-width: 768px) { .main-content { margin-left: 0; } }
+
+    .perfil-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 36px 32px 60px;
+    }
+    @media (max-width: 768px) { .perfil-inner { padding: 20px 16px 88px; } }
+
+    /* ─── Header ─── */
+    .perfil-header {
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+      margin-bottom: 32px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    @media (max-width: 560px) {
+      .perfil-header { flex-direction: column; align-items: flex-start; }
+    }
+
+    /* ─── Avatar upload ─── */
+    .avatar-upload-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .avatar-upload-wrap .avatar-xl {
+      width: 88px;
+      height: 88px;
+      font-size: 1.75rem;
+      border: 2px solid var(--color-border);
+    }
+
+    .avatar-upload-wrap img.avatar-photo {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--color-border);
+      display: block;
+    }
+
+    .avatar-edit-btn {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: background var(--transition-fast);
+    }
+    .avatar-edit-btn:hover { background: var(--color-bg); }
+    .avatar-edit-btn svg { width: 13px; height: 13px; color: var(--color-text-muted); }
+
+    #avatar-file-input { display: none; }
+
+    /* ─── Header info ─── */
+    .perfil-header-info { flex: 1; min-width: 0; }
+
+    .perfil-name {
+      font-family: var(--font-brand);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text);
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .perfil-email {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin-bottom: 10px;
+    }
+
+    .perfil-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .ptag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      border: 1px solid;
+    }
+    .ptag-role  { color: #1B2E5E; background: #eef2ff; border-color: #c7d2fe; }
+    .ptag-status-active  { color: #15803d; background: #f0fdf4; border-color: #bbf7d0; }
+    .ptag-status-pending { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+
+    /* ─── Sections ─── */
+    .perfil-section {
+      margin-bottom: 28px;
+    }
+
+    .perfil-section-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    /* ─── Field rows ─── */
+    .perfil-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 560px) { .perfil-grid { grid-template-columns: 1fr; } }
+
+    .perfil-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .perfil-field-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+    }
+
+    .perfil-field-value {
+      font-size: 0.9rem;
+      color: var(--color-text);
+      font-weight: 400;
+    }
+
+    .perfil-field-value.empty {
+      color: var(--color-text-light);
+      font-style: italic;
+      font-size: 0.8rem;
+    }
+
+    /* ─── Edit mode ─── */
+    .perfil-field input,
+    .perfil-field select {
+      font-size: 0.875rem;
+      color: var(--color-text);
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xs);
+      padding: 7px 10px;
+      outline: none;
+      width: 100%;
+      font-family: var(--font-ui);
+      transition: border-color var(--transition-fast);
+    }
+    .perfil-field input:focus,
+    .perfil-field select:focus {
+      border-color: var(--color-primary);
+    }
+
+    /* ─── Actions ─── */
+    .perfil-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* ─── Solicitud card ─── */
+    .solicitud-card {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .solicitud-num {
+      font-family: monospace;
+      font-size: 0.875rem;
+      color: var(--color-text);
+      font-weight: 600;
+    }
+
+    .solicitud-date {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar-placeholder"></div>
+
+  <div class="main-content">
+    <div class="perfil-inner">
+
+      <!-- Page header -->
+      <div class="page-header" style="margin-bottom:24px;">
+        <div class="page-header-left">
+          <div class="page-header-label">Mi cuenta</div>
+          <h1 class="page-title">Mi perfil</h1>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary btn-sm" id="btn-editar" onclick="toggleEdit()">Editar datos</button>
+          <button class="btn btn-primary btn-sm" id="btn-guardar" style="display:none;" onclick="guardar()">Guardar cambios</button>
+          <button class="btn btn-ghost btn-sm" id="btn-cancelar" style="display:none;" onclick="cancelarEdit()">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- ══ HEADER PERFIL ══ -->
+      <div class="perfil-header">
+        <div class="avatar-upload-wrap">
+          <div id="avatar-display"></div>
+          <label class="avatar-edit-btn" for="avatar-file-input" title="Cambiar foto">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z"/>
+            </svg>
+          </label>
+          <input type="file" id="avatar-file-input" accept="image/*" onchange="handleAvatarUpload(event)">
+        </div>
+
+        <div class="perfil-header-info">
+          <div class="perfil-name" id="ph-name">—</div>
+          <div class="perfil-email" id="ph-email">—</div>
+          <div class="perfil-badges" id="ph-badges"></div>
+        </div>
+      </div>
+
+      <!-- ══ SECCIÓN: DATOS PERSONALES ══ -->
+      <div class="perfil-section">
+        <div class="perfil-section-title">Datos personales</div>
+        <div class="perfil-grid">
+          <div class="perfil-field">
+            <div class="perfil-field-label">Nombre</div>
+            <div class="perfil-field-value" id="val-nombre">—</div>
+            <input id="inp-nombre" style="display:none;" placeholder="Nombre">
+          </div>
+          <div class="perfil-field">
+            <div class="perfil-field-label">Apellidos</div>
+            <div class="perfil-field-value" id="val-apellidos">—</div>
+            <input id="inp-apellidos" style="display:none;" placeholder="Apellidos">
+          </div>
+          <div class="perfil-field">
+            <div class="perfil-field-label">Teléfono</div>
+            <div class="perfil-field-value" id="val-telefono">—</div>
+            <input id="inp-telefono" style="display:none;" placeholder="+34 600 000 000">
+          </div>
+          <div class="perfil-field">
+            <div class="perfil-field-label">Fecha de nacimiento</div>
+            <div class="perfil-field-value" id="val-fechanac">—</div>
+          </div>
+          <div class="perfil-field">
+            <div class="perfil-field-label">Nacionalidad</div>
+            <div class="perfil-field-value" id="val-nacionalidad">—</div>
+          </div>
+          <div class="perfil-field">
+            <div class="perfil-field-label">País de nacimiento</div>
+            <div class="perfil-field-value" id="val-paisnac">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECCIÓN: DIRECCIÓN ══ -->
+      <div class="perfil-section">
+        <div class="perfil-section-title">Dirección</div>
+        <div class="perfil-grid">
+          <div class="perfil-field">
+            <div class="perfil-field-label">País</div>
+            <div class="perfil-field-value" id="val-pais">—</div>
+            <input id="inp-pais" style="display:none;" placeholder="País">
+          </div>
+          <div class="perfil-field">
+            <div class="perfil-field-label">Ciudad</div>
+            <div class="perfil-field-value" id="val-ciudad">—</div>
+            <input id="inp-ciudad" style="display:none;" placeholder="Ciudad">
+          </div>
+          <div class="perfil-field">
+            <div class="perfil-field-label">Código postal</div>
+            <div class="perfil-field-value" id="val-cp">—</div>
+            <input id="inp-cp" style="display:none;" placeholder="CP">
+          </div>
+          <div class="perfil-field" style="grid-column: 1 / -1;">
+            <div class="perfil-field-label">Dirección</div>
+            <div class="perfil-field-value" id="val-direccion">—</div>
+            <input id="inp-direccion" style="display:none;" placeholder="Calle, número, piso...">
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECCIÓN: COMUNIDAD ══ -->
+      <div class="perfil-section">
+        <div class="perfil-section-title">Comunidad</div>
+        <div class="perfil-grid">
+          <div class="perfil-field">
+            <div class="perfil-field-label">Comunidad</div>
+            <div class="perfil-field-value" id="val-comunidad">—</div>
+          </div>
+          <div class="perfil-field">
+            <div class="perfil-field-label">Práctica religiosa</div>
+            <div class="perfil-field-value" id="val-practica">—</div>
+          </div>
+          <div class="perfil-field">
+            <div class="perfil-field-label">Familiar en kehilá</div>
+            <div class="perfil-field-value" id="val-familiar">—</div>
+          </div>
+          <div class="perfil-field">
+            <div class="perfil-field-label">Cómo conoció Kehilá</div>
+            <div class="perfil-field-value" id="val-conocio">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECCIÓN: DOCUMENTO ══ -->
+      <div class="perfil-section" id="section-doc">
+        <div class="perfil-section-title">Documento de identidad</div>
+        <div class="perfil-grid">
+          <div class="perfil-field">
+            <div class="perfil-field-label">Tipo</div>
+            <div class="perfil-field-value" id="val-docTipo">—</div>
+          </div>
+          <div class="perfil-field">
+            <div class="perfil-field-label">Número</div>
+            <div class="perfil-field-value" id="val-docNum">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECCIÓN: SOLICITUD ══ -->
+      <div class="perfil-section" id="section-solicitud" style="display:none;">
+        <div class="perfil-section-title">Solicitud de acceso</div>
+        <div class="solicitud-card">
+          <div>
+            <div class="solicitud-num" id="sol-num">—</div>
+            <div class="solicitud-date" id="sol-date">—</div>
+          </div>
+          <span class="ptag" id="sol-status-tag">—</span>
+        </div>
+      </div>
+
+      <!-- ══ ACCIONES ══ -->
+      <div class="perfil-actions" id="edit-actions" style="display:none;">
+        <button class="btn btn-primary btn-sm" onclick="guardar()">Guardar cambios</button>
+        <button class="btn btn-ghost btn-sm" onclick="cancelarEdit()">Cancelar</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom nav móvil -->
+  <div id="bottom-nav-placeholder"></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    const user = requireAuth();
+    let editMode = false;
+    let perfilData = {};
+
+    // Campos editables
+    const EDIT_FIELDS = ['nombre','apellidos','telefono','pais','ciudad','cp','direccion'];
+
+    function init() {
+      if (!user) return;
+
+      // Cargar datos de solicitud desde localStorage
+      const pending = JSON.parse(localStorage.getItem('kehila_pending') || '[]');
+      const sol = pending.find(s => s.email === user.email) || {};
+
+      // Cargar foto guardada
+      const savedPhoto = localStorage.getItem('kehila_avatar_' + user.email);
+
+      // Construir perfilData
+      const nameParts = (user.name || '').split(' ');
+      perfilData = {
+        nombre:      sol.nombre     || nameParts[0] || '',
+        apellidos:   sol.apellidos  || nameParts.slice(1).join(' ') || '',
+        email:       user.email     || '',
+        telefono:    (sol.telefonoPrefijo ? sol.telefonoPrefijo + ' ' : '') + (sol.telefono || user.telefono || ''),
+        fechaNac:    sol.fechaNacDia ? sol.fechaNacDia + '/' + sol.fechaNacMes + '/' + sol.fechaNacAnio : '',
+        nacionalidad: sol.nacionalidad || '',
+        paisNac:     sol.paisNac    || '',
+        pais:        sol.pais       || '',
+        ciudad:      sol.ciudad     || '',
+        cp:          sol.cp         || '',
+        direccion:   sol.direccion  || '',
+        comunidad:   sol.comunidad  || user.comunidad || '',
+        practica:    sol.practica   || '',
+        familiar:    sol.familiar === 'si' ? (sol.familiarNombre || 'Sí') : 'No',
+        conocio:     sol.comoConocio || '',
+        docTipo:     sol.docTipo    || '',
+        docNum:      sol.docNumero  ? '••••' + sol.docNumero.slice(-3) : '',
+        role:        user.role      || 'miembro',
+        status:      user.status    || 'active',
+        solicitudNum: sol.solicitudNum || '',
+        submittedAt: sol.submittedAt || '',
+        photo:       savedPhoto     || '',
+      };
+
+      renderPerfil();
+    }
+
+    function renderPerfil() {
+      const d = perfilData;
+
+      // Avatar
+      const avatarWrap = document.getElementById('avatar-display');
+      if (d.photo) {
+        avatarWrap.innerHTML = `<img class="avatar-photo" src="${d.photo}" alt="Foto de perfil">`;
+      } else {
+        const color = getAvatarColor(d.nombre || user.name);
+        const initials = (user.initials || (d.nombre[0] || '') + (d.apellidos[0] || '')).toUpperCase().slice(0,2) || '?';
+        avatarWrap.innerHTML = `<div class="avatar avatar-xl" data-color="${color}">${initials}</div>`;
+      }
+
+      // Header
+      document.getElementById('ph-name').textContent = (d.nombre + ' ' + d.apellidos).trim() || user.name;
+      document.getElementById('ph-email').textContent = d.email;
+
+      // Badges
+      const roleLabel = { admin: 'Admin', mod: 'Moderador', miembro: 'Miembro' }[d.role] || d.role;
+      const statusClass = d.status === 'active' ? 'ptag-status-active' : 'ptag-status-pending';
+      const statusLabel = { active: 'Activo', pending: 'Pendiente aprobación', banned: 'Suspendido' }[d.status] || d.status;
+      document.getElementById('ph-badges').innerHTML =
+        `<span class="ptag ptag-role">${roleLabel}</span>
+         <span class="ptag ${statusClass}">${statusLabel}</span>`;
+
+      // Campos
+      setVal('nombre',      d.nombre);
+      setVal('apellidos',   d.apellidos);
+      setVal('telefono',    d.telefono);
+      setVal('fechanac',    d.fechaNac);
+      setVal('nacionalidad',d.nacionalidad);
+      setVal('paisnac',     d.paisNac);
+      setVal('pais',        d.pais);
+      setVal('ciudad',      d.ciudad);
+      setVal('cp',          d.cp);
+      setVal('direccion',   d.direccion);
+      setVal('comunidad',   d.comunidad);
+      setVal('practica',    d.practica);
+      setVal('familiar',    d.familiar);
+      setVal('conocio',     d.conocio);
+      setVal('docTipo',     d.docTipo);
+      setVal('docNum',      d.docNum);
+
+      // Solicitud
+      if (d.solicitudNum) {
+        document.getElementById('section-solicitud').style.display = '';
+        document.getElementById('sol-num').textContent = d.solicitudNum;
+        document.getElementById('sol-date').textContent = d.submittedAt
+          ? 'Enviada el ' + new Date(d.submittedAt).toLocaleDateString('es-ES', {day:'numeric',month:'long',year:'numeric'})
+          : '';
+        document.getElementById('sol-status-tag').textContent = statusLabel;
+        document.getElementById('sol-status-tag').className = 'ptag ' + statusClass;
+      }
+    }
+
+    function setVal(id, value) {
+      const el = document.getElementById('val-' + id);
+      if (!el) return;
+      if (value) {
+        el.textContent = value;
+        el.classList.remove('empty');
+      } else {
+        el.textContent = 'No indicado';
+        el.classList.add('empty');
+      }
+    }
+
+    function toggleEdit() {
+      editMode = true;
+      document.getElementById('btn-editar').style.display = 'none';
+      document.getElementById('btn-guardar').style.display = '';
+      document.getElementById('btn-cancelar').style.display = '';
+      document.getElementById('edit-actions').style.display = 'none';
+
+      EDIT_FIELDS.forEach(f => {
+        const val = document.getElementById('val-' + f);
+        const inp = document.getElementById('inp-' + f);
+        if (val && inp) {
+          val.style.display = 'none';
+          inp.style.display = '';
+          inp.value = perfilData[f] || '';
+        }
+      });
+    }
+
+    function cancelarEdit() {
+      editMode = false;
+      document.getElementById('btn-editar').style.display = '';
+      document.getElementById('btn-guardar').style.display = 'none';
+      document.getElementById('btn-cancelar').style.display = 'none';
+
+      EDIT_FIELDS.forEach(f => {
+        const val = document.getElementById('val-' + f);
+        const inp = document.getElementById('inp-' + f);
+        if (val && inp) {
+          val.style.display = '';
+          inp.style.display = 'none';
+        }
+      });
+    }
+
+    function guardar() {
+      EDIT_FIELDS.forEach(f => {
+        const inp = document.getElementById('inp-' + f);
+        if (inp) perfilData[f] = inp.value.trim();
+      });
+
+      // Actualizar sesión
+      const session = JSON.parse(localStorage.getItem('kehila_user') || '{}');
+      session.name = (perfilData.nombre + ' ' + perfilData.apellidos).trim();
+      session.telefono = perfilData.telefono;
+      localStorage.setItem('kehila_user', JSON.stringify(session));
+
+      cancelarEdit();
+      renderPerfil();
+
+      // Toast
+      const t = document.createElement('div');
+      t.style.cssText = 'position:fixed;top:20px;right:20px;z-index:999;background:#1B2E5E;color:#fff;padding:12px 18px;border-radius:6px;font-size:.875rem;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.15);';
+      t.textContent = 'Perfil actualizado';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+    }
+
+    function handleAvatarUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 3 * 1024 * 1024) {
+        alert('La imagen no puede superar 3MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        perfilData.photo = ev.target.result;
+        localStorage.setItem('kehila_avatar_' + user.email, ev.target.result);
+        renderPerfil();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    init();
+  </script>
+</body>
+</html>

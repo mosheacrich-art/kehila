@@ -1109,22 +1109,23 @@
     return `<div class="avatar avatar-${size}" data-color="${color}">${user.initials}</div>`;
   }
 
+  const TAG = 'display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:3px;font-size:0.7rem;font-weight:600;letter-spacing:0.03em;border:1px solid;white-space:nowrap;';
   function badgeStatus(status) {
     const map = {
-      active:  '<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;color:#15803d;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>Activo</span>',
-      pending: '<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;color:#b45309;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#d97706;flex-shrink:0;display:inline-block;"></span>Pendiente</span>',
-      banned:  '<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;color:#b91c1c;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#ef4444;flex-shrink:0;display:inline-block;"></span>Baneado</span>',
+      active:  `<span style="${TAG}color:#15803d;background:#f0fdf4;border-color:#bbf7d0;"><span style="width:5px;height:5px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>Activo</span>`,
+      pending: `<span style="${TAG}color:#92400e;background:#fffbeb;border-color:#fde68a;"><span style="width:5px;height:5px;border-radius:50%;background:#d97706;flex-shrink:0;display:inline-block;"></span>Pendiente</span>`,
+      banned:  `<span style="${TAG}color:#991b1b;background:#fef2f2;border-color:#fecaca;"><span style="width:5px;height:5px;border-radius:50%;background:#ef4444;flex-shrink:0;display:inline-block;"></span>Baneado</span>`,
     };
-    return map[status] || `<span style="font-size:0.8rem;color:var(--color-text-muted);">${status}</span>`;
+    return map[status] || `<span style="${TAG}color:var(--color-text-muted);background:var(--color-bg);border-color:var(--color-border);">${status}</span>`;
   }
 
   function badgeRole(role) {
     const map = {
-      admin:   '<span style="font-size:0.75rem;font-weight:600;color:var(--color-primary);letter-spacing:0.03em;">Admin</span>',
-      mod:     '<span style="font-size:0.75rem;font-weight:600;color:#1d4ed8;letter-spacing:0.03em;">Mod.</span>',
-      miembro: '<span style="font-size:0.75rem;color:var(--color-text-muted);">Miembro</span>',
+      admin:   `<span style="${TAG}color:#1B2E5E;background:#eef2ff;border-color:#c7d2fe;">Admin</span>`,
+      mod:     `<span style="${TAG}color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe;">Mod.</span>`,
+      miembro: `<span style="${TAG}color:var(--color-text-muted);background:var(--color-bg);border-color:var(--color-border);">Miembro</span>`,
     };
-    return map[role] || `<span style="font-size:0.75rem;color:var(--color-text-muted);">${role}</span>`;
+    return map[role] || `<span style="${TAG}color:var(--color-text-muted);background:var(--color-bg);border-color:var(--color-border);">${role}</span>`;
   }
 
   function formatDate(str) {
