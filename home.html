@@ -80,9 +80,10 @@
     .tefila-card {
       background: var(--color-primary);
       color: var(--color-white);
-      border-radius: var(--radius-md);
-      padding: 16px 20px;
-      min-width: 200px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 14px 18px;
+      min-width: 192px;
       flex-shrink: 0;
     }
 
@@ -146,12 +147,12 @@
       align-items: center;
       gap: 2px;
       background: var(--color-white);
-      border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-full);
-      padding: 7px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xs);
+      padding: 6px 14px;
       white-space: nowrap;
       flex-shrink: 0;
-      transition: all var(--transition-fast);
+      transition: border-color var(--transition-fast);
     }
 
     .zman-chip-name {
@@ -255,19 +256,19 @@
     .eventos-scroll::-webkit-scrollbar { display: none; }
 
     .evento-home-card {
-      flex: 0 0 280px;
+      flex: 0 0 268px;
       background: var(--color-white);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-sm);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
       overflow: hidden;
-      transition: all var(--transition-normal);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
       display: flex;
       flex-direction: column;
     }
 
     .evento-home-card:hover {
+      border-color: #c0c7d4;
       box-shadow: var(--shadow-md);
-      transform: translateY(-3px);
     }
 
     .evento-home-thumb {
@@ -361,10 +362,11 @@
     }
 
     .plazas-badge {
-      font-size: 0.7rem;
+      font-size: 0.6875rem;
       font-weight: 600;
-      padding: 3px 8px;
-      border-radius: var(--radius-full);
+      letter-spacing: 0.02em;
+      padding: 2px 7px;
+      border-radius: var(--radius-xs);
     }
 
     .plazas-badge.libre { background: var(--color-success-light); color: #065F46; }
@@ -380,20 +382,19 @@
 
     .noticia-home-card {
       background: var(--color-white);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
       padding: 14px 16px;
-      box-shadow: var(--shadow-sm);
       display: flex;
       gap: 14px;
       cursor: pointer;
-      transition: all var(--transition-normal);
+      transition: border-color var(--transition-fast);
       text-decoration: none;
       color: inherit;
     }
 
     .noticia-home-card:hover {
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
+      border-color: #c0c7d4;
     }
 
     .noticia-home-card.destacada {
@@ -472,15 +473,15 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      padding: 2px 7px;
-      border-radius: var(--radius-full);
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
     }
 
     /* ─── 6. Card Shabat ─── */
     .shabat-card {
       background: var(--color-primary);
-      border-radius: var(--radius-lg);
-      padding: 28px 32px;
+      border-radius: var(--radius-md);
+      padding: 24px 28px;
       color: var(--color-white);
       position: relative;
       overflow: hidden;
@@ -600,12 +601,9 @@
     }
 
     /* ─── Colores de fondo evento ─── */
-    .ev-bg-0 { background: linear-gradient(135deg, #1B2E5E 0%, #2A4080 100%); }
-    .ev-bg-1 { background: linear-gradient(135deg, #065F46 0%, #047857 100%); }
-    .ev-bg-2 { background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%); }
-    .ev-bg-3 { background: linear-gradient(135deg, #B45309 0%, #92400E 100%); }
-    .ev-bg-4 { background: linear-gradient(135deg, #1E40AF 0%, #1D4ED8 100%); }
-    .ev-bg-5 { background: linear-gradient(135deg, #9D174D 0%, #831843 100%); }
+    .ev-bg-0, .ev-bg-1, .ev-bg-2, .ev-bg-3, .ev-bg-4, .ev-bg-5 {
+      background: var(--color-primary);
+    }
   </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
