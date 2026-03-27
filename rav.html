@@ -412,6 +412,80 @@
   requireAuth();
   initNav('rav');
 
+  /* ─── Bandeja del Rav (solo admin) ─── */
+  (function() {
+    const u = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    if (!u || u.role !== 'admin') return;
+
+    // Inject inbox section into the DOM after .rav-inner
+    const inner = document.querySelector('.rav-inner');
+    if (!inner) return;
+
+    const section = document.createElement('div');
+    section.id = 'rav-inbox';
+    section.style.cssText = 'margin-top:32px;';
+    section.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <p style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gold-dark,#9a7a2a);">Panel del Rav</p>
+          <h2 style="font-size:1.25rem;font-weight:700;color:var(--color-text);">Preguntas recibidas</h2>
+        </div>
+        <button onclick="loadPreguntas()" style="font-size:.8rem;padding:6px 14px;border-radius:999px;border:1.5px solid var(--color-border);background:#fff;cursor:pointer;color:var(--color-text-muted);">↺ Actualizar</button>
+      </div>
+      <div id="rav-inbox-list"><p style="text-align:center;color:var(--color-text-muted);padding:24px 0;">Cargando preguntas…</p></div>`;
+    inner.appendChild(section);
+
+    loadPreguntas();
+  })();
+
+  async function loadPreguntas() {
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return;
+    const list = document.getElementById('rav-inbox-list');
+    if (!list) return;
+    try {
+      const { data, error } = await sb.from('preguntas_rav').select('*').order('created_at', { ascending: false });
+      if (error || !data?.length) {
+        list.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:24px 0;">No hay preguntas aún</p>';
+        return;
+      }
+      list.innerHTML = data.map(p => {
+        const fecha = new Date(p.created_at).toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' });
+        const estadoColor = p.estado === 'respondida' ? '#059669' : '#D97706';
+        const estadoLabel = p.estado === 'respondida' ? 'Respondida' : 'Pendiente';
+        return `<div id="preg-${p.id}" style="background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.08);padding:18px 20px;margin-bottom:14px;border-left:4px solid ${estadoColor};">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--color-bg);color:var(--color-text-muted);">${p.categoria || 'Sin categoría'}</span>
+              <span style="font-size:.7rem;color:var(--color-text-muted);">${p.usuario_nombre || 'Anónimo'} · ${fecha}</span>
+            </div>
+            <span style="font-size:.7rem;font-weight:600;color:${estadoColor};">${estadoLabel}</span>
+          </div>
+          <p style="font-size:.9rem;color:var(--color-text);line-height:1.55;margin-bottom:12px;">${p.pregunta}</p>
+          ${p.respuesta ? `<div style="background:#F0FDF4;border-radius:8px;padding:12px 14px;font-size:.875rem;color:#065F46;line-height:1.5;"><strong>Respuesta:</strong> ${p.respuesta}</div>` : `
+          <details style="margin-top:4px;">
+            <summary style="font-size:.8rem;cursor:pointer;color:var(--color-primary);font-weight:600;list-style:none;">✏️ Responder</summary>
+            <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;">
+              <textarea id="resp-${p.id}" rows="3" placeholder="Escribe tu respuesta…" style="border:1.5px solid var(--color-border);border-radius:8px;padding:9px 12px;font-size:.875rem;font-family:inherit;outline:none;resize:vertical;width:100%;box-sizing:border-box;"></textarea>
+              <button onclick="responderPregunta('${p.id}')" style="align-self:flex-end;padding:7px 18px;background:var(--color-primary);color:#fff;border:none;border-radius:8px;font-size:.875rem;font-weight:600;cursor:pointer;">Publicar respuesta</button>
+            </div>
+          </details>`}
+        </div>`;
+      }).join('');
+    } catch(e) { list.innerHTML = '<p style="color:#ef4444;text-align:center;padding:20px;">Error al cargar preguntas</p>'; }
+  }
+
+  async function responderPregunta(id) {
+    const resp = document.getElementById(`resp-${id}`)?.value.trim();
+    if (!resp) { alert('Escribe una respuesta'); return; }
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return;
+    const { error } = await sb.from('preguntas_rav').update({ respuesta: resp, estado: 'respondida' }).eq('id', id);
+    if (error) { alert('Error: ' + error.message); return; }
+    if (typeof showToast === 'function') showToast('Respuesta publicada', 'success');
+    loadPreguntas();
+  }
+
   /* ─── Toggle switches (reutiliza CSS de components.css) ─── */
   /* Ya están en components.css */
 
@@ -434,14 +508,35 @@
   }
 
   /* ─── Enviar pregunta ─── */
-  function enviarPregunta() {
+  async function enviarPregunta() {
     const text = document.getElementById('rav-textarea').value.trim();
     let valid = true;
     if (!selectedCat) { document.getElementById('err-cat').style.display = ''; valid = false; }
     if (text.length < 20) { document.getElementById('err-textarea').style.display = ''; valid = false; }
     if (!valid) return;
 
-    const ref = '#' + String(Math.floor(1000 + Math.random() * 9000));
+    const btn = document.querySelector('.rav-form-section .btn-primary');
+    if (btn) { btn.textContent = 'Enviando...'; btn.disabled = true; }
+
+    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    const ref  = '#' + String(Math.floor(1000 + Math.random() * 9000));
+
+    const registro = {
+      usuario_nombre: user?.name || 'Anónimo',
+      categoria: selectedCat,
+      pregunta: text,
+      anonima: false,
+      estado: 'pendiente'
+    };
+
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) {
+      try {
+        await sb.from('preguntas_rav').insert(registro);
+      } catch(e) { console.warn('preguntas_rav insert:', e); }
+    }
+
+    if (btn) { btn.textContent = 'Enviar pregunta'; btn.disabled = false; }
     document.getElementById('confirm-ref-num').textContent = ref;
     document.getElementById('rav-form-body').style.display = 'none';
     document.getElementById('rav-confirm').style.display = 'block';

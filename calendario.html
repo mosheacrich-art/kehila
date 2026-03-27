@@ -124,6 +124,23 @@
     .cal-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-border); }
     .legend-item { display: flex; align-items: center; gap: 5px; font-size: .7rem; color: var(--color-text-muted); }
     .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Eventos de comunidad en calendario ── */
+    .cal-ev-item { background:var(--color-bg); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:8px; border-left:3px solid var(--color-gold); }
+    .cal-ev-item-title { font-size:.875rem; font-weight:600; color:var(--color-text); }
+    .cal-ev-item-hora  { font-size:.75rem; color:var(--color-gold-dark,#9a7a2a); font-weight:500; margin-top:2px; }
+    .cal-ev-item-desc  { font-size:.75rem; color:var(--color-text-muted); margin-top:3px; }
+    .cal-ev-item-del   { float:right; background:none; border:none; color:#ef4444; cursor:pointer; font-size:.8rem; padding:0; opacity:0.6; }
+    .cal-ev-item-del:hover { opacity:1; }
+    .cal-add-btn { width:100%; margin-top:10px; padding:8px; border:1.5px dashed var(--color-border); background:none; border-radius:var(--radius-sm); color:var(--color-text-muted); cursor:pointer; font-size:.8125rem; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; }
+    .cal-add-btn:hover { border-color:var(--color-gold); color:var(--color-gold-dark,#9a7a2a); background:var(--color-bg); }
+    .cal-add-form { background:var(--color-bg); border-radius:var(--radius-sm); padding:12px; margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+    .cal-add-form input, .cal-add-form textarea, .cal-add-form select { border:1.5px solid var(--color-border); border-radius:6px; padding:7px 10px; font-size:.8125rem; font-family:inherit; outline:none; background:#fff; }
+    .cal-add-form input:focus, .cal-add-form textarea:focus { border-color:var(--color-primary); }
+    .cal-add-form-btns { display:flex; gap:8px; }
+    .cal-add-form-btns button { flex:1; padding:7px; border-radius:6px; font-size:.8125rem; cursor:pointer; border:1.5px solid var(--color-border); }
+    .cal-add-form-btns .btn-save { background:var(--color-primary); color:#fff; border-color:var(--color-primary); font-weight:600; }
+    .dot-custom { background: #F59E0B; }
   </style>
 </head>
 <body>
@@ -168,6 +185,9 @@ let loadedYear = null;
 let curYear  = new Date().getFullYear();
 let curMonth = new Date().getMonth(); // 0-based
 let selectedDate = null;
+let customEventsMap = {}; // date → [{id, titulo, hora, descripcion, tipo}]
+const _calUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+const _calIsAdmin = _calUser?.role === 'admin';
 
 /* ─── Traducciones ─── */
 const PARASHA = {
@@ -347,6 +367,26 @@ async function ensureData(year) {
   loadedYear = year;
 }
 
+async function loadCustomEvents(year, month) {
+  const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+  if (!sb) return;
+  try {
+    const from = `${year}-${String(month+1).padStart(2,'0')}-01`;
+    const to   = `${year}-${String(month+1).padStart(2,'0')}-${new Date(year,month+1,0).getDate()}`;
+    const { data } = await sb.from('calendario_eventos').select('*')
+      .gte('fecha', from).lte('fecha', to).order('hora', { ascending: true });
+    if (data) {
+      data.forEach(ev => {
+        if (!customEventsMap[ev.fecha]) customEventsMap[ev.fecha] = [];
+        // avoid duplicates
+        if (!customEventsMap[ev.fecha].find(e => e.id === ev.id)) {
+          customEventsMap[ev.fecha].push(ev);
+        }
+      });
+    }
+  } catch(e) { console.warn('loadCustomEvents:', e); }
+}
+
 /* ─── Renderiza el calendario ─── */
 function renderCal() {
   const today = new Date();
@@ -406,6 +446,7 @@ function renderCal() {
           <div class="legend-item"><div class="legend-dot" style="background:var(--color-primary)"></div>Shabat / Parashá</div>
           <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>Festividad</div>
           <div class="legend-item"><div class="legend-dot" style="background:#7C3AED"></div>Ayuno</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Evento comunidad</div>
         </div>
       </div>
       <div class="cal-side">
@@ -441,6 +482,7 @@ function dayCell(d, key, other, todayKey) {
     else if (tipo === 'purim')   dots += `<span class="cal-dot dot-purim"></span>`;
     else                         dots += `<span class="cal-dot dot-holiday"></span>`;
   }
+  if (customEventsMap[key]?.length) dots += `<span class="cal-dot dot-custom"></span>`;
 
   const dotsHtml = dots ? `<div class="cal-dots">${dots}</div>` : '';
 
@@ -549,11 +591,86 @@ function selectDate(key) {
       </div>`;
   });
 
+  // ── Eventos personalizados de la comunidad ──
+  const customEvs = customEventsMap[key] || [];
+  if (customEvs.length) {
+    if (hasContent) html += `<hr style="border:none;border-top:1px solid var(--color-border);margin:12px 0;">`;
+    html += `<div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted);margin-bottom:8px;">Eventos de la comunidad</div>`;
+    customEvs.forEach(ev => {
+      html += `<div class="cal-ev-item" id="calev-${ev.id}">
+        ${_calIsAdmin ? `<button class="cal-ev-item-del" onclick="deleteCalEv('${ev.id}','${key}',event)" title="Eliminar">✕</button>` : ''}
+        <div class="cal-ev-item-title">${ev.titulo}</div>
+        ${ev.hora ? `<div class="cal-ev-item-hora">🕐 ${ev.hora}</div>` : ''}
+        ${ev.descripcion ? `<div class="cal-ev-item-desc">${ev.descripcion}</div>` : ''}
+      </div>`;
+    });
+    hasContent = true;
+  }
+
+  if (_calIsAdmin) {
+    html += `<button class="cal-add-btn" onclick="showCalAddForm('${key}')">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+      Añadir evento a este día
+    </button>
+    <div id="cal-add-form-${key}" style="display:none;">
+      <div class="cal-add-form">
+        <input id="caef-titulo-${key}" placeholder="Título del evento" maxlength="80">
+        <input id="caef-hora-${key}" type="time" placeholder="Hora (opcional)">
+        <textarea id="caef-desc-${key}" placeholder="Descripción (opcional)" rows="2" style="resize:none;"></textarea>
+        <div class="cal-add-form-btns">
+          <button onclick="hideCalAddForm('${key}')">Cancelar</button>
+          <button class="btn-save" onclick="saveCalEv('${key}')">Guardar</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
   if (!hasContent) {
     html = `<p class="cal-empty">Sin eventos hebreos este día</p>`;
   }
 
   document.getElementById('cal-side-detail').innerHTML = html;
+}
+
+function showCalAddForm(key) {
+  document.getElementById(`cal-add-form-${key}`).style.display = '';
+}
+function hideCalAddForm(key) {
+  document.getElementById(`cal-add-form-${key}`).style.display = 'none';
+}
+
+async function saveCalEv(key) {
+  const titulo = document.getElementById(`caef-titulo-${key}`).value.trim();
+  if (!titulo) { alert('Escribe un título'); return; }
+  const hora  = document.getElementById(`caef-hora-${key}`).value || null;
+  const desc  = document.getElementById(`caef-desc-${key}`).value.trim() || null;
+
+  const newEv = { fecha: key, titulo, hora, descripcion: desc, tipo: 'comunidad' };
+
+  const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+  if (sb) {
+    const { data, error } = await sb.from('calendario_eventos').insert(newEv).select().single();
+    if (error) { alert('Error: ' + error.message); return; }
+    if (data) newEv.id = data.id;
+  } else {
+    newEv.id = 'local-' + Date.now();
+  }
+
+  if (!customEventsMap[key]) customEventsMap[key] = [];
+  customEventsMap[key].push(newEv);
+  renderCal();
+  selectDate(key);
+  if (typeof showToast === 'function') showToast('Evento añadido — todos lo verán', 'success');
+}
+
+async function deleteCalEv(id, key, e) {
+  e.stopPropagation();
+  const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+  if (sb) { try { await sb.from('calendario_eventos').delete().eq('id', id); } catch(_) {} }
+  if (customEventsMap[key]) customEventsMap[key] = customEventsMap[key].filter(ev => ev.id !== id);
+  renderCal();
+  selectDate(key);
+  if (typeof showToast === 'function') showToast('Evento eliminado', 'success');
 }
 
 async function navMonth(delta) {
@@ -565,7 +682,7 @@ async function navMonth(delta) {
   if (curYear !== loadedYear) {
     document.getElementById('cal-container').innerHTML = `
       <div class="loading-state"><div class="loading-spinner"></div><p>Cargando calendario…</p></div>`;
-    try { await ensureData(curYear); } catch(e) { showError(); return; }
+    try { await ensureData(curYear); await loadCustomEvents(curYear, curMonth); } catch(e) { showError(); return; }
   }
   selectedDate = null;
   renderCal();
@@ -585,6 +702,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNav('calendario');
   try {
     await ensureData(curYear);
+    await loadCustomEvents(curYear, curMonth);
     renderCal();
   } catch(e) {
     showError();
