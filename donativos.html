@@ -109,6 +109,25 @@
     .btn-trash { position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; background:#fff; border:1.5px solid #fca5a5; color:#ef4444; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .15s,background .15s; z-index:10; box-shadow:0 1px 6px rgba(0,0,0,.12); padding:0; }
     .btn-trash:hover { background:#fef2f2; }
     .campaign-card:hover .btn-trash { opacity:1; }
+    /* FAB admin */
+    .fab-admin { position:fixed; bottom:28px; right:28px; width:54px; height:54px; border-radius:50%; background:#C9A84C; color:#fff; border:none; font-size:1.6rem; cursor:pointer; box-shadow:0 4px 18px rgba(201,168,76,.45); display:flex; align-items:center; justify-content:center; z-index:100; transition:background .15s,transform .15s; }
+    .fab-admin:hover { background:#a8892e; transform:scale(1.06); }
+    @media (max-width:768px) { .fab-admin { bottom:80px; right:18px; } }
+    /* Modal admin */
+    .admin-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:300; display:flex; align-items:center; justify-content:center; padding:16px; }
+    .admin-modal-overlay.hidden { display:none; }
+    .admin-modal { background:#fff; border-radius:16px; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+    .admin-modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px 16px; border-bottom:1px solid var(--color-border); }
+    .admin-modal-header h3 { font-size:1.1rem; font-weight:700; }
+    .admin-modal-close { background:none; border:none; cursor:pointer; padding:4px; color:var(--color-text-muted); border-radius:8px; }
+    .admin-modal-close:hover { background:var(--color-bg); }
+    .admin-modal-body { padding:20px 24px; display:flex; flex-direction:column; gap:14px; }
+    .admin-modal-footer { padding:16px 24px; border-top:1px solid var(--color-border); display:flex; gap:10px; justify-content:flex-end; }
+    .form-group { display:flex; flex-direction:column; gap:5px; }
+    .form-group label { font-size:.78rem; font-weight:600; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:.05em; }
+    .form-group input, .form-group textarea, .form-group select { border:1.5px solid var(--color-border); border-radius:8px; padding:9px 12px; font-size:.9rem; font-family:inherit; outline:none; transition:border-color .15s; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--color-primary); }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
     .campaign-banner {
       height: 90px; position: relative; overflow: hidden;
@@ -122,6 +141,9 @@
     }
     .campaign-banner.granate {
       background: linear-gradient(135deg, #7C2D12 0%, #9A3412 100%);
+    }
+    .campaign-banner.dorado {
+      background: linear-gradient(135deg, #92400E 0%, #C9A84C 100%);
     }
 
     /* Patrón geométrico CSS */
@@ -929,12 +951,76 @@
   requireAuth();
   initNav('donativos');
 
-  /* ─── Botón basurita admin ─── */
+  /* ─── Admin: basurita + FAB nueva campaña ─── */
   (function() {
     const u = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
     if (!u || u.role !== 'admin') {
       document.querySelectorAll('.btn-trash.admin-only').forEach(b => b.remove());
+      return;
     }
+
+    // FAB
+    const fab = document.createElement('button');
+    fab.className = 'fab-admin';
+    fab.setAttribute('aria-label', 'Nueva campaña');
+    fab.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:24px;height:24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>';
+    fab.onclick = () => document.getElementById('modal-nueva-campana').classList.remove('hidden');
+    document.body.appendChild(fab);
+
+    // Modal
+    document.body.insertAdjacentHTML('beforeend', `
+      <div class="admin-modal-overlay hidden" id="modal-nueva-campana">
+        <div class="admin-modal">
+          <div class="admin-modal-header">
+            <h3>➕ Nueva campaña de donativos</h3>
+            <button class="admin-modal-close" onclick="document.getElementById('modal-nueva-campana').classList.add('hidden')">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="admin-modal-body">
+            <div class="form-group">
+              <label>Título de la campaña</label>
+              <input id="camp-titulo" placeholder="Ej: Fondo de emergencia familiar">
+            </div>
+            <div class="form-group">
+              <label>Descripción</label>
+              <textarea id="camp-desc" rows="3" placeholder="Explica el objetivo de la campaña..."></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Meta (€)</label>
+                <input id="camp-meta" type="number" placeholder="10000" min="1">
+              </div>
+              <div class="form-group">
+                <label>Días restantes</label>
+                <input id="camp-dias" type="number" placeholder="30" min="1" value="30">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Color del banner</label>
+                <select id="camp-color">
+                  <option value="azul">🔵 Azul</option>
+                  <option value="verde">🟢 Verde</option>
+                  <option value="granate">🔴 Granate</option>
+                  <option value="dorado">🟡 Dorado</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Emoji (opcional)</label>
+                <input id="camp-emoji" placeholder="💙" maxlength="4">
+              </div>
+            </div>
+          </div>
+          <div class="admin-modal-footer">
+            <button class="btn btn-ghost" onclick="document.getElementById('modal-nueva-campana').classList.add('hidden')">Cancelar</button>
+            <button class="btn btn-primary" onclick="crearCampaña()">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              Publicar campaña
+            </button>
+          </div>
+        </div>
+      </div>`);
   })();
 
   function deleteCampaña(cardId, e) {
@@ -942,6 +1028,82 @@
     const card = document.getElementById(cardId);
     if (card) card.remove();
     if (typeof showToast === 'function') showToast('Campaña eliminada', 'success');
+  }
+
+  const TRASH_SVG = `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>`;
+
+  let _campCounter = 10;
+
+  function crearCampaña() {
+    const titulo = document.getElementById('camp-titulo').value.trim();
+    const desc   = document.getElementById('camp-desc').value.trim();
+    const meta   = parseInt(document.getElementById('camp-meta').value) || 0;
+    const dias   = parseInt(document.getElementById('camp-dias').value) || 30;
+    const color  = document.getElementById('camp-color').value;
+    const emoji  = document.getElementById('camp-emoji').value.trim() || '💙';
+
+    if (!titulo) { if (typeof showToast === 'function') showToast('Escribe un título para la campaña', 'warning'); return; }
+    if (!desc)   { if (typeof showToast === 'function') showToast('Añade una descripción', 'warning'); return; }
+    if (!meta)   { if (typeof showToast === 'function') showToast('Indica la meta en €', 'warning'); return; }
+
+    const id = `camp-new-${++_campCounter}`;
+    const metaFmt = meta >= 1000 ? `€${(meta/1000).toFixed(meta%1000===0?0:1)}k` : `€${meta}`;
+
+    const card = document.createElement('div');
+    card.className = 'campaign-card';
+    card.id = id;
+    card.innerHTML = `
+      <button class="btn-trash admin-only" onclick="deleteCampaña('${id}',event)" title="Eliminar campaña">${TRASH_SVG}</button>
+      <div class="campaign-banner ${color}">
+        <span class="campaign-banner-emoji" style="font-size:1.3rem;">${emoji}</span>
+        <span class="campaign-banner-title">${titulo}</span>
+      </div>
+      <div class="campaign-body">
+        <p class="campaign-desc">${desc}</p>
+        <div class="campaign-stats-row">
+          <div class="camp-stat">
+            <span class="camp-stat-value green">€0</span>
+            <span class="camp-stat-label">Recaudado</span>
+          </div>
+          <div class="camp-stat-sep"></div>
+          <div class="camp-stat">
+            <span class="camp-stat-value">${metaFmt}</span>
+            <span class="camp-stat-label">Meta</span>
+          </div>
+          <div class="camp-stat-sep"></div>
+          <div class="camp-stat">
+            <span class="camp-stat-value gold">0</span>
+            <span class="camp-stat-label">Donantes</span>
+          </div>
+        </div>
+        <div class="campaign-progress-wrap">
+          <div class="progress-header">
+            <span class="progress-pct">0%</span>
+            <span class="progress-dias">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+              ${dias} días restantes
+            </span>
+          </div>
+          <div class="don-progress-bar"><div class="don-progress-fill" style="width:0%"></div></div>
+        </div>
+        <div class="campaign-footer">
+          <div class="donantes-pile"><span>Sé el primero en donar</span></div>
+          <button class="btn btn-primary" onclick="openDonModal('${titulo}','${id}',${meta},0)">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:17px;height:17px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+            Donar a esta campaña
+          </button>
+        </div>
+      </div>`;
+
+    document.querySelector('.campaigns-list').insertBefore(card, document.querySelector('.campaigns-list').firstChild);
+    document.getElementById('modal-nueva-campana').classList.add('hidden');
+
+    // Reset form
+    ['camp-titulo','camp-desc','camp-meta','camp-emoji'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('camp-dias').value = '30';
+    document.getElementById('camp-color').value = 'azul';
+
+    if (typeof showToast === 'function') showToast('Campaña publicada', 'success');
   }
 
   /* ─── Stripe init ─── */
