@@ -531,9 +531,21 @@
 
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (sb) {
-      try {
-        await sb.from('preguntas_rav').insert(registro);
-      } catch(e) { console.warn('preguntas_rav insert:', e); }
+      const { error } = await sb.from('preguntas_rav').insert(registro);
+      if (error) {
+        console.error('preguntas_rav insert error:', error);
+        if (btn) { btn.textContent = 'Enviar pregunta'; btn.disabled = false; }
+        if (typeof showToast === 'function') {
+          showToast('Error al enviar: ' + error.message, 'error');
+        } else {
+          alert('Error al enviar la pregunta: ' + error.message);
+        }
+        return;
+      }
+    } else {
+      if (btn) { btn.textContent = 'Enviar pregunta'; btn.disabled = false; }
+      if (typeof showToast === 'function') showToast('Error: no hay conexión con el servidor', 'error');
+      return;
     }
 
     if (btn) { btn.textContent = 'Enviar pregunta'; btn.disabled = false; }
