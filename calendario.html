@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario Hebreo — Kehilá</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <style>
+    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
+    @media (max-width: 768px) { .main-content { margin-left: 0; padding-bottom: 80px; } }
+    .cal-inner { max-width: 860px; margin: 0 auto; padding: 32px 32px 60px; }
+    @media (max-width: 768px) { .cal-inner { padding: 20px 14px 88px; } }
+
+    /* ── Chips de filtro ── */
+    .filter-chips { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; margin-bottom:24px; }
+    .filter-chips::-webkit-scrollbar { display:none; }
+    .chip { padding:6px 16px; border-radius:var(--radius-full); font-size:.8125rem; font-weight:500; border:1.5px solid var(--color-border); color:var(--color-text-muted); cursor:pointer; background:var(--color-white); white-space:nowrap; transition:all var(--transition-fast); }
+    .chip:hover { border-color:var(--color-primary); color:var(--color-primary); }
+    .chip.active { background:var(--color-primary); border-color:var(--color-primary); color:#fff; }
+
+    /* ── Selector de año ── */
+    .year-nav { display:flex; align-items:center; gap:12px; margin-bottom:24px; }
+    .year-btn { width:32px; height:32px; border-radius:50%; border:1.5px solid var(--color-border); background:var(--color-white); color:var(--color-text); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all var(--transition-fast); }
+    .year-btn:hover { border-color:var(--color-primary); color:var(--color-primary); }
+    .year-label { font-size:1rem; font-weight:600; color:var(--color-text); }
+
+    /* ── Sección por mes ── */
+    .month-section { margin-bottom:32px; }
+    .month-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--color-text-muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1.5px solid var(--color-border); }
+
+    /* ── Card de Shabat ── */
+    .shabat-row {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: stretch;
+      overflow: hidden;
+      margin-bottom: 10px;
+      border-left: 4px solid var(--color-gold);
+      transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+    }
+    .shabat-row:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+    .shabat-date-col {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: #fffbf0; padding: 12px 16px; min-width: 62px; text-align: center; flex-shrink: 0;
+    }
+    .shabat-date-day { font-family: var(--font-brand); font-size: 1.6rem; font-weight: 900; color: var(--color-gold-dark, #9a7a2a); line-height: 1; }
+    .shabat-date-mon { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-muted); margin-top: 2px; }
+
+    .shabat-body { flex: 1; padding: 14px 16px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+    .shabat-parasha-name { font-size: .9375rem; font-weight: 600; color: var(--color-text); }
+    .shabat-parasha-he { font-family: var(--font-brand); font-size: 1rem; color: var(--color-text-muted); direction: rtl; }
+    .shabat-extra { font-size: .75rem; color: var(--color-gold-dark, #9a7a2a); font-weight: 500; margin-top: 2px; }
+
+    .shabat-times-col {
+      display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+      padding: 12px 16px; gap: 6px; flex-shrink: 0;
+    }
+    .time-item { display: flex; flex-direction: column; align-items: flex-end; }
+    .time-label { font-size: .625rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-muted); }
+    .time-val { font-family: var(--font-brand); font-size: 1.05rem; font-weight: 700; color: var(--color-primary); line-height: 1.1; }
+    .time-sep { width: 1px; height: 20px; background: var(--color-border); align-self: flex-end; }
+
+    /* ── Card de festividad ── */
+    .holiday-row {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: stretch;
+      overflow: hidden;
+      margin-bottom: 10px;
+      border-left: 4px solid var(--color-primary);
+      transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+    }
+    .holiday-row:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .holiday-row.yomtov  { border-left-color: #1B2E5E; }
+    .holiday-row.fast    { border-left-color: #7C3AED; }
+    .holiday-row.rosh-h  { border-left-color: #059669; }
+    .holiday-row.sukkot  { border-left-color: #D97706; }
+    .holiday-row.chanuka { border-left-color: #2563EB; }
+    .holiday-row.purim   { border-left-color: #DB2777; }
+    .holiday-row.special { border-left-color: var(--color-gold); }
+
+    .holiday-date-col {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: var(--color-bg); padding: 12px 16px; min-width: 62px; text-align: center; flex-shrink: 0;
+    }
+    .holiday-date-day { font-family: var(--font-brand); font-size: 1.6rem; font-weight: 900; color: var(--color-primary); line-height: 1; }
+    .holiday-date-mon { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-muted); margin-top: 2px; }
+
+    .holiday-body { flex: 1; padding: 14px 16px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+    .holiday-name { font-size: .9375rem; font-weight: 600; color: var(--color-text); }
+    .holiday-he   { font-family: var(--font-brand); font-size: 1rem; color: var(--color-text-muted); direction: rtl; }
+    .holiday-desc { font-size: .75rem; color: var(--color-text-muted); margin-top: 2px; }
+
+    .holiday-times-col {
+      display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+      padding: 12px 16px; gap: 6px; flex-shrink: 0;
+    }
+
+    /* ── Estado de carga ── */
+    .loading-state { text-align:center; padding: 60px 20px; color: var(--color-text-muted); }
+    .loading-spinner { width:36px; height:36px; border:3px solid var(--color-border); border-top-color:var(--color-primary); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 16px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .empty-state { text-align:center; padding:48px 20px; color:var(--color-text-muted); }
+    .empty-icon { font-size:2.5rem; margin-bottom:12px; }
+
+    /* ── Badge tipo ── */
+    .type-badge { font-size:.65rem; font-weight:700; padding:2px 8px; border-radius:var(--radius-full); text-transform:uppercase; letter-spacing:.06em; align-self:flex-start; margin-top:3px; }
+    .badge-shabat   { background:#fffbf0; color:#9a7a2a; border:1px solid #e9d38a; }
+    .badge-yomtov   { background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; }
+    .badge-fast     { background:#F5F3FF; color:#6D28D9; border:1px solid #DDD6FE; }
+    .badge-rosh     { background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; }
+    .badge-especial { background:#FEF3C7; color:#92400E; border:1px solid #FDE68A; }
+
+    @media (max-width: 480px) {
+      .shabat-times-col { padding: 10px 12px; }
+      .time-val { font-size: .9rem; }
+      .shabat-date-col, .holiday-date-col { min-width: 52px; padding: 10px 10px; }
+      .shabat-date-day, .holiday-date-day { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-placeholder"></div>
+    <main class="main-content">
+      <div class="cal-inner">
+
+        <div class="page-header" style="margin-bottom:24px;">
+          <div class="page-header-left">
+            <p class="page-header-label">Kehilá</p>
+            <h1 class="page-title">Calendario Hebreo</h1>
+            <p class="page-subtitle">Shabatot, festividades y horas para Madrid</p>
+          </div>
+        </div>
+
+        <!-- Año y filtros -->
+        <div class="year-nav">
+          <button class="year-btn" id="btn-year-prev" onclick="changeYear(-1)">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+          </button>
+          <span class="year-label" id="year-display">2026</span>
+          <button class="year-btn" id="btn-year-next" onclick="changeYear(1)">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+          </button>
+        </div>
+
+        <div class="filter-chips">
+          <button class="chip active" data-filter="todo"      onclick="setFilter(this,'todo')">Todo</button>
+          <button class="chip"        data-filter="shabatot"  onclick="setFilter(this,'shabatot')">Shabatot</button>
+          <button class="chip"        data-filter="fiestas"   onclick="setFilter(this,'fiestas')">Festividades</button>
+        </div>
+
+        <div id="cal-content">
+          <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Cargando calendario…</p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    /* ─────────────────────────────────────────
+       CALENDARIO HEBREO — Kehilá
+       Fuente: HebCal API (Madrid 40°25'N)
+    ───────────────────────────────────────── */
+
+    let currentYear = new Date().getFullYear();
+    let activeFilter = 'todo';
+    let allItems = [];
+
+    const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const DIAS_CORTO = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+    // Traducciones de festividades al español
+    const HOLIDAY_NAMES_ES = {
+      "Rosh Hashana":           { es: "Rosh Hashana", he: "ראש השנה",        desc: "Año Nuevo Hebreo",       tipo: "rosh-h" },
+      "Rosh Hashana II":        { es: "Rosh Hashana (2º día)", he: "ראש השנה", desc: "Año Nuevo Hebreo",      tipo: "rosh-h" },
+      "Yom Kippur":             { es: "Yom Kipur",    he: "יום כיפור",        desc: "Día del Ayuno",          tipo: "fast" },
+      "Sukkot I":               { es: "Sucot (1er día)", he: "סוכות",          desc: "Fiesta de las Cabañas",  tipo: "sukkot" },
+      "Sukkot II":              { es: "Sucot (2º día)", he: "סוכות",           desc: "Fiesta de las Cabañas",  tipo: "sukkot" },
+      "Sukkot III (CH''M)":     { es: "Sucot (Jol Hamoed)", he: "סוכות",      desc: "Días intermedios",       tipo: "sukkot" },
+      "Sukkot IV (CH''M)":      { es: "Sucot (Jol Hamoed)", he: "סוכות",      desc: "Días intermedios",       tipo: "sukkot" },
+      "Sukkot V (CH''M)":       { es: "Sucot (Jol Hamoed)", he: "סוכות",      desc: "Días intermedios",       tipo: "sukkot" },
+      "Sukkot VI (CH''M)":      { es: "Sucot (Jol Hamoed)", he: "סוכות",      desc: "Días intermedios",       tipo: "sukkot" },
+      "Sukkot VII (Hoshana Raba)": { es: "Hoshaná Rabá", he: "הושענא רבה",   desc: "7º día de Sucot",        tipo: "sukkot" },
+      "Shmini Atzeret":         { es: "Shminí Atseret", he: "שמיני עצרת",    desc: "",                       tipo: "yomtov" },
+      "Simchat Torah":          { es: "Simjat Torá",  he: "שמחת תורה",        desc: "Alegría de la Torá",     tipo: "yomtov" },
+      "Chanukah: 1 Candle":     { es: "Janucá (1ª vela)", he: "חנוכה",        desc: "Fiesta de las Luces",    tipo: "chanuka" },
+      "Chanukah: 2 Candles":    { es: "Janucá (2ª vela)", he: "חנוכה",        desc: "Fiesta de las Luces",    tipo: "chanuka" },
+      "Chanukah: 3 Candles":    { es: "Janucá (3ª vela)", he: "חנוכה",        desc: "Fiesta de las Luces",    tipo: "chanuka" },
+      "Chanukah: 4 Candles":    { es: "Janucá (4ª vela)", he: "חנוכה",        desc: "Fiesta de las Luces",    tipo: "chanuka" },
+      "Chanukah: 5 Candles":    { es: "Janucá (5ª vela)", he: "חנוכה",        desc: "Fiesta de las Luces",    tipo: "chanuka" },
+      "Chanukah: 6 Candles":    { es: "Janucá (6ª vela)", he: "חנוכה",        desc: "Fiesta de las Luces",    tipo: "chanuka" },
+      "Chanukah: 7 Candles":    { es: "Janucá (7ª vela)", he: "חנוכה",        desc: "Fiesta de las Luces",    tipo: "chanuka" },
+      "Chanukah: 8 Candles":    { es: "Janucá (8ª vela)", he: "חנוכה",        desc: "Fiesta de las Luces",    tipo: "chanuka" },
+      "Chanukah: 8th Day":      { es: "Janucá (8º día)", he: "חנוכה",         desc: "Último día de Janucá",   tipo: "chanuka" },
+      "Purim":                  { es: "Purim",         he: "פורים",            desc: "Fiesta de Ester",        tipo: "purim" },
+      "Shushan Purim":          { es: "Purim de Shushán", he: "פורים שושן",   desc: "",                       tipo: "purim" },
+      "Pesach I":               { es: "Pesaj (1er día)", he: "פסח",            desc: "Fiesta de la Libertad",  tipo: "yomtov" },
+      "Pesach II":              { es: "Pesaj (2º día)", he: "פסח",             desc: "Fiesta de la Libertad",  tipo: "yomtov" },
+      "Pesach III (CH''M)":     { es: "Pesaj (Jol Hamoed)", he: "פסח",        desc: "Días intermedios",       tipo: "yomtov" },
+      "Pesach IV (CH''M)":      { es: "Pesaj (Jol Hamoed)", he: "פסח",        desc: "Días intermedios",       tipo: "yomtov" },
+      "Pesach V (CH''M)":       { es: "Pesaj (Jol Hamoed)", he: "פסח",        desc: "Días intermedios",       tipo: "yomtov" },
+      "Pesach VI (CH''M)":      { es: "Pesaj (Jol Hamoed)", he: "פסח",        desc: "Días intermedios",       tipo: "yomtov" },
+      "Pesach VII":             { es: "Pesaj (7º día)", he: "פסח",             desc: "",                       tipo: "yomtov" },
+      "Pesach VIII":            { es: "Pesaj (8º día)", he: "פסח",             desc: "",                       tipo: "yomtov" },
+      "Shavuot I":              { es: "Shavuot (1er día)", he: "שבועות",       desc: "Fiesta de las Semanas",  tipo: "yomtov" },
+      "Shavuot II":             { es: "Shavuot (2º día)", he: "שבועות",        desc: "Fiesta de las Semanas",  tipo: "yomtov" },
+      "Tu BiShvat":             { es: "Tu Bishvat",    he: "ט״ו בשבט",        desc: "Año Nuevo de los Árboles", tipo: "especial" },
+      "Lag BaOmer":             { es: "Lag Baomer",    he: "ל״ג בעומר",       desc: "",                       tipo: "especial" },
+      "Tish'a B'Av":            { es: "Tishá Beav",   he: "תשעה באב",         desc: "Ayuno del 9 de Av",      tipo: "fast" },
+      "Fast of Gedaliah":       { es: "Ayuno de Guedalia", he: "צום גדליה",   desc: "",                       tipo: "fast" },
+      "Fast of Esther":         { es: "Ayuno de Ester", he: "תענית אסתר",     desc: "",                       tipo: "fast" },
+      "Fast of 17th of Tammuz": { es: "Ayuno del 17 de Tamuz", he: "צום י״ז בתמוז", desc: "",               tipo: "fast" },
+      "Fast of 10th of Tevet":  { es: "Ayuno del 10 de Tevet", he: "צום עשרה בטבת", desc: "",               tipo: "fast" },
+      "Yom HaShoah":            { es: "Yom Hashoá",   he: "יום השואה",        desc: "Día del Holocausto",     tipo: "especial" },
+      "Yom HaZikaron":          { es: "Yom Hazikaron", he: "יום הזיכרון",     desc: "Día del Recuerdo",       tipo: "especial" },
+      "Yom HaAtzma'ut":         { es: "Yom Haatsmaut", he: "יום העצמאות",     desc: "Día Independencia Israel", tipo: "especial" },
+      "Yom Yerushalayim":       { es: "Yom Yerushalayim", he: "יום ירושלים",  desc: "Día de Jerusalén",       tipo: "especial" },
+      "Rosh Chodesh Nisan":     { es: "Rosh Jodesh Nisan", he: "ראש חודש ניסן", desc: "",                    tipo: "especial" },
+    };
+
+    // Traducciones de parashá
+    const PARASHA_NAMES_ES = {
+      "Bereshit":      { es: "Bereshit",      he: "בְּרֵאשִׁית" },
+      "Noach":         { es: "Noaj",          he: "נֹחַ" },
+      "Lech-Lecha":    { es: "Lej Lejá",      he: "לֶךְ-לְךָ" },
+      "Vayera":        { es: "Vayerá",        he: "וַיֵּרָא" },
+      "Chayei Sara":   { es: "Jayé Sara",     he: "חַיֵּי שָׂרָה" },
+      "Toldot":        { es: "Toldot",        he: "תּוֹלְדֹת" },
+      "Vayetzei":      { es: "Vayetsé",       he: "וַיֵּצֵא" },
+      "Vayishlach":    { es: "Vayishláj",     he: "וַיִּשְׁלַח" },
+      "Vayeshev":      { es: "Vayeshev",      he: "וַיֵּשֶׁב" },
+      "Miketz":        { es: "Mikets",        he: "מִקֵּץ" },
+      "Vayigash":      { es: "Vayigash",      he: "וַיִּגַּשׁ" },
+      "Vayechi":       { es: "Vayejí",        he: "וַיְחִי" },
+      "Shemot":        { es: "Shemot",        he: "שְׁמוֹת" },
+      "Vaera":         { es: "Vaerá",         he: "וָאֵרָא" },
+      "Bo":            { es: "Bo",            he: "בֹּא" },
+      "Beshalach":     { es: "Besháláj",      he: "בְּשַׁלַּח" },
+      "Yitro":         { es: "Yitró",         he: "יִתְרוֹ" },
+      "Mishpatim":     { es: "Mishpatim",     he: "מִּשְׁפָּטִים" },
+      "Terumah":       { es: "Terumá",        he: "תְּרוּמָה" },
+      "Tetzaveh":      { es: "Tetsavé",       he: "תְּצַוֶּה" },
+      "Ki Tisa":       { es: "Ki Tisá",       he: "כִּי תִשָּׂא" },
+      "Vayakhel":      { es: "Vaiakel",       he: "וַיַּקְהֵל" },
+      "Pekudei":       { es: "Pekudé",        he: "פְקוּדֵי" },
+      "Vayakhel-Pekudei": { es: "Vaiakel-Pekudé", he: "וַיַּקְהֵל-פְקוּדֵי" },
+      "Vayikra":       { es: "Vaikrá",        he: "וַיִּקְרָא" },
+      "Tzav":          { es: "Tsav",          he: "צַו" },
+      "Shmini":        { es: "Shminí",        he: "שְּׁמִינִי" },
+      "Tazria":        { es: "Tazria",        he: "תַזְרִיעַ" },
+      "Metzora":       { es: "Metsora",       he: "מְּצֹרָע" },
+      "Tazria-Metzora":{ es: "Tazria-Metsora",he: "תַזְרִיעַ-מְּצֹרָע" },
+      "Achrei Mot":    { es: "Ajaré Mot",     he: "אַחֲרֵי מוֹת" },
+      "Kedoshim":      { es: "Kedoshim",      he: "קְדֹשִׁים" },
+      "Achrei Mot-Kedoshim": { es: "Ajaré-Kedoshim", he: "אַחֲרֵי-קְדֹשִׁים" },
+      "Emor":          { es: "Emor",          he: "אֱמֹר" },
+      "Behar":         { es: "Behar",         he: "בְּהַר" },
+      "Bechukotai":    { es: "Bejukotai",     he: "בְּחֻקֹּתַי" },
+      "Behar-Bechukotai": { es: "Behar-Bejukotai", he: "בְּהַר-בְּחֻקֹּתַי" },
+      "Bamidbar":      { es: "Bamidbar",      he: "בְּמִדְבַּר" },
+      "Nasso":         { es: "Nasó",          he: "נָשֹׂא" },
+      "Beha'alotcha":  { es: "Behaalotjá",    he: "בְּהַעֲלֹתְךָ" },
+      "Sh'lach":       { es: "Shlaj Lejá",    he: "שְׁלַח-לְךָ" },
+      "Korach":        { es: "Koraj",         he: "קֹרַח" },
+      "Chukat":        { es: "Jukat",         he: "חֻקַּת" },
+      "Balak":         { es: "Balak",         he: "בָּלָק" },
+      "Chukat-Balak":  { es: "Jukat-Balak",   he: "חֻקַּת-בָּלָק" },
+      "Pinchas":       { es: "Pinjás",        he: "פִּינְחָס" },
+      "Matot":         { es: "Matot",         he: "מַּטּוֹת" },
+      "Masei":         { es: "Masé",          he: "מַסְעֵי" },
+      "Matot-Masei":   { es: "Matot-Masé",    he: "מַּטּוֹת-מַסְעֵי" },
+      "Devarim":       { es: "Devarim",       he: "דְּבָרִים" },
+      "Vaetchanan":    { es: "Vaetjanán",     he: "וָאֶתְחַנַּן" },
+      "Eikev":         { es: "Ekev",          he: "עֵקֶב" },
+      "Re'eh":         { es: "Reé",           he: "רְאֵה" },
+      "Shoftim":       { es: "Shoftim",       he: "שֹׁפְטִים" },
+      "Ki Teitzei":    { es: "Ki Tetsé",      he: "כִּי-תֵצֵא" },
+      "Ki Tavo":       { es: "Ki Tavó",       he: "כִּי-תָבוֹא" },
+      "Nitzavim":      { es: "Nitsavim",      he: "נִצָּבִים" },
+      "Vayeilech":     { es: "Vayelej",       he: "וַיֵּלֶךְ" },
+      "Nitzavim-Vayeilech": { es: "Nitsavim-Vayelej", he: "נִצָּבִים-וַיֵּלֶךְ" },
+      "Ha'azinu":      { es: "Haaziní",       he: "הַאֲזִינוּ" },
+      "Vezot Haberakhah": { es: "Vezot Habrajá", he: "וְזֹאת הַבְּרָכָה" },
+    };
+
+    // Shabat haGadol, Shuva, etc.
+    const SHABAT_ESPECIAL = {
+      "Shabbat HaGadol": "Shabat HaGadol",
+      "Shabbat Shuva": "Shabat Shuva",
+      "Shabbat Shekalim": "Shabat Shekalim",
+      "Shabbat Zachor": "Shabat Zajor",
+      "Shabbat Parah": "Shabat Pará",
+      "Shabbat HaChodesh": "Shabat HaJodesh",
+      "Shabbat Chazon": "Shabat Jazón",
+      "Shabbat Nachamu": "Shabat Najamú",
+    };
+
+    function fmtTime(isoStr) {
+      if (!isoStr) return null;
+      const d = new Date(isoStr);
+      return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
+    }
+
+    function fmtDate(isoStr) {
+      const d = new Date(isoStr + (isoStr.length === 10 ? 'T12:00:00' : ''));
+      return {
+        day: d.toLocaleDateString('es-ES', { day: 'numeric', timeZone: 'Europe/Madrid' }),
+        mes: MESES[d.getMonth()].slice(0, 3).toUpperCase(),
+        month: d.getMonth(),
+        weekday: DIAS_CORTO[d.getDay()]
+      };
+    }
+
+    function changeYear(delta) {
+      currentYear += delta;
+      document.getElementById('year-display').textContent = currentYear;
+      loadCalendar();
+    }
+
+    function setFilter(el, filter) {
+      document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      activeFilter = filter;
+      renderCalendar();
+    }
+
+    async function loadCalendar() {
+      document.getElementById('cal-content').innerHTML = `
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Cargando calendario…</p>
+        </div>`;
+
+      try {
+        // HebCal API — Madrid (geonameid 3117735), candlelighting 18 min, havdalah 42 min
+        const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&nx=off&year=${currentYear}&month=x&ss=on&mf=on&c=on&geo=geoname&geonameid=3117735&m=42&b=18&s=on&lg=s`;
+        const res  = await fetch(url);
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        allItems = data.items || [];
+        renderCalendar();
+      } catch (e) {
+        document.getElementById('cal-content').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📡</div>
+            <p>No se pudo cargar el calendario.<br>Verifica tu conexión a internet.</p>
+          </div>`;
+      }
+    }
+
+    function renderCalendar() {
+      // Agrupar por Shabat (candles+havdalah+parashat forman una sola entrada)
+      const shabatot = {};
+      const holidays = [];
+
+      allItems.forEach(item => {
+        const dateKey = item.date.slice(0, 10);
+
+        if (item.category === 'candles') {
+          if (!shabatot[dateKey]) shabatot[dateKey] = {};
+          shabatot[dateKey].candles = item;
+          shabatot[dateKey].candlesDate = dateKey;
+        } else if (item.category === 'havdalah') {
+          // Havdalah va el día siguiente al encendido
+          const prev = getPrevShabbat(dateKey, shabatot);
+          if (prev) {
+            shabatot[prev].havdalah = item;
+            shabatot[prev].havdalahDate = dateKey;
+          }
+        } else if (item.category === 'parashat') {
+          // La parasha cae el sábado, vela el viernes
+          const fri = getPrevDay(dateKey);
+          if (!shabatot[fri]) shabatot[fri] = {};
+          shabatot[fri].parasha = item;
+          shabatot[fri].parashaDate = dateKey;
+        } else if (item.category === 'holiday') {
+          holidays.push(item);
+        } else if (item.category === 'mf') {
+          // Major fast
+          holidays.push({ ...item, category: 'holiday', subcat: 'fast' });
+        }
+      });
+
+      // Shabatot especiales (títulos como "Shabbat HaGadol") que vienen como holiday
+      allItems.forEach(item => {
+        if (item.category === 'holiday' && item.title && SHABAT_ESPECIAL[item.title]) {
+          const dateKey = item.date.slice(0, 10);
+          const fri = getPrevDay(dateKey);
+          if (shabatot[fri]) {
+            shabatot[fri].especial = SHABAT_ESPECIAL[item.title];
+          } else if (shabatot[dateKey]) {
+            shabatot[dateKey].especial = SHABAT_ESPECIAL[item.title];
+          }
+        }
+      });
+
+      // Unir todo y ordenar por fecha
+      const entries = [];
+
+      Object.entries(shabatot).forEach(([dateKey, s]) => {
+        if (s.candles || s.parasha) {
+          entries.push({ type: 'shabat', dateKey, ...s });
+        }
+      });
+
+      holidays.forEach(h => {
+        // Excluir los Shabat especiales que ya están fusionados
+        if (h.title && SHABAT_ESPECIAL[h.title]) return;
+        // Excluir candles/havdalah sueltos
+        if (h.category === 'candles' || h.category === 'havdalah') return;
+        entries.push({ type: 'holiday', dateKey: h.date.slice(0, 10), item: h });
+      });
+
+      entries.sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+
+      // Filtrar según chip activo
+      const filtered = entries.filter(e => {
+        if (activeFilter === 'shabatot') return e.type === 'shabat';
+        if (activeFilter === 'fiestas') return e.type === 'holiday';
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        document.getElementById('cal-content').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <p>No hay entradas para este filtro.</p>
+          </div>`;
+        return;
+      }
+
+      // Agrupar por mes
+      const byMonth = {};
+      filtered.forEach(e => {
+        const m = new Date(e.dateKey + 'T12:00:00').getMonth();
+        if (!byMonth[m]) byMonth[m] = [];
+        byMonth[m].push(e);
+      });
+
+      let html = '';
+      Object.entries(byMonth).forEach(([m, items]) => {
+        html += `<div class="month-section">
+          <div class="month-title">${MESES[m]} ${currentYear}</div>`;
+        items.forEach(e => {
+          if (e.type === 'shabat') html += renderShabatRow(e);
+          else html += renderHolidayRow(e);
+        });
+        html += `</div>`;
+      });
+
+      document.getElementById('cal-content').innerHTML = html;
+    }
+
+    function renderShabatRow(s) {
+      const df = fmtDate(s.candlesDate || s.dateKey);
+      const candlesTime  = s.candles  ? fmtTime(s.candles.date)  : null;
+      const havdalahTime = s.havdalah ? fmtTime(s.havdalah.date) : null;
+
+      // Nombre de parasha
+      let parashaES = '', parashaHE = '';
+      if (s.parasha) {
+        const rawTitle = s.parasha.title.replace(/^Parashat\s+/, '').replace(/^Parasha\s+/,'');
+        const mapped = PARASHA_NAMES_ES[rawTitle];
+        parashaES = mapped ? mapped.es : rawTitle;
+        parashaHE = mapped ? mapped.he : (s.parasha.hebrew || '');
+      } else {
+        parashaES = 'Shabat';
+      }
+
+      const extraHTML = s.especial ? `<span class="shabat-extra">${s.especial}</span>` : '';
+
+      const timesHTML = `
+        ${candlesTime  ? `<div class="time-item"><span class="time-label">Encendido</span><span class="time-val">${candlesTime}</span></div>` : ''}
+        ${(candlesTime && havdalahTime) ? '<div class="time-sep"></div>' : ''}
+        ${havdalahTime ? `<div class="time-item"><span class="time-label">Habdalá</span><span class="time-val">${havdalahTime}</span></div>` : ''}
+      `;
+
+      return `
+        <div class="shabat-row">
+          <div class="shabat-date-col">
+            <span class="shabat-date-day">${df.day}</span>
+            <span class="shabat-date-mon">${df.mes}</span>
+          </div>
+          <div class="shabat-body">
+            <span class="shabat-parasha-name">${parashaES}</span>
+            <span class="shabat-parasha-he">${parashaHE}</span>
+            ${extraHTML}
+          </div>
+          <div class="shabat-times-col">${timesHTML}</div>
+        </div>`;
+    }
+
+    function renderHolidayRow(e) {
+      const h = e.item;
+      const df = fmtDate(e.dateKey);
+      const mapped = HOLIDAY_NAMES_ES[h.title] || null;
+      const name   = mapped ? mapped.es : h.title;
+      const heText = mapped ? mapped.he : (h.hebrew || '');
+      const desc   = mapped ? mapped.desc : '';
+      const tipo   = mapped ? mapped.tipo : 'especial';
+
+      // Hora de inicio si la tienen (yom tov, ayuno)
+      const timeStr = (h.date && h.date.length > 10) ? fmtTime(h.date) : null;
+
+      const timeHTML = timeStr ? `
+        <div class="holiday-times-col">
+          <div class="time-item">
+            <span class="time-label">Inicio</span>
+            <span class="time-val">${timeStr}</span>
+          </div>
+        </div>` : '';
+
+      return `
+        <div class="holiday-row ${tipo}">
+          <div class="holiday-date-col">
+            <span class="holiday-date-day">${df.day}</span>
+            <span class="holiday-date-mon">${df.mes}</span>
+          </div>
+          <div class="holiday-body">
+            <span class="holiday-name">${name}</span>
+            ${heText ? `<span class="holiday-he">${heText}</span>` : ''}
+            ${desc    ? `<span class="holiday-desc">${desc}</span>` : ''}
+          </div>
+          ${timeHTML}
+        </div>`;
+    }
+
+    // Dado un sábado (ISO), busca el viernes anterior en shabatot
+    function getPrevShabbat(satDate, shabatot) {
+      const sat = new Date(satDate + 'T12:00:00');
+      const fri = new Date(sat);
+      fri.setDate(fri.getDate() - 1);
+      const friKey = fri.toISOString().slice(0, 10);
+      if (shabatot[friKey]) return friKey;
+      // A veces la clave es el sábado mismo (festividades)
+      const satKey = satDate;
+      if (shabatot[satKey]) return satKey;
+      return null;
+    }
+
+    function getPrevDay(isoDate) {
+      const d = new Date(isoDate + 'T12:00:00');
+      d.setDate(d.getDate() - 1);
+      return d.toISOString().slice(0, 10);
+    }
+
+    /* ─── Init ─── */
+    document.addEventListener('DOMContentLoaded', () => {
+      requireAuth();
+      initNav('calendario');
+      loadCalendar();
+    });
+  </script>
+</body>
+</html>
