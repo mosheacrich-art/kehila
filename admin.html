@@ -416,6 +416,65 @@
       .hide-sm { display: none !important; }
       .admin-tab { padding: 10px 12px; font-size: 0.8rem; }
     }
+
+    /* ─── Preguntas Rav ─── */
+    .preg-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--color-border);
+    }
+    .preg-card.pendiente { border-left-color: var(--color-warning); }
+    .preg-card.respondida { border-left-color: var(--color-success); }
+    .preg-card-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .preg-cat {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; padding: 3px 9px;
+      border-radius: var(--radius-full);
+      background: var(--color-bg);
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+    .preg-estado-badge {
+      font-size: 0.7rem; font-weight: 700; padding: 3px 9px;
+      border-radius: var(--radius-full);
+    }
+    .preg-estado-badge.pendiente { background:#fef3c7; color:#92400e; }
+    .preg-estado-badge.respondida { background:#d1fae5; color:#065f46; }
+    .preg-meta { font-size: 0.775rem; color: var(--color-text-muted); margin-left: auto; }
+    .preg-user { font-size: 0.8125rem; font-weight: 600; color: var(--color-text); }
+    .preg-text {
+      font-size: 0.9rem; color: var(--color-text);
+      line-height: 1.6; margin-bottom: 12px;
+      background: var(--color-bg); border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+    .preg-respuesta {
+      background: #f0fdf4; border-radius: var(--radius-sm);
+      padding: 10px 14px; margin-bottom: 12px;
+      border-left: 3px solid var(--color-success);
+    }
+    .preg-respuesta-label {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: #065f46; margin-bottom: 4px;
+    }
+    .preg-respuesta-text { font-size: 0.875rem; color: var(--color-text); line-height: 1.5; }
+    .preg-reply-area {
+      display: flex; gap: 8px; align-items: flex-end; margin-top: 8px;
+    }
+    .preg-reply-area textarea {
+      flex: 1; min-height: 70px; resize: vertical;
+      padding: 9px 12px; font-size: 0.875rem;
+      border: 1.5px solid var(--color-border); border-radius: var(--radius-sm);
+      font-family: var(--font-body); outline: none;
+      transition: border-color var(--transition-fast);
+    }
+    .preg-reply-area textarea:focus { border-color: var(--color-primary); }
   </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
@@ -462,6 +521,11 @@
       <button class="admin-tab" data-tab="marketplace">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72"/></svg>
         Marketplace
+      </button>
+      <button class="admin-tab" data-tab="preguntas">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"/></svg>
+        Preguntas Rav
+        <span class="tab-badge" id="rav-pending-badge" style="display:none"></span>
       </button>
     </div>
 
@@ -676,6 +740,39 @@
           </table>
         </div>
       </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         TAB: PREGUNTAS AL RAV
+    ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-preguntas">
+
+      <div class="toolbar" style="margin-bottom:16px;">
+        <select class="filter-select" id="rav-filter-estado" onchange="renderPreguntas()">
+          <option value="">Todas</option>
+          <option value="pendiente">Pendientes</option>
+          <option value="respondida">Respondidas</option>
+        </select>
+        <select class="filter-select" id="rav-filter-cat" onchange="renderPreguntas()">
+          <option value="">Todas las categorías</option>
+          <option value="halajá">Halajá</option>
+          <option value="shabat">Shabat</option>
+          <option value="kashrut">Kashrut</option>
+          <option value="tefila">Tefila</option>
+          <option value="lifecycle">Ciclo de vida</option>
+          <option value="otro">Otro</option>
+        </select>
+        <span class="results-count" id="rav-count"></span>
+        <button class="btn btn-ghost btn-sm" onclick="loadPreguntas()" style="margin-left:auto">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+          Actualizar
+        </button>
+      </div>
+
+      <div id="rav-preguntas-list">
+        <p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Cargando preguntas…</p>
+      </div>
+
     </div>
 
   </div><!-- /admin-inner -->
@@ -1808,7 +1905,85 @@
   // Cargar solicitudes al abrir el tab de usuarios
   document.addEventListener('DOMContentLoaded', function() {
     renderPendingSolicitudes();
+    loadPreguntas();
   });
+
+  /* ══════════════════════════════
+     PREGUNTAS AL RAV
+  ══════════════════════════════ */
+  let _preguntas = [];
+
+  async function loadPreguntas() {
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return;
+    const { data, error } = await sb.from('preguntas_rav').select('*').order('created_at', { ascending: false });
+    if (error) { console.error(error); return; }
+    _preguntas = data || [];
+    renderPreguntas();
+    // Badge con pendientes
+    const pendientes = _preguntas.filter(p => p.estado === 'pendiente').length;
+    const badge = document.getElementById('rav-pending-badge');
+    if (badge) {
+      if (pendientes > 0) { badge.textContent = pendientes; badge.style.display = ''; }
+      else { badge.style.display = 'none'; }
+    }
+  }
+
+  function renderPreguntas() {
+    const estado = document.getElementById('rav-filter-estado')?.value || '';
+    const cat    = document.getElementById('rav-filter-cat')?.value || '';
+    const list   = document.getElementById('rav-preguntas-list');
+    if (!list) return;
+
+    let filtered = _preguntas;
+    if (estado) filtered = filtered.filter(p => p.estado === estado);
+    if (cat)    filtered = filtered.filter(p => p.categoria === cat);
+
+    const count = document.getElementById('rav-count');
+    if (count) count.textContent = filtered.length + ' pregunta' + (filtered.length !== 1 ? 's' : '');
+
+    if (!filtered.length) {
+      list.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">No hay preguntas</p>';
+      return;
+    }
+
+    const CATS = { halajá:'Halajá', shabat:'Shabat', kashrut:'Kashrut', tefila:'Tefila', lifecycle:'Ciclo de vida', otro:'Otro' };
+    list.innerHTML = filtered.map(p => {
+      const fecha = p.created_at ? new Date(p.created_at).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' }) : '';
+      const catLabel = CATS[p.categoria] || p.categoria || '—';
+      const respHTML = p.respuesta
+        ? `<div class="preg-respuesta">
+             <div class="preg-respuesta-label">✓ Respuesta del Rav</div>
+             <div class="preg-respuesta-text">${p.respuesta}</div>
+           </div>`
+        : `<div class="preg-reply-area">
+             <textarea id="resp-${p.id}" placeholder="Escribe la respuesta del Rav…"></textarea>
+             <button class="btn btn-primary btn-sm" onclick="responderPregunta('${p.id}')">Responder</button>
+           </div>`;
+      return `
+        <div class="preg-card ${p.estado || 'pendiente'}">
+          <div class="preg-card-header">
+            <span class="preg-user">${p.anonima ? 'Anónimo' : (p.usuario_nombre || 'Usuario')}</span>
+            <span class="preg-cat">${catLabel}</span>
+            <span class="preg-estado-badge ${p.estado || 'pendiente'}">${p.estado === 'respondida' ? 'Respondida' : 'Pendiente'}</span>
+            <span class="preg-meta">${fecha}</span>
+          </div>
+          <div class="preg-text">${p.pregunta}</div>
+          ${respHTML}
+        </div>`;
+    }).join('');
+  }
+
+  async function responderPregunta(id) {
+    const resp = document.getElementById('resp-' + id)?.value.trim();
+    if (!resp) { showToast('Escribe una respuesta', 'warning'); return; }
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return;
+    const { error } = await sb.from('preguntas_rav').update({ respuesta: resp, estado: 'respondida' }).eq('id', id);
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+    showToast('Respuesta publicada', 'success');
+    loadPreguntas();
+  }
 
 </script>
   <script>
