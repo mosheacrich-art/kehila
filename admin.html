@@ -194,7 +194,38 @@
     }
 
     /* ─── User row acciones ─── */
-    .action-btns { display: flex; gap: 6px; }
+    .action-btns { display: flex; gap: 4px; align-items: center; }
+
+    .tbl-action {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      border: 1px solid transparent;
+      cursor: pointer;
+      background: none;
+      transition: background var(--transition-fast), color var(--transition-fast);
+      white-space: nowrap;
+      font-family: var(--font-ui);
+    }
+    .tbl-action-approve {
+      color: #065F46;
+      border-color: #a7f3d0;
+      background: #f0fdf4;
+    }
+    .tbl-action-approve:hover { background: #d1fae5; }
+    .tbl-action-danger {
+      color: #991B1B;
+      border-color: #fca5a5;
+      background: #fef2f2;
+    }
+    .tbl-action-danger:hover { background: #fee2e2; }
+    .tbl-action-warn {
+      color: #92400E;
+      border-color: #fcd34d;
+      background: #fffbeb;
+    }
+    .tbl-action-warn:hover { background: #fef3c7; }
 
     /* ─── Pending banner ─── */
     .pending-banner {
@@ -1198,24 +1229,19 @@
       if (u.status === 'pending') {
         actions = `
           <div class="action-btns">
-            <button class="btn btn-sm" style="background:#065F46;color:#fff;border-color:#065F46;"
-              onclick="promptAprobar('${u.userId}')">✓ Aprobar</button>
-            <button class="btn btn-sm btn-danger"
-              onclick="promptBanear('${u.userId}')">✗ Rechazar</button>
+            <button class="tbl-action tbl-action-approve" onclick="promptAprobar('${u.userId}')">Aprobar</button>
+            <button class="tbl-action tbl-action-danger" onclick="promptBanear('${u.userId}')">Rechazar</button>
           </div>`;
       } else if (u.status === 'active') {
         actions = `
           <div class="action-btns">
-            <button class="btn btn-sm" style="background:var(--color-warning-light);color:#92400E;border-color:var(--color-warning);"
-              onclick="suspenderUser('${u.userId}')">Suspender</button>
-            <button class="btn btn-sm btn-danger"
-              onclick="promptBanear('${u.userId}')">Banear</button>
+            <button class="tbl-action tbl-action-warn" onclick="suspenderUser('${u.userId}')">Suspender</button>
+            <button class="tbl-action tbl-action-danger" onclick="promptBanear('${u.userId}')">Banear</button>
           </div>`;
       } else {
         actions = `
           <div class="action-btns">
-            <button class="btn btn-sm" style="background:var(--color-success-light);color:#065F46;border-color:var(--color-success);"
-              onclick="reactivarUser('${u.userId}')">↺ Reactivar</button>
+            <button class="tbl-action tbl-action-approve" onclick="reactivarUser('${u.userId}')">Reactivar</button>
           </div>`;
       }
 
@@ -1227,7 +1253,7 @@
               <div class="user-cell-info">
                 <div class="user-cell-name">
                   ${u.name}
-                  ${u.source === 'real' ? '<span style="display:inline-block;margin-left:6px;background:#1B2E5E;color:#fff;font-size:0.6rem;font-weight:700;padding:1px 6px;border-radius:99px;vertical-align:middle;letter-spacing:.04em;">REAL</span>' : ''}
+                  ${u.source === 'real' ? '<span style="display:inline-block;margin-left:6px;background:var(--color-bg);color:var(--color-text-muted);font-size:0.6rem;font-weight:600;padding:1px 5px;border-radius:3px;border:1px solid var(--color-border);vertical-align:middle;letter-spacing:.05em;">REAL</span>' : ''}
                 </div>
                 <div class="user-cell-email">${u.email}</div>
               </div>
@@ -1238,7 +1264,7 @@
           <td class="hide-md" style="font-size:.8rem;color:var(--color-text-muted);">${formatDate(u.joinDate)}</td>
           <td>
             ${actions}
-            ${u.source === 'real' ? `<button class="btn btn-sm btn-ghost" style="margin-top:4px;display:block;" onclick="verPerfil('${u.userId}')">👁 Ver perfil</button>` : ''}
+            ${u.source === 'real' ? `<button class="tbl-action" style="margin-top:4px;color:var(--color-primary);border-color:var(--color-border);background:none;" onclick="verPerfil('${u.userId}')">Ver perfil</button>` : ''}
           </td>
         </tr>`;
     }).join('');
