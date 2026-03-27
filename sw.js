@@ -2,7 +2,7 @@
    Kehilá — Service Worker
    ============================================= */
 
-const CACHE = 'kehila-v1';
+const CACHE = 'kehila-v2';
 const ASSETS = [
   '/kehila/',
   '/kehila/index.html',
