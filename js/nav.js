@@ -159,16 +159,37 @@ function buildSidebar(activePage) {
   const color = getAvatarColor(user.name);
   const initials = user.initials || user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
+  // Función de traducción local (i18n puede no estar cargado aún)
+  const _t = (key) => (typeof t === 'function') ? t(key) : key;
+  const _lang = (typeof getLang === 'function') ? getLang() : 'es';
+
+  // Mapa de ids a claves i18n
+  const NAV_KEYS = {
+    home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
+    noticias: 'nav_noticias', shiurim: 'nav_shiurim', rav: 'nav_rav',
+    wallap: 'nav_wallap', kosher: 'nav_kosher', business: 'nav_business',
+    donativos: 'nav_donativos', professionals: 'nav_professionals',
+    voluntariado: 'nav_voluntariado', tienda: 'nav_tienda',
+    'citas-rabino': 'nav_citas', contacto: 'nav_contacto',
+    siddur: 'nav_siddur', servicios: 'nav_servicios', perfil: 'nav_perfil'
+  };
+  const GROUP_KEYS = {
+    'Principal': 'group_principal', 'Comunidad': 'group_comunidad',
+    'Servicios': 'group_servicios', 'Tefila': 'group_tefila', 'Mi cuenta': 'group_cuenta'
+  };
+
   // Construir grupos de navegación
   let navHTML = '';
   NAV_ITEMS.forEach(group => {
-    navHTML += `<div class="nav-group-label">${group.group}</div>`;
+    const groupLabel = _t(GROUP_KEYS[group.group] || group.group);
+    navHTML += `<div class="nav-group-label">${groupLabel}</div>`;
     group.items.forEach(item => {
       const active = item.id === activePage ? 'active' : '';
+      const label = _t(NAV_KEYS[item.id] || ('nav_' + item.id)) || item.label;
       navHTML += `
         <a href="${item.href}" class="nav-item ${active}" data-page="${item.id}">
           ${item.icon}
-          <span>${item.label}</span>
+          <span>${label}</span>
         </a>`;
     });
   });
@@ -181,15 +202,17 @@ function buildSidebar(activePage) {
       <div class="nav-divider"></div>
       <a href="admin.html" class="nav-item admin-item ${adminActive}" data-page="admin">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0H3"/></svg>
-        <span>Panel Admin</span>
+        <span>${_t('nav_admin')}</span>
       </a>`;
   }
 
-  const roleLabel = {
-    admin: 'Administrador',
-    miembro: 'Miembro',
-    mod: 'Moderador'
-  }[user.role] || user.role;
+  const roleLabelMap = {
+    es: { admin: 'Administrador', miembro: 'Miembro', mod: 'Moderador' },
+    en: { admin: 'Administrator', miembro: 'Member', mod: 'Moderator' }
+  };
+  const roleLabel = (roleLabelMap[_lang] || roleLabelMap.es)[user.role] || user.role;
+  const verPerfil = _lang === 'en' ? 'View profile' : 'Ver perfil';
+  const cerrarSesion = _t('nav_logout');
 
   const sidebarHTML = `
     <aside class="sidebar">
@@ -212,7 +235,7 @@ function buildSidebar(activePage) {
           <div class="avatar avatar-md" data-color="${color}">${initials}</div>
           <div class="sidebar-user-info">
             <div class="sidebar-user-name">${user.name}</div>
-            <div class="sidebar-user-role">${roleLabel} · Ver perfil</div>
+            <div class="sidebar-user-role">${roleLabel} · ${verPerfil}</div>
           </div>
         </a>
 
@@ -222,11 +245,14 @@ function buildSidebar(activePage) {
           ${adminHTML}
         </nav>
 
-        <!-- Logout -->
+        <!-- Footer: lang toggle + logout -->
         <div class="sidebar-footer">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 2px;">
+            <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:0.7rem;font-weight:700;letter-spacing:0.08em;color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:3px;padding:3px 8px;cursor:pointer;font-family:inherit;transition:all 0.15s;" title="${_lang === 'es' ? 'Switch to English' : 'Cambiar a Español'}">${_lang === 'es' ? 'EN' : 'ES'}</button>
+          </div>
           <button class="sidebar-logout" onclick="logout()">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"/></svg>
-            <span>Cerrar sesión</span>
+            <span>${cerrarSesion}</span>
           </button>
         </div>
       </div>
@@ -540,6 +566,14 @@ function buildBackBtn(activePage) {
  * @param {string} activePage - id de la página
  */
 function initNav(activePage) {
+  // Cargar i18n.js si no está disponible
+  if (typeof t === 'undefined' && !document.querySelector('script[src*="i18n"]')) {
+    const s = document.createElement('script');
+    s.src = 'js/i18n.js';
+    s.onload = () => { buildSidebar(activePage); buildBottomNav(activePage); buildHamburger(activePage); buildBackBtn(activePage); };
+    document.head.appendChild(s);
+    return;
+  }
   buildSidebar(activePage);
   buildBottomNav(activePage);
   buildHamburger(activePage);
