@@ -1,7 +1,7 @@
 # Kehilá — App Comunidades · Registro de Progreso
 
-> Última actualización: 25 marzo 2026
-> Estado: **✅ Prototipo completo (13 páginas)**
+> Última actualización: 27 marzo 2026
+> Estado: **✅ Prototipo completo (15 páginas) — Rediseño profesional en curso**
 
 ---
 
@@ -15,6 +15,27 @@ Destinado a presentaciones con inversores.
 - **Auth:** Simulada con `localStorage`
 - **Datos:** Mock data en `data.js`
 - **Fuentes:** Inter (UI) + Frank Ruhl Libre (hebreo/marca)
+
+---
+
+## 🎨 Rediseño profesional (27 marzo 2026)
+
+- Eliminados gradientes de colores en event cards (ahora navy uniforme)
+- Eliminados hover lifts en todas las cards y botones (`translateY` → sin movimiento)
+- Border-radius reducidos globalmente (12px → 8px, 20px → 12px)
+- Sombras rediseñadas con offset x/y real
+- Badges con recuadro (border + fondo suave) en lugar de píldoras sin borde
+- Tabs rediseñadas: underline style (como Linear/Notion) en lugar de cápsulas
+- Emojis eliminados del marketplace (servicios.html)
+- Botones de acción en admin compactos: Aprobar/Rechazar/Suspender/Banear → tags pequeños
+- Avatar del sidebar es enlace directo al perfil del usuario
+
+### `perfil.html` — Perfil del miembro ← NUEVA PÁGINA
+- Foto de perfil subible (FileReader → base64 → localStorage)
+- Datos completos del formulario de solicitud (nombre, apellidos, teléfono, doc, dirección, comunidad)
+- Número de solicitud `#KEH-YYYYMM-XXXX` con estado
+- Edición de campos básicos (nombre, teléfono, dirección)
+- Acceso desde avatar del sidebar · Botón ← Volver en la página
 
 ---
 
@@ -70,10 +91,12 @@ URL: **http://localhost:3000/index.html**
 
 ```
 kehila/
-├── index.html          ← Login + Registro
+├── index.html          ← Login + Registro (4 pasos con verificación de identidad)
 ├── home.html           ← Dashboard del miembro
+├── perfil.html         ← Perfil del miembro (foto, datos personales, solicitud) ← NUEVO
 ├── admin.html          ← Panel de administración
 ├── eventos.html        ← Eventos comunitarios
+├── calendario.html     ← Calendario hebreo
 ├── wallap.html         ← Marketplace comunitario
 ├── kosher.html         ← Directorio kosher
 ├── rav.html            ← Preguntas al Rabino
@@ -87,10 +110,13 @@ kehila/
 │   ├── main.css        ← Variables, reset, utilidades
 │   ├── components.css  ← Botones, cards, modales, toasts
 │   └── pages.css       ← Sidebar, bottom nav, layouts
-└── js/
-    ├── auth.js         ← Sistema de autenticación
-    ├── nav.js          ← Navegación dinámica
-    └── data.js         ← Mock data
+├── js/
+│   ├── auth.js         ← Autenticación (Supabase + mock fallback)
+│   ├── nav.js          ← Navegación dinámica (sidebar + bottom nav)
+│   ├── data.js         ← Mock data
+│   ├── registro.js     ← Formulario de registro 4 pasos
+│   └── media.js        ← Gestión de media
+└── img/                ← Fotos comunidad (mosaico landing)
 ```
 
 ---
@@ -300,15 +326,20 @@ Abrir en el navegador: **http://localhost:3000/index.html**
 
 ---
 
-## 📌 Notas para futuras mejoras
+## 📌 Próximos pasos sugeridos
 
-- [ ] Conectar a backend real (Node.js / Supabase)
+### Diseño
+- [ ] Continuar refinando páginas interiores (eventos, noticias, kosher)
+- [ ] Modo oscuro
+
+### Funcionalidad
+- [ ] Conectar a backend real (Supabase — auth ya configurado)
 - [ ] Sistema de mensajería interna entre miembros
 - [ ] Push notifications para eventos y noticias
-- [ ] Modo oscuro
-- [ ] App nativa (React Native / Capacitor)
 - [ ] Integración real de Stripe para donativos
-- [ ] Mikvé reservation system
 - [ ] Calendario hebreo sincronizado (API Hebcal)
-- [ ] Sistema de votaciones para asamblea
 - [ ] Exportación de certificados PDF reales
+
+### App
+- [ ] App nativa (React Native / Capacitor)
+- [ ] PWA mejorada (ya tiene manifest.json + sw.js)
