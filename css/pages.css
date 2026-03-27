@@ -28,6 +28,7 @@
   flex-direction: column;
   z-index: var(--z-sidebar);
   overflow: hidden;
+  border-right: 1px solid rgba(0,0,0,0.15);
 }
 
 .sidebar-inner {
@@ -137,14 +138,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 18px;
-  color: rgba(255,255,255,0.65);
+  padding: 8px 18px;
+  color: rgba(255,255,255,0.6);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: color var(--transition-fast), background var(--transition-fast);
   text-decoration: none;
   position: relative;
-  border-left: 3px solid transparent;
-  font-size: 0.875rem;
+  border-left: 2px solid transparent;
+  font-size: 0.8125rem;
   font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
@@ -168,7 +169,7 @@
 
 .nav-item.active {
   color: var(--color-white);
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
   border-left-color: var(--color-gold);
   font-weight: 500;
 }
@@ -355,10 +356,11 @@
 
 .page-title {
   font-family: var(--font-brand);
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--color-text);
-  line-height: 1.2;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .page-subtitle {

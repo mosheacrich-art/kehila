@@ -15,7 +15,7 @@
   --color-gold:         #C9A84C;
   --color-gold-light:   #F5EDD6;
   --color-gold-dark:    #A8892E;
-  --color-bg:           #F5F6FA;
+  --color-bg:           #F7F8FC;
   --color-white:        #FFFFFF;
   --color-text:         #1A1A2E;
   --color-text-muted:   #6B7280;
@@ -32,17 +32,17 @@
   --color-info-light:   #DBEAFE;
 
   /* Sombras */
-  --shadow-sm:  0 2px 8px rgba(27,46,94,0.06);
-  --shadow-md:  0 4px 16px rgba(27,46,94,0.10);
-  --shadow-lg:  0 8px 32px rgba(27,46,94,0.14);
-  --shadow-xl:  0 16px 48px rgba(27,46,94,0.18);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:  0 2px 6px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-lg:  0 4px 12px rgba(0,0,0,0.07), 0 12px 28px rgba(0,0,0,0.07);
+  --shadow-xl:  0 8px 24px rgba(0,0,0,0.08), 0 24px 56px rgba(0,0,0,0.09);
 
   /* Radios */
-  --radius-xs:  4px;
-  --radius-sm:  8px;
-  --radius-md:  12px;
-  --radius-lg:  20px;
-  --radius-xl:  28px;
+  --radius-xs:  3px;
+  --radius-sm:  6px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
   --radius-full:9999px;
 
   /* Tipografía */
@@ -135,27 +135,30 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-brand);
   font-size: 2.25rem;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   color: var(--color-text);
 }
 
 .h2 {
   font-family: var(--font-brand);
-  font-size: 1.75rem;
+  font-size: 1.625rem;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
   color: var(--color-text);
 }
 
 .h3 {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
   line-height: 1.35;
+  letter-spacing: -0.01em;
   color: var(--color-text);
 }
 
 .h4 {
-  font-size: 1.05rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: var(--color-text);
 }
