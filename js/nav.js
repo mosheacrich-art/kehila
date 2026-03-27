@@ -208,13 +208,13 @@ function buildSidebar(activePage) {
         </a>
 
         <!-- Usuario -->
-        <div class="sidebar-user">
+        <a href="perfil.html" class="sidebar-user" style="text-decoration:none;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background=''">
           <div class="avatar avatar-md" data-color="${color}">${initials}</div>
           <div class="sidebar-user-info">
             <div class="sidebar-user-name">${user.name}</div>
-            <div class="sidebar-user-role">${roleLabel}</div>
+            <div class="sidebar-user-role">${roleLabel} · Ver perfil</div>
           </div>
-        </div>
+        </a>
 
         <!-- Navegación -->
         <nav class="sidebar-nav">
