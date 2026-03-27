@@ -160,7 +160,7 @@
 ═══════════════════════════════════════════ */
 
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const DIAS_HDR = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
+const DIAS_HDR = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
 
 // dateMap[YYYY-MM-DD] = { candles, havdalah, parasha, especial, holidays[] }
 let dateMap  = {};
@@ -354,9 +354,8 @@ function renderCal() {
   const firstDay = new Date(curYear, curMonth, 1);
   const lastDay  = new Date(curYear, curMonth+1, 0);
 
-  // Día de la semana del 1 (0=Dom → convertir a LUN=0)
-  let startDow = firstDay.getDay(); // 0=Dom
-  startDow = (startDow === 0) ? 6 : startDow - 1; // Lun=0 … Dom=6
+  // Día de la semana del 1 (0=Dom, 6=Sáb — sin conversión)
+  let startDow = firstDay.getDay(); // 0=Dom … 6=Sáb
 
   let daysHtml = '';
 
