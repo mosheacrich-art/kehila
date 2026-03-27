@@ -1111,20 +1111,20 @@
 
   function badgeStatus(status) {
     const map = {
-      active:  '<span class="badge badge-active">Activo</span>',
-      pending: '<span class="badge badge-pending">Pendiente</span>',
-      banned:  '<span class="badge badge-banned">Baneado</span>',
+      active:  '<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;color:#15803d;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>Activo</span>',
+      pending: '<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;color:#b45309;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#d97706;flex-shrink:0;display:inline-block;"></span>Pendiente</span>',
+      banned:  '<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;color:#b91c1c;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#ef4444;flex-shrink:0;display:inline-block;"></span>Baneado</span>',
     };
-    return map[status] || `<span class="badge">${status}</span>`;
+    return map[status] || `<span style="font-size:0.8rem;color:var(--color-text-muted);">${status}</span>`;
   }
 
   function badgeRole(role) {
     const map = {
-      admin:   '<span class="badge badge-admin">Admin</span>',
-      mod:     '<span class="badge badge-mod">Moderador</span>',
-      miembro: '<span class="badge" style="background:var(--color-bg);color:var(--color-text-muted);border:1px solid var(--color-border);">Miembro</span>',
+      admin:   '<span style="font-size:0.75rem;font-weight:600;color:var(--color-primary);letter-spacing:0.03em;">Admin</span>',
+      mod:     '<span style="font-size:0.75rem;font-weight:600;color:#1d4ed8;letter-spacing:0.03em;">Mod.</span>',
+      miembro: '<span style="font-size:0.75rem;color:var(--color-text-muted);">Miembro</span>',
     };
-    return map[role] || `<span class="badge">${role}</span>`;
+    return map[role] || `<span style="font-size:0.75rem;color:var(--color-text-muted);">${role}</span>`;
   }
 
   function formatDate(str) {
@@ -1263,8 +1263,10 @@
           <td id="status-cell-${u.userId}">${badgeStatus(u.status)}</td>
           <td class="hide-md" style="font-size:.8rem;color:var(--color-text-muted);">${formatDate(u.joinDate)}</td>
           <td>
-            ${actions}
-            ${u.source === 'real' ? `<button class="tbl-action" style="margin-top:4px;color:var(--color-primary);border-color:var(--color-border);background:none;" onclick="verPerfil('${u.userId}')">Ver perfil</button>` : ''}
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
+              ${actions}
+              <button onclick="verPerfil('${u.userId}')" style="font-size:0.75rem;color:var(--color-primary);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;font-family:inherit;">Ver solicitud</button>
+            </div>
           </td>
         </tr>`;
     }).join('');
@@ -1273,53 +1275,63 @@
   function verPerfil(userId) {
     const u = usersState.find(x => x.userId === userId);
     if (!u) return;
+
+    // Buscar datos completos de solicitud en localStorage
+    const pending = JSON.parse(localStorage.getItem('kehila_pending') || '[]');
+    const sol = pending.find(s => s.email === u.email) || {};
+
     const row = (label, value) => value ? `
-      <div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--color-border-light);">
-        <div style="width:140px;flex-shrink:0;font-size:.8rem;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.04em;">${label}</div>
-        <div style="font-size:.9rem;color:var(--color-text);">${value}</div>
+      <div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--color-border-light);">
+        <div style="width:150px;flex-shrink:0;font-size:.75rem;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;padding-top:1px;">${label}</div>
+        <div style="font-size:.875rem;color:var(--color-text);flex:1;">${value}</div>
       </div>` : '';
+
+    const section = (title) => `
+      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-muted);margin:18px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--color-border);">${title}</div>`;
+
     const body = document.getElementById('perfil-modal-body');
     body.innerHTML = `
-      <div style="display:flex;align-items:center;gap:14px;padding-bottom:18px;margin-bottom:18px;border-bottom:2px solid var(--color-border);">
+      <div style="display:flex;align-items:center;gap:14px;padding-bottom:16px;margin-bottom:4px;">
         ${avatarHTML(u, 'lg')}
         <div>
-          <div style="font-size:1.1rem;font-weight:700;color:var(--color-primary);">${u.name}</div>
-          <div style="font-size:.85rem;color:var(--color-text-muted);">${u.email}</div>
-          <div style="margin-top:6px;">${badgeStatus(u.status)}</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--color-text);letter-spacing:-0.01em;">${u.name}</div>
+          <div style="font-size:.85rem;color:var(--color-text-muted);margin-top:2px;">${u.email}</div>
+          <div style="margin-top:6px;display:flex;gap:8px;align-items:center;">
+            ${badgeStatus(u.status)}
+            ${sol.solicitudNum ? `<span style="font-size:.7rem;color:var(--color-text-muted);font-family:monospace;">${sol.solicitudNum}</span>` : ''}
+          </div>
         </div>
       </div>
-      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gold);margin-bottom:8px;">Contacto</div>
-      ${row('Teléfono', u.telefono)}
-      ${row('Comunidad', u.comunidad)}
-      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gold);margin:14px 0 8px;">Identidad</div>
-      ${row('Tipo doc.', u.doc_tipo)}
-      ${row('Nº documento', u.doc_numero)}
-      ${row('Fecha nac.', u.fecha_nac)}
-      ${row('Nacionalidad', u.nacionalidad)}
-      ${row('País nacimiento', u.pais_nac)}
-      ${u.doc_url
-        ? `<div style="padding:10px 0;border-bottom:1px solid var(--color-border-light);">
-             <div style="font-size:.8rem;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Documento adjunto</div>
-             <a href="${u.doc_url}" target="_blank">
-               <img src="${u.doc_url}" alt="Documento de identidad"
-                 style="max-width:100%;max-height:260px;border-radius:8px;border:1px solid var(--color-border);cursor:pointer;"
-                 onerror="this.style.display='none';this.nextSibling.style.display=''">
-               <span style="display:none;color:#16a34a;font-size:.85rem;">✓ ${u.doc_filename || 'Ver documento'}</span>
-             </a>
-           </div>`
-        : row('Documento', u.doc_filename
-            ? `<span style="color:#f59e0b;">⚠ Subido antes del sistema de fotos: ${u.doc_filename}</span>`
-            : '<span style="color:#ef4444;">No adjuntado</span>')
-      }
-      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gold);margin:14px 0 8px;">Dirección</div>
-      ${row('País', u.pais)}
-      ${row('Ciudad / CP', u.ciudad ? u.ciudad + (u.cp ? ' (' + u.cp + ')' : '') : '')}
-      ${row('Dirección', u.direccion)}
-      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gold);margin:14px 0 8px;">Comunidad</div>
-      ${row('Práctica judía', u.practica)}
-      ${row('Familiar en kehilá', u.familiar ? (u.familiar_nombre || 'Sí') : 'No')}
-      ${row('Cómo conoció Kehilá', u.como_conocio)}
-      ${row('Fecha registro', u.joinDate)}
+
+      ${section('Datos personales')}
+      ${row('Nombre completo', (sol.nombre || u.name.split(' ')[0]) + ' ' + (sol.apellidos || u.name.split(' ').slice(1).join(' ')))}
+      ${row('Teléfono', sol.telefonoPrefijo ? sol.telefonoPrefijo + ' ' + sol.telefono : u.telefono)}
+      ${row('Fecha de nacimiento', sol.fechaNacDia && sol.fechaNacMes && sol.fechaNacAnio ? sol.fechaNacDia + '/' + sol.fechaNacMes + '/' + sol.fechaNacAnio : u.fecha_nac)}
+      ${row('Nacionalidad', sol.nacionalidad || u.nacionalidad)}
+      ${row('País de nacimiento', sol.paisNac || u.pais_nac)}
+
+      ${section('Documento de identidad')}
+      ${row('Tipo', sol.docTipo || u.doc_tipo)}
+      ${row('Número', sol.docNumero ? '••••' + sol.docNumero.slice(-3) : (u.doc_numero || '—'))}
+      ${sol.docFileName ? row('Archivo', `<span style="color:var(--color-text-muted);">${sol.docFileName}</span>`) : ''}
+      ${u.doc_url ? `<div style="padding:10px 0;border-bottom:1px solid var(--color-border-light);">
+        <a href="${u.doc_url}" target="_blank"><img src="${u.doc_url}" style="max-width:100%;max-height:220px;border-radius:6px;border:1px solid var(--color-border);" onerror="this.style.display='none'"></a>
+      </div>` : ''}
+
+      ${section('Dirección')}
+      ${row('País', sol.pais || u.pais)}
+      ${row('Ciudad', (sol.ciudad || u.ciudad) + (sol.cp || u.cp ? ' (' + (sol.cp || u.cp) + ')' : ''))}
+      ${row('Dirección', sol.direccion || u.direccion)}
+
+      ${section('Vinculación con la comunidad')}
+      ${row('Comunidad', sol.comunidad || u.comunidad)}
+      ${row('Práctica religiosa', sol.practica || u.practica)}
+      ${row('Familiar en kehilá', sol.familiar === 'si' ? (sol.familiarNombre || 'Sí') : (u.familiar ? (u.familiar_nombre || 'Sí') : 'No'))}
+      ${row('Cómo conoció Kehilá', sol.comoConocio || u.como_conocio)}
+
+      ${section('Registro')}
+      ${row('Fecha solicitud', sol.submittedAt ? new Date(sol.submittedAt).toLocaleString('es-ES') : u.joinDate)}
+      ${row('Fuente', u.source === 'real' ? 'Supabase (cuenta real)' : 'Mock / Local')}
     `;
     const btnAprobar = document.getElementById('perfil-btn-aprobar');
     if (u.status === 'pending') {
