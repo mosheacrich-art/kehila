@@ -130,11 +130,11 @@ const NAV_ITEMS = [
 
 // Items de bottom nav (máximo 5)
 const BOTTOM_NAV_ITEMS = [
-  { id: 'home',     label: 'Inicio',   href: 'home.html',     icon: NAV_ITEMS[0].items[0].icon },
-  { id: 'eventos',  label: 'Eventos',  href: 'eventos.html',  icon: NAV_ITEMS[0].items[1].icon },
-  { id: 'wallap',   label: 'Wallap',   href: 'wallap.html',   icon: NAV_ITEMS[1].items[0].icon },
-  { id: 'kosher',   label: 'Kosher',   href: 'kosher.html',   icon: NAV_ITEMS[1].items[1].icon },
-  { id: 'siddur',   label: 'Siddur',   href: 'siddur.html',   icon: NAV_ITEMS[2].items[0].icon }
+  { id: 'home',       label: 'Inicio',    href: 'home.html',       icon: NAV_ITEMS[0].items[0].icon },
+  { id: 'eventos',    label: 'Eventos',   href: 'eventos.html',    icon: NAV_ITEMS[0].items[1].icon },
+  { id: 'calendario', label: 'Cal. Heb.', href: 'calendario.html', icon: NAV_ITEMS[0].items[2].icon },
+  { id: 'siddur',     label: 'Siddur',    href: 'siddur.html',     icon: NAV_ITEMS[3].items[0].icon },
+  { id: 'kosher',     label: 'Kosher',    href: 'kosher.html',     icon: NAV_ITEMS[1].items[1].icon }
 ];
 
 /**
@@ -265,6 +265,220 @@ function buildBottomNav(activePage) {
 }
 
 /**
+ * Construye e inyecta el botón hamburguesa + drawer lateral (solo móvil).
+ * @param {string} activePage
+ */
+function buildHamburger(activePage) {
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const color = getAvatarColor(user.name);
+  const initials = user.initials || user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const roleLabel = { admin: 'Administrador', miembro: 'Miembro', mod: 'Moderador' }[user.role] || user.role;
+
+  // Construir nav items para el drawer
+  let navHTML = '';
+  NAV_ITEMS.forEach(group => {
+    navHTML += `<div class="hb-group-label">${group.group}</div>`;
+    group.items.forEach(item => {
+      const active = item.id === activePage ? 'active' : '';
+      navHTML += `<a href="${item.href}" class="hb-nav-item ${active}">${item.icon}<span>${item.label}</span></a>`;
+    });
+  });
+  if (user.role === 'admin') {
+    navHTML += `
+      <div class="hb-divider"></div>
+      <a href="admin.html" class="hb-nav-item${activePage === 'admin' ? ' active' : ''}">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0H3"/></svg>
+        <span>Panel Admin</span>
+      </a>`;
+  }
+
+  const drawerHTML = `
+    <div id="hb-overlay" onclick="closeHamburger()" style="display:none"></div>
+    <div id="hb-drawer">
+      <div class="hb-header">
+        <div class="hb-logo">
+          <div class="hb-logo-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+          </div>
+          <div>
+            <div class="hb-logo-text">Kehilá</div>
+            <div class="hb-logo-sub">App Comunidades</div>
+          </div>
+        </div>
+        <button class="hb-close" onclick="closeHamburger()" aria-label="Cerrar menú">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="hb-user">
+        <div class="avatar avatar-md" data-color="${color}">${initials}</div>
+        <div class="hb-user-info">
+          <div class="hb-user-name">${user.name}</div>
+          <div class="hb-user-role">${roleLabel}</div>
+        </div>
+      </div>
+      <nav class="hb-nav">${navHTML}</nav>
+      <div class="hb-footer">
+        <button class="hb-logout" onclick="logout()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"/></svg>
+          <span>Cerrar sesión</span>
+        </button>
+      </div>
+    </div>`;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    /* Hamburger button */
+    #hb-btn {
+      display: none;
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 500;
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: var(--color-primary, #1b2e5e);
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 0;
+      box-shadow: 0 2px 8px rgba(27,46,94,.25);
+    }
+    #hb-btn span {
+      display: block;
+      width: 18px; height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      transition: transform .2s, opacity .2s;
+    }
+    @media (max-width: 768px) {
+      #hb-btn { display: flex; }
+    }
+
+    /* Overlay */
+    #hb-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 600;
+      backdrop-filter: blur(2px);
+    }
+
+    /* Drawer */
+    #hb-drawer {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 280px;
+      background: var(--color-surface, #fff);
+      z-index: 700;
+      display: flex; flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+      box-shadow: 4px 0 24px rgba(0,0,0,.15);
+      overflow-y: auto;
+    }
+    #hb-drawer.open { transform: translateX(0); }
+
+    .hb-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--color-border, #e2e8f0);
+    }
+    .hb-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .hb-logo-icon {
+      width: 36px; height: 36px;
+      background: var(--color-primary, #1b2e5e);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #c9a84c;
+      flex-shrink: 0;
+    }
+    .hb-logo-icon svg { width: 20px; height: 20px; }
+    .hb-logo-text { font-size: 15px; font-weight: 700; color: var(--color-primary, #1b2e5e); }
+    .hb-logo-sub { font-size: 10px; color: var(--color-text-muted, #64748b); }
+    .hb-close {
+      width: 32px; height: 32px;
+      background: var(--color-bg, #f8fafc);
+      border: 1px solid var(--color-border, #e2e8f0);
+      border-radius: 8px;
+      cursor: pointer; color: var(--color-text, #1e293b);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .hb-close svg { width: 16px; height: 16px; }
+
+    .hb-user {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--color-border, #e2e8f0);
+    }
+    .hb-user-name { font-size: 13px; font-weight: 600; color: var(--color-text, #1e293b); }
+    .hb-user-role { font-size: 11px; color: var(--color-text-muted, #64748b); }
+
+    .hb-nav { flex: 1; padding: 8px 10px; overflow-y: auto; }
+    .hb-group-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--color-text-muted, #64748b);
+      padding: 12px 8px 4px;
+    }
+    .hb-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px; border-radius: 8px;
+      text-decoration: none; color: var(--color-text, #1e293b);
+      font-size: 13.5px; font-weight: 500;
+      transition: background .15s, color .15s;
+      margin-bottom: 1px;
+    }
+    .hb-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: .7; }
+    .hb-nav-item:hover { background: var(--color-bg, #f8fafc); }
+    .hb-nav-item.active {
+      background: var(--color-primary, #1b2e5e);
+      color: #fff;
+    }
+    .hb-nav-item.active svg { opacity: 1; }
+    .hb-divider { height: 1px; background: var(--color-border, #e2e8f0); margin: 8px 0; }
+
+    .hb-footer { padding: 12px 16px; border-top: 1px solid var(--color-border, #e2e8f0); }
+    .hb-logout {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 9px 10px; border-radius: 8px;
+      background: none; border: none; cursor: pointer;
+      color: #dc2626; font-size: 13.5px; font-weight: 500;
+    }
+    .hb-logout svg { width: 18px; height: 18px; }
+    .hb-logout:hover { background: #fef2f2; }
+  `;
+  document.head.appendChild(style);
+
+  // Botón hamburguesa
+  const btn = document.createElement('button');
+  btn.id = 'hb-btn';
+  btn.setAttribute('aria-label', 'Abrir menú');
+  btn.innerHTML = `<span></span><span></span><span></span>`;
+  btn.onclick = openHamburger;
+  document.body.appendChild(btn);
+
+  // Drawer + overlay
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = drawerHTML;
+  document.body.appendChild(wrapper.children[0]); // overlay
+  document.body.appendChild(wrapper.children[0]); // drawer
+}
+
+function openHamburger() {
+  document.getElementById('hb-overlay').style.display = 'block';
+  document.getElementById('hb-drawer').classList.add('open');
+}
+function closeHamburger() {
+  document.getElementById('hb-overlay').style.display = 'none';
+  document.getElementById('hb-drawer').classList.remove('open');
+}
+
+/**
  * Inyecta el botón de volver atrás en todas las páginas excepto home.
  * @param {string} activePage - id de la página activa
  */
@@ -301,7 +515,7 @@ function buildBackBtn(activePage) {
     }
     @media (max-width: 768px) {
       #global-back-btn {
-        left: 12px;
+        left: 62px;
         top: 12px;
       }
     }
@@ -317,6 +531,7 @@ function buildBackBtn(activePage) {
 function initNav(activePage) {
   buildSidebar(activePage);
   buildBottomNav(activePage);
+  buildHamburger(activePage);
   buildBackBtn(activePage);
 }
 
