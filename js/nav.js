@@ -259,12 +259,59 @@ function buildBottomNav(activePage) {
 }
 
 /**
+ * Inyecta el botón de volver atrás en todas las páginas excepto home.
+ * @param {string} activePage - id de la página activa
+ */
+function buildBackBtn(activePage) {
+  if (activePage === 'home') return;
+  if (!window.history || window.history.length <= 1) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'global-back-btn';
+  btn.setAttribute('aria-label', 'Volver atrás');
+  btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>`;
+  btn.onclick = () => history.back();
+
+  const style = document.createElement('style');
+  style.textContent = `
+    #global-back-btn {
+      position: fixed;
+      top: 16px;
+      left: calc(var(--sidebar-width, 240px) + 16px);
+      z-index: 200;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: white;
+      border: 1.5px solid var(--color-border, #e2e8f0);
+      color: var(--color-text, #1e293b);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.10);
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    #global-back-btn:hover {
+      border-color: var(--color-primary, #1b2e5e);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+    }
+    @media (max-width: 768px) {
+      #global-back-btn {
+        left: 12px;
+        top: 12px;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+  document.body.appendChild(btn);
+}
+
+/**
  * Inicializa sidebar y bottom nav.
  * @param {string} activePage - id de la página
  */
 function initNav(activePage) {
   buildSidebar(activePage);
   buildBottomNav(activePage);
+  buildBackBtn(activePage);
 }
 
 /**
