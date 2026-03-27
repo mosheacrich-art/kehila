@@ -10,14 +10,14 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
   <style>
-    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; display: flex; flex-direction: column; }
+    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
     @media (max-width: 768px) { .main-content { margin-left: 0; padding-bottom: 80px; } }
-    .cal-heb-inner { flex: 1; padding: 32px 36px 60px; display: flex; flex-direction: column; }
+    .cal-heb-inner { padding: 32px 36px 60px; }
     @media (max-width: 768px) { .cal-heb-inner { padding: 20px 14px 88px; } }
 
     /* ── Grid principal ── */
-    .cal-wrap { display: grid; grid-template-columns: 1fr 380px; gap: 28px; flex: 1; align-items: start; }
-    @media (max-width: 768px) { .cal-wrap { grid-template-columns: 1fr; } }
+    .cal-wrap { display: grid; grid-template-columns: 1fr 400px; gap: 28px; align-items: start; }
+    @media (max-width: 900px) { .cal-wrap { grid-template-columns: 1fr; } }
 
     /* ── Nav mes ── */
     .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -127,10 +127,9 @@
   </style>
 </head>
 <body>
-<div class="app-layout">
-  <div id="sidebar-placeholder"></div>
-  <main class="main-content">
-    <div class="cal-heb-inner">
+<div id="sidebar-placeholder"></div>
+<div class="main-content">
+  <div class="cal-heb-inner">
 
       <!-- Header -->
       <div class="page-header" style="margin-bottom:24px;">
@@ -149,8 +148,7 @@
         </div>
       </div>
 
-    </div>
-  </main>
+  </div>
 </div>
 
 <script src="js/auth.js"></script>
