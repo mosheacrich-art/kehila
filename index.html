@@ -555,15 +555,30 @@
 
     @media (max-width: 768px) {
       body { overflow: auto; flex-direction: column; }
-      .auth-hero { flex: 0 0 260px; justify-content: flex-end; }
-      .hero-mosaic { opacity: 0.9; }
-      .auth-form-panel { min-height: calc(100vh - 260px); }
-      .auth-form-wrapper { padding: 16px 20px 32px; align-items: flex-start; }
+      .auth-hero { flex: 0 0 200px; justify-content: flex-end; padding: 20px 20px 16px; }
+      .hero-mosaic { opacity: 0.85; }
+      .hero-logo { margin-bottom: 6px; }
+      .hero-logo-icon { width: 32px; height: 32px; }
+      .hero-logo-name { font-size: 1.1rem; }
+      .hero-logo-sub { font-size: 0.65rem; }
+      .hero-divider { display: none; }
+      .hero-tagline { font-size: 1.25rem; margin-bottom: 4px; }
+      .hero-desc { display: none; }
+      .hero-stats { gap: 16px; margin-top: 8px; }
+      .stat-num { font-size: 1.1rem; }
+      .stat-label { font-size: 0.6rem; }
+      .auth-form-panel { min-height: calc(100vh - 200px); }
+      .auth-form-wrapper { padding: 20px 20px 24px; align-items: flex-start; }
       .auth-form-inner { max-width: 100%; }
-      .auth-footer { padding: 14px 20px; }
+      .auth-footer { padding: 12px 20px; }
       .mobile-logo { display: none; }
-      .hero-stats { gap: 20px; }
-      .stat-num { font-size: 1.2rem; }
+    }
+
+    @media (max-width: 480px) {
+      .auth-hero { flex: 0 0 160px; }
+      .hero-stats { display: none; }
+      .hero-tagline { font-size: 1.15rem; }
+      .auth-form-panel { min-height: calc(100vh - 160px); }
     }
   </style>
   <link rel="manifest" href="manifest.json">
