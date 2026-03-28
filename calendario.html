@@ -19,6 +19,39 @@
     .cal-wrap { display: grid; grid-template-columns: 1fr 400px; gap: 28px; align-items: start; }
     @media (max-width: 900px) { .cal-wrap { grid-template-columns: 1fr; } }
 
+    /* ── Selector de ciudad ── */
+    .city-selector-bar {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--color-white); border-radius: var(--radius-md);
+      border: 1.5px solid var(--color-border); padding: 12px 18px;
+      margin-bottom: 20px; flex-wrap: wrap;
+      box-shadow: var(--shadow-sm);
+    }
+    .city-selector-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .city-selector-label { font-size: .8125rem; font-weight: 600; color: var(--color-text-muted); white-space: nowrap; }
+    .city-select {
+      border: 1.5px solid var(--color-border); border-radius: var(--radius-sm);
+      padding: 6px 12px; font-size: .875rem; font-family: inherit;
+      color: var(--color-text); background: var(--color-bg);
+      cursor: pointer; outline: none; min-width: 200px; font-weight: 500;
+    }
+    .city-select:focus { border-color: var(--color-primary); }
+    .city-candles-preview {
+      font-size: .8125rem; color: var(--color-text-muted);
+      margin-left: auto; text-align: right;
+    }
+    .city-candles-preview strong { color: var(--color-gold-dark, #9a7a2a); }
+    .city-minutes-note {
+      font-size: .72rem; color: var(--color-text-muted);
+      padding: 3px 8px; background: var(--color-bg);
+      border-radius: 20px; border: 1px solid var(--color-border);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    @media (max-width: 600px) {
+      .city-candles-preview { margin-left: 0; width: 100%; }
+      .city-select { width: 100%; }
+    }
+
     /* ── Nav mes ── */
     .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .cal-month-label { font-family: var(--font-brand); font-size: 1.5rem; font-weight: 700; color: var(--color-text); }
@@ -85,6 +118,11 @@
     .side-time-label { font-size: .6rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.45); }
     .side-time-val { font-family: var(--font-brand); font-size: 1.1rem; font-weight: 700; color: var(--color-gold); }
     .side-time-sep { width: 1px; background: rgba(255,255,255,.12); align-self: stretch; }
+    .side-city-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: .65rem; font-weight: 600; color: rgba(255,255,255,.5);
+      margin-top: 8px; letter-spacing: .06em;
+    }
 
     /* ── Tarjeta festividad en el panel ── */
     .side-holiday-card {
@@ -149,12 +187,70 @@
   <div class="cal-heb-inner">
 
       <!-- Header -->
-      <div class="page-header" style="margin-bottom:24px;">
+      <div class="page-header" style="margin-bottom:20px;">
         <div class="page-header-left">
           <p class="page-header-label">Kehilá</p>
           <h1 class="page-title">Calendario Hebreo</h1>
-          <p class="page-subtitle">Shabatot, festividades y horarios para Madrid</p>
+          <p class="page-subtitle" id="page-subtitle">Cargando horarios…</p>
         </div>
+      </div>
+
+      <!-- Selector de ciudad -->
+      <div class="city-selector-bar">
+        <span class="city-selector-icon">📍</span>
+        <span class="city-selector-label">Ciudad:</span>
+        <select id="city-select" class="city-select" onchange="changeCity(this.value)">
+          <optgroup label="🇪🇸 España">
+            <option value="madrid">Madrid</option>
+            <option value="barcelona">Barcelona</option>
+            <option value="valencia">Valencia</option>
+            <option value="bilbao">Bilbao</option>
+            <option value="sevilla">Sevilla</option>
+            <option value="malaga">Málaga</option>
+            <option value="palma">Palma de Mallorca</option>
+            <option value="zaragoza">Zaragoza</option>
+          </optgroup>
+          <optgroup label="🇮🇱 Israel">
+            <option value="jerusalem">Jerusalén</option>
+            <option value="telaviv">Tel Aviv</option>
+            <option value="haifa">Haifa</option>
+            <option value="beersheva">Beer Sheva</option>
+          </optgroup>
+          <optgroup label="🌍 Europa">
+            <option value="london">Londres</option>
+            <option value="paris">París</option>
+            <option value="berlin">Berlín</option>
+            <option value="amsterdam">Ámsterdam</option>
+            <option value="zurich">Zúrich</option>
+            <option value="rome">Roma</option>
+            <option value="lisbon">Lisboa</option>
+            <option value="brussels">Bruselas</option>
+            <option value="vienna">Viena</option>
+            <option value="geneva">Ginebra</option>
+          </optgroup>
+          <optgroup label="🌎 América del Norte">
+            <option value="newyork">Nueva York</option>
+            <option value="losangeles">Los Ángeles</option>
+            <option value="miami">Miami</option>
+            <option value="chicago">Chicago</option>
+            <option value="toronto">Toronto</option>
+            <option value="montreal">Montreal</option>
+            <option value="mexico">Ciudad de México</option>
+          </optgroup>
+          <optgroup label="🌎 América del Sur">
+            <option value="buenosaires">Buenos Aires</option>
+            <option value="montevideo">Montevideo</option>
+            <option value="saopaulo">São Paulo</option>
+            <option value="bogota">Bogotá</option>
+          </optgroup>
+          <optgroup label="🌏 Otros">
+            <option value="johannesburg">Johannesburgo</option>
+            <option value="melbourne">Melbourne</option>
+            <option value="sydney">Sídney</option>
+          </optgroup>
+        </select>
+        <span class="city-minutes-note" id="city-minutes-note">encendido 18 min antes del ocaso</span>
+        <span class="city-candles-preview" id="city-candles-preview"></span>
       </div>
 
       <!-- Calendario -->
@@ -174,8 +270,56 @@
 <script>
 /* ═══════════════════════════════════════════
    CALENDARIO HEBREO — Kehilá
-   API: HebCal.com · Madrid (40°25'N 3°42'W)
+   API: HebCal.com · Multi-ciudad mundial
+   Horarios reales de encendido de velas
+   por latitud/longitud + timezone local
 ═══════════════════════════════════════════ */
+
+/* ─── Ciudades del mundo con horarios reales ─── */
+const CITIES = {
+  // España
+  "madrid":      { name:"Madrid",            country:"España",       flag:"🇪🇸", lat:40.4168,  lon:-3.7038,   tz:"Europe/Madrid",                       b:18, m:42 },
+  "barcelona":   { name:"Barcelona",          country:"España",       flag:"🇪🇸", lat:41.3888,  lon:2.1589,    tz:"Europe/Madrid",                       b:18, m:42 },
+  "valencia":    { name:"Valencia",           country:"España",       flag:"🇪🇸", lat:39.4699,  lon:-0.3763,   tz:"Europe/Madrid",                       b:18, m:42 },
+  "bilbao":      { name:"Bilbao",             country:"España",       flag:"🇪🇸", lat:43.2630,  lon:-2.9350,   tz:"Europe/Madrid",                       b:18, m:42 },
+  "sevilla":     { name:"Sevilla",            country:"España",       flag:"🇪🇸", lat:37.3891,  lon:-5.9845,   tz:"Europe/Madrid",                       b:18, m:42 },
+  "malaga":      { name:"Málaga",             country:"España",       flag:"🇪🇸", lat:36.7213,  lon:-4.4214,   tz:"Europe/Madrid",                       b:18, m:42 },
+  "palma":       { name:"Palma de Mallorca",  country:"España",       flag:"🇪🇸", lat:39.5696,  lon:2.6502,    tz:"Europe/Madrid",                       b:18, m:42 },
+  "zaragoza":    { name:"Zaragoza",           country:"España",       flag:"🇪🇸", lat:41.6561,  lon:-0.8773,   tz:"Europe/Madrid",                       b:18, m:42 },
+  // Israel
+  "jerusalem":   { name:"Jerusalén",          country:"Israel",       flag:"🇮🇱", lat:31.7683,  lon:35.2137,   tz:"Asia/Jerusalem",                      b:40, m:50 },
+  "telaviv":     { name:"Tel Aviv",           country:"Israel",       flag:"🇮🇱", lat:32.0853,  lon:34.7818,   tz:"Asia/Jerusalem",                      b:18, m:42 },
+  "haifa":       { name:"Haifa",              country:"Israel",       flag:"🇮🇱", lat:32.8193,  lon:34.9877,   tz:"Asia/Jerusalem",                      b:18, m:42 },
+  "beersheva":   { name:"Beer Sheva",         country:"Israel",       flag:"🇮🇱", lat:31.2520,  lon:34.7915,   tz:"Asia/Jerusalem",                      b:18, m:42 },
+  // Europa
+  "london":      { name:"Londres",            country:"Reino Unido",  flag:"🇬🇧", lat:51.5074,  lon:-0.1278,   tz:"Europe/London",                       b:18, m:42 },
+  "paris":       { name:"París",              country:"Francia",      flag:"🇫🇷", lat:48.8566,  lon:2.3522,    tz:"Europe/Paris",                        b:18, m:42 },
+  "berlin":      { name:"Berlín",             country:"Alemania",     flag:"🇩🇪", lat:52.5200,  lon:13.4050,   tz:"Europe/Berlin",                       b:18, m:42 },
+  "amsterdam":   { name:"Ámsterdam",          country:"Países Bajos", flag:"🇳🇱", lat:52.3676,  lon:4.9041,    tz:"Europe/Amsterdam",                    b:18, m:42 },
+  "zurich":      { name:"Zúrich",             country:"Suiza",        flag:"🇨🇭", lat:47.3769,  lon:8.5417,    tz:"Europe/Zurich",                       b:18, m:42 },
+  "rome":        { name:"Roma",               country:"Italia",       flag:"🇮🇹", lat:41.9028,  lon:12.4964,   tz:"Europe/Rome",                         b:18, m:42 },
+  "lisbon":      { name:"Lisboa",             country:"Portugal",     flag:"🇵🇹", lat:38.7223,  lon:-9.1393,   tz:"Europe/Lisbon",                       b:18, m:42 },
+  "brussels":    { name:"Bruselas",           country:"Bélgica",      flag:"🇧🇪", lat:50.8503,  lon:4.3517,    tz:"Europe/Brussels",                     b:18, m:42 },
+  "vienna":      { name:"Viena",              country:"Austria",      flag:"🇦🇹", lat:48.2082,  lon:16.3738,   tz:"Europe/Vienna",                       b:18, m:42 },
+  "geneva":      { name:"Ginebra",            country:"Suiza",        flag:"🇨🇭", lat:46.2044,  lon:6.1432,    tz:"Europe/Zurich",                       b:18, m:42 },
+  // América del Norte
+  "newyork":     { name:"Nueva York",         country:"EE.UU.",       flag:"🇺🇸", lat:40.7128,  lon:-74.0060,  tz:"America/New_York",                    b:18, m:42 },
+  "losangeles":  { name:"Los Ángeles",        country:"EE.UU.",       flag:"🇺🇸", lat:34.0522,  lon:-118.2437, tz:"America/Los_Angeles",                 b:18, m:42 },
+  "miami":       { name:"Miami",              country:"EE.UU.",       flag:"🇺🇸", lat:25.7617,  lon:-80.1918,  tz:"America/New_York",                    b:18, m:42 },
+  "chicago":     { name:"Chicago",            country:"EE.UU.",       flag:"🇺🇸", lat:41.8781,  lon:-87.6298,  tz:"America/Chicago",                     b:18, m:42 },
+  "toronto":     { name:"Toronto",            country:"Canadá",       flag:"🇨🇦", lat:43.6532,  lon:-79.3832,  tz:"America/Toronto",                     b:18, m:42 },
+  "montreal":    { name:"Montreal",           country:"Canadá",       flag:"🇨🇦", lat:45.5017,  lon:-73.5673,  tz:"America/Toronto",                     b:18, m:42 },
+  "mexico":      { name:"Ciudad de México",   country:"México",       flag:"🇲🇽", lat:19.4326,  lon:-99.1332,  tz:"America/Mexico_City",                 b:18, m:42 },
+  // América del Sur
+  "buenosaires": { name:"Buenos Aires",       country:"Argentina",    flag:"🇦🇷", lat:-34.6037, lon:-58.3816,  tz:"America/Argentina/Buenos_Aires",      b:18, m:42 },
+  "montevideo":  { name:"Montevideo",         country:"Uruguay",      flag:"🇺🇾", lat:-34.9011, lon:-56.1645,  tz:"America/Montevideo",                  b:18, m:42 },
+  "saopaulo":    { name:"São Paulo",          country:"Brasil",       flag:"🇧🇷", lat:-23.5505, lon:-46.6333,  tz:"America/Sao_Paulo",                   b:18, m:42 },
+  "bogota":      { name:"Bogotá",             country:"Colombia",     flag:"🇨🇴", lat:4.7110,   lon:-74.0721,  tz:"America/Bogota",                      b:18, m:42 },
+  // Otros
+  "johannesburg":{ name:"Johannesburgo",      country:"Sudáfrica",    flag:"🇿🇦", lat:-26.2041, lon:28.0473,   tz:"Africa/Johannesburg",                 b:18, m:42 },
+  "melbourne":   { name:"Melbourne",          country:"Australia",    flag:"🇦🇺", lat:-37.8136, lon:144.9631,  tz:"Australia/Melbourne",                 b:18, m:42 },
+  "sydney":      { name:"Sídney",             country:"Australia",    flag:"🇦🇺", lat:-33.8688, lon:151.2093,  tz:"Australia/Sydney",                    b:18, m:42 },
+};
 
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DIAS_HDR = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
@@ -183,12 +327,17 @@ const DIAS_HDR = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
 // dateMap[YYYY-MM-DD] = { candles, havdalah, parasha, especial, holidays[] }
 let dateMap  = {};
 let loadedYear = null;
+let loadedCityKey = null;
 let curYear  = new Date().getFullYear();
 let curMonth = new Date().getMonth(); // 0-based
 let selectedDate = null;
 let customEventsMap = {}; // date → [{id, titulo, hora, descripcion, tipo}]
 const _calUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
 const _calIsAdmin = _calUser?.role === 'admin';
+
+// Ciudad activa
+const _savedCityKey = localStorage.getItem('kehila_city') || 'madrid';
+let selectedCity = CITIES[_savedCityKey] || CITIES['madrid'];
 
 /* ─── Traducciones ─── */
 const PARASHA = {
@@ -315,17 +464,22 @@ const SHABAT_ESP = {
 
 function fmtTime(isoStr) {
   if (!isoStr || isoStr.length <= 10) return null;
-  return new Date(isoStr).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Madrid'});
+  return new Date(isoStr).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',timeZone: selectedCity.tz});
 }
 
 function isoDate(y,m,d) {
   return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 }
 
-/* ─── Carga de datos HebCal ─── */
+/* ─── Carga de datos HebCal para la ciudad activa ─── */
 async function ensureData(year) {
-  if (loadedYear === year) return;
-  const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&nx=off&year=${year}&month=x&ss=on&mf=on&c=on&geo=geoname&geonameid=3117735&m=42&b=18&s=on&lg=s`;
+  const cityKey = localStorage.getItem('kehila_city') || 'madrid';
+  if (loadedYear === year && loadedCityKey === cityKey) return;
+
+  selectedCity = CITIES[cityKey] || CITIES['madrid'];
+  const c = selectedCity;
+  const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&nx=off&year=${year}&month=x&ss=on&mf=on&c=on&geo=pos&latitude=${c.lat}&longitude=${c.lon}&tzid=${encodeURIComponent(c.tz)}&m=${c.m}&b=${c.b}&s=on&lg=s`;
+
   const res = await fetch(url);
   if (!res.ok) throw new Error('API error');
   const data = await res.json();
@@ -334,7 +488,6 @@ async function ensureData(year) {
 
   (data.items || []).forEach(item => {
     const dateKey = item.date.slice(0,10);
-
     const get = k => { if (!dateMap[k]) dateMap[k] = { holidays:[] }; return dateMap[k]; };
 
     if (item.category === 'candles') {
@@ -342,7 +495,6 @@ async function ensureData(year) {
     } else if (item.category === 'havdalah') {
       get(dateKey).havdalah = fmtTime(item.date);
     } else if (item.category === 'parashat') {
-      // parasha day = Sábado; la vela = viernes anterior
       const satD = new Date(dateKey + 'T12:00:00');
       const friD = new Date(satD); friD.setDate(friD.getDate()-1);
       const friKey = friD.toISOString().slice(0,10);
@@ -351,7 +503,6 @@ async function ensureData(year) {
       get(friKey).parasha = p;
       get(friKey).shabatDate = dateKey;
     } else if (item.category === 'holiday' && SHABAT_ESP[item.title]) {
-      // Shabat especial (cae el sábado, marcamos el viernes)
       const satD = new Date(dateKey + 'T12:00:00');
       const friD = new Date(satD); friD.setDate(friD.getDate()-1);
       const friKey = friD.toISOString().slice(0,10);
@@ -366,6 +517,7 @@ async function ensureData(year) {
   });
 
   loadedYear = year;
+  loadedCityKey = cityKey;
 }
 
 async function loadCustomEvents(year, month) {
@@ -379,7 +531,6 @@ async function loadCustomEvents(year, month) {
     if (data) {
       data.forEach(ev => {
         if (!customEventsMap[ev.fecha]) customEventsMap[ev.fecha] = [];
-        // avoid duplicates
         if (!customEventsMap[ev.fecha].find(e => e.id === ev.id)) {
           customEventsMap[ev.fecha].push(ev);
         }
@@ -388,38 +539,105 @@ async function loadCustomEvents(year, month) {
   } catch(e) { console.warn('loadCustomEvents:', e); }
 }
 
+/* ─── Cambio de ciudad ─── */
+async function changeCity(key) {
+  if (!CITIES[key]) return;
+  localStorage.setItem('kehila_city', key);
+  selectedCity = CITIES[key];
+  loadedYear = null;
+  loadedCityKey = null;
+  customEventsMap = {};
+  selectedDate = null;
+
+  updateCityUI();
+
+  document.getElementById('cal-container').innerHTML = `
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Cargando horarios para ${selectedCity.flag} ${selectedCity.name}…</p>
+    </div>`;
+
+  try {
+    await ensureData(curYear);
+    await loadCustomEvents(curYear, curMonth);
+    renderCal();
+    updateCandlesPreview();
+  } catch(e) { showError(); }
+}
+
+function updateCityUI() {
+  const c = selectedCity;
+  // Subtítulo
+  const sub = document.getElementById('page-subtitle');
+  if (sub) sub.textContent = `${c.flag} ${c.name}, ${c.country} — Shabatot, festividades y horarios`;
+  // Nota de minutos
+  const note = document.getElementById('city-minutes-note');
+  if (note) {
+    if (c.b === 40) {
+      note.textContent = `encendido ${c.b} min antes del ocaso (minhag Yerushalayim)`;
+    } else {
+      note.textContent = `encendido ${c.b} min antes del ocaso`;
+    }
+  }
+}
+
+/* ─── Preview del próximo encendido ─── */
+function updateCandlesPreview() {
+  const preview = document.getElementById('city-candles-preview');
+  if (!preview) return;
+
+  const today = new Date();
+  let nextCandles = null;
+  let nextDate = null;
+
+  for (let i = 0; i < 10; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    const key = isoDate(d.getFullYear(), d.getMonth(), d.getDate());
+    if (dateMap[key]?.candles) {
+      // Si es hoy, comprobar que aún no ha pasado la hora
+      if (i === 0) {
+        const [h, m] = dateMap[key].candles.split(':').map(Number);
+        const nowH = today.getHours(), nowM = today.getMinutes();
+        if (nowH > h || (nowH === h && nowM >= m)) continue; // ya pasó
+      }
+      nextDate = d;
+      nextCandles = dateMap[key].candles;
+      break;
+    }
+  }
+
+  if (nextCandles && nextDate) {
+    const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+    const dayStr = nextDate.toLocaleDateString('es-ES', opts);
+    const dayStrCap = dayStr.charAt(0).toUpperCase() + dayStr.slice(1);
+    preview.innerHTML = `🕯️ Próximo encendido: <strong>${dayStrCap} · ${nextCandles}</strong>`;
+  } else {
+    preview.innerHTML = '';
+  }
+}
+
 /* ─── Renderiza el calendario ─── */
 function renderCal() {
   const today = new Date();
   const todayKey = isoDate(today.getFullYear(), today.getMonth(), today.getDate());
   const firstDay = new Date(curYear, curMonth, 1);
   const lastDay  = new Date(curYear, curMonth+1, 0);
-
-  // Día de la semana del 1 (0=Dom, 6=Sáb — sin conversión)
-  let startDow = firstDay.getDay(); // 0=Dom … 6=Sáb
+  let startDow = firstDay.getDay();
 
   let daysHtml = '';
+  DIAS_HDR.forEach(d => { daysHtml += `<div class="cal-header-day">${d}</div>`; });
 
-  // Cabeceras
-  DIAS_HDR.forEach(d => {
-    daysHtml += `<div class="cal-header-day">${d}</div>`;
-  });
-
-  // Días del mes anterior
   const prevLast = new Date(curYear, curMonth, 0).getDate();
   for (let i = startDow - 1; i >= 0; i--) {
     const d = prevLast - i;
     const key = isoDate(curYear, curMonth-1, d);
     daysHtml += dayCell(d, key, true, todayKey);
   }
-
-  // Días del mes
   for (let d = 1; d <= lastDay.getDate(); d++) {
     const key = isoDate(curYear, curMonth, d);
     daysHtml += dayCell(d, key, false, todayKey);
   }
-
-  // Días del mes siguiente para completar la grilla
   const totalCells = Math.ceil((startDow + lastDay.getDate()) / 7) * 7;
   const remaining = totalCells - startDow - lastDay.getDate();
   for (let d = 1; d <= remaining; d++) {
@@ -456,7 +674,6 @@ function renderCal() {
       </div>
     </div>`;
 
-  // Seleccionar hoy automáticamente si está en el mes visible
   if (today.getFullYear() === curYear && today.getMonth() === curMonth) {
     selectDate(todayKey);
   }
@@ -472,7 +689,6 @@ function dayCell(d, key, other, todayKey) {
   if (isToday)  classes += ' today';
   if (isSelected && !isToday) classes += ' selected';
 
-  // Dots
   let dots = '';
   if (info.candles)            dots += `<span class="cal-dot dot-candles"></span>`;
   if (info.parasha)            dots += `<span class="cal-dot dot-shabbat"></span>`;
@@ -486,14 +702,12 @@ function dayCell(d, key, other, todayKey) {
   if (customEventsMap[key]?.length) dots += `<span class="cal-dot dot-custom"></span>`;
 
   const dotsHtml = dots ? `<div class="cal-dots">${dots}</div>` : '';
-
   return `<div class="${classes}" data-key="${key}" onclick="selectDate('${key}')">${d}${dotsHtml}</div>`;
 }
 
 function selectDate(key) {
   selectedDate = key;
 
-  // Resaltar celda seleccionada
   document.querySelectorAll('.cal-day').forEach(el => {
     el.classList.remove('selected');
     if (el.dataset.key === key && !el.classList.contains('today')) {
@@ -514,13 +728,11 @@ function selectDate(key) {
   // ── Encendido de velas (viernes o erev yom tov) ──
   if (info.candles) {
     hasContent = true;
-    // Buscar havdalah del sábado siguiente
     const satD = new Date(dateObj); satD.setDate(satD.getDate()+1);
     const satKey = satD.toISOString().slice(0,10);
     const havdalahTime = (dateMap[satKey] || {}).havdalah || null;
 
     if (info.parasha) {
-      // Viernes con parashá → mostrar tarjeta Shabat completa
       const p = info.parasha;
       const esp = info.especial ? `<div class="side-shabat-especial">✦ ${info.especial}</div>` : '';
       const havdalahHTML = havdalahTime
@@ -539,23 +751,23 @@ function selectDate(key) {
             </div>
             ${havdalahHTML}
           </div>
+          <div class="side-city-badge">📍 ${selectedCity.flag} ${selectedCity.name} · ${selectedCity.b} min antes del ocaso</div>
         </div>`;
     } else {
-      // Erev Yom Tov (sin parashá)
       html += `
         <div class="side-candles-card">
           <div class="side-candles-icon">🕯️</div>
           <div class="side-candles-info">
-            <div class="side-candles-label">Encendido de velas</div>
+            <div class="side-candles-label">Encendido de velas — ${selectedCity.flag} ${selectedCity.name}</div>
             <div class="side-candles-time">${info.candles}</div>
+            <div class="side-candles-next">${selectedCity.b} minutos antes del ocaso</div>
           </div>
         </div>`;
     }
   }
 
-  // ── Sábado: mostrar parashá si no se mostró en el viernes ──
+  // ── Sábado: mostrar parashá ──
   if (info.havdalah && !info.candles) {
-    // Es un sábado — buscar la parasha del viernes
     const friD = new Date(dateObj); friD.setDate(friD.getDate()-1);
     const friKey = friD.toISOString().slice(0,10);
     const friInfo = dateMap[friKey] || {};
@@ -571,10 +783,16 @@ function selectDate(key) {
           ${esp}
           <div class="side-shabat-times">
             <div class="side-time-item">
+              <span class="side-time-label">Encendido (ayer)</span>
+              <span class="side-time-val">${friInfo.candles || '—'}</span>
+            </div>
+            <div class="side-time-sep"></div>
+            <div class="side-time-item">
               <span class="side-time-label">Habdalá</span>
               <span class="side-time-val">${info.havdalah}</span>
             </div>
           </div>
+          <div class="side-city-badge">📍 ${selectedCity.flag} ${selectedCity.name}</div>
         </div>`;
     }
   }
@@ -582,7 +800,7 @@ function selectDate(key) {
   // ── Festividades ──
   info.holidays.forEach(h => {
     hasContent = true;
-    const timeHTML = h.time ? `<div class="side-holiday-time">🕯️ Encendido: ${h.time}</div>` : '';
+    const timeHTML = h.time ? `<div class="side-holiday-time">🕯️ Encendido: ${h.time} · ${selectedCity.flag} ${selectedCity.name}</div>` : '';
     html += `
       <div class="side-holiday-card ${h.tipo}">
         <div class="side-holiday-name">${h.es}</div>
@@ -592,7 +810,7 @@ function selectDate(key) {
       </div>`;
   });
 
-  // ── Eventos personalizados de la comunidad ──
+  // ── Eventos personalizados ──
   const customEvs = customEventsMap[key] || [];
   if (customEvs.length) {
     if (hasContent) html += `<hr style="border:none;border-top:1px solid var(--color-border);margin:12px 0;">`;
@@ -633,21 +851,15 @@ function selectDate(key) {
   document.getElementById('cal-side-detail').innerHTML = html;
 }
 
-function showCalAddForm(key) {
-  document.getElementById(`cal-add-form-${key}`).style.display = '';
-}
-function hideCalAddForm(key) {
-  document.getElementById(`cal-add-form-${key}`).style.display = 'none';
-}
+function showCalAddForm(key) { document.getElementById(`cal-add-form-${key}`).style.display = ''; }
+function hideCalAddForm(key) { document.getElementById(`cal-add-form-${key}`).style.display = 'none'; }
 
 async function saveCalEv(key) {
   const titulo = document.getElementById(`caef-titulo-${key}`).value.trim();
   if (!titulo) { alert('Escribe un título'); return; }
   const hora  = document.getElementById(`caef-hora-${key}`).value || null;
   const desc  = document.getElementById(`caef-desc-${key}`).value.trim() || null;
-
   const newEv = { fecha: key, titulo, hora, descripcion: desc, tipo: 'comunidad' };
-
   const sb = typeof getSupabase === 'function' ? getSupabase() : null;
   if (sb) {
     const { data, error } = await sb.from('calendario_eventos').insert(newEv).select().single();
@@ -656,7 +868,6 @@ async function saveCalEv(key) {
   } else {
     newEv.id = 'local-' + Date.now();
   }
-
   if (!customEventsMap[key]) customEventsMap[key] = [];
   customEventsMap[key].push(newEv);
   renderCal();
@@ -679,11 +890,13 @@ async function navMonth(delta) {
   if (curMonth > 11) { curMonth = 0;  curYear++; }
   if (curMonth < 0)  { curMonth = 11; curYear--; }
 
-  // Si cambia el año, recargar datos
-  if (curYear !== loadedYear) {
+  if (curYear !== loadedYear || loadedCityKey !== (localStorage.getItem('kehila_city') || 'madrid')) {
     document.getElementById('cal-container').innerHTML = `
       <div class="loading-state"><div class="loading-spinner"></div><p>Cargando calendario…</p></div>`;
-    try { await ensureData(curYear); await loadCustomEvents(curYear, curMonth); } catch(e) { showError(); return; }
+    try {
+      await ensureData(curYear);
+      await loadCustomEvents(curYear, curMonth);
+    } catch(e) { showError(); return; }
   }
   selectedDate = null;
   renderCal();
@@ -701,10 +914,19 @@ function showError() {
 document.addEventListener('DOMContentLoaded', async () => {
   requireAuth();
   initNav('calendario');
+
+  // Restaurar ciudad guardada
+  const savedKey = localStorage.getItem('kehila_city') || 'madrid';
+  selectedCity = CITIES[savedKey] || CITIES['madrid'];
+  const sel = document.getElementById('city-select');
+  if (sel) sel.value = savedKey;
+  updateCityUI();
+
   try {
     await ensureData(curYear);
     await loadCustomEvents(curYear, curMonth);
     renderCal();
+    updateCandlesPreview();
   } catch(e) {
     showError();
   }
