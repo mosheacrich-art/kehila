@@ -521,13 +521,12 @@ function closeHamburger() {
  */
 function buildBackBtn(activePage) {
   if (activePage === 'home') return;
-  if (!window.history || window.history.length <= 1) return;
 
   const btn = document.createElement('button');
   btn.id = 'global-back-btn';
-  btn.setAttribute('aria-label', 'Volver atrás');
+  btn.setAttribute('aria-label', 'Volver al inicio');
   btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>`;
-  btn.onclick = () => history.back();
+  btn.onclick = () => { window.location.href = 'home.html'; };
 
   const style = document.createElement('style');
   style.textContent = `

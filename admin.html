@@ -23,6 +23,14 @@
     @media (max-width: 768px) { .admin-inner { padding: 20px 14px 88px; } }
 
     /* ─── Tabs ─── */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.8rem; font-weight: 500;
+      color: var(--color-text-muted); text-decoration: none;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--color-primary); }
+
     .admin-tabs {
       display: flex;
       gap: 2px;
@@ -456,7 +464,9 @@
     }
     @media (max-width: 600px) {
       .hide-sm { display: none !important; }
-      .admin-tab { padding: 10px 12px; font-size: 0.8rem; }
+      .admin-tab { padding: 9px 10px; font-size: 0.75rem; gap: 0; }
+      .admin-tab svg { display: none; }
+      .admin-inner { padding: 16px 14px 80px; }
     }
 
     /* ─── Preguntas Rav ─── */
@@ -535,7 +545,11 @@
     <!-- Page header -->
     <div class="page-header mb-xl">
       <div class="page-header-left">
-        <p class="page-header-label">Administración</p>
+        <a href="home.html" class="back-link">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
+          Volver al inicio
+        </a>
+        <p class="page-header-label" style="margin-top:6px;">Administración</p>
         <h1 class="page-title">Panel de Control</h1>
         <p class="page-subtitle">Gestiona tu comunidad desde aquí</p>
       </div>
