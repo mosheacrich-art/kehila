@@ -301,6 +301,17 @@
     .event-admin-meta span { display: flex; align-items: center; gap: 4px; }
     .event-admin-meta svg { width: 12px; height: 12px; }
 
+    @media (max-width: 600px) {
+      .event-admin-card { flex-wrap: wrap; gap: 12px; padding: 14px 16px; }
+      .event-admin-info { flex: 1 1 calc(100% - 68px); min-width: 0; }
+      .event-admin-card > div:last-child {
+        width: 100%; display: flex; justify-content: flex-end; gap: 8px;
+        padding-top: 10px; border-top: 1px solid var(--color-border);
+        align-items: center;
+      }
+      .event-admin-title { font-size: 0.9rem; }
+    }
+
     /* ─── Progress aforo ─── */
     .aforo-bar {
       display: flex;
