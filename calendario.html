@@ -197,10 +197,9 @@
 
       <!-- Selector de ciudad -->
       <div class="city-selector-bar">
-        <span class="city-selector-icon">📍</span>
         <span class="city-selector-label">Ciudad:</span>
         <select id="city-select" class="city-select" onchange="changeCity(this.value)">
-          <optgroup label="🇪🇸 España">
+          <optgroup label="España">
             <option value="madrid">Madrid</option>
             <option value="barcelona">Barcelona</option>
             <option value="valencia">Valencia</option>
@@ -210,13 +209,13 @@
             <option value="palma">Palma de Mallorca</option>
             <option value="zaragoza">Zaragoza</option>
           </optgroup>
-          <optgroup label="🇮🇱 Israel">
+          <optgroup label="Israel">
             <option value="jerusalem">Jerusalén</option>
             <option value="telaviv">Tel Aviv</option>
             <option value="haifa">Haifa</option>
             <option value="beersheva">Beer Sheva</option>
           </optgroup>
-          <optgroup label="🌍 Europa">
+          <optgroup label="Europa">
             <option value="london">Londres</option>
             <option value="paris">París</option>
             <option value="berlin">Berlín</option>
@@ -228,7 +227,7 @@
             <option value="vienna">Viena</option>
             <option value="geneva">Ginebra</option>
           </optgroup>
-          <optgroup label="🌎 América del Norte">
+          <optgroup label="América del Norte">
             <option value="newyork">Nueva York</option>
             <option value="losangeles">Los Ángeles</option>
             <option value="miami">Miami</option>
@@ -237,13 +236,13 @@
             <option value="montreal">Montreal</option>
             <option value="mexico">Ciudad de México</option>
           </optgroup>
-          <optgroup label="🌎 América del Sur">
+          <optgroup label="América del Sur">
             <option value="buenosaires">Buenos Aires</option>
             <option value="montevideo">Montevideo</option>
             <option value="saopaulo">São Paulo</option>
             <option value="bogota">Bogotá</option>
           </optgroup>
-          <optgroup label="🌏 Otros">
+          <optgroup label="Otros">
             <option value="johannesburg">Johannesburgo</option>
             <option value="melbourne">Melbourne</option>
             <option value="sydney">Sídney</option>
@@ -554,7 +553,7 @@ async function changeCity(key) {
   document.getElementById('cal-container').innerHTML = `
     <div class="loading-state">
       <div class="loading-spinner"></div>
-      <p>Cargando horarios para ${selectedCity.flag} ${selectedCity.name}…</p>
+      <p>Cargando horarios para ${selectedCity.name}…</p>
     </div>`;
 
   try {
@@ -569,7 +568,7 @@ function updateCityUI() {
   const c = selectedCity;
   // Subtítulo
   const sub = document.getElementById('page-subtitle');
-  if (sub) sub.textContent = `${c.flag} ${c.name}, ${c.country} — Shabatot, festividades y horarios`;
+  if (sub) sub.textContent = `${c.name}, ${c.country} — Shabatot, festividades y horarios`;
   // Nota de minutos
   const note = document.getElementById('city-minutes-note');
   if (note) {
@@ -611,7 +610,7 @@ function updateCandlesPreview() {
     const opts = { weekday: 'long', day: 'numeric', month: 'long' };
     const dayStr = nextDate.toLocaleDateString('es-ES', opts);
     const dayStrCap = dayStr.charAt(0).toUpperCase() + dayStr.slice(1);
-    preview.innerHTML = `🕯️ Próximo encendido: <strong>${dayStrCap} · ${nextCandles}</strong>`;
+    preview.innerHTML = `Próximo encendido: <strong>${dayStrCap} · ${nextCandles}</strong>`;
   } else {
     preview.innerHTML = '';
   }
@@ -751,14 +750,14 @@ function selectDate(key) {
             </div>
             ${havdalahHTML}
           </div>
-          <div class="side-city-badge">📍 ${selectedCity.flag} ${selectedCity.name} · ${selectedCity.b} min antes del ocaso</div>
+          <div class="side-city-badge">${selectedCity.name} · ${selectedCity.b} min antes del ocaso</div>
         </div>`;
     } else {
       html += `
         <div class="side-candles-card">
           <div class="side-candles-icon">🕯️</div>
           <div class="side-candles-info">
-            <div class="side-candles-label">Encendido de velas — ${selectedCity.flag} ${selectedCity.name}</div>
+            <div class="side-candles-label">Encendido de velas — ${selectedCity.name}</div>
             <div class="side-candles-time">${info.candles}</div>
             <div class="side-candles-next">${selectedCity.b} minutos antes del ocaso</div>
           </div>
@@ -800,7 +799,7 @@ function selectDate(key) {
   // ── Festividades ──
   info.holidays.forEach(h => {
     hasContent = true;
-    const timeHTML = h.time ? `<div class="side-holiday-time">🕯️ Encendido: ${h.time} · ${selectedCity.flag} ${selectedCity.name}</div>` : '';
+    const timeHTML = h.time ? `<div class="side-holiday-time">Encendido: ${h.time} · ${selectedCity.name}</div>` : '';
     html += `
       <div class="side-holiday-card ${h.tipo}">
         <div class="side-holiday-name">${h.es}</div>
