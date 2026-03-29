@@ -378,6 +378,7 @@
   <!-- Bottom nav móvil -->
   <div id="bottom-nav-placeholder"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
@@ -389,7 +390,7 @@
     // Campos editables
     const EDIT_FIELDS = ['nombre','apellidos','telefono','pais','ciudad','cp','direccion'];
 
-    function init() {
+    async function init() {
       if (!user) return;
 
       // Cargar datos de solicitud desde localStorage
@@ -425,6 +426,28 @@
         submittedAt: sol.submittedAt || '',
         photo:       savedPhoto     || '',
       };
+
+      // Sobreescribir con datos guardados en Supabase
+      const sb = getSupabase();
+      if (sb && user.userId) {
+        try {
+          const { data } = await sb
+            .from('profiles')
+            .select('nombre,apellidos,telefono,pais,ciudad,cp,direccion,avatar_url')
+            .eq('id', user.userId)
+            .single();
+          if (data) {
+            if (data.nombre)    perfilData.nombre    = data.nombre;
+            if (data.apellidos) perfilData.apellidos = data.apellidos;
+            if (data.telefono)  perfilData.telefono  = data.telefono;
+            if (data.pais)      perfilData.pais      = data.pais;
+            if (data.ciudad)    perfilData.ciudad    = data.ciudad;
+            if (data.cp)        perfilData.cp        = data.cp;
+            if (data.direccion) perfilData.direccion = data.direccion;
+            if (data.avatar_url && !savedPhoto) perfilData.photo = data.avatar_url;
+          }
+        } catch(e) { /* usa datos localStorage como fallback */ }
+      }
 
       renderPerfil();
     }
@@ -530,27 +553,49 @@
       });
     }
 
-    function guardar() {
+    async function guardar() {
       EDIT_FIELDS.forEach(f => {
         const inp = document.getElementById('inp-' + f);
         if (inp) perfilData[f] = inp.value.trim();
       });
 
-      // Actualizar sesión
+      // Actualizar sesión en localStorage
       const session = JSON.parse(localStorage.getItem('kehila_user') || '{}');
       session.name = (perfilData.nombre + ' ' + perfilData.apellidos).trim();
       session.telefono = perfilData.telefono;
       localStorage.setItem('kehila_user', JSON.stringify(session));
 
+      // Guardar en Supabase
+      const sb = getSupabase();
+      if (sb && user.userId) {
+        try {
+          await sb.from('profiles').upsert({
+            id:        user.userId,
+            nombre:    perfilData.nombre,
+            apellidos: perfilData.apellidos,
+            telefono:  perfilData.telefono,
+            pais:      perfilData.pais,
+            ciudad:    perfilData.ciudad,
+            cp:        perfilData.cp,
+            direccion: perfilData.direccion,
+            name:      session.name,
+            email:     user.email
+          }, { onConflict: 'id' });
+        } catch(e) { /* fallback local ya guardado */ }
+      }
+
       cancelarEdit();
       renderPerfil();
 
-      // Toast
-      const t = document.createElement('div');
-      t.style.cssText = 'position:fixed;top:20px;right:20px;z-index:999;background:#1B2E5E;color:#fff;padding:12px 18px;border-radius:6px;font-size:.875rem;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.15);';
-      t.textContent = 'Perfil actualizado';
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 2500);
+      if (typeof showToast === 'function') {
+        showToast('Perfil actualizado', 'success');
+      } else {
+        const t = document.createElement('div');
+        t.style.cssText = 'position:fixed;top:20px;right:20px;z-index:999;background:#1B2E5E;color:#fff;padding:12px 18px;border-radius:6px;font-size:.875rem;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.15);';
+        t.textContent = 'Perfil actualizado';
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2500);
+      }
     }
 
     function handleAvatarUpload(e) {
