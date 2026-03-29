@@ -127,65 +127,139 @@
       .home-greeting { font-size: 1.6rem; }
     }
 
-    /* ─── 2. Zmanim strip ─── */
-    .zmanim-strip {
-      margin-bottom: 32px;
+    /* ─── 2. Banner carousel ─── */
+    .banner-carousel {
+      position: relative;
+      height: 110px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 20px;
+      background: #1a1a2e;
     }
 
-    .zmanim-scroll {
+    .banner-slides {
       display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
+      height: 100%;
+      transition: transform 0.5s ease;
     }
-    .zmanim-scroll::-webkit-scrollbar { display: none; }
 
-    .zman-chip {
+    .banner-slide {
+      flex: 0 0 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .banner-slide-placeholder {
+      width: 100%;
+      height: 100%;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 2px;
-      background: var(--color-white);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-xs);
-      padding: 6px 14px;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: border-color var(--transition-fast);
+      justify-content: center;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    .zman-chip-name {
-      font-size: 0.6875rem;
-      color: var(--color-text-muted);
-      font-weight: 500;
+    .banner-slide-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 0;
     }
 
-    .zman-chip-time {
-      font-size: 0.875rem;
+    .banner-slide-text {
+      color: #fff;
+      max-width: 70%;
+    }
+
+    .banner-slide-title {
+      font-size: 0.9rem;
       font-weight: 700;
-      color: var(--color-text);
+      line-height: 1.2;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
     }
 
-    .zman-chip.next {
-      background: var(--color-primary);
-      border-color: var(--color-primary);
+    .banner-slide-subtitle {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 2px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
 
-    .zman-chip.next .zman-chip-name {
-      color: rgba(255,255,255,0.6);
+    .banner-dots {
+      position: absolute;
+      bottom: 7px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 5px;
     }
 
-    .zman-chip.next .zman-chip-time {
-      color: var(--color-gold);
+    .banner-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.45);
+      cursor: pointer;
+      transition: background 0.25s, width 0.25s;
     }
 
-    .zman-chip.shabbat {
-      background: var(--color-gold-light);
-      border-color: var(--color-gold);
+    .banner-dot.active {
+      background: #fff;
+      width: 16px;
+      border-radius: 3px;
     }
-    .zman-chip.shabbat .zman-chip-name { color: var(--color-gold-dark); }
-    .zman-chip.shabbat .zman-chip-time { color: var(--color-gold-dark); }
+
+    .banner-btn-prev,
+    .banner-btn-next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.18);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+      backdrop-filter: blur(4px);
+      transition: background 0.2s;
+    }
+    .banner-btn-prev:hover, .banner-btn-next:hover { background: rgba(255,255,255,0.32); }
+    .banner-btn-prev { left: 8px; }
+    .banner-btn-next { right: 8px; }
+
+    .banner-admin-btn {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.7rem;
+      color: #fff;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+    .banner-admin-btn:hover { background: rgba(255,255,255,0.28); }
 
     /* ─── Sección genérica ─── */
     .home-section {
@@ -662,39 +736,21 @@
       </div>
 
       <!-- ══════════════════════════════════
-           2. ZMANIM STRIP
+           2. BANNER CAROUSEL
       ══════════════════════════════════ -->
-      <div class="zmanim-strip home-section">
-        <div class="zmanim-scroll">
-          <div class="zman-chip">
-            <span class="zman-chip-name">Alot haShajar</span>
-            <span class="zman-chip-time">06:15</span>
-          </div>
-          <div class="zman-chip">
-            <span class="zman-chip-name">Neitz haJamá</span>
-            <span class="zman-chip-time">07:02</span>
-          </div>
-          <div class="zman-chip">
-            <span class="zman-chip-name">Sof K. Shemá</span>
-            <span class="zman-chip-time">09:45</span>
-          </div>
-          <div class="zman-chip">
-            <span class="zman-chip-name">Jatzot</span>
-            <span class="zman-chip-time">13:12</span>
-          </div>
-          <div class="zman-chip next">
-            <span class="zman-chip-name">▶ Minjá</span>
-            <span class="zman-chip-time">19:30</span>
-          </div>
-          <div class="zman-chip">
-            <span class="zman-chip-name">Plag haMinJá</span>
-            <span class="zman-chip-time">18:20</span>
-          </div>
-          <div class="zman-chip shabbat">
-            <span class="zman-chip-name"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/></svg> Entrada Shabat</span>
-            <span class="zman-chip-time">19:42</span>
-          </div>
-        </div>
+      <div class="banner-carousel" id="banner-carousel">
+        <div class="banner-slides" id="banner-slides-track"></div>
+        <div class="banner-dots" id="banner-dots"></div>
+        <button class="banner-btn-prev" id="banner-prev" aria-label="Anterior">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+        </button>
+        <button class="banner-btn-next" id="banner-next" aria-label="Siguiente">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+        </button>
+        <button class="banner-admin-btn" id="banner-admin-btn">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+          Gestionar
+        </button>
       </div>
 
       <!-- ══════════════════════════════════
@@ -1031,6 +1087,166 @@
     /* ─── Init renders ─── */
     renderEventos();
     renderNoticias();
+
+    /* ══════════════════════════════════════
+       BANNER CAROUSEL
+    ══════════════════════════════════════ */
+    const BANNER_FALLBACK = [
+      { imagen_url: '', titulo: 'Bienvenidos a Kehilá', subtitulo: 'Tu comunidad judía en España', color: 'linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%)' },
+      { imagen_url: '', titulo: 'Próximos eventos', subtitulo: 'Shabat · Clases · Celebraciones', color: 'linear-gradient(135deg,#2d4a22 0%,#3a6b2e 100%)' },
+      { imagen_url: '', titulo: 'Tienda Kosher', subtitulo: 'Vinos, productos y más', color: 'linear-gradient(135deg,#5c2d0a 0%,#8b4513 100%)' }
+    ];
+
+    let bannerSlides = [];
+    let bannerCurrent = 0;
+    let bannerTimer = null;
+
+    function buildBannerSlide(s) {
+      const slide = document.createElement('div');
+      slide.className = 'banner-slide';
+      if (s.imagen_url) {
+        slide.innerHTML = `
+          <img src="${s.imagen_url}" alt="${s.titulo || ''}" loading="lazy" onerror="this.style.display='none'">
+          <div class="banner-slide-overlay">
+            <div class="banner-slide-text">
+              ${s.titulo ? `<div class="banner-slide-title">${s.titulo}</div>` : ''}
+              ${s.subtitulo ? `<div class="banner-slide-subtitle">${s.subtitulo}</div>` : ''}
+            </div>
+          </div>`;
+      } else {
+        slide.innerHTML = `
+          <div class="banner-slide-placeholder" style="background:${s.color || '#1a1a2e'}">
+            <div class="banner-slide-overlay" style="background:none;padding:0 20px;">
+              <div class="banner-slide-text">
+                ${s.titulo ? `<div class="banner-slide-title">${s.titulo}</div>` : ''}
+                ${s.subtitulo ? `<div class="banner-slide-subtitle">${s.subtitulo}</div>` : ''}
+              </div>
+            </div>
+          </div>`;
+      }
+      return slide;
+    }
+
+    function bannerGoTo(idx) {
+      bannerCurrent = (idx + bannerSlides.length) % bannerSlides.length;
+      document.getElementById('banner-slides-track').style.transform = `translateX(-${bannerCurrent * 100}%)`;
+      document.querySelectorAll('.banner-dot').forEach((d, i) => d.classList.toggle('active', i === bannerCurrent));
+    }
+
+    function startBannerTimer() {
+      clearInterval(bannerTimer);
+      if (bannerSlides.length > 1) bannerTimer = setInterval(() => bannerGoTo(bannerCurrent + 1), 10000);
+    }
+
+    function renderBanner(slides) {
+      bannerSlides = slides;
+      const track = document.getElementById('banner-slides-track');
+      const dots = document.getElementById('banner-dots');
+      track.innerHTML = '';
+      dots.innerHTML = '';
+
+      if (!slides.length) return;
+
+      slides.forEach((s, i) => {
+        track.appendChild(buildBannerSlide(s));
+        const dot = document.createElement('button');
+        dot.className = 'banner-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+        dot.addEventListener('click', () => { bannerGoTo(i); startBannerTimer(); });
+        dots.appendChild(dot);
+      });
+
+      document.getElementById('banner-prev').addEventListener('click', () => { bannerGoTo(bannerCurrent - 1); startBannerTimer(); });
+      document.getElementById('banner-next').addEventListener('click', () => { bannerGoTo(bannerCurrent + 1); startBannerTimer(); });
+
+      bannerGoTo(0);
+      startBannerTimer();
+    }
+
+    async function loadBanner() {
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (user && user.role === 'admin') {
+        const btn = document.getElementById('banner-admin-btn');
+        if (btn) btn.style.display = 'flex';
+      }
+      if (!sb) { renderBanner(BANNER_FALLBACK); return; }
+      try {
+        const { data, error } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
+        renderBanner(data?.length ? data : BANNER_FALLBACK);
+      } catch(e) { renderBanner(BANNER_FALLBACK); }
+    }
+
+    /* ── Admin: gestionar slides ── */
+    function abrirBannerAdmin() {
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (!sb) { showToast('Sin conexión con Supabase', 'error'); return; }
+
+      async function refreshList(container) {
+        const { data } = await sb.from('banner_slides').select('*').order('orden');
+        container.innerHTML = (data || []).map(s => `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #eee;" data-id="${s.id}">
+            ${s.imagen_url ? `<img src="${s.imagen_url}" style="width:60px;height:36px;object-fit:cover;border-radius:6px;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:60px;height:36px;border-radius:6px;background:#eee;flex-shrink:0;"></div>`}
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.titulo || '(sin título)'}</div>
+              <div style="font-size:0.75rem;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.imagen_url || 'Sin imagen'}</div>
+            </div>
+            <button onclick="deleteBannerSlide('${s.id}')" style="background:none;border:none;cursor:pointer;color:#e55;font-size:1rem;flex-shrink:0;" title="Eliminar">🗑</button>
+          </div>`).join('') || '<p style="color:#aaa;font-size:0.85rem;text-align:center;padding:16px 0;">No hay slides todavía</p>';
+      }
+
+      const overlay = document.createElement('div');
+      overlay.id = 'banner-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px;';
+      overlay.innerHTML = `
+        <div style="background:#fff;border-radius:16px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid #eee;">
+            <h3 style="font-size:1.05rem;font-weight:700;">🖼️ Gestionar banner</h3>
+            <button onclick="document.getElementById('banner-overlay').remove()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#888;">✕</button>
+          </div>
+          <div style="padding:20px 24px;">
+            <div id="banner-list-container" style="margin-bottom:20px;"></div>
+            <div style="border-top:1px solid #eee;padding-top:16px;">
+              <p style="font-size:0.85rem;font-weight:600;margin-bottom:10px;">Añadir slide</p>
+              <input id="bnew-titulo" placeholder="Título" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:8px;box-sizing:border-box;">
+              <input id="bnew-subtitulo" placeholder="Subtítulo (opcional)" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:8px;box-sizing:border-box;">
+              <input id="bnew-url" placeholder="URL de imagen (opcional)" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:12px;box-sizing:border-box;">
+              <button id="bnew-save" style="width:100%;background:var(--color-primary);color:#fff;border:none;border-radius:10px;padding:12px;font-size:0.9rem;font-weight:600;cursor:pointer;">Añadir slide</button>
+            </div>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      const listEl = overlay.querySelector('#banner-list-container');
+      refreshList(listEl);
+
+      overlay.querySelector('#bnew-save').addEventListener('click', async () => {
+        const titulo = overlay.querySelector('#bnew-titulo').value.trim();
+        const subtitulo = overlay.querySelector('#bnew-subtitulo').value.trim();
+        const imagen_url = overlay.querySelector('#bnew-url').value.trim();
+        if (!titulo) { showToast('El título es obligatorio', 'error'); return; }
+        const { error } = await sb.from('banner_slides').insert({ titulo, subtitulo, imagen_url, activo: true, orden: 99 });
+        if (error) { showToast('Error al guardar', 'error'); return; }
+        overlay.querySelector('#bnew-titulo').value = '';
+        overlay.querySelector('#bnew-subtitulo').value = '';
+        overlay.querySelector('#bnew-url').value = '';
+        showToast('Slide añadido', 'success');
+        refreshList(listEl);
+        loadBanner();
+      });
+    }
+
+    async function deleteBannerSlide(id) {
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (!sb) return;
+      await sb.from('banner_slides').delete().eq('id', id);
+      showToast('Slide eliminado', 'success');
+      document.querySelector(`[data-id="${id}"]`)?.remove();
+      loadBanner();
+    }
+
+    document.getElementById('banner-admin-btn').addEventListener('click', abrirBannerAdmin);
+
+    loadBanner();
 
     /* ─── Cerrar dropdowns al click fuera ─── */
     document.addEventListener('click', function (e) {
