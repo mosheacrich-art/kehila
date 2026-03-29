@@ -713,6 +713,115 @@
   .upload-placeholder { display:flex; flex-direction:column; align-items:center; gap:6px; padding:20px; color:#a0aec0; }
   .upload-hint { font-size:.73rem; }
   .biz-logo-img { width:52px; height:52px; border-radius:10px; object-fit:cover; flex-shrink:0; }
+
+  /* ── Newspaper Logo Section ── */
+  @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&display=swap');
+  .biz-np-section {
+    background: var(--color-white);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .biz-np-masthead {
+    background: #1a202c;
+    padding: 14px 22px 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    border-bottom: 3px solid #c9a84c;
+  }
+  .biz-np-num {
+    font-family: 'Frank Ruhl Libre', Georgia, serif;
+    font-size: .7rem;
+    font-weight: 700;
+    color: #c9a84c;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .biz-np-title {
+    font-family: 'Frank Ruhl Libre', Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #f5f0e8;
+    letter-spacing: .02em;
+  }
+  .biz-np-body { padding: 20px 22px; }
+  .biz-np-rule {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 16px 0;
+  }
+  .biz-np-label {
+    font-family: Georgia, serif;
+    font-size: .78rem;
+    font-weight: 700;
+    color: #1a202c;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .biz-np-label span { color: #a0aec0; font-weight: 400; text-transform: none; letter-spacing: 0; }
+  .biz-np-upload-zone {
+    border: 2px solid #1a202c;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    overflow: hidden;
+    background: #fafaf8;
+  }
+  .biz-np-upload-zone:hover { background: #f0ede4; }
+  .biz-np-upload-ph {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 22px 16px;
+    color: #718096;
+  }
+  .biz-np-upload-ph svg { width: 28px; height: 28px; color: #1a202c; opacity: .4; }
+  .biz-np-upload-ph-title {
+    font-family: Georgia, serif;
+    font-size: .875rem;
+    font-weight: 700;
+    color: #1a202c;
+  }
+  .biz-np-upload-ph-hint {
+    font-family: Georgia, serif;
+    font-size: .73rem;
+    color: #a0aec0;
+    font-style: italic;
+  }
+  .biz-np-palette-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .biz-np-palette-label {
+    font-family: Georgia, serif;
+    font-size: .75rem;
+    color: #718096;
+    font-style: italic;
+    white-space: nowrap;
+  }
+  .biz-np-preview-frame {
+    border: 2px solid #1a202c;
+    border-radius: 2px;
+    padding: 16px;
+    background: #fafaf8;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .biz-np-preview-hint {
+    font-family: Georgia, serif;
+    font-size: .8rem;
+    color: #718096;
+    font-style: italic;
+    line-height: 1.55;
+  }
   </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
@@ -900,44 +1009,57 @@
             </div>
 
             <!-- Secci&#243;n 5: Logo -->
-            <div class="form-section">
-              <div class="form-section-title">Logo del negocio</div>
-              <div class="form-group">
-                <label class="form-label">Subir logo <span style="color:#a0aec0;font-weight:400;">(opcional)</span></label>
-                <div class="upload-area" id="upload-area-biz">
+            <div class="biz-np-section">
+              <div class="biz-np-masthead">
+                <span class="biz-np-num">V.</span>
+                <span class="biz-np-title">Identidad Visual</span>
+              </div>
+              <div class="biz-np-body">
+
+                <!-- Upload -->
+                <label class="biz-np-label">Logotipo <span>(opcional &mdash; JPG o PNG cuadrado)</span></label>
+                <div class="biz-np-upload-zone" id="upload-area-biz">
                   <input type="file" id="file-biz" accept="image/*" hidden>
-                  <div class="upload-placeholder" id="upload-ph-biz" style="display:flex;">
-                    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
-                    <span style="font-size:.85rem;font-weight:500;color:#718096;">Subir logo del negocio</span>
-                    <span class="upload-hint">JPG, PNG · cuadrado recomendado</span>
+                  <div class="biz-np-upload-ph" id="upload-ph-biz" style="display:flex;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+                    <span class="biz-np-upload-ph-title">Subir logotipo</span>
+                    <span class="biz-np-upload-ph-hint">Haz clic o arrastra una imagen</span>
                   </div>
                   <div id="upload-filled-biz" style="display:none;position:relative;">
-                    <img id="upload-img-biz" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;background:#f7fafc;">
-                    <button type="button" onclick="clearBizLogo()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:22px;text-align:center;padding:0;">&times;</button>
+                    <img id="upload-img-biz" style="width:100%;max-height:200px;object-fit:contain;padding:12px;background:#fafaf8;">
+                    <button type="button" onclick="clearBizLogo()" style="position:absolute;top:8px;right:8px;background:#1a202c;color:#fff;border:none;border-radius:0;width:24px;height:24px;cursor:pointer;font-size:14px;line-height:24px;text-align:center;padding:0;">&times;</button>
                   </div>
                 </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">O elegir color de fondo</label>
-                <div class="color-picker" id="color-picker">
-                  <div class="color-circle selected" data-color-val="#1B5E20" style="background:#1B5E20"></div>
-                  <div class="color-circle" data-color-val="#1B2E5E" style="background:#1B2E5E"></div>
-                  <div class="color-circle" data-color-val="#880E4F" style="background:#880E4F"></div>
-                  <div class="color-circle" data-color-val="#E65100" style="background:#E65100"></div>
-                  <div class="color-circle" data-color-val="#4A148C" style="background:#4A148C"></div>
-                  <div class="color-circle" data-color-val="#37474F" style="background:#37474F"></div>
+
+                <hr class="biz-np-rule">
+
+                <!-- Color -->
+                <label class="biz-np-label">Color de fondo <span>(si no se sube logo)</span></label>
+                <div class="biz-np-palette-row">
+                  <span class="biz-np-palette-label">Paleta:</span>
+                  <div class="color-picker" id="color-picker" style="margin:0;">
+                    <div class="color-circle selected" data-color-val="#1B5E20" style="background:#1B5E20"></div>
+                    <div class="color-circle" data-color-val="#1B2E5E" style="background:#1B2E5E"></div>
+                    <div class="color-circle" data-color-val="#880E4F" style="background:#880E4F"></div>
+                    <div class="color-circle" data-color-val="#E65100" style="background:#E65100"></div>
+                    <div class="color-circle" data-color-val="#4A148C" style="background:#4A148C"></div>
+                    <div class="color-circle" data-color-val="#37474F" style="background:#37474F"></div>
+                  </div>
                 </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Previsualizaci&#243;n</label>
-                <div class="logo-preview-wrap">
-                  <div class="logo-preview-box" id="logo-preview" style="background:#1B5E20">AB</div>
-                  <div class="logo-preview-text">Si subes un logo, se usar&#225; en lugar del color.<br>Si no, se muestran las iniciales del negocio.</div>
+
+                <hr class="biz-np-rule">
+
+                <!-- Preview -->
+                <label class="biz-np-label">Previsualizaci&#243;n</label>
+                <div class="biz-np-preview-frame">
+                  <div class="logo-preview-box" id="logo-preview" style="background:#1B5E20;border-radius:2px;flex-shrink:0;">AB</div>
+                  <div class="biz-np-preview-hint">Si subes un logotipo, aparecer&#225; en la ficha de tu negocio.<br>Si no, se mostrar&#225;n tus iniciales sobre el color elegido.</div>
                 </div>
+
               </div>
             </div>
 
-            <button type="submit" class="btn-publish">Publicar negocio</button>
+            <button type="submit" class="btn-publish" style="background:#1a202c;border-radius:2px;letter-spacing:.04em;font-family:'Frank Ruhl Libre',Georgia,serif;font-size:1rem;">Publicar negocio</button>
           </form>
         </div>
       </div>
