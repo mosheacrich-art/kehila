@@ -418,7 +418,6 @@
     const u = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
     if (!u || u.role !== 'admin') return;
 
-    // Inject inbox section into the DOM after .rav-inner
     const inner = document.querySelector('.rav-inner');
     if (!inner) return;
 
@@ -487,8 +486,6 @@
     loadPreguntas();
   }
 
-  /* ─── Toggle switches (reutiliza CSS de components.css) ─── */
-  /* Ya están en components.css */
 
   /* ─── Categoría seleccionada ─── */
   let selectedCat = '';
@@ -516,40 +513,27 @@
     if (text.length < 20) { document.getElementById('err-textarea').style.display = ''; valid = false; }
     if (!valid) return;
 
-    const btn = document.querySelector('.rav-form-section .btn-primary');
-    if (btn) { btn.textContent = 'Enviando...'; btn.disabled = true; }
+    const user = getCurrentUser();
+    const publica = document.getElementById('toggle-publico').checked;
+    const ref = '#' + String(Math.floor(1000 + Math.random() * 9000));
 
-    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    const ref  = '#' + String(Math.floor(1000 + Math.random() * 9000));
-
-    const registro = {
-      usuario_nombre: user?.name || 'Anónimo',
-      categoria: selectedCat,
-      pregunta: text,
-      anonima: false,
-      estado: 'pendiente'
-    };
-
-    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    const sb = getSupabase();
     if (sb) {
-      const { error } = await sb.from('preguntas_rav').insert(registro);
-      if (error) {
-        console.error('preguntas_rav insert error:', error);
-        if (btn) { btn.textContent = 'Enviar pregunta'; btn.disabled = false; }
-        if (typeof showToast === 'function') {
-          showToast('Error al enviar: ' + error.message, 'error');
-        } else {
-          alert('Error al enviar la pregunta: ' + error.message);
-        }
-        return;
-      }
-    } else {
-      if (btn) { btn.textContent = 'Enviar pregunta'; btn.disabled = false; }
-      if (typeof showToast === 'function') showToast('Error: no hay conexión con el servidor', 'error');
-      return;
+      try {
+        await sb.from('preguntas_rav').insert({
+          usuario_id: user?.userId || null,
+          usuario_nombre: user?.name || 'Miembro',
+          categoria: selectedCat,
+          pregunta: text,
+          anonima: !publica,
+          publica: publica,
+          estado: 'pendiente',
+          referencia: ref
+        });
+      } catch (e) { /* fallback silencioso */ }
     }
 
-    if (btn) { btn.textContent = 'Enviar pregunta'; btn.disabled = false; }
+
     document.getElementById('confirm-ref-num').textContent = ref;
     document.getElementById('rav-form-body').style.display = 'none';
     document.getElementById('rav-confirm').style.display = 'block';
@@ -736,7 +720,71 @@
     showToast('Enlace copiado al portapapeles', 'success');
   }
 
-  filterQA();
+  /* ─── Cargar Q&A desde Supabase ─── */
+  async function loadQAFromSupabase() {
+    const sb = getSupabase();
+    if (!sb) { filterQA(); return; }
+    try {
+      const { data } = await sb
+        .from('preguntas_rav')
+        .select('*')
+        .eq('estado', 'respondida')
+        .eq('publica', true)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (data && data.length) {
+        const mapped = data.map(r => ({
+          id: r.id,
+          cat: r.categoria,
+          fecha: new Date(r.created_at).toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' }),
+          pregunta: r.pregunta,
+          respuesta: r.respuesta || '',
+          util: 0,
+          fecha_resp: r.updated_at ? new Date(r.updated_at).toLocaleDateString('es-ES') : ''
+        }));
+        QA_DATA.unshift(...mapped);
+      }
+    } catch(e) { /* usa QA_DATA mock como fallback */ }
+    filterQA();
+  }
+
+  /* ─── Cargar mis preguntas desde Supabase ─── */
+  async function loadMisPreguntas() {
+    const sb = getSupabase();
+    const user = getCurrentUser();
+    if (!sb || !user) return;
+    try {
+      const { data } = await sb
+        .from('preguntas_rav')
+        .select('*')
+        .eq('usuario_id', user.userId)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (!data || !data.length) return;
+      const statusLabel = { pendiente: 'Pendiente de respuesta', respondida: 'Respondida', respondida_publica: 'Respondida — pública' };
+      const badgeClass = { pendiente: 'badge-pending', respondida: '', respondida_publica: 'badge-active' };
+      const body = document.getElementById('mis-preg-body');
+      const badge = document.querySelector('#mis-preg-card .badge');
+      if (badge) badge.textContent = data.length;
+      body.innerHTML = data.map(p => {
+        const catClass = (p.categoria || 'otro').toLowerCase().replace(/[áéíóúñ]/g, c => ({'á':'a','é':'e','í':'i','ó':'o','ú':'u','ñ':'n'}[c]));
+        const estado = p.publica && p.estado === 'respondida' ? 'respondida_publica' : (p.estado || 'pendiente');
+        const fecha = new Date(p.created_at).toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' });
+        return `<div class="mis-preg-row">
+          <span class="mis-preg-ref">${p.referencia || ('#' + p.id?.slice(0,6))}</span>
+          <div class="mis-preg-info">
+            <div class="mis-preg-cat"><span class="qbadge qbadge-${catClass}">${p.categoria}</span></div>
+            <div class="mis-preg-fecha">Enviada el ${fecha}</div>
+          </div>
+          <span class="badge ${badgeClass[estado] || ''}" style="font-size:.7rem;">${statusLabel[estado] || estado}</span>
+          ${p.respuesta ? `<button class="btn btn-sm btn-secondary" onclick="showToast('${p.respuesta.slice(0,80).replace(/'/g,'&apos;')}…','info',6000)">Ver respuesta</button>` : ''}
+        </div>`;
+      }).join('');
+    } catch(e) { /* mantiene HTML mock */ }
+  }
+
+  loadQAFromSupabase();
+  loadMisPreguntas();
 </script>
   <script>
     if ("serviceWorker" in navigator) {

@@ -461,20 +461,44 @@
     openModal('modal-inscripcion');
   }
 
-  document.getElementById('btn-confirm-inscripcion').addEventListener('click', () => {
-    inscrito.add(pendingEv);
-    const ev = MOCK_EVENTOS.find(e => e.id === pendingEv);
+  document.getElementById('btn-confirm-inscripcion').addEventListener('click', async () => {
+    const evId = pendingEv;
+    inscrito.add(evId);
+    const ev = MOCK_EVENTOS.find(e => e.id === evId);
     closeModal('modal-inscripcion');
     renderLista();
     showToast(`¡Inscripción confirmada en "${ev.titulo}"!`, 'success');
     pendingEv = null;
+
+    const sb = getSupabase();
+    const user = getCurrentUser();
+    if (sb && user) {
+      try {
+        await sb.from('inscripciones').insert({
+          usuario_id: user.userId,
+          evento_id: String(evId),
+          evento_titulo: ev.titulo
+        });
+      } catch(e) { /* fallback silencioso */ }
+    }
   });
 
-  function cancelarInscripcion(id) {
+  async function cancelarInscripcion(id) {
     inscrito.delete(id);
     const ev = MOCK_EVENTOS.find(e => e.id === id);
     renderLista();
     showToast(`Inscripción cancelada en "${ev.titulo}".`, 'warning');
+
+    const sb = getSupabase();
+    const user = getCurrentUser();
+    if (sb && user) {
+      try {
+        await sb.from('inscripciones')
+          .delete()
+          .eq('usuario_id', user.userId)
+          .eq('evento_id', String(id));
+      } catch(e) { /* fallback silencioso */ }
+    }
   }
 
   function openEspera(id) { pendingEv = id; openModal('modal-espera'); }
@@ -570,13 +594,18 @@
   document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target===o) closeModal(o.id); }));
   document.addEventListener('keydown', e => { if (e.key==='Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id)); });
 
-  /* ─── Init: cargar eventos desde Supabase ─── */
+  /* ─── Init: cargar eventos e inscripciones desde Supabase ─── */
   async function loadEventos() {
     const sb = getSupabase();
+    const user = getCurrentUser();
     if (sb) {
       try {
-        const { data } = await sb.from('eventos').select('*').order('fecha', { ascending: true });
-        if (data?.length) data.forEach(ev => MOCK_EVENTOS.unshift(ev));
+        const [evRes, insRes] = await Promise.all([
+          sb.from('eventos').select('*').order('fecha', { ascending: true }),
+          user ? sb.from('inscripciones').select('evento_id').eq('usuario_id', user.userId) : Promise.resolve({ data: [] })
+        ]);
+        if (evRes.data?.length) evRes.data.forEach(ev => MOCK_EVENTOS.unshift(ev));
+        if (insRes.data?.length) insRes.data.forEach(r => inscrito.add(r.evento_id));
       } catch(e) {}
     }
     renderLista();

@@ -946,6 +946,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/data.js"></script>
@@ -1094,7 +1095,30 @@
   }
 
   try {
-    filterAndRender();
+    /* Cargar negocios de Supabase y mezclar con MOCK */
+    (async function () {
+      var sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (sb) {
+        try {
+          var res = await sb.from('negocios').select('*').order('created_at', { ascending: false }).limit(100);
+          if (res.data && res.data.length) {
+            res.data.forEach(function (n) {
+              if (typeof MOCK_BUSINESSES !== 'undefined') {
+                MOCK_BUSINESSES.unshift({
+                  id: n.id, nombre: n.nombre, categoria: n.categoria,
+                  descripcion: n.descripcion || '', descripcionCorta: (n.descripcion || '').slice(0, 80),
+                  ciudad: n.ciudad || 'España', direccion: n.direccion || '',
+                  telefono: n.telefono || '', email: n.email || '', web: n.web || '',
+                  kosher: n.kosher || false, cierraShabat: n.cierra_shabat || false,
+                  verificado: n.verificado || false, color: '#1B2E5E', horario: {}
+                });
+              }
+            });
+          }
+        } catch (err) { /* usa mock */ }
+      }
+      filterAndRender();
+    })();
     searchEl.addEventListener('input',   function () { try { filterAndRender(); } catch (e) { console.error(e); } });
     filterCat.addEventListener('change', function () { try { filterAndRender(); } catch (e) { console.error(e); } });
     filterCity.addEventListener('change',function () { try { filterAndRender(); } catch (e) { console.error(e); } });
@@ -1397,6 +1421,25 @@
         });
 
         if (typeof MOCK_BUSINESSES !== 'undefined') MOCK_BUSINESSES.unshift(newBiz);
+
+        /* Guardar en Supabase */
+        var sb = typeof getSupabase === 'function' ? getSupabase() : null;
+        if (sb) {
+          sb.from('negocios').insert({
+            nombre: newBiz.nombre,
+            categoria: newBiz.categoria,
+            descripcion: newBiz.descripcion,
+            ciudad: newBiz.ciudad,
+            direccion: newBiz.direccion,
+            telefono: newBiz.telefono,
+            email: newBiz.email,
+            web: newBiz.web,
+            kosher: document.getElementById('f-kosher') ? document.getElementById('f-kosher').checked : false,
+            cierra_shabat: document.getElementById('f-shabat') ? document.getElementById('f-shabat').checked : false,
+            verificado: false,
+            usuario_id: (typeof getCurrentUser === 'function' && getCurrentUser()) ? getCurrentUser().userId : null
+          }).then(function () {}).catch(function () {});
+        }
 
         /* Switch to tab 1 and re-render */
         activateTab('tab-directorio');

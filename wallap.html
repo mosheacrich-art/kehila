@@ -315,6 +315,7 @@
 </div>
 
 <div class="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/data.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
@@ -454,7 +455,7 @@
     });
   }
 
-  function publicarAnuncio() {
+  async function publicarAnuncio() {
     const titulo = document.getElementById('pub-titulo').value.trim();
     if (!titulo) { document.getElementById('pub-titulo-err').style.display = ''; return; }
     document.getElementById('pub-titulo-err').style.display = 'none';
@@ -470,9 +471,27 @@
       vendedor: user?.name || 'Miembro',
       fecha: new Date().toISOString().split('T')[0],
       ubicacion: document.getElementById('pub-loc').value || 'España',
-      emoji: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>',
       estado: 'disponible'
     };
+
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { data, error } = await sb.from('wallap_anuncios').insert({
+          usuario_id: user?.userId || null,
+          usuario_nombre: user?.name || 'Miembro',
+          tipo: newItem.tipo,
+          titulo: newItem.titulo,
+          descripcion: newItem.descripcion,
+          precio: newItem.precio,
+          categoria: newItem.categoria,
+          ubicacion: newItem.ubicacion,
+          activo: true
+        }).select().single();
+        if (data) newItem.id = data.id;
+      } catch(e) { /* fallback local */ }
+    }
+
     wallapItems.unshift(newItem);
     closeModal('modal-publicar');
     document.getElementById('form-publicar').reset();
@@ -481,12 +500,41 @@
     showToast(`Anuncio "${titulo}" publicado correctamente.`, 'success');
   }
 
+  async function loadWallapFromSupabase() {
+    const sb = getSupabase();
+    if (!sb) return;
+    try {
+      const { data } = await sb
+        .from('wallap_anuncios')
+        .select('*')
+        .eq('activo', true)
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (data && data.length) {
+        const mapped = data.map(r => ({
+          id: r.id,
+          titulo: r.titulo,
+          tipo: r.tipo,
+          precio: r.precio || 0,
+          categoria: r.categoria,
+          descripcion: r.descripcion || '',
+          vendedor: r.usuario_nombre || 'Miembro',
+          fecha: r.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+          ubicacion: r.ubicacion || 'España',
+          estado: 'disponible'
+        }));
+        wallapItems = [...mapped, ...wallapItems];
+      }
+    } catch(e) { /* usa mock */ }
+    filterWallap();
+  }
+
   function openModal(id)  { document.getElementById(id).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
   function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.body.style.overflow = ''; }
   document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target===o) closeModal(o.id); }));
   document.addEventListener('keydown', e => { if (e.key==='Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id)); });
 
-  filterWallap();
+  loadWallapFromSupabase();
 </script>
   <script>
     if ("serviceWorker" in navigator) {

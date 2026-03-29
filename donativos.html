@@ -1379,7 +1379,22 @@
       return;
     }
 
-    // Pago validado por Stripe — flujo demo (sin backend)
+    // Pago validado por Stripe — guardar registro en Supabase
+    const user = getCurrentUser();
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        await sb.from('donaciones').insert({
+          usuario_id: user?.userId || null,
+          usuario_nombre: user?.name || 'Anónimo',
+          campana_nombre: donState.campana,
+          campana_id: donState.campanaId !== 'general' ? donState.campanaId : null,
+          cantidad: donState.amount,
+          recurrente: donState.recurrente,
+          dedicatoria: donState.dedicat || null
+        });
+      } catch(e) { /* fallback silencioso */ }
+    }
     closeDonModal();
     showGraciasOverlay();
 
