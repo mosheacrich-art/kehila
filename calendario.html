@@ -179,6 +179,12 @@
     .cal-add-form-btns button { flex:1; padding:7px; border-radius:6px; font-size:.8125rem; cursor:pointer; border:1.5px solid var(--color-border); }
     .cal-add-form-btns .btn-save { background:var(--color-primary); color:#fff; border-color:var(--color-primary); font-weight:600; }
     .dot-custom { background: #F59E0B; }
+    .dot-inscripcion { background: #0EA5E9; }
+    .cal-ev-inscripcion { background:#EFF6FF; border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:8px; border-left:3px solid #0EA5E9; }
+    .cal-ev-inscripcion .cal-ev-item-title { font-size:.875rem; font-weight:600; color:var(--color-text); }
+    .cal-ev-inscripcion .cal-ev-item-hora  { font-size:.75rem; color:#0369A1; font-weight:500; margin-top:2px; }
+    .cal-ev-inscripcion .cal-ev-item-desc  { font-size:.75rem; color:var(--color-text-muted); margin-top:3px; }
+    .cal-ev-inscripcion-badge { display:inline-flex; align-items:center; gap:4px; font-size:.68rem; font-weight:600; color:#0369A1; background:#DBEAFE; padding:2px 8px; border-radius:999px; margin-top:5px; }
   </style>
 </head>
 <body>
@@ -519,6 +525,52 @@ async function ensureData(year) {
   loadedCityKey = cityKey;
 }
 
+async function loadMisInscripciones() {
+  const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+  const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (!sb || !user) return;
+  try {
+    // Cargar inscripciones del usuario
+    const { data: ins } = await sb
+      .from('inscripciones')
+      .select('evento_id, evento_titulo')
+      .eq('usuario_id', user.userId);
+    if (!ins || !ins.length) return;
+
+    // Buscar fechas: primero en Supabase, luego en MOCK_EVENTOS
+    const ids = ins.map(i => i.evento_id);
+    let eventosConFecha = [];
+
+    const { data: sbEvs } = await sb.from('eventos').select('id, titulo, fecha, hora, lugar').in('id', ids);
+    if (sbEvs?.length) eventosConFecha = sbEvs;
+
+    // Complementar con MOCK_EVENTOS para los que no estén en Supabase
+    if (typeof MOCK_EVENTOS !== 'undefined') {
+      ins.forEach(i => {
+        if (!eventosConFecha.find(e => String(e.id) === String(i.evento_id))) {
+          const mock = MOCK_EVENTOS.find(e => String(e.id) === String(i.evento_id));
+          if (mock) eventosConFecha.push(mock);
+        }
+      });
+    }
+
+    eventosConFecha.forEach(ev => {
+      if (!ev.fecha) return;
+      const key = ev.fecha.slice(0, 10);
+      if (!customEventsMap[key]) customEventsMap[key] = [];
+      if (!customEventsMap[key].find(e => e.tipo === 'inscripcion' && e.titulo === ev.titulo)) {
+        customEventsMap[key].push({
+          id: 'ins-' + ev.id,
+          titulo: ev.titulo,
+          hora: ev.hora || null,
+          lugar: ev.lugar || null,
+          tipo: 'inscripcion'
+        });
+      }
+    });
+  } catch(e) { /* silencioso */ }
+}
+
 async function loadCustomEvents(year, month) {
   const sb = typeof getSupabase === 'function' ? getSupabase() : null;
   if (!sb) return;
@@ -665,6 +717,7 @@ function renderCal() {
           <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>Festividad</div>
           <div class="legend-item"><div class="legend-dot" style="background:#7C3AED"></div>Ayuno</div>
           <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Evento comunidad</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#0EA5E9"></div>Mis inscripciones</div>
         </div>
       </div>
       <div class="cal-side">
@@ -698,7 +751,9 @@ function dayCell(d, key, other, todayKey) {
     else if (tipo === 'purim')   dots += `<span class="cal-dot dot-purim"></span>`;
     else                         dots += `<span class="cal-dot dot-holiday"></span>`;
   }
-  if (customEventsMap[key]?.length) dots += `<span class="cal-dot dot-custom"></span>`;
+  const allEvs = customEventsMap[key] || [];
+  if (allEvs.some(e => e.tipo !== 'inscripcion')) dots += `<span class="cal-dot dot-custom"></span>`;
+  if (allEvs.some(e => e.tipo === 'inscripcion')) dots += `<span class="cal-dot dot-inscripcion"></span>`;
 
   const dotsHtml = dots ? `<div class="cal-dots">${dots}</div>` : '';
   return `<div class="${classes}" data-key="${key}" onclick="selectDate('${key}')">${d}${dotsHtml}</div>`;
@@ -809,8 +864,24 @@ function selectDate(key) {
       </div>`;
   });
 
-  // ── Eventos personalizados ──
-  const customEvs = customEventsMap[key] || [];
+  // ── Mis eventos inscritos ──
+  const inscrEvs = (customEventsMap[key] || []).filter(e => e.tipo === 'inscripcion');
+  if (inscrEvs.length) {
+    if (hasContent) html += `<hr style="border:none;border-top:1px solid var(--color-border);margin:12px 0;">`;
+    html += `<div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#0369A1;margin-bottom:8px;">Mis eventos inscritos</div>`;
+    inscrEvs.forEach(ev => {
+      html += `<div class="cal-ev-inscripcion">
+        <div class="cal-ev-item-title">${ev.titulo}</div>
+        ${ev.hora ? `<div class="cal-ev-item-hora">🕐 ${ev.hora}</div>` : ''}
+        ${ev.lugar ? `<div class="cal-ev-item-desc">📍 ${ev.lugar}</div>` : ''}
+        <span class="cal-ev-inscripcion-badge">✓ Inscrito</span>
+      </div>`;
+    });
+    hasContent = true;
+  }
+
+  // ── Eventos de la comunidad ──
+  const customEvs = (customEventsMap[key] || []).filter(e => e.tipo !== 'inscripcion');
   if (customEvs.length) {
     if (hasContent) html += `<hr style="border:none;border-top:1px solid var(--color-border);margin:12px 0;">`;
     html += `<div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted);margin-bottom:8px;">Eventos de la comunidad</div>`;
@@ -894,7 +965,10 @@ async function navMonth(delta) {
       <div class="loading-state"><div class="loading-spinner"></div><p>Cargando calendario…</p></div>`;
     try {
       await ensureData(curYear);
-      await loadCustomEvents(curYear, curMonth);
+      await Promise.all([
+        loadCustomEvents(curYear, curMonth),
+        loadMisInscripciones()
+      ]);
     } catch(e) { showError(); return; }
   }
   selectedDate = null;
@@ -923,7 +997,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     await ensureData(curYear);
-    await loadCustomEvents(curYear, curMonth);
+    await Promise.all([
+      loadCustomEvents(curYear, curMonth),
+      loadMisInscripciones()
+    ]);
     renderCal();
     updateCandlesPreview();
   } catch(e) {
