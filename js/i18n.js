@@ -26,6 +26,7 @@ const TRANSLATIONS = {
     nav_perfil:       'Mi perfil',
     nav_admin:        'Administración',
     nav_logout:       'Cerrar sesión',
+    nav_more:         'Más',
 
     // Grupos de nav
     group_principal:  'Principal',
@@ -157,6 +158,7 @@ const TRANSLATIONS = {
     nav_perfil:       'My profile',
     nav_admin:        'Administration',
     nav_logout:       'Sign out',
+    nav_more:         'More',
 
     // Nav groups
     group_principal:  'Main',

@@ -141,11 +141,10 @@ const NAV_ITEMS = [
 
 // Items de bottom nav (máximo 5)
 const BOTTOM_NAV_ITEMS = [
-  { id: 'home',       label: 'Inicio',    href: 'home.html',       icon: NAV_ITEMS[0].items[0].icon },
-  { id: 'eventos',    label: 'Eventos',   href: 'eventos.html',    icon: NAV_ITEMS[0].items[1].icon },
-  { id: 'calendario', label: 'Cal. Heb.', href: 'calendario.html', icon: NAV_ITEMS[0].items[2].icon },
-  { id: 'siddur',     label: 'Siddur',    href: 'siddur.html',     icon: NAV_ITEMS[3].items[0].icon },
-  { id: 'kosher',     label: 'Kosher',    href: 'kosher.html',     icon: NAV_ITEMS[1].items[1].icon }
+  { id: 'home',       href: 'home.html',       icon: NAV_ITEMS[0].items[0].icon },
+  { id: 'eventos',    href: 'eventos.html',    icon: NAV_ITEMS[0].items[1].icon },
+  { id: 'noticias',   href: 'noticias.html',   icon: NAV_ITEMS[0].items[3].icon },
+  { id: 'calendario', href: 'calendario.html', icon: NAV_ITEMS[0].items[2].icon },
 ];
 
 /**
@@ -276,21 +275,41 @@ function buildSidebar(activePage) {
  * @param {string} activePage - id de la página activa
  */
 function buildBottomNav(activePage) {
+  const _t = (key) => (typeof t === 'function') ? t(key) : key;
+  const NAV_KEYS = {
+    home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
+    noticias: 'nav_noticias', shiurim: 'nav_shiurim', rav: 'nav_rav',
+    wallap: 'nav_wallap', kosher: 'nav_kosher', business: 'nav_business',
+    donativos: 'nav_donativos', professionals: 'nav_professionals',
+    voluntariado: 'nav_voluntariado', siddur: 'nav_siddur', servicios: 'nav_servicios'
+  };
+
+  const moreLabel = _t('nav_more') || 'Más';
+
   let itemsHTML = '';
   BOTTOM_NAV_ITEMS.forEach(item => {
     const active = item.id === activePage ? 'active' : '';
+    const label = _t(NAV_KEYS[item.id]) || item.id;
     itemsHTML += `
       <a href="${item.href}" class="bottom-nav-item ${active}">
         ${item.icon}
-        <span>${item.label}</span>
+        <span>${label}</span>
       </a>`;
   });
 
+  // Botón "Más"
+  const moreActive = !BOTTOM_NAV_ITEMS.find(i => i.id === activePage) ? 'active' : '';
+  itemsHTML += `
+    <button class="bottom-nav-item ${moreActive}" id="bottom-more-btn" onclick="toggleMoreDrawer()">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:22px;height:22px;">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+      </svg>
+      <span>${moreLabel}</span>
+    </button>`;
+
   const bottomNavHTML = `
     <nav class="bottom-nav" id="bottom-nav">
-      <div class="bottom-nav-items">
-        ${itemsHTML}
-      </div>
+      <div class="bottom-nav-items">${itemsHTML}</div>
     </nav>`;
 
   const existing = document.getElementById('bottom-nav');
@@ -298,6 +317,125 @@ function buildBottomNav(activePage) {
     existing.outerHTML = bottomNavHTML;
   } else {
     document.body.insertAdjacentHTML('beforeend', bottomNavHTML);
+  }
+
+  buildMoreDrawer(activePage);
+}
+
+/**
+ * Construye el drawer "Más" con todas las páginas.
+ */
+function buildMoreDrawer(activePage) {
+  const _t  = (key) => (typeof t === 'function') ? t(key) : key;
+  const _lang = (typeof getLang === 'function') ? getLang() : 'es';
+  const user = getCurrentUser();
+
+  const NAV_KEYS = {
+    home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
+    noticias: 'nav_noticias', shiurim: 'nav_shiurim', rav: 'nav_rav',
+    wallap: 'nav_wallap', kosher: 'nav_kosher', business: 'nav_business',
+    donativos: 'nav_donativos', professionals: 'nav_professionals',
+    voluntariado: 'nav_voluntariado', siddur: 'nav_siddur', servicios: 'nav_servicios',
+    'citas-rabino': 'nav_citas', contacto: 'nav_contacto', tienda: 'nav_tienda'
+  };
+  const GROUP_KEYS = {
+    'Principal': 'group_principal', 'Comunidad': 'group_comunidad',
+    'Servicios': 'group_servicios', 'Tefila': 'group_tefila'
+  };
+
+  let sectionsHTML = '';
+  NAV_ITEMS.forEach(group => {
+    const groupLabel = _t(GROUP_KEYS[group.group] || group.group);
+    let rowsHTML = '';
+    group.items.forEach(item => {
+      const label = _t(NAV_KEYS[item.id] || ('nav_' + item.id)) || item.label;
+      const active = item.id === activePage ? 'style="color:var(--color-primary);font-weight:600;"' : '';
+      rowsHTML += `
+        <a href="${item.href}" class="more-drawer-item" ${active}>
+          <span class="more-drawer-icon">${item.icon}</span>
+          <span>${label}</span>
+        </a>`;
+    });
+    sectionsHTML += `
+      <div class="more-drawer-section">
+        <div class="more-drawer-group-label">${groupLabel}</div>
+        <div class="more-drawer-grid">${rowsHTML}</div>
+      </div>`;
+  });
+
+  // Admin link
+  if (user?.role === 'admin') {
+    sectionsHTML += `
+      <div class="more-drawer-section">
+        <div class="more-drawer-grid">
+          <a href="admin.html" class="more-drawer-item" ${activePage === 'admin' ? 'style="color:var(--color-primary);font-weight:600;"' : ''}>
+            <span class="more-drawer-icon"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0H3"/></svg></span>
+            <span>${_t('nav_admin')}</span>
+          </a>
+        </div>
+      </div>`;
+  }
+
+  const langLabel = _lang === 'es' ? 'EN' : 'ES';
+  const langTitle = _lang === 'es' ? 'Switch to English' : 'Cambiar a Español';
+  const closeLabel = _lang === 'es' ? 'Cerrar' : 'Close';
+
+  const drawerHTML = `
+    <div id="more-drawer-backdrop" onclick="toggleMoreDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:699;"></div>
+    <div id="more-drawer" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:700;background:#fff;border-radius:20px 20px 0 0;padding:0 0 env(safe-area-inset-bottom,0);max-height:80vh;overflow-y:auto;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.32,.72,0,1);">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;border-bottom:1px solid #e2e8f0;">
+        <span style="font-weight:700;font-size:1rem;color:#1a202c;">Kehilá</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button onclick="toggleLang();toggleMoreDrawer();" style="font-size:0.7rem;font-weight:700;color:#718096;background:#f7fafc;border:1px solid #e2e8f0;border-radius:4px;padding:4px 10px;cursor:pointer;">${langLabel}</button>
+          <button onclick="toggleMoreDrawer()" style="background:none;border:none;font-size:0.85rem;color:#718096;cursor:pointer;padding:4px 8px;">${closeLabel}</button>
+        </div>
+      </div>
+      <div style="padding:12px 16px 20px;">
+        ${sectionsHTML}
+      </div>
+      <div style="padding:0 16px 16px;">
+        <button onclick="logout()" style="width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;background:none;color:#718096;font-size:0.875rem;cursor:pointer;font-family:inherit;">
+          ${_t('nav_logout')}
+        </button>
+      </div>
+    </div>`;
+
+  // CSS del drawer
+  if (!document.getElementById('more-drawer-styles')) {
+    const style = document.createElement('style');
+    style.id = 'more-drawer-styles';
+    style.textContent = `
+      .more-drawer-section { margin-bottom: 16px; }
+      .more-drawer-group-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #a0aec0; padding: 0 4px; margin-bottom: 6px; }
+      .more-drawer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+      .more-drawer-item { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 4px; border-radius: 10px; text-decoration: none; color: #4a5568; font-size: 0.72rem; font-weight: 500; transition: background 0.15s; }
+      .more-drawer-item:active { background: #f7fafc; }
+      .more-drawer-icon { color: #1B2E5E; }
+      .more-drawer-icon svg { width: 22px; height: 22px; }
+      #more-drawer.open { transform: translateY(0) !important; }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Eliminar drawer anterior si existe
+  document.getElementById('more-drawer')?.remove();
+  document.getElementById('more-drawer-backdrop')?.remove();
+  document.body.insertAdjacentHTML('beforeend', drawerHTML);
+}
+
+function toggleMoreDrawer() {
+  const drawer   = document.getElementById('more-drawer');
+  const backdrop = document.getElementById('more-drawer-backdrop');
+  if (!drawer) return;
+  const isOpen = drawer.classList.contains('open');
+  if (isOpen) {
+    drawer.classList.remove('open');
+    backdrop.style.display = 'none';
+    setTimeout(() => { drawer.style.display = 'none'; }, 300);
+  } else {
+    drawer.style.display = 'block';
+    backdrop.style.display = 'block';
+    requestAnimationFrame(() => drawer.classList.add('open'));
   }
 }
 
