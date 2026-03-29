@@ -240,7 +240,7 @@ function initDelegation() {
   });
 }
 
-/* ── Drawer ── */
+/* ── Drawer newspaper style ── */
 
 function abrirNoticia(id) {
   try {
@@ -249,44 +249,80 @@ function abrirNoticia(id) {
     cerrarModal();
 
     const user = getCurrentUser?.() ?? null;
-    const color = catColor(n);
     const parrafos = (n.contenido ?? n.excerpt ?? '')
-      .split(/\n\n+/).filter(p => p.trim())
-      .map(p => `<p>${p.trim()}</p>`).join('');
+      .split(/\n\n+/).filter(p => p.trim());
+    const bodyHTML = parrafos.map((p, i) =>
+      `<p class="np-p${i === 0 ? ' np-dropcap' : ''}">${p.trim()}</p>`
+    ).join('');
     const adminBtn = user?.role === 'admin'
       ? `<button class="btn btn-secondary btn-sm">Editar</button>` : '';
+    const authorInitial = (n.autor?.[0] ?? 'A').toUpperCase();
+
+    if (!document.getElementById('np-drawer-styles')) {
+      const s = document.createElement('style');
+      s.id = 'np-drawer-styles';
+      s.textContent = `
+        .np-drawer { background:#f9f7f2; }
+        .np-masthead { background:#1a202c; padding:10px 22px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+        .np-cat-label { color:rgba(255,255,255,.85); font-size:9px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; }
+        .np-close-btn { background:none; border:1px solid rgba(255,255,255,.2); color:rgba(255,255,255,.7); cursor:pointer; font-size:14px; line-height:1; padding:0; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:3px; transition:all .15s; }
+        .np-close-btn:hover { background:rgba(255,255,255,.1); color:#fff; }
+        .np-img { width:100%; height:200px; object-fit:cover; display:block; }
+        .np-scroll { overflow-y:auto; flex:1; }
+        .np-content { padding:22px 28px 4px; }
+        .np-rule-double { border-top:3px solid #1a202c; border-bottom:1px solid #1a202c; padding:3px 0; margin-bottom:14px; text-align:center; }
+        .np-rule-double span { font-size:8px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:#1a202c; }
+        .np-headline { font-family:'Frank Ruhl Libre',Georgia,'Times New Roman',serif; font-size:1.85rem; font-weight:700; line-height:1.15; color:#1a202c; margin-bottom:16px; }
+        .np-byline-bar { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid #c8c3b8; border-bottom:1px solid #c8c3b8; margin-bottom:22px; }
+        .np-avatar { width:30px; height:30px; border-radius:50%; background:#1a202c; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .np-avatar span { color:#fff; font-size:11px; font-weight:700; }
+        .np-byline-name { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:#1a202c; }
+        .np-byline-date { font-size:10px; color:#718096; margin-top:2px; }
+        .np-p { font-family:Georgia,'Times New Roman',serif; font-size:.9375rem; line-height:1.78; color:#2d3748; margin-bottom:1.1em; text-align:justify; hyphens:auto; }
+        .np-dropcap::first-letter { font-family:'Frank Ruhl Libre',Georgia,serif; font-size:4em; font-weight:700; float:left; line-height:.7; margin:.06em .12em 0 0; color:#1a202c; }
+        .np-rule-end { border:none; border-top:1px solid #c8c3b8; margin:18px 0 12px; text-align:center; overflow:visible; }
+        .np-rule-end::after { content:'◆'; font-size:11px; color:#c8c3b8; background:#f9f7f2; padding:0 10px; position:relative; top:-9px; }
+        .np-footer { padding:12px 22px; border-top:2px solid #1a202c; display:flex; gap:8px; justify-content:flex-end; background:#1a202c; flex-shrink:0; }
+        .np-footer .btn { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.25); color:#fff; }
+        .np-footer .btn:hover { background:rgba(255,255,255,.2); }
+        .np-footer .btn-primary { background:#C9A84C; border-color:#C9A84C; color:#1a202c; font-weight:700; }
+        .np-footer .btn-primary:hover { background:#b8943f; }
+        @media(max-width:768px){ .np-content{padding:18px 18px 4px;} .np-headline{font-size:1.45rem;} }
+      `;
+      document.head.appendChild(s);
+    }
 
     const overlay = document.createElement('div');
     overlay.className = 'drawer-overlay';
 
     const drawer = document.createElement('div');
-    drawer.className = 'drawer';
+    drawer.className = 'drawer np-drawer';
     drawer.id = 'noticia-drawer';
     drawer.style.cssText = 'width:520px;max-width:100vw';
     drawer.innerHTML = `
-      <div style="height:3px;background:${color};flex-shrink:0"></div>
-      <div class="drawer-header" style="padding:var(--space-6) var(--space-8) var(--space-5)">
-        <div class="drawer-header-top">
-          <span class="badge" style="font-size:10px;padding:2px 8px;letter-spacing:0.06em">${catLabel(n.categoria)}</span>
-          <button class="drawer-close-btn" data-action="cerrar-modal" title="Cerrar">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
-          </button>
+      <div class="np-masthead">
+        <span class="np-cat-label">${catLabel(n.categoria).toUpperCase()}</span>
+        <button class="np-close-btn" data-action="cerrar-modal" title="Cerrar">✕</button>
+      </div>
+      ${n.imagen_url ? `<img src="${n.imagen_url}" class="np-img" alt="">` : ''}
+      <div class="np-scroll">
+        <div class="np-content">
+          <div class="np-rule-double"><span>— ${catLabel(n.categoria).toUpperCase()} —</span></div>
+          <h2 class="np-headline">${n.titulo ?? ''}</h2>
+          <div class="np-byline-bar">
+            <div class="np-avatar"><span>${authorInitial}</span></div>
+            <div>
+              <div class="np-byline-name">${n.autor ?? ''}</div>
+              <div class="np-byline-date">${formatearFecha(n.fecha)} · ${n.tiempoLectura ?? ''} lectura</div>
+            </div>
+          </div>
+          <div class="np-body">${bodyHTML}</div>
+          <hr class="np-rule-end">
         </div>
       </div>
-      <div class="drawer-body" style="padding:var(--space-6) var(--space-8) var(--space-8)">
-        <h2 style="font-family:'Frank Ruhl Libre',serif;font-size:1.55rem;font-weight:300;line-height:1.3;margin-bottom:var(--space-5);color:var(--color-text)">${n.titulo ?? ''}</h2>
-        <div class="drawer-body-meta" style="gap:var(--space-3);font-size:12px;color:var(--color-text-muted);margin-bottom:var(--space-6);padding-bottom:var(--space-6);border-bottom:1px solid var(--color-border);display:flex;flex-wrap:wrap">
-          <span>${n.autor ?? ''}</span>
-          <span>·</span>
-          <span>${formatearFecha(n.fecha)}</span>
-          <span>·</span>
-          <span>${n.tiempoLectura ?? ''} lectura</span>
-        </div>
-        <div class="drawer-body-contenido">${parrafos}</div>
-      </div>
-      <div class="drawer-footer" style="padding:var(--space-4) var(--space-8) var(--space-6)">
+      <div class="np-footer">
         <button class="btn btn-secondary btn-sm" onclick="showToast('Enlace copiado','success')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.935-2.185 2.25 2.25 0 0 0-3.935 2.185Z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.935-2.185 2.25 2.25 0 0 0-3.935 2.185Z"/></svg>
           Compartir
         </button>
         ${adminBtn}
