@@ -311,10 +311,11 @@ function updateLangToggle() {
 
 function toggleLang() {
   setLang(getLang() === 'es' ? 'en' : 'es');
-  // Rebuild sidebar if available
-  if (typeof initNav === 'function') {
-    const active = document.querySelector('.nav-item.active')?.getAttribute('href') || '';
-    initNav(active);
+  // Reconstruir solo el sidebar (no duplicar bottom nav ni hamburger)
+  if (typeof buildSidebar === 'function') {
+    const activeHref = document.querySelector('.nav-item.active')?.getAttribute('href') || '';
+    const activeId = activeHref.replace('.html', '') || 'home';
+    buildSidebar(activeId);
   }
   // Notify pages that render dynamic content via JS
   document.dispatchEvent(new Event('langchange'));
