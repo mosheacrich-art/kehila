@@ -889,6 +889,21 @@
           <span class="emoji-opt" data-emoji="🕎">🕎</span>
         </div>
       </div>
+      <div class="form-field">
+        <label class="form-label">Foto del objeto <span style="color:#a0aec0;font-weight:400;">(opcional)</span></label>
+        <div id="obj-upload-area" style="border:2px dashed #e2e8f0;border-radius:10px;cursor:pointer;overflow:hidden;transition:border-color .15s;" onclick="document.getElementById('obj-img-file').click()">
+          <div id="obj-img-ph" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px;color:#a0aec0;">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:24px;height:24px;"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+            <span style="font-size:.82rem;font-weight:500;color:#718096;">Añadir foto</span>
+            <span style="font-size:.72rem;">JPG o PNG</span>
+          </div>
+          <div id="obj-img-filled" style="display:none;position:relative;">
+            <img id="obj-img-preview" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;">
+            <button type="button" onclick="event.stopPropagation();clearObjImg()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:22px;text-align:center;padding:0;">&times;</button>
+          </div>
+        </div>
+        <input type="file" id="obj-img-file" accept="image/*" style="display:none;">
+      </div>
       <div class="toggle-wrap">
         <label class="toggle">
           <input type="checkbox" id="obj-anonimo">
@@ -1217,6 +1232,25 @@
   /* Ofrecer objeto */
   var selEmoji = '📦';
   try {
+    /* Image upload for object */
+    document.getElementById('obj-img-file').addEventListener('change', function() {
+      var file = this.files[0]; if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('obj-img-preview').src = e.target.result;
+        document.getElementById('obj-img-ph').style.display = 'none';
+        document.getElementById('obj-img-filled').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+  } catch (e) { console.error(e); }
+  window.clearObjImg = function() {
+    document.getElementById('obj-img-file').value = '';
+    document.getElementById('obj-img-preview').src = '';
+    document.getElementById('obj-img-ph').style.display = 'flex';
+    document.getElementById('obj-img-filled').style.display = 'none';
+  };
+  try {
     document.getElementById('btn-ofrecer-objeto').addEventListener('click', function () {
       try { openModal('modal-ofrecer-obj'); } catch (err) { console.error(err); }
     });
@@ -1243,9 +1277,11 @@
         var user = getCurrentUser();
         saveSolicitud('tenyad_objeto', { nombre: nombre, descripcion: desc, categoria: cat, condicion: cond, anonimo: anonimo });
         var owner = anonimo ? 'An&oacute;nimo' : (user ? user.name : 'T&uacute;');
+        var objImgSrc = document.getElementById('obj-img-preview').src;
+        var hasImg = objImgSrc && objImgSrc.startsWith('data:');
         var newCard = document.createElement('div');
         newCard.className = 'object-card fade-in';
-        newCard.innerHTML = '<div class="object-emoji">' + selEmoji + '</div>'
+        newCard.innerHTML = (hasImg ? '<img src="' + objImgSrc + '" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;">' : '<div class="object-emoji">' + selEmoji + '</div>')
           + '<div class="object-name">' + nombre + '</div>'
           + '<div class="object-desc">' + desc + '</div>'
           + condBadge(cond)
@@ -1253,6 +1289,7 @@
           + '<div class="object-avail" style="display:flex;align-items:center;gap:4px"><span class="avail-dot"></span><span>Disponible</span></div>'
           + '<button class="btn-solicit" data-obj-id="new-' + Date.now() + '" data-obj-name="' + nombre.replace(/"/g,'&quot;') + '">Solicitar pr&eacute;stamo</button>';
         document.getElementById('tenyad-grid').insertAdjacentElement('afterbegin', newCard);
+        clearObjImg();
         closeModal('modal-ofrecer-obj');
         document.getElementById('obj-nombre').value = '';
         document.getElementById('obj-desc').value = '';

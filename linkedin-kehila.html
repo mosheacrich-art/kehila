@@ -239,6 +239,21 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
+          <label class="form-label">Foto de perfil <span style="color:#a0aec0;font-weight:400;">(opcional)</span></label>
+          <div id="prof-upload-area" style="border:2px dashed #e2e8f0;border-radius:10px;cursor:pointer;overflow:hidden;transition:border-color .15s;" onclick="document.getElementById('prof-img-file').click()">
+            <div id="prof-img-ph" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px;color:#a0aec0;">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+              <span style="font-size:.85rem;font-weight:500;color:#718096;">Subir foto de perfil</span>
+              <span style="font-size:.73rem;">JPG o PNG · cuadrado recomendado</span>
+            </div>
+            <div id="prof-img-filled" style="display:none;position:relative;">
+              <img id="prof-img-preview" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;">
+              <button type="button" onclick="event.stopPropagation();clearProfImg()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:22px;text-align:center;padding:0;">&times;</button>
+            </div>
+          </div>
+          <input type="file" id="prof-img-file" accept="image/*" style="display:none;">
+        </div>
+        <div class="form-group">
           <label class="form-label">Categoría principal</label>
           <select class="form-select">
             <option value="">Selecciona...</option>
@@ -308,6 +323,28 @@
   <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
   <script>
+    /* ── Prof photo upload ── */
+    document.getElementById('prof-img-file').addEventListener('change', function() {
+      var file = this.files[0]; if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('prof-img-preview').src = e.target.result;
+        document.getElementById('prof-img-ph').style.display = 'none';
+        document.getElementById('prof-img-filled').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+    function clearProfImg() {
+      document.getElementById('prof-img-file').value = '';
+      document.getElementById('prof-img-preview').src = '';
+      document.getElementById('prof-img-ph').style.display = 'flex';
+      document.getElementById('prof-img-filled').style.display = 'none';
+    }
+    function getProfImg() {
+      var img = document.getElementById('prof-img-preview');
+      return (img && img.src && img.src.startsWith('data:')) ? img.src : null;
+    }
+
     const PROFESSIONALS = [
       { id:'p1', nombre:'Rabino Moshé Katz', especialidad:'Profesor Bar Mitzvá', ciudad:'Madrid', modalidad:'Presencial', experiencia:15, idiomas:['ES','HE'], rating:4.9, valoraciones:47, precio:'Desde €60/h', bio:'Especialista en preparación de Bar y Bat Mitzvá con más de 15 años de experiencia. Método personalizado adaptado a cada alumno y su familia.', color:'0', formacion:'Semicha del Beit Din de Madrid. Licenciado en Ciencias de la Educación. Formación pedagógica avanzada.' },
       { id:'p2', nombre:'Dvora Mizrahi', especialidad:'Profesora Hebreo', ciudad:'Barcelona', modalidad:'Online', experiencia:8, idiomas:['ES','EN','HE'], rating:4.8, valoraciones:32, precio:'Desde €45/h', bio:'Profesora nativa de hebreo moderno y bíblico. Clases para todos los niveles, desde principiantes hasta avanzados. Método comunicativo y dinámico.', color:'1', formacion:'Licenciada en Filología Hebrea por la Universidad Hebrea de Jerusalén. Certificación de enseñanza de hebreo como segunda lengua.' },
@@ -360,7 +397,7 @@
 
       grid.innerHTML = filtered.map(p => `
         <div class="prof-card">
-          <div class="prof-avatar" data-color="${p.color}">${p.nombre.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+          ${p.foto ? `<img src="${p.foto}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 4px;display:block;">` : `<div class="prof-avatar" data-color="${p.color}">${p.nombre.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>`}
           <div class="prof-name">${p.nombre}</div>
           <div style="text-align:center"><span class="prof-badge-main">${p.especialidad}</span></div>
           <p class="prof-bio">${p.bio}</p>
@@ -435,7 +472,27 @@
     }
 
     function publicarPerfil() {
+      const foto = getProfImg();
+      const nombre = getCurrentUser()?.name || 'Nuevo profesional';
+      const newProf = {
+        id: 'p_new_' + Date.now(),
+        nombre,
+        especialidad: document.querySelector('#modalOfrecer .form-select')?.value || 'Profesional',
+        ciudad: document.querySelector('#modalOfrecer input[placeholder="Ej: Madrid"]')?.value || 'España',
+        modalidad: document.querySelector('input[name="ofrecerMod"]:checked')?.value || 'Online',
+        experiencia: parseInt(document.querySelector('#modalOfrecer input[placeholder="5"]')?.value) || 0,
+        idiomas: ['ES'],
+        rating: 0, valoraciones: 0,
+        precio: document.querySelector('#modalOfrecer input[placeholder="Ej: Desde €40/h"]')?.value || 'A consultar',
+        bio: document.getElementById('ofrecerBio')?.value || '',
+        color: String(Math.floor(Math.random() * 8)),
+        formacion: document.querySelector('#modalOfrecer input[placeholder*="Semicha"]')?.value || '',
+        foto
+      };
+      PROFESSIONALS.unshift(newProf);
+      renderProfessionals();
       closeModal('modalOfrecer');
+      clearProfImg();
       showToast('Tu perfil ha sido enviado para revisión. El equipo lo aprobará en 24-48h.', 'success');
     }
 
