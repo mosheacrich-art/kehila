@@ -47,12 +47,20 @@ const TRANSLATIONS = {
     inscrito:         'Inscrito',
 
     // Home
-    home_greeting:    'Boker tov',
-    home_shabbat:     'Shabbat esta semana',
-    home_quick:       'Accesos rápidos',
-    home_eventos:     'Próximos eventos',
-    home_noticias:    'Últimas noticias',
-    home_sinagoga:    'Hoy en la sinagoga',
+    home_greeting:       'Boker tov',
+    home_shabbat:        'Shabbat esta semana',
+    home_quick:          'Accesos rápidos',
+    home_quick_rav:      'Preg. al Rav',
+    home_quick_cal:      'Cal. Hebreo',
+    home_banner_manage:  'Gestionar',
+    home_eventos:        'Próximos eventos',
+    home_noticias:       'Últimas noticias',
+    home_sinagoga:       'Hoy en la sinagoga',
+
+    // Eventos (dinámico)
+    ev_completo:    'Completo',
+    ev_pocas:       '¡Solo {n} plazas!',
+    ev_plazas:      '{n} plazas libres',
 
     // Perfil
     perfil_title:     'Mi perfil',
@@ -170,12 +178,20 @@ const TRANSLATIONS = {
     inscrito:         'Registered',
 
     // Home
-    home_greeting:    'Boker tov',
-    home_shabbat:     'This week\'s Shabbat',
-    home_quick:       'Quick access',
-    home_eventos:     'Upcoming events',
-    home_noticias:    'Latest news',
-    home_sinagoga:    'Today at the synagogue',
+    home_greeting:       'Boker tov',
+    home_shabbat:        'This week\'s Shabbat',
+    home_quick:          'Quick access',
+    home_quick_rav:      'Ask Rabbi',
+    home_quick_cal:      'Hebrew Cal.',
+    home_banner_manage:  'Manage',
+    home_eventos:        'Upcoming events',
+    home_noticias:       'Latest news',
+    home_sinagoga:       'Today at the synagogue',
+
+    // Events (dynamic)
+    ev_completo:    'Full',
+    ev_pocas:       'Only {n} spots left!',
+    ev_plazas:      '{n} spots available',
 
     // Profile
     perfil_title:     'My profile',
@@ -300,6 +316,8 @@ function toggleLang() {
     const active = document.querySelector('.nav-item.active')?.getAttribute('href') || '';
     initNav(active);
   }
+  // Notify pages that render dynamic content via JS
+  document.dispatchEvent(new Event('langchange'));
 }
 
 // Auto-apply on load
