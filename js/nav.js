@@ -136,7 +136,7 @@ function buildSidebar(activePage) {
   // Si está en un iframe, suprimir sidebar y quitar márgenes
   if (window.self !== window.top) {
     var embedStyle = document.createElement('style');
-    embedStyle.textContent = '.main-content{margin-left:0!important;width:100vw!important;padding-bottom:0!important;}';
+    embedStyle.textContent = '.main-content{margin-left:0!important;width:100vw!important;padding-bottom:0!important;}.page-header{display:none!important;}.bottom-nav{display:none!important;}';
     document.head.appendChild(embedStyle);
     return;
   }
