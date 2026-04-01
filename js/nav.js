@@ -44,6 +44,29 @@ const NAV_ITEMS = [
         icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>`
       }
     ]
+  },
+  {
+    group: 'Esencial',
+    items: [
+      {
+        id: 'kosher',
+        label: 'Kosher App',
+        href: 'kosher.html',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/></svg>`
+      },
+      {
+        id: 'siddur',
+        label: 'Siddur',
+        href: 'siddur.html',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>`
+      },
+      {
+        id: 'servicios',
+        label: 'Servicios Comunitarios',
+        href: 'servicios.html',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>`
+      }
+    ]
   }
 ];
 
@@ -81,10 +104,11 @@ function buildSidebar(activePage) {
   // Mapa de ids a claves i18n
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
-    'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos'
+    'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos',
+    kosher: 'nav_kosher', siddur: 'nav_siddur', servicios: 'nav_servicios'
   };
   const GROUP_KEYS = {
-    'Principal': 'group_principal'
+    'Principal': 'group_principal', 'Esencial': 'group_esencial'
   };
 
   // Construir grupos de navegación
@@ -193,7 +217,8 @@ function buildBottomNav(activePage) {
   const _t = (key) => (typeof t === 'function') ? t(key) : key;
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
-    'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos'
+    'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos',
+    kosher: 'nav_kosher', siddur: 'nav_siddur', servicios: 'nav_servicios'
   };
 
   const moreLabel = _t('nav_more') || 'Más';
@@ -244,10 +269,11 @@ function buildMoreDrawer(activePage) {
 
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
-    'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos'
+    'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos',
+    kosher: 'nav_kosher', siddur: 'nav_siddur', servicios: 'nav_servicios'
   };
   const GROUP_KEYS = {
-    'Principal': 'group_principal'
+    'Principal': 'group_principal', 'Esencial': 'group_esencial'
   };
 
   let sectionsHTML = '';
