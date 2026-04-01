@@ -39,7 +39,7 @@ const TRANSLATIONS = {
 
     // Nav extra
     nav_comunidad:    'Comunidad',
-    nav_rav_hub:      'El Rav',
+    nav_rav_hub:      'Beit HaRav',
 
     // Común
     save:             'Guardar cambios',
@@ -177,7 +177,7 @@ const TRANSLATIONS = {
 
     // Nav extra
     nav_comunidad:    'Community',
-    nav_rav_hub:      'The Rabbi',
+    nav_rav_hub:      'Beit HaRav',
 
     // Common
     save:             'Save changes',
