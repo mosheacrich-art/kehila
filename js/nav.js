@@ -14,90 +14,29 @@ const NAV_ITEMS = [
         icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>`
       },
       {
-        id: 'eventos',
-        label: 'Eventos',
-        href: 'eventos.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>`
-      },
-      {
         id: 'calendario',
         label: 'Calendario Hebreo',
         href: 'calendario.html',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/></svg>`
       },
       {
-        id: 'shiurim',
-        label: 'Shiurim',
-        href: 'shiurim.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 3.741-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>`
+        id: 'eventos',
+        label: 'Eventos',
+        href: 'eventos.html',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>`
       },
       {
         id: 'rav-hub',
         label: 'Beit HaRav',
         href: 'rav-hub.html',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"/></svg>`
-      }
-    ]
-  },
-  {
-    group: 'Esencial',
-    items: [
+      },
       {
         id: 'comunidad',
         label: 'Comunidad',
         href: 'comunidad.html',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>`
-      }
-    ]
-  },
-  {
-    group: 'Servicios',
-    items: [
-      {
-        id: 'kosher',
-        label: 'Kosher App',
-        href: 'kosher.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/></svg>`
       },
-      {
-        id: 'contacto',
-        label: 'Contacto',
-        href: 'contacto.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>`
-      }
-    ]
-  },
-  {
-    group: 'Mi cuenta',
-    items: [
-      {
-        id: 'perfil',
-        label: 'Mi perfil',
-        href: 'perfil.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>`
-      }
-    ]
-  },
-  {
-    group: 'Tefila',
-    items: [
-      {
-        id: 'siddur',
-        label: 'Siddur',
-        href: 'siddur.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>`
-      },
-      {
-        id: 'servicios',
-        label: 'Servicios',
-        href: 'servicios.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>`
-      }
-    ]
-  },
-  {
-    group: 'Más',
-    items: [
       {
         id: 'donativos',
         label: 'Donativos',
@@ -111,8 +50,9 @@ const NAV_ITEMS = [
 // Items de bottom nav (máximo 5)
 const BOTTOM_NAV_ITEMS = [
   { id: 'home',       href: 'home.html',       icon: NAV_ITEMS[0].items[0].icon },
-  { id: 'eventos',    href: 'eventos.html',    icon: NAV_ITEMS[0].items[1].icon },
-  { id: 'calendario', href: 'calendario.html', icon: NAV_ITEMS[0].items[2].icon },
+  { id: 'calendario', href: 'calendario.html', icon: NAV_ITEMS[0].items[1].icon },
+  { id: 'eventos',    href: 'eventos.html',    icon: NAV_ITEMS[0].items[2].icon },
+  { id: 'comunidad',  href: 'comunidad.html',  icon: NAV_ITEMS[0].items[4].icon },
 ];
 
 /**
@@ -141,16 +81,10 @@ function buildSidebar(activePage) {
   // Mapa de ids a claves i18n
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
-    noticias: 'nav_noticias', shiurim: 'nav_shiurim', 'rav-hub': 'nav_rav_hub',
-    comunidad: 'nav_comunidad', kosher: 'nav_kosher',
-    donativos: 'nav_donativos',
-    contacto: 'nav_contacto',
-    siddur: 'nav_siddur', servicios: 'nav_servicios', perfil: 'nav_perfil'
+    'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos'
   };
   const GROUP_KEYS = {
-    'Principal': 'group_principal', 'Esencial': 'group_esencial',
-    'Servicios': 'group_servicios', 'Tefila': 'group_tefila',
-    'Mi cuenta': 'group_cuenta', 'Más': 'group_mas'
+    'Principal': 'group_principal'
   };
 
   // Construir grupos de navegación
@@ -259,11 +193,7 @@ function buildBottomNav(activePage) {
   const _t = (key) => (typeof t === 'function') ? t(key) : key;
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
-    noticias: 'nav_noticias', shiurim: 'nav_shiurim', 'rav-hub': 'nav_rav_hub',
-    comunidad: 'nav_comunidad', kosher: 'nav_kosher',
-    donativos: 'nav_donativos',
-    contacto: 'nav_contacto',
-    siddur: 'nav_siddur', servicios: 'nav_servicios', perfil: 'nav_perfil'
+    'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos'
   };
 
   const moreLabel = _t('nav_more') || 'Más';
@@ -314,16 +244,10 @@ function buildMoreDrawer(activePage) {
 
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
-    noticias: 'nav_noticias', shiurim: 'nav_shiurim', 'rav-hub': 'nav_rav_hub',
-    comunidad: 'nav_comunidad', kosher: 'nav_kosher',
-    donativos: 'nav_donativos',
-    contacto: 'nav_contacto',
-    siddur: 'nav_siddur', servicios: 'nav_servicios', perfil: 'nav_perfil'
+    'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos'
   };
   const GROUP_KEYS = {
-    'Principal': 'group_principal', 'Esencial': 'group_esencial',
-    'Servicios': 'group_servicios', 'Tefila': 'group_tefila',
-    'Mi cuenta': 'group_cuenta', 'Más': 'group_mas'
+    'Principal': 'group_principal'
   };
 
   let sectionsHTML = '';
