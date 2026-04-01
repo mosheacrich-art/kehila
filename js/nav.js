@@ -5,14 +5,19 @@
 
 const NAV_ITEMS = [
   {
-    group: 'Principal',
+    group: '',
     items: [
       {
         id: 'home',
         label: 'Inicio',
         href: 'home.html',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>`
-      },
+      }
+    ]
+  },
+  {
+    group: 'Principal',
+    items: [
       {
         id: 'calendario',
         label: 'Calendario Hebreo',
@@ -50,15 +55,26 @@ const NAV_ITEMS = [
         icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>`
       }
     ]
+  },
+  {
+    group: 'Mi cuenta',
+    items: [
+      {
+        id: 'perfil',
+        label: 'Mi perfil',
+        href: 'perfil.html',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>`
+      }
+    ]
   }
 ];
 
 // Items de bottom nav (máximo 5)
 const BOTTOM_NAV_ITEMS = [
   { id: 'home',       href: 'home.html',       icon: NAV_ITEMS[0].items[0].icon },
-  { id: 'calendario', href: 'calendario.html', icon: NAV_ITEMS[0].items[1].icon },
-  { id: 'eventos',    href: 'eventos.html',    icon: NAV_ITEMS[0].items[2].icon },
-  { id: 'comunidad',  href: 'comunidad.html',  icon: NAV_ITEMS[0].items[4].icon },
+  { id: 'calendario', href: 'calendario.html', icon: NAV_ITEMS[1].items[0].icon },
+  { id: 'eventos',    href: 'eventos.html',    icon: NAV_ITEMS[1].items[1].icon },
+  { id: 'comunidad',  href: 'comunidad.html',  icon: NAV_ITEMS[1].items[3].icon },
 ];
 
 /**
@@ -88,10 +104,10 @@ function buildSidebar(activePage) {
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
     'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos',
-    kosher: 'nav_kosher', siddur: 'nav_siddur', servicios: 'nav_servicios'
+    esencial: 'nav_esencial', perfil: 'nav_perfil'
   };
   const GROUP_KEYS = {
-    'Principal': 'group_principal', 'Esencial': 'group_esencial'
+    'Principal': 'group_principal', 'Mi cuenta': 'group_cuenta'
   };
 
   // Construir grupos de navegación
@@ -201,7 +217,7 @@ function buildBottomNav(activePage) {
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
     'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos',
-    kosher: 'nav_kosher', siddur: 'nav_siddur', servicios: 'nav_servicios'
+    esencial: 'nav_esencial', perfil: 'nav_perfil'
   };
 
   const moreLabel = _t('nav_more') || 'Más';
@@ -253,10 +269,10 @@ function buildMoreDrawer(activePage) {
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
     'rav-hub': 'nav_rav_hub', comunidad: 'nav_comunidad', donativos: 'nav_donativos',
-    kosher: 'nav_kosher', siddur: 'nav_siddur', servicios: 'nav_servicios'
+    esencial: 'nav_esencial', perfil: 'nav_perfil'
   };
   const GROUP_KEYS = {
-    'Principal': 'group_principal', 'Esencial': 'group_esencial'
+    'Principal': 'group_principal', 'Mi cuenta': 'group_cuenta'
   };
 
   let sectionsHTML = '';
