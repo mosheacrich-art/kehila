@@ -26,12 +26,6 @@ const NAV_ITEMS = [
         icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/></svg>`
       },
       {
-        id: 'noticias',
-        label: 'Noticias',
-        href: 'noticias.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z"/></svg>`
-      },
-      {
         id: 'shiurim',
         label: 'Shiurim',
         href: 'shiurim.html',
@@ -118,7 +112,6 @@ const NAV_ITEMS = [
 const BOTTOM_NAV_ITEMS = [
   { id: 'home',       href: 'home.html',       icon: NAV_ITEMS[0].items[0].icon },
   { id: 'eventos',    href: 'eventos.html',    icon: NAV_ITEMS[0].items[1].icon },
-  { id: 'noticias',   href: 'noticias.html',   icon: NAV_ITEMS[0].items[3].icon },
   { id: 'calendario', href: 'calendario.html', icon: NAV_ITEMS[0].items[2].icon },
 ];
 
