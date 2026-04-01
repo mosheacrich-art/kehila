@@ -31,9 +31,15 @@ const TRANSLATIONS = {
     // Grupos de nav
     group_principal:  'Principal',
     group_comunidad:  'Comunidad',
+    group_esencial:   'Esencial',
     group_servicios:  'Servicios',
     group_tefila:     'Tefila',
     group_cuenta:     'Mi cuenta',
+    group_mas:        'Más',
+
+    // Nav extra
+    nav_comunidad:    'Comunidad',
+    nav_rav_hub:      'El Rav',
 
     // Común
     save:             'Guardar cambios',
@@ -163,9 +169,15 @@ const TRANSLATIONS = {
     // Nav groups
     group_principal:  'Main',
     group_comunidad:  'Community',
+    group_esencial:   'Essential',
     group_servicios:  'Services',
     group_tefila:     'Tefila',
     group_cuenta:     'My account',
+    group_mas:        'More',
+
+    // Nav extra
+    nav_comunidad:    'Community',
+    nav_rav_hub:      'The Rabbi',
 
     // Common
     save:             'Save changes',
