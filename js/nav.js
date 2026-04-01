@@ -46,31 +46,13 @@ const NAV_ITEMS = [
     ]
   },
   {
-    group: 'Comunidad',
+    group: 'Esencial',
     items: [
       {
-        id: 'wallap',
-        label: 'Wallap',
-        href: 'wallap.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/></svg>`
-      },
-      {
-        id: 'kosher',
-        label: 'Kosher App',
-        href: 'kosher.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/></svg>`
-      },
-      {
-        id: 'business',
-        label: 'Jewish Business',
-        href: 'business.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z"/></svg>`
-      },
-      {
-        id: 'donativos',
-        label: 'Donativos',
-        href: 'donativos.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>`
+        id: 'comunidad',
+        label: 'Comunidad',
+        href: 'comunidad.html',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>`
       }
     ]
   },
@@ -78,22 +60,10 @@ const NAV_ITEMS = [
     group: 'Servicios',
     items: [
       {
-        id: 'professionals',
-        label: 'Professionals',
-        href: 'linkedin-kehila.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z"/></svg>`
-      },
-      {
-        id: 'voluntariado',
-        label: 'Voluntariado',
-        href: 'voluntariado.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>`
-      },
-      {
-        id: 'tienda',
-        label: 'Tienda',
-        href: 'tienda.html',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"/></svg>`
+        id: 'kosher',
+        label: 'Kosher App',
+        href: 'kosher.html',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/></svg>`
       },
       {
         id: 'citas-rabino',
@@ -136,6 +106,17 @@ const NAV_ITEMS = [
         icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>`
       }
     ]
+  },
+  {
+    group: 'Más',
+    items: [
+      {
+        id: 'donativos',
+        label: 'Donativos',
+        href: 'donativos.html',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>`
+      }
+    ]
   }
 ];
 
@@ -152,6 +133,14 @@ const BOTTOM_NAV_ITEMS = [
  * @param {string} activePage - id de la página activa
  */
 function buildSidebar(activePage) {
+  // Si está en un iframe, suprimir sidebar y quitar márgenes
+  if (window.self !== window.top) {
+    var embedStyle = document.createElement('style');
+    embedStyle.textContent = '.main-content{margin-left:0!important;width:100vw!important;padding-bottom:0!important;}';
+    document.head.appendChild(embedStyle);
+    return;
+  }
+
   const user = getCurrentUser();
   if (!user) return;
 
@@ -166,15 +155,15 @@ function buildSidebar(activePage) {
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
     noticias: 'nav_noticias', shiurim: 'nav_shiurim', rav: 'nav_rav',
-    wallap: 'nav_wallap', kosher: 'nav_kosher', business: 'nav_business',
-    donativos: 'nav_donativos', professionals: 'nav_professionals',
-    voluntariado: 'nav_voluntariado', tienda: 'nav_tienda',
+    comunidad: 'nav_comunidad', kosher: 'nav_kosher',
+    donativos: 'nav_donativos',
     'citas-rabino': 'nav_citas', contacto: 'nav_contacto',
     siddur: 'nav_siddur', servicios: 'nav_servicios', perfil: 'nav_perfil'
   };
   const GROUP_KEYS = {
-    'Principal': 'group_principal', 'Comunidad': 'group_comunidad',
-    'Servicios': 'group_servicios', 'Tefila': 'group_tefila', 'Mi cuenta': 'group_cuenta'
+    'Principal': 'group_principal', 'Esencial': 'group_esencial',
+    'Servicios': 'group_servicios', 'Tefila': 'group_tefila',
+    'Mi cuenta': 'group_cuenta', 'Más': 'group_mas'
   };
 
   // Construir grupos de navegación
@@ -279,13 +268,15 @@ function buildSidebar(activePage) {
  * @param {string} activePage - id de la página activa
  */
 function buildBottomNav(activePage) {
+  if (window.self !== window.top) return;
   const _t = (key) => (typeof t === 'function') ? t(key) : key;
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
     noticias: 'nav_noticias', shiurim: 'nav_shiurim', rav: 'nav_rav',
-    wallap: 'nav_wallap', kosher: 'nav_kosher', business: 'nav_business',
-    donativos: 'nav_donativos', professionals: 'nav_professionals',
-    voluntariado: 'nav_voluntariado', siddur: 'nav_siddur', servicios: 'nav_servicios'
+    comunidad: 'nav_comunidad', kosher: 'nav_kosher',
+    donativos: 'nav_donativos',
+    'citas-rabino': 'nav_citas', contacto: 'nav_contacto',
+    siddur: 'nav_siddur', servicios: 'nav_servicios', perfil: 'nav_perfil'
   };
 
   const moreLabel = _t('nav_more') || 'Más';
@@ -337,14 +328,15 @@ function buildMoreDrawer(activePage) {
   const NAV_KEYS = {
     home: 'nav_home', eventos: 'nav_eventos', calendario: 'nav_calendario',
     noticias: 'nav_noticias', shiurim: 'nav_shiurim', rav: 'nav_rav',
-    wallap: 'nav_wallap', kosher: 'nav_kosher', business: 'nav_business',
-    donativos: 'nav_donativos', professionals: 'nav_professionals',
-    voluntariado: 'nav_voluntariado', siddur: 'nav_siddur', servicios: 'nav_servicios',
-    'citas-rabino': 'nav_citas', contacto: 'nav_contacto', tienda: 'nav_tienda'
+    comunidad: 'nav_comunidad', kosher: 'nav_kosher',
+    donativos: 'nav_donativos',
+    'citas-rabino': 'nav_citas', contacto: 'nav_contacto',
+    siddur: 'nav_siddur', servicios: 'nav_servicios', perfil: 'nav_perfil'
   };
   const GROUP_KEYS = {
-    'Principal': 'group_principal', 'Comunidad': 'group_comunidad',
-    'Servicios': 'group_servicios', 'Tefila': 'group_tefila'
+    'Principal': 'group_principal', 'Esencial': 'group_esencial',
+    'Servicios': 'group_servicios', 'Tefila': 'group_tefila',
+    'Mi cuenta': 'group_cuenta', 'Más': 'group_mas'
   };
 
   let sectionsHTML = '';
