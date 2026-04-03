@@ -182,16 +182,18 @@
     .banner-slide-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 70%, transparent 100%);
+      background: rgba(0,0,0,0.42);
       display: flex;
-      align-items: flex-end;
-      padding: 16px 20px;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 24px;
       gap: 0;
     }
 
     .banner-slide-text {
       color: #fff;
-      max-width: 75%;
+      max-width: 80%;
+      text-align: center;
     }
 
     .banner-slide-title {
@@ -203,14 +205,12 @@
 
     .banner-slide-subtitle {
       font-size: 0.8rem;
-      color: rgba(255,255,255,0.85);
+      color: rgba(255,255,255,0.9);
       margin-top: 4px;
       text-shadow: 0 1px 4px rgba(0,0,0,0.4);
       line-height: 1.35;
-      max-width: 420px;
     }
     @media (max-width: 480px) {
-      .banner-slide-overlay { padding: 12px 14px; }
       .banner-slide-title { font-size: 1rem; }
       .banner-slide-subtitle { font-size: 0.73rem; margin-top: 2px; }
     }
@@ -1094,7 +1094,7 @@
       } else {
         slide.innerHTML = `
           <div class="banner-slide-placeholder" style="background:${s.color || '#1a1a2e'}">
-            <div class="banner-slide-overlay" style="background:none;padding:0 20px;">
+            <div class="banner-slide-overlay" style="background:none;">
               <div class="banner-slide-text">
                 ${s._cat ? `<div style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:6px;">${s._cat}</div>` : ''}
                 ${s.titulo ? `<div class="banner-slide-title">${s.titulo}</div>` : ''}
@@ -1208,7 +1208,16 @@
               <p style="font-size:0.85rem;font-weight:600;margin-bottom:10px;">Añadir slide</p>
               <input id="bnew-titulo" placeholder="Título" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:8px;box-sizing:border-box;">
               <input id="bnew-subtitulo" placeholder="Subtítulo (opcional)" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:8px;box-sizing:border-box;">
-              <input id="bnew-url" placeholder="URL de imagen (opcional)" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:12px;box-sizing:border-box;">
+              <div style="margin-bottom:8px;">
+                <label style="display:block;font-size:0.8rem;color:#666;margin-bottom:6px;font-weight:500;">Imagen</label>
+                <label id="bnew-file-label" style="display:flex;align-items:center;gap:8px;border:1.5px dashed #c0c7d4;border-radius:8px;padding:10px 14px;cursor:pointer;font-size:0.85rem;color:#666;background:#fafafa;transition:border-color 0.2s;">
+                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+                  <span id="bnew-file-text">Subir foto desde el dispositivo</span>
+                  <input type="file" id="bnew-file" accept="image/*" style="display:none;">
+                </label>
+                <img id="bnew-preview" src="" alt="" style="display:none;width:100%;height:80px;object-fit:cover;border-radius:8px;margin-top:8px;">
+              </div>
+              <input id="bnew-url" placeholder="O pegar URL de imagen" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:12px;box-sizing:border-box;">
               <button id="bnew-save" style="width:100%;background:var(--color-primary);color:#fff;border:none;border-radius:10px;padding:12px;font-size:0.9rem;font-weight:600;cursor:pointer;">Añadir slide</button>
             </div>
           </div>
@@ -1218,16 +1227,51 @@
       const listEl = overlay.querySelector('#banner-list-container');
       refreshList(listEl);
 
+      /* File upload → data URL or Supabase Storage */
+      let _pickedDataUrl = '';
+      overlay.querySelector('#bnew-file').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        overlay.querySelector('#bnew-file-text').textContent = file.name;
+        // Try Supabase Storage first
+        const storage = sb?.storage;
+        if (storage) {
+          const ext = file.name.split('.').pop();
+          const path = `banner/${Date.now()}.${ext}`;
+          const { data: up, error: upErr } = await storage.from('imagenes').upload(path, file, { upsert: true });
+          if (!upErr) {
+            const { data: pub } = storage.from('imagenes').getPublicUrl(path);
+            _pickedDataUrl = pub?.publicUrl || '';
+            overlay.querySelector('#bnew-url').value = _pickedDataUrl;
+            const prev = overlay.querySelector('#bnew-preview');
+            prev.src = _pickedDataUrl; prev.style.display = 'block';
+            return;
+          }
+        }
+        // Fallback: read as data URL
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          _pickedDataUrl = ev.target.result;
+          overlay.querySelector('#bnew-url').value = '';
+          const prev = overlay.querySelector('#bnew-preview');
+          prev.src = _pickedDataUrl; prev.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      });
+
       overlay.querySelector('#bnew-save').addEventListener('click', async () => {
         const titulo = overlay.querySelector('#bnew-titulo').value.trim();
         const subtitulo = overlay.querySelector('#bnew-subtitulo').value.trim();
-        const imagen_url = overlay.querySelector('#bnew-url').value.trim();
+        const imagen_url = _pickedDataUrl || overlay.querySelector('#bnew-url').value.trim();
         if (!titulo) { showToast('El título es obligatorio', 'error'); return; }
         const { error } = await sb.from('banner_slides').insert({ titulo, subtitulo, imagen_url, activo: true, orden: 99 });
         if (error) { showToast('Error al guardar', 'error'); return; }
         overlay.querySelector('#bnew-titulo').value = '';
         overlay.querySelector('#bnew-subtitulo').value = '';
         overlay.querySelector('#bnew-url').value = '';
+        overlay.querySelector('#bnew-file-text').textContent = 'Subir foto desde el dispositivo';
+        overlay.querySelector('#bnew-preview').style.display = 'none';
+        _pickedDataUrl = '';
         showToast('Slide añadido', 'success');
         refreshList(listEl);
         loadBanner();
