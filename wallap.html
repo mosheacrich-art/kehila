@@ -319,6 +319,7 @@
 <script src="js/data.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
+<script src="js/media.js"></script>
 <script>
   requireAuth();
   initNav('wallap');
@@ -460,44 +461,47 @@
     if (!titulo) { document.getElementById('pub-titulo-err').style.display = ''; return; }
     document.getElementById('pub-titulo-err').style.display = 'none';
 
+    const btn = document.querySelector('#modal-publicar .btn-primary');
+    if (btn) { btn.textContent = 'Publicando...'; btn.disabled = true; }
+
     const user = getCurrentUser();
+    const tipoVal = document.getElementById('pub-tipo').value;
+    const emojiMap = { venta:'🏷️', alquiler:'🏠', servicio:'🛠️', busco:'🔍' };
+
     const newItem = {
-      id: 'wp_' + Date.now(),
       titulo,
-      tipo: document.getElementById('pub-tipo').value,
+      tipo: tipoVal,
       precio: parseFloat(document.getElementById('pub-precio').value) || 0,
       categoria: document.getElementById('pub-cat').value,
       descripcion: document.getElementById('pub-desc').value || 'Sin descripción.',
       vendedor: user?.name || 'Miembro',
+      vendedor_id: user?.userId || user?.id || '',
       fecha: new Date().toISOString().split('T')[0],
       ubicacion: document.getElementById('pub-loc').value || 'España',
+      emoji: emojiMap[tipoVal] || '📦',
       estado: 'disponible'
     };
 
-    const sb = getSupabase();
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (sb) {
-      try {
-        const { data, error } = await sb.from('wallap_anuncios').insert({
-          usuario_id: user?.userId || null,
-          usuario_nombre: user?.name || 'Miembro',
-          tipo: newItem.tipo,
-          titulo: newItem.titulo,
-          descripcion: newItem.descripcion,
-          precio: newItem.precio,
-          categoria: newItem.categoria,
-          ubicacion: newItem.ubicacion,
-          activo: true
-        }).select().single();
-        if (data) newItem.id = data.id;
-      } catch(e) { /* fallback local */ }
+      const { data, error } = await sb.from('anuncios').insert(newItem).select().single();
+      if (error) {
+        if (btn) { btn.textContent = 'Publicar anuncio'; btn.disabled = false; }
+        showToast('Error al publicar: ' + error.message, 'error');
+        return;
+      }
+      if (data) newItem.id = data.id;
+    } else {
+      newItem.id = 'wp_' + Date.now();
     }
 
     wallapItems.unshift(newItem);
     closeModal('modal-publicar');
     document.getElementById('form-publicar').reset();
     document.getElementById('photo-previews-container').innerHTML = '';
+    if (btn) { btn.textContent = 'Publicar anuncio'; btn.disabled = false; }
     filterWallap();
-    showToast(`Anuncio "${titulo}" publicado correctamente.`, 'success');
+    showToast(`Anuncio "${titulo}" publicado para toda la comunidad ✓`, 'success');
   }
 
   async function loadWallapFromSupabase() {
@@ -534,7 +538,21 @@
   document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target===o) closeModal(o.id); }));
   document.addEventListener('keydown', e => { if (e.key==='Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id)); });
 
-  loadWallapFromSupabase();
+  /* ─── Cargar anuncios desde Supabase ─── */
+  async function loadAnuncios() {
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) {
+      const { data } = await sb.from('anuncios').select('*').order('created_at', { ascending: false });
+      if (data?.length) {
+        // Fusionar: Supabase primero, luego mock (sin duplicados)
+        const sbIds = new Set(data.map(a => a.id));
+        const mockFiltrado = wallapItems.filter(w => !sbIds.has(w.id));
+        wallapItems = [...data, ...mockFiltrado];
+      }
+    }
+    filterWallap();
+  }
+  loadAnuncios();
 </script>
   <script>
     if ("serviceWorker" in navigator) {

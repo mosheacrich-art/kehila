@@ -168,6 +168,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
@@ -329,10 +330,32 @@
       if (btn) btn.disabled = !checked;
     }
 
-    function confirmarCita() {
+    async function confirmarCita() {
       const tipo = TIPOS_CITA.find(t => t.id === selectedTipo);
       const user = getCurrentUser();
       const mod = document.querySelector('input[name="f_mod"]:checked')?.value || 'Presencial';
+      const notas = document.getElementById('f_notas')?.value?.trim() || '';
+
+      // Guardar en Supabase
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (sb) {
+        await sb.from('citas').insert({
+          usuario_id: user?.userId || user?.id || '',
+          usuario_nombre: user?.name || '',
+          usuario_email: user?.email || '',
+          tipo_cita: tipo?.titulo || selectedTipo,
+          tipo_emoji: selectedTipo,
+          fecha: selectedSlot?.dia || '',
+          hora: selectedSlot?.h || '',
+          duracion: tipo?.duracion || '',
+          modalidad: mod,
+          notas,
+          estado: 'confirmada'
+        });
+      }
+      // Marcar slot como ocupado localmente
+      if (selectedSlot) selectedSlot.libre = false;
+
       document.getElementById('formContent').style.display = 'none';
       document.getElementById('formHint').style.display = 'none';
       document.getElementById('confirmacionContent').style.display = 'block';
@@ -343,7 +366,7 @@
           </div>
           <div class="conf-title">¡Cita confirmada!</div>
           <div class="conf-resumen">
-            <div class="conf-row"><span>Tipo de consulta</span><span>${tipo.emoji} ${tipo.titulo}</span></div>
+            <div class="conf-row"><span>Tipo de consulta</span><span>${tipo.titulo}</span></div>
             <div class="conf-row"><span>Fecha</span><span>${selectedSlot.dia}</span></div>
             <div class="conf-row"><span>Hora</span><span>${selectedSlot.h}</span></div>
             <div class="conf-row"><span>Duración</span><span>${tipo.duracion}</span></div>
@@ -375,18 +398,42 @@
       renderCalendario();
     }
 
-    function renderMisCitas() {
-      document.getElementById('citasList').innerHTML = MIS_CITAS.map(c => `
+    function renderMisCitas(citasData) {
+      const lista = citasData || MIS_CITAS;
+      const emojiMap = { halacha:'📖', espiritual:'✨', giur:'⭐', barmitzvah:'🎓', matrimonial:'💛', otro:'💬' };
+      document.getElementById('citasList').innerHTML = lista.length ? lista.map(c => `
         <div class="cita-item">
-          <div class="cita-emoji">${c.emoji}</div>
+          <div class="cita-emoji">${emojiMap[c.tipo_emoji || c.tipo] || c.emoji || '📅'}</div>
           <div class="cita-info">
-            <div class="cita-titulo">${c.tipo}</div>
+            <div class="cita-titulo">${c.tipo_cita || c.tipo}</div>
             <div class="cita-meta">${c.fecha} · ${c.hora}</div>
           </div>
           <span class="cita-estado ${c.estado}">${c.estado === 'realizada' ? 'Realizada' : c.estado === 'confirmada' ? 'Confirmada' : 'Cancelada'}</span>
-          ${c.estado === 'confirmada' ? `<button class="btn-cancelar" onclick="showToast('Cita cancelada','info')">Cancelar</button>` : ''}
+          ${c.estado === 'confirmada' ? `<button class="btn-cancelar" onclick="cancelarCita('${c.id}')">Cancelar</button>` : ''}
         </div>
-      `).join('');
+      `).join('') : '<p style="color:var(--color-text-muted);font-size:.875rem;padding:12px 0;">No tienes citas registradas.</p>';
+    }
+
+    async function cancelarCita(id) {
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (sb) {
+        await sb.from('citas').update({ estado: 'cancelada' }).eq('id', id);
+      }
+      loadMisCitas();
+      showToast('Cita cancelada.', 'info');
+    }
+
+    async function loadMisCitas() {
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      const user = getCurrentUser();
+      if (sb && user) {
+        const uid = user.userId || user.id || user.email;
+        const { data } = await sb.from('citas').select('*')
+          .eq('usuario_id', uid)
+          .order('created_at', { ascending: false });
+        if (data?.length) { renderMisCitas(data); return; }
+      }
+      renderMisCitas();
     }
 
     initNav('citas-rabino');

@@ -221,6 +221,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
@@ -354,8 +355,38 @@
       document.getElementById('modalApuntar').classList.add('open');
     }
 
-    function confirmarInscripcion() {
+    async function confirmarInscripcion() {
+      const nombre = document.getElementById('apuntarNombre')?.value?.trim() || '';
+      const email  = document.getElementById('apuntarEmail')?.value?.trim() || '';
+      const notas  = document.getElementById('apuntarNotas')?.value?.trim() || '';
+      const user   = getCurrentUser();
+      const op     = OPORTUNIDADES.find(o => o.id === currentVolId);
+
+      const registro = {
+        voluntariado_id: currentVolId,
+        voluntariado_titulo: op?.titulo || '',
+        usuario_id: user?.userId || user?.id || email,
+        usuario_nombre: nombre || user?.name || 'Miembro',
+        usuario_email: email || user?.email || '',
+        notas
+      };
+
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (sb) {
+        const { error } = await sb.from('inscripciones_voluntariado').insert(registro);
+        if (error) {
+          showToast('Error al registrar: ' + error.message, 'error');
+          return;
+        }
+        // Incrementar cubiertas en Supabase si tiene id de Supabase
+        if (op && op.supabase_id) {
+          await sb.from('voluntariados').update({ cubiertas: (op.cubiertas || 0) + 1 }).eq('id', op.supabase_id);
+        }
+      }
+
+      if (op) op.cubiertas = Math.min((op.cubiertas || 0) + 1, op.plazas);
       closeModal('modalApuntar');
+      renderOportunidades();
       showToast('¡Inscripción confirmada! El coordinador se pondrá en contacto contigo.', 'success');
     }
 
