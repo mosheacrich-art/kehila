@@ -150,8 +150,10 @@ function buildSidebar(activePage) {
     <aside class="sidebar">
       <div class="sidebar-inner">
         <!-- Logo -->
-        <a href="home.html" class="sidebar-logo" style="text-decoration:none;cursor:pointer;display:flex;justify-content:center;align-items:center;width:100%;padding:4px 0 12px;">
-          <img src="img/logo_jabad.png" alt="Jabad Barcelona" style="width:90px;height:90px;border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 2px 12px rgba(0,0,0,0.3);">
+        <a href="home.html" class="sidebar-logo" style="text-decoration:none;cursor:pointer;display:flex;justify-content:center;align-items:center;width:100%;padding:6px 0 14px;">
+          <div style="width:88px;height:88px;border-radius:50%;overflow:hidden;background:#1338BE;flex-shrink:0;box-shadow:0 2px 14px rgba(0,0,0,0.35);">
+            <img src="img/logo_jabad.png" alt="Jabad Barcelona" style="width:100%;height:100%;object-fit:cover;display:block;">
+          </div>
         </a>
 
         <!-- Usuario -->
