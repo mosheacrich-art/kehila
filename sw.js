@@ -1,34 +1,16 @@
 /* =============================================
    Jabad Barcelona — Service Worker
+   Estrategia: network-first (siempre versión más reciente)
    ============================================= */
 
-const CACHE = 'kehila-v2';
-const ASSETS = [
-  '/kehila/',
-  '/kehila/index.html',
-  '/kehila/home.html',
-  '/kehila/siddur.html',
-  '/kehila/eventos.html',
-  '/kehila/noticias.html',
-  '/kehila/servicios.html',
-  '/kehila/css/main.css',
-  '/kehila/css/components.css',
-  '/kehila/css/pages.css',
-  '/kehila/js/auth.js',
-  '/kehila/js/nav.js',
-  '/kehila/js/data.js',
-  '/kehila/img/icon-192.png',
-  '/kehila/img/icon-512.png',
-];
+const CACHE = 'kehila-v3';
 
-// Instalar: cachear recursos estáticos
+// Instalar: activar inmediatamente sin esperar
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
-  );
+  self.skipWaiting();
 });
 
-// Activar: limpiar caches viejos
+// Activar: limpiar caches viejos y tomar control inmediato
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -37,23 +19,23 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Fetch: cache-first para estáticos, network-first para API
+// Fetch: network-first siempre
 self.addEventListener('fetch', e => {
-  // No interceptar peticiones a Supabase
   if (e.request.url.includes('supabase.co')) return;
+  if (e.request.method !== 'GET') return;
 
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        // Cachear solo respuestas válidas de nuestro dominio
-        if (res.ok && e.request.url.includes('github.io')) {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return res;
-      }).catch(() => {
-        // Sin red: devolver página de inicio si es navegación
+    fetch(e.request).then(res => {
+      // Guardar en caché solo si la respuesta es válida
+      if (res.ok) {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+      }
+      return res;
+    }).catch(() => {
+      // Sin red: usar caché como fallback
+      return caches.match(e.request).then(cached => {
+        if (cached) return cached;
         if (e.request.mode === 'navigate') {
           return caches.match('/kehila/home.html');
         }
