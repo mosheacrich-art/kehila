@@ -216,7 +216,8 @@ const MOCK_NOTICIAS = [
     autor: 'Jabad Barcelona',
     fecha: '2026-03-05',
     tiempoLectura: '2 min',
-    colorCategoria: '#1B2E5E'
+    colorCategoria: '#1B2E5E',
+    fotos: ['img/mikve-1.jpg', 'img/mikve-3.jpg', 'img/mikve-2.jpg']
   }
 ];
 
