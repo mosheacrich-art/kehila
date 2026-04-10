@@ -1039,8 +1039,8 @@
 <div class="modal-overlay hidden" id="modal-noticia">
   <div class="modal modal-lg">
     <div class="modal-header">
-      <h3 class="modal-title">Nueva noticia</h3>
-      <button class="modal-close" onclick="closeModal('modal-noticia')">
+      <h3 class="modal-title" id="modal-noticia-title">Nueva noticia</h3>
+      <button class="modal-close" onclick="closeModal('modal-noticia');_resetNoticiaModal()">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
       </button>
     </div>
@@ -1087,10 +1087,10 @@
       </form>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-noticia')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveNoticia()">
+      <button class="btn btn-ghost" onclick="closeModal('modal-noticia');_resetNoticiaModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-noticia" onclick="saveNoticia()">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-        Publicar noticia
+        <span id="btn-save-noticia-txt">Publicar noticia</span>
       </button>
     </div>
   </div>
@@ -1802,7 +1802,7 @@
         <button class="pin-btn ${(n.destacada||n.isPinned) ? 'pinned' : ''}"
           title="${(n.destacada||n.isPinned) ? 'Quitar de portada' : 'Fijar en portada'}"
           onclick="togglePin('${n.id}')"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg></button>
-        <button class="btn btn-sm btn-secondary" onclick="showToast('Edición próximamente','info')">Editar</button>
+        <button class="btn btn-sm btn-secondary" onclick="editNoticia('${n.id}')">Editar</button>
         <button class="btn btn-sm btn-danger" onclick="promptDelNoticia('${n.id}')">Eliminar</button>
       </div>`).join('');
   }
@@ -1829,6 +1829,33 @@
     delNoticiaTarget = null;
   });
 
+  let _editNoticiaId = null;
+
+  function editNoticia(id) {
+    const n = newsState.find(n => n.id === id);
+    if (!n) return;
+    _editNoticiaId = id;
+    document.getElementById('modal-noticia-title').textContent = 'Editar noticia';
+    document.getElementById('btn-save-noticia-txt').textContent = 'Guardar cambios';
+    document.getElementById('news-titulo').value = n.titulo || '';
+    document.getElementById('news-extracto').value = n.excerpt || n.resumen || '';
+    document.getElementById('news-contenido').value = n.contenido || '';
+    document.getElementById('news-pin').checked = !!(n.destacada || n.isPinned);
+    clearUpload('news');
+    if (n.imagen) {
+      document.getElementById('upload-img-news').src = n.imagen;
+      document.getElementById('upload-ph-news').style.display = 'none';
+      document.getElementById('upload-filled-news').style.display = '';
+    }
+    openModal('modal-noticia');
+  }
+
+  function _resetNoticiaModal() {
+    _editNoticiaId = null;
+    document.getElementById('modal-noticia-title').textContent = 'Nueva noticia';
+    document.getElementById('btn-save-noticia-txt').textContent = 'Publicar noticia';
+  }
+
   function saveNoticia() {
     const titulo    = document.getElementById('news-titulo').value.trim();
     const contenido = document.getElementById('news-contenido').value.trim();
@@ -1841,23 +1868,51 @@
     if (!contenido) { document.getElementById('news-cont-err').style.display = ''; valid = false; }
     if (!valid) return;
 
-    const newN = {
-      id: 'n_' + Date.now(),
-      titulo,
-      resumen: document.getElementById('news-extracto').value || contenido.slice(0, 120) + '…',
-      categoria: 'Comunidad',
-      fecha: new Date().toISOString().split('T')[0],
-      autor: getCurrentUser()?.name || 'Admin',
-      emoji: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z"/></svg>',
-      destacada: document.getElementById('news-pin').checked,
-      imagen: getUpload('news') || null
-    };
-    newsState.unshift(newN);
-    renderNewsAdmin();
-    closeModal('modal-noticia');
-    document.getElementById('form-noticia').reset();
-    clearUpload('news');
-    showToast(`Noticia "${titulo}" publicada.`, 'success');
+    const extracto = document.getElementById('news-extracto').value.trim();
+    const imagen = getUpload('news') || null;
+    const destacada = document.getElementById('news-pin').checked;
+
+    if (_editNoticiaId) {
+      // Modo edición
+      const n = newsState.find(n => n.id === _editNoticiaId);
+      if (n) {
+        n.titulo = titulo;
+        n.excerpt = extracto || contenido.slice(0, 120) + '…';
+        n.resumen = n.excerpt;
+        n.contenido = contenido;
+        n.destacada = destacada;
+        n.isPinned = destacada;
+        if (imagen) n.imagen = imagen;
+      }
+      renderNewsAdmin();
+      closeModal('modal-noticia');
+      document.getElementById('form-noticia').reset();
+      clearUpload('news');
+      _resetNoticiaModal();
+      showToast(`Noticia "${titulo}" actualizada.`, 'success');
+    } else {
+      // Modo creación
+      const newN = {
+        id: 'n_' + Date.now(),
+        titulo,
+        resumen: extracto || contenido.slice(0, 120) + '…',
+        excerpt: extracto || contenido.slice(0, 120) + '…',
+        categoria: 'Comunidad',
+        colorCategoria: '#1b2e5e',
+        fecha: new Date().toISOString().split('T')[0],
+        autor: getCurrentUser()?.name || 'Admin',
+        destacada,
+        isPinned: destacada,
+        imagen: imagen
+      };
+      newsState.unshift(newN);
+      renderNewsAdmin();
+      closeModal('modal-noticia');
+      document.getElementById('form-noticia').reset();
+      clearUpload('news');
+      _resetNoticiaModal();
+      showToast(`Noticia "${titulo}" publicada.`, 'success');
+    }
   }
 
   renderNewsAdmin();
