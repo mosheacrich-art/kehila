@@ -1107,16 +1107,21 @@
       if (s.href) slide.style.cursor = 'pointer';
       if (s.href) slide.addEventListener('click', () => { window.location.href = s.href; });
 
-      if (s.imagen_url) {
-        slide.innerHTML = `
-          <img src="${s.imagen_url}" alt="${s.titulo || ''}" loading="lazy" onerror="this.style.display='none'">
-          <div class="banner-slide-overlay">
-            <div class="banner-slide-text">
-              ${s._cat ? `<div style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:6px;">${s._cat}</div>` : ''}
-              ${s.titulo ? `<div class="banner-slide-title">${s.titulo}</div>` : ''}
-              ${s.subtitulo ? `<div class="banner-slide-subtitle">${s.subtitulo}</div>` : ''}
-            </div>
-          </div>`;
+      const textHTML = `
+        <div class="banner-slide-overlay">
+          <div class="banner-slide-text">
+            ${s._cat ? `<div style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:6px;">${s._cat}</div>` : ''}
+            ${s.titulo ? `<div class="banner-slide-title">${s.titulo}</div>` : ''}
+            ${s.subtitulo ? `<div class="banner-slide-subtitle">${s.subtitulo}</div>` : ''}
+          </div>
+        </div>`;
+
+      if (s.fotos && s.fotos.length >= 2) {
+        // Mosaico de 3 fotos
+        const cols = s.fotos.map(f => `<div style="flex:1;height:100%;background:url('${f}') center/cover no-repeat;"></div>`).join('');
+        slide.innerHTML = `<div style="display:flex;width:100%;height:100%;gap:2px;">${cols}</div>${textHTML}`;
+      } else if (s.imagen_url) {
+        slide.innerHTML = `<img src="${s.imagen_url}" alt="${s.titulo || ''}" loading="lazy" onerror="this.style.display='none'">${textHTML}`;
       } else {
         slide.innerHTML = `
           <div class="banner-slide-placeholder" style="background:${s.color || '#1a1a2e'}">
@@ -1177,9 +1182,10 @@
         'Calendario':'linear-gradient(135deg,#2a1a3a 0%,#5a1a8e 100%)',
       };
       return (typeof MOCK_NOTICIAS !== 'undefined' ? MOCK_NOTICIAS : []).map(n => ({
-        imagen_url: '',
+        imagen_url: n.imagen_url || '',
+        fotos: n.fotos || null,
         titulo: n.titulo,
-        subtitulo: n.resumen,
+        subtitulo: n.excerpt || n.resumen || '',
         color: catColors[n.categoria] || 'linear-gradient(135deg,#1a202c 0%,#2d3748 100%)',
         _cat: n.categoria,
         href: 'noticias.html'
