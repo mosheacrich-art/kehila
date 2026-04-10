@@ -18,9 +18,9 @@
     .com-inner {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 32px 28px 80px;
+      padding: 64px 28px 80px;
     }
-    @media (max-width: 768px) { .com-inner { padding: 20px 16px 100px; } }
+    @media (max-width: 768px) { .com-inner { padding: 72px 16px 100px; } }
 
     /* ─── Tabs ─── */
     .com-tabs {
@@ -145,11 +145,12 @@
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
 <script>
-  buildSidebar('comunidad');
-  buildBottomNav('comunidad');
+  initNav('comunidad');
 
-  // Tab switching
+  // Tab switching con historial del navegador
   const tabs = document.querySelectorAll('.com-tab');
+  history.replaceState({ tab: 'marketplace' }, '');
+
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const target = tab.dataset.tab;
@@ -157,7 +158,18 @@
       document.querySelectorAll('.com-panel').forEach(p => p.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById('panel-' + target).classList.add('active');
+      history.pushState({ tab: target }, '');
     });
+  });
+
+  window.addEventListener('popstate', e => {
+    const target = (e.state && e.state.tab) ? e.state.tab : 'marketplace';
+    tabs.forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.com-panel').forEach(p => p.classList.remove('active'));
+    const btn = document.querySelector('.com-tab[data-tab="' + target + '"]');
+    if (btn) btn.classList.add('active');
+    const panel = document.getElementById('panel-' + target);
+    if (panel) panel.classList.add('active');
   });
 </script>
 </body>

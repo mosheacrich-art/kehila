@@ -18,9 +18,9 @@
     .rav-inner {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 32px 28px 80px;
+      padding: 64px 28px 80px;
     }
-    @media (max-width: 768px) { .rav-inner { padding: 20px 16px 100px; } }
+    @media (max-width: 768px) { .rav-inner { padding: 72px 16px 100px; } }
 
     /* ─── Tabs ─── */
     .rav-tabs {
@@ -129,10 +129,11 @@
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
 <script>
-  buildSidebar('rav-hub');
-  buildBottomNav('rav-hub');
+  initNav('rav-hub');
 
   const tabs = document.querySelectorAll('.rav-tab');
+  history.replaceState({ tab: 'preguntas' }, '');
+
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const target = tab.dataset.tab;
@@ -140,7 +141,18 @@
       document.querySelectorAll('.rav-panel').forEach(p => p.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById('panel-' + target).classList.add('active');
+      history.pushState({ tab: target }, '');
     });
+  });
+
+  window.addEventListener('popstate', e => {
+    const target = (e.state && e.state.tab) ? e.state.tab : 'preguntas';
+    tabs.forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.rav-panel').forEach(p => p.classList.remove('active'));
+    const btn = document.querySelector('.rav-tab[data-tab="' + target + '"]');
+    if (btn) btn.classList.add('active');
+    const panel = document.getElementById('panel-' + target);
+    if (panel) panel.classList.add('active');
   });
 </script>
 </body>

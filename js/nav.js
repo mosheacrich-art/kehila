@@ -366,6 +366,7 @@ function toggleMoreDrawer() {
  * @param {string} activePage
  */
 function buildHamburger(activePage) {
+  if (window.self !== window.top) return;
   const user = getCurrentUser();
   if (!user) return;
 
@@ -578,13 +579,14 @@ function closeHamburger() {
  * @param {string} activePage - id de la página activa
  */
 function buildBackBtn(activePage) {
+  if (window.self !== window.top) return;
   if (activePage === 'home') return;
 
   const btn = document.createElement('button');
   btn.id = 'global-back-btn';
-  btn.setAttribute('aria-label', 'Volver al inicio');
+  btn.setAttribute('aria-label', 'Volver atrás');
   btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>`;
-  btn.onclick = () => { window.location.href = 'home.html'; };
+  btn.onclick = () => history.back();
 
   const style = document.createElement('style');
   style.textContent = `
@@ -616,6 +618,18 @@ function buildBackBtn(activePage) {
   `;
   document.head.appendChild(style);
   document.body.appendChild(btn);
+
+  /* En pantallas anchas el contenido puede estar centrado con margin:auto,
+     así que alineamos el botón al borde izquierdo real del contenedor. */
+  function alignBtn() {
+    if (window.innerWidth <= 768) return;
+    var inner = document.querySelector('.main-content > *');
+    if (!inner) return;
+    var rect = inner.getBoundingClientRect();
+    if (rect.left > 0) btn.style.left = rect.left + 'px';
+  }
+  requestAnimationFrame(alignBtn);
+  window.addEventListener('resize', alignBtn);
 }
 
 /**
