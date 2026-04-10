@@ -1228,7 +1228,7 @@
   (function initResumen() {
     const activos   = MOCK_USERS.filter(u => u.status === 'active').length;
     const pendientes = MOCK_USERS.filter(u => u.status === 'pending').length;
-    const totalDonativos = MOCK_DONATIVOS.reduce((s, d) => s + d.recaudado, 0);
+    const totalDonativos = MOCK_DONATIVOS.reduce((s, d) => s + d.actual, 0);
 
     document.getElementById('metric-activos').textContent    = activos;
     document.getElementById('metric-pendientes').textContent = pendientes;
