@@ -748,7 +748,19 @@
     ════════════════════════════════ -->
     <div class="tab-panel" id="panel-noticias">
 
-      <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
+      <!-- Banner del inicio -->
+      <div style="background:#1b2e5e;border-radius:14px;padding:18px 22px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div>
+          <p style="color:#c9a84c;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Banner del inicio</p>
+          <p style="color:#fff;font-size:0.9rem;font-weight:600;margin:0;">Slides del carrusel principal</p>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.78rem;margin:2px 0 0;">Añade, edita y elimina los slides que se ven en la pantalla de inicio</p>
+        </div>
+        <a href="home.html" target="_blank" style="background:#c9a84c;color:#1b2e5e;border:none;border-radius:10px;padding:10px 18px;font-size:0.85rem;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none;flex-shrink:0;">Gestionar Banner</a>
+      </div>
+
+      <!-- Noticias -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin:0;">Noticias publicadas</p>
         <button class="btn btn-primary" onclick="openModal('modal-noticia')">
           <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:17px;height:17px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
           Nueva noticia
@@ -1782,13 +1794,13 @@
     const container = document.getElementById('news-admin-list');
     container.innerHTML = newsState.map(n => `
       <div class="news-admin-row" id="news-row-${n.id}">
-        ${n.imagen ? `<img src="${n.imagen}" class="news-admin-thumb" alt="">` : `<div class="news-admin-emoji">${n.emoji}</div>`}
+        ${n.imagen ? `<img src="${n.imagen}" class="news-admin-thumb" alt="">` : `<div style="width:52px;height:52px;border-radius:10px;background:${n.colorCategoria||'#1b2e5e'};display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700;font-size:1.05rem;text-transform:uppercase;">${(n.categoria||'N')[0]}</div>`}
         <div class="news-admin-info">
           <p class="news-admin-title">${n.titulo}</p>
           <p class="news-admin-meta">${n.categoria} · ${formatDate(n.fecha)} · ${n.autor}</p>
         </div>
-        <button class="pin-btn ${n.destacada ? 'pinned' : ''}"
-          title="${n.destacada ? 'Quitar de portada' : 'Fijar en portada'}"
+        <button class="pin-btn ${(n.destacada||n.isPinned) ? 'pinned' : ''}"
+          title="${(n.destacada||n.isPinned) ? 'Quitar de portada' : 'Fijar en portada'}"
           onclick="togglePin('${n.id}')"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg></button>
         <button class="btn btn-sm btn-secondary" onclick="showToast('Edición próximamente','info')">Editar</button>
         <button class="btn btn-sm btn-danger" onclick="promptDelNoticia('${n.id}')">Eliminar</button>

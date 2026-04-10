@@ -163,9 +163,12 @@
     }
 
     .banner-slide img {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center;
       display: block;
     }
 
@@ -1192,105 +1195,116 @@
         if (btn) btn.style.display = 'flex';
       }
       const noticiaSlides = getNoticiaSlides();
+      // localStorage first
+      const lsSlides = JSON.parse(localStorage.getItem('banner_custom') || '[]');
+      if (lsSlides.length) { renderBanner([...lsSlides, ...noticiaSlides]); return; }
       if (!sb) { renderBanner([...BANNER_FALLBACK, ...noticiaSlides]); return; }
       try {
-        const { data, error } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
-        const dbSlides = data?.length ? data : BANNER_FALLBACK;
-        renderBanner([...dbSlides, ...noticiaSlides]);
+        const { data } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
+        renderBanner([...(data?.length ? data : BANNER_FALLBACK), ...noticiaSlides]);
       } catch(e) { renderBanner([...BANNER_FALLBACK, ...noticiaSlides]); }
     }
 
-    /* ── Admin: gestionar slides ── */
-    function abrirBannerAdmin() {
-      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
-      if (!sb) { showToast('Sin conexión con Supabase', 'error'); return; }
+    /* ── Admin: gestionar slides (localStorage) ── */
+    function _lsBannerGet() { return JSON.parse(localStorage.getItem('banner_custom') || '[]'); }
+    function _lsBannerSave(arr) { localStorage.setItem('banner_custom', JSON.stringify(arr)); }
 
-      async function refreshList(container) {
-        const { data } = await sb.from('banner_slides').select('*').order('orden');
-        container.innerHTML = (data || []).map(s => `
-          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #eee;" data-id="${s.id}">
-            ${s.imagen_url ? `<img src="${s.imagen_url}" style="width:60px;height:36px;object-fit:cover;border-radius:6px;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:60px;height:36px;border-radius:6px;background:#eee;flex-shrink:0;"></div>`}
-            <div style="flex:1;min-width:0;">
-              <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.titulo || '(sin título)'}</div>
-              <div style="font-size:0.75rem;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.imagen_url || 'Sin imagen'}</div>
-            </div>
-            <button onclick="deleteBannerSlide('${s.id}')" style="background:none;border:none;cursor:pointer;color:#e55;font-size:1rem;flex-shrink:0;" title="Eliminar">🗑</button>
-          </div>`).join('') || '<p style="color:#aaa;font-size:0.85rem;text-align:center;padding:16px 0;">No hay slides todavía</p>';
-      }
+    function abrirBannerAdmin() {
+      if (document.getElementById('banner-overlay')) return;
 
       const overlay = document.createElement('div');
       overlay.id = 'banner-overlay';
-      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px;';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px;';
       overlay.innerHTML = `
-        <div style="background:#fff;border-radius:16px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div style="background:#fff;border-radius:16px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.25);">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid #eee;">
-            <h3 style="font-size:1.05rem;font-weight:700;">🖼️ Gestionar banner</h3>
-            <button onclick="document.getElementById('banner-overlay').remove()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#888;">✕</button>
+            <div>
+              <h3 style="font-size:1.05rem;font-weight:700;margin:0;">Gestionar banner</h3>
+              <p style="font-size:0.75rem;color:#888;margin:2px 0 0;">Los cambios se guardan en este dispositivo</p>
+            </div>
+            <button onclick="document.getElementById('banner-overlay').remove()" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:#aaa;line-height:1;padding:4px;">✕</button>
           </div>
           <div style="padding:20px 24px;">
+            <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin-bottom:10px;">Slides activos</p>
             <div id="banner-list-container" style="margin-bottom:20px;"></div>
-            <div style="border-top:1px solid #eee;padding-top:16px;">
-              <p style="font-size:0.85rem;font-weight:600;margin-bottom:10px;">Añadir slide</p>
-              <input id="bnew-titulo" placeholder="Título" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:8px;box-sizing:border-box;">
-              <input id="bnew-subtitulo" placeholder="Subtítulo (opcional)" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:8px;box-sizing:border-box;">
-              <div style="margin-bottom:8px;">
-                <label style="display:block;font-size:0.8rem;color:#666;margin-bottom:6px;font-weight:500;">Imagen</label>
-                <label id="bnew-file-label" style="display:flex;align-items:center;gap:8px;border:1.5px dashed #c0c7d4;border-radius:8px;padding:10px 14px;cursor:pointer;font-size:0.85rem;color:#666;background:#fafafa;transition:border-color 0.2s;">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
-                  <span id="bnew-file-text">Subir foto desde el dispositivo</span>
-                  <input type="file" id="bnew-file" accept="image/*" style="display:none;">
-                </label>
-                <img id="bnew-preview" src="" alt="" style="display:none;width:100%;height:80px;object-fit:cover;border-radius:8px;margin-top:8px;">
-              </div>
-              <input id="bnew-url" placeholder="O pegar URL de imagen" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:12px;box-sizing:border-box;">
-              <button id="bnew-save" style="width:100%;background:var(--color-primary);color:#fff;border:none;border-radius:10px;padding:12px;font-size:0.9rem;font-weight:600;cursor:pointer;">Añadir slide</button>
+            <div style="border-top:1px solid #eee;padding-top:18px;">
+              <p style="font-size:0.85rem;font-weight:600;margin-bottom:12px;">+ Añadir slide</p>
+              <input id="bnew-titulo" placeholder="Título *" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:9px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:8px;box-sizing:border-box;">
+              <input id="bnew-subtitulo" placeholder="Subtítulo (opcional)" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:9px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box;">
+              <label style="display:block;font-size:0.8rem;color:#555;font-weight:500;margin-bottom:6px;">Imagen</label>
+              <label style="display:flex;align-items:center;gap:8px;border:1.5px dashed #c0c7d4;border-radius:8px;padding:10px 14px;cursor:pointer;font-size:0.85rem;color:#666;background:#fafafa;margin-bottom:8px;">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+                <span id="bnew-file-text">Subir foto desde el dispositivo</span>
+                <input type="file" id="bnew-file" accept="image/*" style="display:none;">
+              </label>
+              <img id="bnew-preview" src="" alt="" style="display:none;width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:8px;">
+              <input id="bnew-url" placeholder="O pegar URL de imagen" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:9px 12px;font-size:0.88rem;font-family:inherit;outline:none;margin-bottom:14px;box-sizing:border-box;">
+              <button id="bnew-save" style="width:100%;background:#1b2e5e;color:#fff;border:none;border-radius:10px;padding:12px;font-size:0.9rem;font-weight:600;cursor:pointer;letter-spacing:0.02em;">Añadir slide</button>
             </div>
           </div>
         </div>`;
       document.body.appendChild(overlay);
 
-      const listEl = overlay.querySelector('#banner-list-container');
-      refreshList(listEl);
+      function refreshList() {
+        const slides = _lsBannerGet();
+        const container = overlay.querySelector('#banner-list-container');
+        if (!slides.length) {
+          container.innerHTML = '<p style="color:#aaa;font-size:0.82rem;text-align:center;padding:10px 0 4px;">Sin slides personalizados — se usan los predeterminados</p>';
+          return;
+        }
+        container.innerHTML = slides.map((s, i) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f3f4f6;">
+            ${s.imagen_url ? `<img src="${s.imagen_url}" style="width:68px;height:40px;object-fit:cover;border-radius:7px;flex-shrink:0;" onerror="this.style.background='#eee'">` : `<div style="width:68px;height:40px;border-radius:7px;background:${s.color||'#1b2e5e'};flex-shrink:0;"></div>`}
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.titulo||'(sin título)'}</div>
+              <div style="font-size:0.73rem;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.subtitulo||'Sin subtítulo'}</div>
+            </div>
+            <button data-del="${i}" style="background:#fef2f2;border:none;cursor:pointer;color:#dc2626;padding:5px 10px;border-radius:7px;font-size:0.78rem;font-weight:600;flex-shrink:0;">Borrar</button>
+          </div>`).join('');
+        container.querySelectorAll('[data-del]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const arr = _lsBannerGet();
+            arr.splice(parseInt(btn.dataset.del), 1);
+            _lsBannerSave(arr);
+            loadBanner();
+            refreshList();
+          });
+        });
+      }
 
-      /* File upload → data URL or Supabase Storage */
+      refreshList();
+
       let _pickedDataUrl = '';
-      overlay.querySelector('#bnew-file').addEventListener('change', async (e) => {
+      overlay.querySelector('#bnew-file').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
         overlay.querySelector('#bnew-file-text').textContent = file.name;
-        // Try Supabase Storage first
-        const storage = sb?.storage;
-        if (storage) {
-          const ext = file.name.split('.').pop();
-          const path = `banner/${Date.now()}.${ext}`;
-          const { data: up, error: upErr } = await storage.from('imagenes').upload(path, file, { upsert: true });
-          if (!upErr) {
-            const { data: pub } = storage.from('imagenes').getPublicUrl(path);
-            _pickedDataUrl = pub?.publicUrl || '';
-            overlay.querySelector('#bnew-url').value = _pickedDataUrl;
-            const prev = overlay.querySelector('#bnew-preview');
-            prev.src = _pickedDataUrl; prev.style.display = 'block';
-            return;
-          }
-        }
-        // Fallback: read as data URL
         const reader = new FileReader();
         reader.onload = (ev) => {
           _pickedDataUrl = ev.target.result;
-          overlay.querySelector('#bnew-url').value = '';
           const prev = overlay.querySelector('#bnew-preview');
           prev.src = _pickedDataUrl; prev.style.display = 'block';
         };
         reader.readAsDataURL(file);
       });
 
-      overlay.querySelector('#bnew-save').addEventListener('click', async () => {
+      overlay.querySelector('#bnew-url').addEventListener('input', (e) => {
+        const url = e.target.value.trim();
+        if (url) {
+          _pickedDataUrl = '';
+          const prev = overlay.querySelector('#bnew-preview');
+          prev.src = url; prev.style.display = 'block';
+        }
+      });
+
+      overlay.querySelector('#bnew-save').addEventListener('click', () => {
         const titulo = overlay.querySelector('#bnew-titulo').value.trim();
         const subtitulo = overlay.querySelector('#bnew-subtitulo').value.trim();
         const imagen_url = _pickedDataUrl || overlay.querySelector('#bnew-url').value.trim();
         if (!titulo) { showToast('El título es obligatorio', 'error'); return; }
-        const { error } = await sb.from('banner_slides').insert({ titulo, subtitulo, imagen_url, activo: true, orden: 99 });
-        if (error) { showToast('Error al guardar', 'error'); return; }
+        const arr = _lsBannerGet();
+        arr.push({ id: 'ls_' + Date.now(), titulo, subtitulo, imagen_url });
+        _lsBannerSave(arr);
         overlay.querySelector('#bnew-titulo').value = '';
         overlay.querySelector('#bnew-subtitulo').value = '';
         overlay.querySelector('#bnew-url').value = '';
@@ -1298,18 +1312,9 @@
         overlay.querySelector('#bnew-preview').style.display = 'none';
         _pickedDataUrl = '';
         showToast('Slide añadido', 'success');
-        refreshList(listEl);
         loadBanner();
+        refreshList();
       });
-    }
-
-    async function deleteBannerSlide(id) {
-      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
-      if (!sb) return;
-      await sb.from('banner_slides').delete().eq('id', id);
-      showToast('Slide eliminado', 'success');
-      document.querySelector(`[data-id="${id}"]`)?.remove();
-      loadBanner();
     }
 
     document.getElementById('banner-admin-btn').addEventListener('click', abrirBannerAdmin);
