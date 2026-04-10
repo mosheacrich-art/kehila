@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kehilá — Panel Admin</title>
+  <title>Jabad Barcelona — Panel Admin</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
@@ -540,7 +540,7 @@
   <meta name="theme-color" content="#1b2e5e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Kehilá">
+  <meta name="apple-mobile-web-app-title" content="Jabad Barcelona">
   <link rel="apple-touch-icon" href="img/icon-192.png">
 </head>
 <body>
@@ -976,7 +976,7 @@
           </div>
           <div class="form-group">
             <label class="form-label required">Ubicación</label>
-            <input type="text" class="form-input" id="ev-lugar" placeholder="Ej. Sinagoga Bet El, C/ Balmes 3, Madrid">
+            <input type="text" class="form-input" id="ev-lugar" placeholder="Ej. Sinagoga Bet Jabad, Carrer Montnegre 14-16, Barcelona">
             <span class="form-error" id="ev-lugar-err" style="display:none;">La ubicación es obligatoria.</span>
           </div>
           <div class="date-grid">
@@ -1417,7 +1417,7 @@
       ${row('Comunidad', sol.comunidad || u.comunidad)}
       ${row('Práctica religiosa', sol.practica || u.practica)}
       ${row('Familiar en kehilá', sol.familiar === 'si' ? (sol.familiarNombre || 'Sí') : (u.familiar ? (u.familiar_nombre || 'Sí') : 'No'))}
-      ${row('Cómo conoció Kehilá', sol.comoConocio || u.como_conocio)}
+      ${row('Cómo conoció Jabad Barcelona', sol.comoConocio || u.como_conocio)}
 
       ${section('Registro')}
       ${row('Fecha solicitud', sol.submittedAt ? new Date(sol.submittedAt).toLocaleString('es-ES') : u.joinDate)}
@@ -1519,7 +1519,7 @@
         email:           p.email || '—',
         role:            p.role || 'miembro',
         status:          p.status || 'pending',
-        comunidad:       p.comunidad || 'Bet El Madrid',
+        comunidad:       p.comunidad || 'Jabad Barcelona',
         initials:        p.initials || p.name?.slice(0,2).toUpperCase() || '??',
         joinDate:        p.created_at?.slice(0,10) || new Date().toISOString().slice(0,10),
         source:          'real',
@@ -1621,7 +1621,7 @@
       initials:        (nombre[0] + apellido[0]).toUpperCase(),
       role:            'miembro',
       status:          'pending',
-      comunidad:       'Bet El Madrid',
+      comunidad:       'Jabad Barcelona',
       telefono:        '+34 6' + String(Math.floor(10000000 + Math.random()*89999999)),
       doc_tipo:        'DNI',
       doc_numero:      String(Math.floor(10000000 + Math.random()*89999999)) + rand(['A','B','C','D','E','F','G','H','J','K','L','M','N','P','Q','R','S','T','V','W','X','Y','Z']),
@@ -1970,7 +1970,7 @@
             <div class="pending-detail-row"><div class="label">Comunidad solicitada</div><div class="value">${s.comunidad || '—'}</div></div>
             <div class="pending-detail-row"><div class="label">Práctica judía</div><div class="value">${s.practica || '—'}</div></div>
             <div class="pending-detail-row"><div class="label">Familiar en comunidad</div><div class="value">${s.familiar ? (s.familiarNombre || 'Sí') : 'No'}</div></div>
-            <div class="pending-detail-row"><div class="label">Cómo conoció Kehilá</div><div class="value">${s.comoConocio || '—'}</div></div>
+            <div class="pending-detail-row"><div class="label">Cómo conoció Jabad Barcelona</div><div class="value">${s.comoConocio || '—'}</div></div>
             <div class="pending-detail-row"><div class="label">Documento adjunto</div><div class="value">${s.docFileName ? `<span style="color:#16a34a;font-weight:600;">&#10003; ${s.docFileName}</span>` : '<span style="color:#ef4444;">No adjuntado</span>'}</div></div>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--color-border-light);">

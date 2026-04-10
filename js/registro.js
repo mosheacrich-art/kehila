@@ -378,7 +378,7 @@ async function regSubmit() {
         initials:        initials,
         role:            'miembro',
         status:          'pending',
-        comunidad:       'Bet El Madrid',
+        comunidad:       'Jabad Barcelona',
         telefono:        (REG.data.telefonoPrefijo || '+34') + ' ' + (REG.data.telefono || ''),
         doc_tipo:        REG.data.docTipo        || null,
         doc_numero:      REG.data.docNumero      || null,
@@ -584,7 +584,7 @@ function openTermsModal(type) {
     title.textContent = 'Términos de Uso y Normas de Convivencia';
     body.innerHTML = `
       <p><strong>Artículo 1 — Objeto y ámbito de aplicación</strong><br>
-      Los presentes Términos de Uso regulan el acceso y utilización de la plataforma Kehilá, destinada exclusivamente a miembros de comunidades judías en España y sus familias.</p>
+      Los presentes Términos de Uso regulan el acceso y utilización de la plataforma Jabad Barcelona, destinada exclusivamente a miembros de comunidades judías en España y sus familias.</p>
       <p><strong>Artículo 2 — Requisitos de membresía</strong><br>
       El acceso requiere ser judío/a, familiar directo de un miembro, o encontrarse en proceso de guiur (conversión). La solicitud es revisada manualmente por la administración de cada comunidad.</p>
       <p><strong>Artículo 3 — Normas de conducta</strong><br>
@@ -594,7 +594,7 @@ function openTermsModal(type) {
       <p><strong>Artículo 5 — Confidencialidad</strong><br>
       La información de los miembros es estrictamente confidencial y no será compartida fuera del ámbito de la comunidad.</p>
       <p><strong>Artículo 6 — Propiedad intelectual</strong><br>
-      Todo el contenido de la plataforma es propiedad de Kehilá Comunidades o de sus respectivos autores.</p>
+      Todo el contenido de la plataforma es propiedad de Jabad Barcelona o de sus respectivos autores.</p>
       <p><strong>Artículo 7 — Causas de suspensión</strong><br>
       El incumplimiento de estos términos puede resultar en la suspensión temporal o permanente del acceso.</p>
       <p><strong>Artículo 8 — Legislación aplicable</strong><br>
@@ -603,14 +603,14 @@ function openTermsModal(type) {
   } else {
     title.textContent = 'Política de Privacidad';
     body.innerHTML = `
-      <p><strong>Responsable del tratamiento:</strong> Kehilá Comunidades · privacidad@kehila.app</p>
+      <p><strong>Responsable del tratamiento:</strong> Jabad Barcelona · privacidad@jabad.barcelona</p>
       <p><strong>Finalidad:</strong> Gestión de membresía comunitaria, comunicación de eventos y actividades de la comunidad judía.</p>
       <p><strong>Base legal:</strong> Consentimiento explícito del interesado (Art. 6.1.a RGPD).</p>
       <p><strong>Datos recogidos:</strong> Nombre, apellidos, email, teléfono, documento de identidad, fecha de nacimiento, nacionalidad, domicilio. Estos datos son necesarios para verificar la identidad y gestionar el acceso.</p>
       <p><strong>Plazo de conservación:</strong> Los datos se conservan durante la vigencia de la membresía y 2 años adicionales tras la baja, salvo obligación legal.</p>
-      <p><strong>Derechos ARCO:</strong> Puedes ejercer tus derechos de Acceso, Rectificación, Cancelación y Oposición escribiendo a privacidad@kehila.app con copia de tu documento de identidad.</p>
+      <p><strong>Derechos ARCO:</strong> Puedes ejercer tus derechos de Acceso, Rectificación, Cancelación y Oposición escribiendo a privacidad@jabad.barcelona con copia de tu documento de identidad.</p>
       <p><strong>Transferencias internacionales:</strong> No se realizan transferencias de datos fuera del Espacio Económico Europeo.</p>
-      <p><strong>Delegado de Protección de Datos:</strong> privacidad@kehila.app</p>
+      <p><strong>Delegado de Protección de Datos:</strong> privacidad@jabad.barcelona</p>
     `;
   }
 

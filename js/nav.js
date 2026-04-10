@@ -150,20 +150,8 @@ function buildSidebar(activePage) {
     <aside class="sidebar">
       <div class="sidebar-inner">
         <!-- Logo -->
-        <a href="home.html" class="sidebar-logo" style="text-decoration:none;cursor:pointer">
-          <div class="sidebar-logo-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12,2 21,17 3,17" stroke-width="1.3"/>
-              <polygon points="12,22 21,7 3,7" stroke-width="1.3"/>
-              <line x1="9" y1="8" x2="9" y2="16" stroke-width="2.2"/>
-              <line x1="9" y1="12" x2="16" y2="8" stroke-width="2.2"/>
-              <line x1="9" y1="12" x2="16" y2="16" stroke-width="2.2"/>
-            </svg>
-          </div>
-          <div>
-            <div class="sidebar-logo-text">Kehilá</div>
-            <span class="sidebar-logo-sub">App Comunidades</span>
-          </div>
+        <a href="home.html" class="sidebar-logo" style="text-decoration:none;cursor:pointer;display:flex;justify-content:center;align-items:center;width:100%;padding:4px 0 12px;">
+          <img src="img/logo_jabad.png" alt="Jabad Barcelona" style="width:90px;height:90px;border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 2px 12px rgba(0,0,0,0.3);">
         </a>
 
         <!-- Usuario -->
@@ -316,7 +304,7 @@ function buildMoreDrawer(activePage) {
     <div id="more-drawer-backdrop" onclick="toggleMoreDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:699;"></div>
     <div id="more-drawer" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:700;background:#fff;border-radius:20px 20px 0 0;padding:0 0 env(safe-area-inset-bottom,0);max-height:80vh;overflow-y:auto;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.32,.72,0,1);">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;border-bottom:1px solid #e2e8f0;">
-        <span style="font-weight:700;font-size:1rem;color:#1a202c;">Kehilá</span>
+        <span style="font-weight:700;font-size:1rem;color:#1a202c;">Jabad Barcelona</span>
         <div style="display:flex;gap:8px;align-items:center;">
           <button onclick="toggleLang();toggleMoreDrawer();" style="font-size:0.7rem;font-weight:700;color:#718096;background:#f7fafc;border:1px solid #e2e8f0;border-radius:4px;padding:4px 10px;cursor:pointer;">${langLabel}</button>
           <button onclick="toggleMoreDrawer()" style="background:none;border:none;font-size:0.85rem;color:#718096;cursor:pointer;padding:4px 8px;">${closeLabel}</button>
@@ -405,15 +393,13 @@ function buildHamburger(activePage) {
     <div id="hb-overlay" onclick="closeHamburger()" style="display:none"></div>
     <div id="hb-drawer">
       <div class="hb-header">
-        <div class="hb-logo">
-          <div class="hb-logo-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 21,17 3,17" stroke-width="1.3"/><polygon points="12,22 21,7 3,7" stroke-width="1.3"/><line x1="9" y1="8" x2="9" y2="16" stroke-width="2.2"/><line x1="9" y1="12" x2="16" y2="8" stroke-width="2.2"/><line x1="9" y1="12" x2="16" y2="16" stroke-width="2.2"/></svg>
-          </div>
+        <a href="home.html" class="hb-logo" style="text-decoration:none;" onclick="closeHamburger()">
+          <img src="img/logo_jabad.png" alt="Jabad Barcelona" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
           <div>
-            <div class="hb-logo-text">Kehilá</div>
-            <div class="hb-logo-sub">App Comunidades</div>
+            <div class="hb-logo-text">Jabad Barcelona</div>
+            <div class="hb-logo-sub">Comunidad Jabad Lubavitch</div>
           </div>
-        </div>
+        </a>
         <button class="hb-close" onclick="closeHamburger()" aria-label="Cerrar menú">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
         </button>

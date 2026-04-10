@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kehilá — Inicio</title>
+  <title>Jabad Barcelona — Inicio</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
@@ -749,7 +749,7 @@
   <meta name="theme-color" content="#1b2e5e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Kehilá">
+  <meta name="apple-mobile-web-app-title" content="Jabad Barcelona">
   <link rel="apple-touch-icon" href="img/icon-192.png">
 </head>
 <body>
@@ -1091,7 +1091,7 @@
        BANNER CAROUSEL
     ══════════════════════════════════════ */
     const BANNER_FALLBACK = [
-      { imagen_url: '', titulo: 'Bienvenidos a Kehilá', subtitulo: 'Tu comunidad judía en España', color: 'linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%)' },
+      { imagen_url: '', titulo: 'Bienvenidos a Jabad Barcelona', subtitulo: 'Tu comunidad judía en Barcelona', color: 'linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%)' },
       { imagen_url: '', titulo: 'Próximos eventos', subtitulo: 'Shabat · Clases · Celebraciones', color: 'linear-gradient(135deg,#2d4a22 0%,#3a6b2e 100%)' },
       { imagen_url: '', titulo: 'Tienda Kosher', subtitulo: 'Vinos, productos y más', color: 'linear-gradient(135deg,#5c2d0a 0%,#8b4513 100%)' }
     ];
@@ -1459,7 +1459,7 @@
     ══════════════════════════════════════════ */
     const SHABAT_CITIES = {
       "madrid":      { name:"Madrid",          lat:40.4168,  lon:-3.7038,   tz:"Europe/Madrid",                    b:18, m:42 },
-      "barcelona":   { name:"Barcelona",        lat:41.3888,  lon:2.1589,    tz:"Europe/Madrid",                    b:18, m:42 },
+      "barcelona":   { name:"Barcelona · Les Corts",  lat:41.38879, lon:2.15899,    tz:"Europe/Madrid",                    b:18, m:42 },
       "valencia":    { name:"Valencia",         lat:39.4699,  lon:-0.3763,   tz:"Europe/Madrid",                    b:18, m:42 },
       "bilbao":      { name:"Bilbao",           lat:43.2630,  lon:-2.9350,   tz:"Europe/Madrid",                    b:18, m:42 },
       "sevilla":     { name:"Sevilla",          lat:37.3891,  lon:-5.9845,   tz:"Europe/Madrid",                    b:18, m:42 },
@@ -1517,8 +1517,8 @@
 
     async function loadShabatCard() {
       try {
-        const cityKey = localStorage.getItem('kehila_city') || 'madrid';
-        const city = SHABAT_CITIES[cityKey] || SHABAT_CITIES['madrid'];
+        const cityKey = localStorage.getItem('kehila_city') || 'barcelona';
+        const city = SHABAT_CITIES[cityKey] || SHABAT_CITIES['barcelona'];
 
         const today = new Date();
         const year  = today.getFullYear();

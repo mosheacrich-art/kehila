@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shiurim — Kehilá</title>
+  <title>Shiurim — Jabad Barcelona</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
@@ -791,7 +791,7 @@
   <meta name="theme-color" content="#1b2e5e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Kehilá">
+  <meta name="apple-mobile-web-app-title" content="Jabad Barcelona">
   <link rel="apple-touch-icon" href="img/icon-192.png">
 </head>
 <body>
@@ -980,7 +980,7 @@
     // ── Helpers ──────────────────────────────────────────────
 
     const TEACHER_DESCS = {
-      'HaRav Yosef Cohen':  'Rosh Yeshivá de Bet El. Especialista en Talmud y pensamiento judío clásico.',
+      'HaRav Dovid Libersohn':  'Rabino de Jabad Barcelona desde 1999. Especialista en Talmud, halaká y pensamiento jasídico Lubavitch.',
       'HaRav David Levi':   'Rabino principal de la comunidad. Especialista en halajá y minhag sefaradí.',
       'Prof. Sara Mizrahi': 'Doctora en Historia Medieval. Docente universitaria especializada en judaísmo español.',
       'HaRav Aaron Peretz': 'Dayan del Beit Din comunitario. Experto en Parshanut y comentarios clásicos.'
@@ -1227,7 +1227,7 @@
     function openDrawer(shiur) {
       currentShiur = shiur;
       const bg = CAT_COLORS[shiur.categoria] || '#1B2E5E';
-      const teacherDesc = TEACHER_DESCS[shiur.maestro] || 'Maestro de Torah de la comunidad Bet El.';
+      const teacherDesc = TEACHER_DESCS[shiur.maestro] || 'Maestro de Torah de la comunidad Jabad Barcelona.';
       const stars = starsHTML(shiur.nivel);
       const nivelLabel = NIVEL_LABELS[shiur.nivel] || '';
       const catCls = catBadgeClass(shiur.categoria);

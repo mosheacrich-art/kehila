@@ -24,35 +24,35 @@ function getSupabase() {
 
 // ─── Datos mock (siguen funcionando) ─────────
 const USERS_DB = {
-  'admin@kehila.es': {
+  'admin@jabad.barcelona': {
     userId: 'u001',
-    name: 'Rabino David Levi',
-    email: 'admin@kehila.es',
-    password: 'admin123',
+    name: 'Dovid Libersohn',
+    email: 'admin@jabad.barcelona',
+    password: 'Admin1234',
     role: 'admin',
     status: 'active',
-    comunidad: 'Bet El Madrid',
+    comunidad: 'Jabad Barcelona',
     initials: 'DL'
   },
-  'moshe@kehila.es': {
+  'moshe@jabad.barcelona': {
     userId: 'u002',
     name: 'Moshe Goldstein',
-    email: 'moshe@kehila.es',
-    password: 'moshe123',
+    email: 'moshe@jabad.barcelona',
+    password: 'Moshe1234',
     role: 'miembro',
     status: 'active',
-    comunidad: 'Bet El Madrid',
+    comunidad: 'Jabad Barcelona',
     initials: 'MG'
   },
-  'nuevo@kehila.es': {
+  'sarah@gmail.com': {
     userId: 'u003',
-    name: 'Carlos Nuevo',
-    email: 'nuevo@kehila.es',
-    password: 'nuevo123',
+    name: 'Sarah Cohen',
+    email: 'sarah@gmail.com',
+    password: 'Sarah1234',
     role: 'miembro',
     status: 'pending',
-    comunidad: 'Bet El Madrid',
-    initials: 'CN'
+    comunidad: 'Jabad Barcelona',
+    initials: 'SC'
   }
 };
 
@@ -110,7 +110,7 @@ async function login(email, password) {
           email: data.user.email,
           role: profile?.role || 'miembro',
           status: profile?.status || 'pending',
-          comunidad: profile?.comunidad || 'Bet El Madrid',
+          comunidad: profile?.comunidad || 'Jabad Barcelona',
           initials: profile?.initials || normalizedEmail.slice(0, 2).toUpperCase(),
           loginAt: new Date().toISOString(),
           source: 'supabase'

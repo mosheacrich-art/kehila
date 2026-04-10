@@ -63,7 +63,7 @@ const TRANSLATIONS = {
     home_banner_manage:  'Gestionar',
     home_eventos:        'Próximos eventos',
     home_noticias:       'Últimas noticias',
-    home_sinagoga:       'Hoy en la sinagoga',
+    home_sinagoga:       'Bet Jabad Barcelona — Montnegre 14',
 
     // Eventos (dinámico)
     ev_completo:    'Completo',
@@ -90,7 +90,7 @@ const TRANSLATIONS = {
     perfil_direccion: 'Dirección',
     perfil_practica:  'Práctica religiosa',
     perfil_familiar:  'Familiar en kehilá',
-    perfil_conocio:   'Cómo conoció Kehilá',
+    perfil_conocio:   'Cómo conoció Jabad Barcelona',
     perfil_doc_tipo:  'Tipo',
     perfil_doc_num:   'Número',
     perfil_photo:     'Cambiar foto',

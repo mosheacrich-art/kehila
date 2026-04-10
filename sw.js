@@ -1,5 +1,5 @@
 /* =============================================
-   Kehilá — Service Worker
+   Jabad Barcelona — Service Worker
    ============================================= */
 
 const CACHE = 'kehila-v2';

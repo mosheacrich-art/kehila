@@ -3,230 +3,350 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Siddur — Kehilá</title>
+  <title>Siddur — Jabad Barcelona</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
   <style>
+    /* ── Base dark ── */
+    body { background: #000; }
     .main-content {
       margin-left: var(--sidebar-width);
       width: calc(100vw - var(--sidebar-width));
-      min-height: 100vh;
-      background: var(--color-bg);
+      height: 100vh;
+      background: #000;
       box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
     @media (max-width: 768px) { .main-content { margin-left: 0; width: 100vw; } }
 
-    /* ── Siddur layout: panel texto (sin sidebar) ── */
-    .siddur-layout {
-      background: #fff;
-      border-radius: var(--radius-xl);
-      border: 1px solid var(--color-border);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      overflow: hidden;
+    .siddur-inner {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      min-height: 520px;
+      overflow: hidden;
+      max-width: 680px;
+      width: 100%;
+      margin: 0 auto;
     }
 
-    /* ── Lista de secciones ── */
-    .sections-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
-      margin-top: 4px;
+    /* ── Top bar ── */
+    .siddur-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: #000;
+      border-bottom: 1px solid #1a1a1a;
+      flex-shrink: 0;
     }
+    .siddur-topbar-title {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1rem;
+      color: #fff;
+      letter-spacing: 0.05em;
+    }
+    .topbar-icon-btn {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid #333;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .topbar-icon-btn svg { width: 15px; height: 15px; }
+    .topbar-icon-btn:hover { border-color: #fff; background: #111; }
+    .topbar-icons { display: flex; align-items: center; gap: 8px; }
+
+    /* ── TOC ── */
+    .toc-tabbar {
+      display: flex;
+      padding: 0 20px;
+      background: #000;
+      border-bottom: 1px solid #1a1a1a;
+      flex-shrink: 0;
+    }
+    .toc-tab {
+      padding: 10px 16px;
+      font-family: Georgia, serif;
+      font-size: 0.82rem;
+      color: #555;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+    .toc-tab.active { color: #fff; border-bottom-color: #fff; }
+    .toc-list { flex: 1; overflow-y: auto; }
+    .toc-section-divider {
+      padding: 18px 24px 8px;
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #444;
+      font-family: Georgia, serif;
+      border-bottom: 1px solid #111;
+    }
+    .toc-entry {
+      padding: 14px 24px;
+      border-bottom: 1px solid #111;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: background 0.12s;
+    }
+    .toc-entry:hover { background: #0d0d0d; }
+    .toc-entry-left { flex: 1; }
+    .toc-entry-en {
+      font-size: 0.63rem;
+      letter-spacing: 0.12em;
+      color: #555;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-family: Georgia, serif;
+    }
+    .toc-heb-box {
+      display: inline-block;
+      border: 1.5px solid #fff;
+      padding: 2px 14px 6px;
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.5rem;
+      color: #fff;
+      direction: rtl;
+      line-height: 1.2;
+    }
+    .toc-entry-num {
+      font-family: Georgia, serif;
+      font-size: 0.78rem;
+      color: #444;
+      flex-shrink: 0;
+      min-width: 28px;
+      text-align: right;
+    }
+
+    /* ── Sections list ── */
+    .sections-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      border-bottom: 1px solid #1a1a1a;
+      flex-shrink: 0;
+    }
+    .sections-header-heb {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.4rem;
+      color: #fff;
+      direction: rtl;
+      line-height: 1;
+    }
+    .sections-header-es {
+      font-size: 0.72rem;
+      color: #555;
+      font-style: italic;
+      font-family: Georgia, serif;
+    }
+    .sections-list-wrap { flex: 1; overflow-y: auto; }
     .section-item {
-      display: flex; align-items: center; gap: 16px;
-      padding: 16px 20px; background: #fff;
-      border: 1.5px solid var(--color-border); border-radius: var(--radius-lg);
-      cursor: pointer; transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      padding: 14px 24px;
+      border-bottom: 1px solid #111;
+      cursor: pointer;
+      transition: background 0.12s;
+      gap: 14px;
     }
-    .section-item:hover { border-color: var(--color-primary); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
-    .section-item-body { flex: 1; min-width: 0; }
-    .section-item-heb { font-family: 'Frank Ruhl Libre', serif; font-size: 1.1rem; direction: rtl; color: var(--color-text); }
-    .section-item-es { font-size: 0.78rem; color: var(--color-text-muted); margin-top: 2px; }
-    .section-item-note { font-size: 0.72rem; color: var(--color-text-muted); margin-top: 5px; font-style: italic; line-height: 1.4; }
-    .section-item-arrow { color: var(--color-border); flex-shrink: 0; transition: color 0.15s; }
-    .section-item:hover .section-item-arrow { color: var(--color-primary); }
+    .section-item:hover { background: #0d0d0d; }
+    .section-item-num {
+      font-family: Georgia, serif;
+      font-size: 0.72rem;
+      color: #444;
+      min-width: 18px;
+      flex-shrink: 0;
+    }
+    .section-item-body { flex: 1; }
+    .section-item-heb {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.1rem;
+      direction: rtl;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .section-item-es {
+      font-size: 0.72rem;
+      color: #555;
+      margin-top: 3px;
+      font-family: Georgia, serif;
+      font-style: italic;
+    }
+    .section-item-arrow { color: #2a2a2a; flex-shrink: 0; transition: color 0.12s; }
+    .section-item:hover .section-item-arrow { color: #fff; }
 
-    /* ── Panel de texto principal ── */
-    .siddur-panel { display: flex; flex-direction: column; }
-    .siddur-panel-header {
-      display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-6);
-      border-bottom: 1.5px solid var(--color-border); background: var(--color-bg);
+    /* ── Reader ── */
+    .reader-page-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 10px 24px 0;
+      flex-shrink: 0;
     }
-    .siddur-panel-title { flex: 1; }
-    .siddur-panel-title h2 { font-family: 'Frank Ruhl Libre', serif; font-size: 1.3rem; direction: rtl; line-height: 1; }
-    .siddur-panel-title span { font-size: 0.8rem; color: var(--color-text-muted); }
-    .siddur-controls { display: flex; align-items: center; gap: var(--space-2); }
-    .ctrl-btn {
-      width: 32px; height: 32px; border-radius: var(--radius-md); border: 1.5px solid var(--color-border);
-      background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      color: var(--color-text-muted); font-size: 0.8rem; font-weight: 700; transition: all 0.15s;
+    .reader-section-tag {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 0.75rem;
+      color: #555;
+      letter-spacing: 0.06em;
     }
-    .ctrl-btn:hover { border-color: var(--color-primary); color: var(--color-primary); background: rgba(27,46,94,0.05); }
-    .ctrl-btn svg { width: 15px; height: 15px; }
-
-    /* ── Modo visualización toggle ── */
-    .view-mode-toggle {
-      display: flex; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden;
+    .reader-page-num {
+      font-family: Georgia, serif;
+      font-size: 0.75rem;
+      color: #444;
     }
-    .view-mode-btn {
-      padding: 4px 10px; font-size: 0.75rem; font-weight: 500; cursor: pointer; border: none;
-      background: #fff; color: var(--color-text-muted); transition: all 0.15s;
-    }
-    .view-mode-btn.active { background: var(--color-primary); color: #fff; }
-
-    /* ── Panel header ── */
-    .siddur-panel-header {
-      display: flex; align-items: center; padding: 14px 24px;
-      border-bottom: 1px solid var(--color-border); background: #fff; gap: 12px; flex-wrap: wrap;
-    }
-
-    /* ── Área de texto ── */
     .siddur-text-area {
-      flex: 1; overflow-y: auto;
-      padding: 48px 72px;
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 32px 80px;
+      -webkit-overflow-scrolling: touch;
     }
-    @media (max-width: 768px) { .siddur-text-area { padding: 28px 20px; } }
+    @media (max-width: 768px) { .siddur-text-area { padding: 16px 20px 100px; } }
 
-    /* ── Bloque de texto apilado (estilo Sefaria) ── */
+    /* Prayer text */
     .prayer-heb-block {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: 1.45rem;
-      line-height: 2.15;
+      line-height: 2.1;
       direction: rtl;
       text-align: right;
-      color: var(--color-text);
-      margin-bottom: 32px;
-      padding-bottom: 28px;
-      border-bottom: 1px solid var(--color-border);
+      color: #fff;
+      margin-bottom: 24px;
     }
     .prayer-translit-block {
+      font-family: Georgia, serif;
       font-style: italic;
-      color: var(--color-text-muted);
-      font-size: 0.9rem;
+      color: #555;
+      font-size: 0.875rem;
       line-height: 2;
-      margin-bottom: 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #f0f2f5;
+      margin-bottom: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #1a1a1a;
     }
     .prayer-trans-block {
-      color: #374151;
-      font-size: 1rem;
+      font-family: Georgia, serif;
+      color: #888;
+      font-size: 0.875rem;
       line-height: 1.9;
+      padding-top: 16px;
+      border-top: 1px solid #1a1a1a;
     }
-
-    /* ── Solo hebreo (modo Hebreo) ── */
     .prayer-heb-only {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: 1.7rem;
       line-height: 2.3;
       direction: rtl;
       text-align: center;
-      color: var(--color-text);
+      color: #fff;
     }
-
-    /* ── Solo traducción (modo Traducción) ── */
-    .prayer-trad-cols {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
-    }
-    .prayer-col-head {
-      font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em;
-      color: var(--color-text-muted); margin-bottom: 16px;
-    }
-    @media (max-width: 700px) { .prayer-trad-cols { grid-template-columns: 1fr; gap: 24px; } }
-
-    /* ── Nota halájica ── */
     .prayer-note {
-      background: rgba(27,46,94,0.03); border-left: 3px solid var(--color-primary);
-      border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 12px 16px;
-      margin-bottom: 32px; font-size: 0.82rem; color: var(--color-text-secondary); line-height: 1.6;
+      background: #0a0a0a;
+      border-left: 2px solid #333;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      font-family: Georgia, serif;
+      font-size: 0.78rem;
+      color: #666;
+      line-height: 1.65;
     }
-    .prayer-note strong { color: var(--color-primary); }
-
-    /* ── Progress strip ── */
-    .siddur-progress {
-      padding: 10px 24px; border-top: 1px solid var(--color-border);
-      display: flex; align-items: center; gap: 16px; font-size: 0.78rem; color: var(--color-text-muted);
-    }
-    .siddur-progress-bar { flex: 1; height: 3px; background: var(--color-border); border-radius: 2px; }
-    .siddur-progress-fill { height: 100%; background: var(--color-primary); border-radius: 2px; transition: width 0.4s; }
-
-    /* ── Inner wrapper ── */
-    .siddur-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 32px 32px 60px;
-    }
-    @media (max-width: 768px) { .siddur-inner { padding: 20px 14px 88px; } }
-
-    /* ── Landing pantalla de selección ── */
-    .siddur-landing {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-      margin-bottom: 8px;
+    .prayer-note strong { color: #888; }
+    .prayer-trad-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    @media (max-width: 600px) { .prayer-trad-cols { grid-template-columns: 1fr; } }
+    .prayer-col-head {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #444;
+      margin-bottom: 12px;
+      font-family: Georgia, serif;
     }
 
-    .tefila-card {
-      background: var(--color-white);
-      border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-xl);
-      padding: 32px 28px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-      box-shadow: var(--shadow-sm);
-      position: relative;
+    /* ── View toggle ── */
+    .view-toggle {
+      display: flex;
+      border: 1px solid #2a2a2a;
+      border-radius: 3px;
       overflow: hidden;
     }
-    .tefila-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: var(--color-primary);
-      transform: scaleX(0);
-      transition: transform 0.2s;
+    .view-toggle-btn {
+      padding: 5px 11px;
+      font-size: 0.7rem;
+      background: transparent;
+      color: #555;
+      border: none;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      transition: color 0.12s, background 0.12s;
     }
-    .tefila-card:hover { border-color: var(--color-primary); box-shadow: var(--shadow-md); transform: translateY(-2px); }
-    .tefila-card:hover::before { transform: scaleX(1); }
-    .tefila-card-heb {
-      font-family: 'Frank Ruhl Libre', serif;
-      font-size: 2rem;
-      color: var(--color-primary);
-      direction: rtl;
-      margin-bottom: 6px;
-      line-height: 1.2;
+    .view-toggle-btn.active { background: #fff; color: #000; }
+
+    /* ── Bottom navigation ── */
+    .reader-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border-top: 1px solid #111;
+      gap: 12px;
+      flex-shrink: 0;
     }
-    .tefila-card-name { font-size: 1.1rem; font-weight: 700; color: var(--color-text); margin-bottom: 6px; }
-    .tefila-card-time {
-      font-size: 0.78rem;
-      color: var(--color-text-muted);
-      background: var(--color-bg);
-      border-radius: var(--radius-full);
-      padding: 3px 10px;
-      display: inline-block;
-      margin-bottom: 14px;
+    .reader-arrow-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid #2a2a2a;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.12s, background 0.12s;
+      flex-shrink: 0;
     }
-    .tefila-card-desc { font-size: 0.83rem; color: var(--color-text-secondary); line-height: 1.5; }
-    .tefila-card-sections {
-      margin-top: 14px;
-      font-size: 0.75rem;
-      color: var(--color-text-muted);
-      border-top: 1px solid var(--color-border);
-      padding-top: 10px;
+    .reader-arrow-btn:hover { border-color: #fff; background: #111; }
+    .reader-arrow-btn svg { width: 13px; height: 13px; }
+    .reader-dots {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex: 1;
+      justify-content: center;
+      overflow: hidden;
     }
+    .reader-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #2a2a2a;
+      transition: background 0.2s, transform 0.2s;
+      flex-shrink: 0;
+    }
+    .reader-dot.active { background: #fff; transform: scale(1.4); }
   </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Kehilá">
+  <meta name="apple-mobile-web-app-title" content="Jabad Barcelona">
   <link rel="apple-touch-icon" href="img/icon-192.png">
 </head>
 <body>
@@ -1496,9 +1616,9 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
 
     /* ── Zmanim editables (admin) ── */
     let ZMANIM = JSON.parse(localStorage.getItem('kehila_zmanim') || 'null') || {
-      shajarit: { hora: '8:30', hasta: '10:42', lugar: 'Sinagoga Bet El' },
-      minja:    { hora: '13:45', hasta: 'puesta de sol', lugar: 'Sinagoga Bet El' },
-      arvit:    { hora: '21:15', hasta: '', lugar: 'Sinagoga Bet El' },
+      shajarit: { hora: '8:30', hasta: '10:42', lugar: 'Bet Jabad Barcelona' },
+      minja:    { hora: '13:45', hasta: 'puesta de sol', lugar: 'Bet Jabad Barcelona' },
+      arvit:    { hora: '21:15', hasta: '', lugar: 'Bet Jabad Barcelona' },
     };
 
     function getZmanCard(tefila) {
@@ -1548,7 +1668,7 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
         ZMANIM[t] = {
           hora:  document.getElementById('z-'+t+'-hora')?.value.trim()  || '',
           hasta: document.getElementById('z-'+t+'-hasta')?.value.trim() || '',
-          lugar: document.getElementById('z-'+t+'-lugar')?.value.trim() || 'Sinagoga Bet El',
+          lugar: document.getElementById('z-'+t+'-lugar')?.value.trim() || 'Bet Jabad Barcelona',
         };
       });
       localStorage.setItem('kehila_zmanim', JSON.stringify(ZMANIM));
