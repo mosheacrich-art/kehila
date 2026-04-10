@@ -151,7 +151,7 @@ function buildSidebar(activePage) {
       <div class="sidebar-inner">
         <!-- Logo -->
         <a href="home.html" class="sidebar-logo" style="text-decoration:none;cursor:pointer;display:flex;justify-content:center;align-items:center;width:100%;padding:6px 0 14px;">
-          <img src="img/logo_jabad.png" alt="Jabad Barcelona" style="width:86px;height:86px;object-fit:contain;display:block;flex-shrink:0;">
+          <img src="img/logo_jabad.png" alt="Jabad Barcelona" style="width:112px;height:112px;object-fit:contain;display:block;flex-shrink:0;">
         </a>
 
         <!-- Usuario -->
