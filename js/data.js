@@ -206,54 +206,6 @@ const MOCK_NOTICIAS = [
     colorCategoria: '#1B2E5E'
   },
   {
-    id: 'n2',
-    isPinned: true,
-    categoria: 'comunidad',
-    titulo: 'Tehilim por la paz en Israel — Este Shabat en Jabad Barcelona',
-    excerpt: 'Ante la situación en Israel, Jabad Barcelona convoca a toda la comunidad judía de Barcelona a un rezo de tehilim este Shabat a las 11:30h, tras el Musaf. Abierto a todos sin excepción.',
-    contenido: 'La comunidad Jabad Barcelona expresa su total solidaridad con el pueblo de Israel.\n\nEste Shabat a las 11:30h, tras el Musaf, el Rav Dovid Libersohn dirigirá la lectura de los capítulos 20, 121, 130 y 142 del Tehilim, especialmente recitados en momentos de dificultad.\n\nBienvenidos todos los miembros de la comunidad judía de Barcelona. Bet Jabad, Carrer Montnegre 14.',
-    autor: 'HaRav Dovid Libersohn',
-    fecha: '2026-03-25',
-    tiempoLectura: '2 min',
-    colorCategoria: '#991B1B'
-  },
-  {
-    id: 'n3',
-    isPinned: false,
-    categoria: 'kashrut',
-    titulo: 'Xerta — Primera estrella Michelin Kosher del mundo, cada miércoles',
-    excerpt: 'El restaurante Xerta, en el Hotel Ohla Eixample de Barcelona, ofrece cada miércoles un menú kosher de autor bajo la supervisión del Rav Dovid Libersohn. La primera estrella Michelin kosher del mundo.',
-    contenido: 'Jabad Barcelona tiene el honor de supervisar el servicio kosher del restaurante Xerta, galardonado con una estrella Michelin.\n\nCada miércoles, el chef Cristina Figueras ofrece un menú degustación kosher de cocina catalana de autor.\n\nReservas imprescindibles con antelación. Supervisión directa del Rav Dovid Libersohn.\n\nHotel Ohla Eixample · Carrer del Còrsega, 289 · Barcelona.',
-    autor: 'Jabad Barcelona',
-    fecha: '2026-03-20',
-    tiempoLectura: '3 min',
-    colorCategoria: '#C9A84C'
-  },
-  {
-    id: 'n4',
-    isPinned: false,
-    categoria: 'kashrut',
-    titulo: 'Supermercado Ben Ben — El kosher más completo de Barcelona',
-    excerpt: 'El supermercado kosher Ben Ben en Carrer d\'Aribau 257 ofrece productos europeos importados, carnes frescas y el único bar lemehadrin de Barcelona. Lunes a jueves 9:00-20:00.',
-    contenido: 'El supermercado kosher de referencia en Barcelona.\n\nProductos: importaciones europeas, carnes frescas, el único bar lemehadrin de la ciudad.\n\nDirección: Carrer d\'Aribau, 257, 08021 Barcelona.\nTeléfono: +34 932 003 375.\nHorario: Lun-Jue 9:00-20:00 · Vie y Dom 9:00-14:00.',
-    autor: 'Jabad Barcelona',
-    fecha: '2026-03-15',
-    tiempoLectura: '2 min',
-    colorCategoria: '#C9A84C'
-  },
-  {
-    id: 'n5',
-    isPinned: false,
-    categoria: 'comunidad',
-    titulo: 'Campamento de invierno en los Pirineos — Greater Israel Camp',
-    excerpt: 'Jabad Barcelona organiza su campamento anual de 8 días en los Pirineos para niños y jóvenes judíos de toda España. Actividades religiosas, deportes y una experiencia comunitaria inolvidable.',
-    contenido: 'El campamento Greater Israel de Jabad Barcelona reúne cada año a niños y jóvenes judíos de toda España en los Pirineos.\n\n8 días de aprendizaje, deporte, actividades religiosas y vida en comunidad.\n\nDirigido a jóvenes judíos de toda España sin distinción de procedencia u observancia.\n\nInscripciones e información: +34 934 100 685.',
-    autor: 'Jabad Barcelona',
-    fecha: '2026-03-10',
-    tiempoLectura: '3 min',
-    colorCategoria: '#166534'
-  },
-  {
     id: 'n6',
     isPinned: false,
     categoria: 'comunidad',
@@ -264,30 +216,6 @@ const MOCK_NOTICIAS = [
     fecha: '2026-03-05',
     tiempoLectura: '2 min',
     colorCategoria: '#1B2E5E'
-  },
-  {
-    id: 'n7',
-    isPinned: false,
-    categoria: 'kashrut',
-    titulo: 'Certifica tu empresa como Kosher — Rav Dovid Libersohn',
-    excerpt: 'El Rav Dovid Libersohn ofrece certificación Kosher para empresas alimentarias. La certificación abre un mercado potencial de 25 millones de consumidores en todo el mundo.',
-    contenido: 'El Rav Dovid Libersohn está cualificado para certificar el proceso de producción de empresas alimentarias como Kosher.\n\nLa certificación Kosher de Jabad Barcelona tiene reconocimiento internacional.\n\nPara más información: +34 934 100 685 · guests@chabadbarcelona.org.',
-    autor: 'Jabad Barcelona',
-    fecha: '2026-02-28',
-    tiempoLectura: '3 min',
-    colorCategoria: '#C9A84C'
-  },
-  {
-    id: 'n8',
-    isPinned: false,
-    categoria: 'educacion',
-    titulo: 'Chay Club — Banco de Alimentos de la comunidad',
-    excerpt: 'El Chay Club de Jabad Barcelona garantiza que toda persona judía en necesidad pueda acceder a una comida digna, celebrar su Bar/Bat Mitzvá y tener una Mezuzá en su hogar.',
-    contenido: 'JAI = VIDA.\n\nEl Chay Club de Jabad Barcelona trabaja para que ningún miembro de la comunidad quede sin lo esencial:\n\n· Banco de Alimentos: distribución gratuita a personas en necesidad.\n· Bar/Bat Mitzvá: financiación para familias sin recursos.\n· Mezuzot: para hogares que no pueden costearla.\n\n"Estamos a tu lado, ya sea en momentos difíciles o de alegría."\n\nPara colaborar o solicitar ayuda: +34 934 100 685.',
-    autor: 'Jabad Barcelona',
-    fecha: '2026-02-20',
-    tiempoLectura: '3 min',
-    colorCategoria: '#166534'
   }
 ];
 
