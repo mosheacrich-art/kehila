@@ -204,7 +204,7 @@ const MOCK_NOTICIAS = [
     fecha: '2026-03-28',
     tiempoLectura: '4 min',
     colorCategoria: '#1B2E5E',
-    fotos: ['img/pesaj-1.jpg', 'img/pesaj-2.jpg', 'img/pesaj-3.jpg']
+    fotos: ['img/pesaj-1.jpg', 'img/pesaj-3.jpg', 'img/pesaj-2.jpg']
   },
   {
     id: 'n6',
