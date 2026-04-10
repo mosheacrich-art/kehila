@@ -90,10 +90,16 @@
 .sidebar-user {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 18px;
+  gap: 8px;
+  padding: 10px 14px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
   flex-shrink: 0;
+}
+
+.sidebar-user .avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 0.7rem;
 }
 
 .sidebar-user-info {
@@ -102,7 +108,7 @@
 }
 
 .sidebar-user-name {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--color-white);
   white-space: nowrap;
@@ -111,7 +117,7 @@
 }
 
 .sidebar-user-role {
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   color: var(--color-gold);
   text-transform: capitalize;
 }
