@@ -246,6 +246,7 @@ function abrirNoticia(id) {
   try {
     const n = getNoticias().find(x => x?.id === id);
     if (!n) return;
+    if (typeof trackNewsRead === 'function') trackNewsRead(id);
     cerrarModal();
 
     const user = getCurrentUser?.() ?? null;
