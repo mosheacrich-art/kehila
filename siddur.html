@@ -532,6 +532,23 @@
           main.style.setProperty('left', '0', 'important');
           main.style.setProperty('right', '0', 'important');
           main.style.setProperty('box-sizing', 'border-box', 'important');
+          main.style.setProperty('background', '#fff', 'important');
+          main.style.setProperty('overflow-y', 'auto', 'important');
+        }
+        var body = document.body;
+        if (body) {
+          body.style.setProperty('background', '#fff', 'important');
+          body.style.setProperty('color', '#000', 'important');
+        }
+        var docEl = document.documentElement;
+        if (docEl) {
+          docEl.style.setProperty('background', '#fff', 'important');
+        }
+        var textArea = document.getElementById('text-area');
+        if (textArea) {
+          textArea.style.setProperty('overflow-y', 'auto', 'important');
+          textArea.style.setProperty('height', 'auto', 'important');
+          textArea.style.setProperty('max-height', 'none', 'important');
         }
         var sidebar = document.querySelector('.sidebar, .side-nav, nav');
         if (sidebar) sidebar.style.setProperty('display', 'none', 'important');
@@ -621,9 +638,9 @@
       <div id="siddur-prayer" style="display:none;">
         <div class="siddur-layout">
           <div class="siddur-panel-header">
-            <button onclick="volverSecciones()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:0.8rem;color:var(--color-text-muted);padding:4px 8px;border-radius:var(--radius-md);transition:background 0.15s;white-space:nowrap;flex-shrink:0;" onmouseover="this.style.background='var(--color-bg)'" onmouseout="this.style.background='none'">
+            <button onclick="volverLanding()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:0.8rem;color:var(--color-text-muted);padding:4px 8px;border-radius:var(--radius-md);transition:background 0.15s;white-space:nowrap;flex-shrink:0;" onmouseover="this.style.background='var(--color-bg)'" onmouseout="this.style.background='none'">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
-              Secciones
+              Inicio
             </button>
             <div class="siddur-panel-title" style="margin:0 16px;">
               <h2 id="panel-heb-title" style="font-family:'Frank Ruhl Libre',serif;font-size:1.3rem;direction:rtl;line-height:1;"></h2>
