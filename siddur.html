@@ -341,6 +341,57 @@
       flex-shrink: 0;
     }
     .reader-dot.active { background: #fff; transform: scale(1.4); }
+
+    /* ── Siddur: 4 botones landing ── */
+    .siddur-btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 28px 0;
+    }
+    .siddur-btn {
+      background: transparent;
+      border: 1px solid #2d2d2d;
+      border-radius: 14px;
+      padding: 40px 20px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: border-color .2s, background .2s;
+      width: 100%;
+    }
+    .siddur-btn:hover  { border-color: #777; background: #0c0c0c; }
+    .siddur-btn:active { background: #141414; }
+    .siddur-btn-heb {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 2rem;
+      color: #fff;
+      direction: rtl;
+      line-height: 1.2;
+      display: block;
+    }
+    .siddur-btn-name {
+      font-family: Georgia, serif;
+      font-size: 0.72rem;
+      color: #555;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      display: block;
+    }
+    .prayer-section-sep {
+      text-align: center;
+      color: #2a2a2a;
+      padding: 22px 0;
+      font-family: Georgia, serif;
+      letter-spacing: 0.5em;
+    }
+    @media (max-width: 600px) {
+      .siddur-btn { padding: 30px 14px; }
+      .siddur-btn-heb { font-size: 1.55rem; }
+    }
   </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
@@ -1536,7 +1587,7 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
 
     function changeFontSize(delta) {
       fontSize = Math.max(0.9, Math.min(2.2, fontSize + delta * 0.15));
-      renderText();
+      if (isFullPrayerMode) renderFullPrayer(); else renderText();
     }
 
     function setViewMode(mode, el) {
@@ -1574,23 +1625,48 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
     }
 
     function goBack() {
-      const sections = document.getElementById('siddur-sections');
-      const prayer   = document.getElementById('siddur-prayer');
+      const prayer = document.getElementById('siddur-prayer');
       if (prayer.style.display !== 'none') {
-        volverSecciones();
-      } else if (sections.style.display !== 'none') {
         volverLanding();
-      }
+    }
+
+    function renderFullPrayer() {
+      isFullPrayerMode = true;
+      const sections = TEFILA_DATA[currentTefila] ? TEFILA_DATA[currentTefila].sections : [];
+      const tefilaHeb = {
+        shajarit: 'שַחֲרִית',
+        minja:    'מִנְחָה',
+        arvit:    'עַרְבִית',
+        birkat:   'בִּרְכַּת הַמָּזוֹן'
+      };
+      const tagEl = document.getElementById('reader-section-tag');
+      const numEl = document.getElementById('reader-page-num');
+      if (tagEl) tagEl.textContent = tefilaHeb[currentTefila] || '';
+      if (numEl) numEl.textContent = '';
+      const bottom = document.querySelector('.reader-bottom');
+      if (bottom) bottom.style.display = 'none';
+      let out = '';
+      let first = true;
+      sections.forEach(function(sec) {
+        const pt = PRAYER_TEXTS[sec.id];
+        if (pt && pt.heb) {
+          if (!first) out += '<div class="prayer-section-sep">· · ·</div>';
+          out += '<div class="prayer-heb-block" style="font-size:' + fontSize + 'rem">' + pt.heb.replace(/\n/g, '<br>') + '</div>';
+          first = false;
+        }
+      });
+      if (!out) out = '<div style="text-align:center;padding:60px 20px;color:#555;">Texto completo pr\u00f3ximamente</div>';
+      document.getElementById('text-area').innerHTML = out;
     }
 
     function abrirTefila(tefila) {
       currentTefila = tefila;
       currentSectionIdx = 0;
       document.getElementById('siddur-landing').style.display   = 'none';
-      document.getElementById('siddur-sections').style.display  = '';
-      document.getElementById('siddur-prayer').style.display    = 'none';
+      document.getElementById('siddur-sections').style.display  = 'none';
+      document.getElementById('siddur-prayer').style.display    = '';
       setBackBtn(true, 'Inicio');
-      renderSectionsList();
+      renderFullPrayer();
     }
 
     function volverLanding() {
@@ -1598,6 +1674,9 @@ hazán et haolám kuló betuvó bején bejésed uverajamím.`,
       document.getElementById('siddur-sections').style.display  = 'none';
       document.getElementById('siddur-prayer').style.display    = 'none';
       setBackBtn(false);
+      const bottom = document.querySelector('.reader-bottom');
+      if (bottom) bottom.style.display = '';
+      isFullPrayerMode = false;
     }
 
     function volverSecciones() {
