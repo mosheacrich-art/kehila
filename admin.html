@@ -681,6 +681,96 @@
       padding: 24px 20px;
       font-size: .875rem;
     }
+
+    /* ─── Subgrupos ─── */
+    .sg-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 4px;
+    }
+    .sg-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 22px 20px 18px;
+      cursor: pointer;
+      transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+      border: 1.5px solid transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sg-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--color-primary-light, #b3c9ff); }
+    .sg-card-icon { font-size: 2rem; line-height: 1; }
+    .sg-card-name { font-size: 1rem; font-weight: 600; color: var(--color-text); }
+    .sg-card-desc { font-size: 0.8125rem; color: var(--color-text-muted); flex: 1; }
+    .sg-card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 8px; padding-top: 10px;
+      border-top: 1px solid var(--color-border-light);
+    }
+    .sg-count { font-size: 0.8125rem; font-weight: 600; color: var(--color-primary); }
+    .sg-del-btn {
+      background: none; border: none; cursor: pointer; padding: 4px;
+      color: var(--color-text-muted); border-radius: var(--radius-xs);
+      transition: color var(--transition-fast);
+    }
+    .sg-del-btn:hover { color: var(--color-danger); }
+
+    /* Detail view */
+    .sg-detail { display: none; }
+    .sg-detail.active { display: block; }
+    .sg-list-view { display: block; }
+    .sg-list-view.hidden { display: none; }
+
+    .sg-detail-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .sg-detail-icon { font-size: 2rem; }
+    .sg-detail-title { font-size: 1.25rem; font-weight: 700; color: var(--color-text); flex: 1; }
+    .sg-detail-sub { font-size: 0.875rem; color: var(--color-text-muted); }
+
+    /* Member list inside detail */
+    .sg-member-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .sg-member-row:last-child { border-bottom: none; }
+    .sg-member-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.875rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .sg-member-info { flex: 1; min-width: 0; }
+    .sg-member-name { font-size: 0.9rem; font-weight: 600; color: var(--color-text); }
+    .sg-member-email { font-size: 0.8rem; color: var(--color-text-muted); }
+    .sg-remove-btn {
+      font-size: 0.75rem; font-weight: 500; padding: 4px 10px;
+      border-radius: var(--radius-xs); border: 1px solid #fca5a5;
+      background: #fef2f2; color: #991B1B; cursor: pointer;
+      white-space: nowrap; transition: background var(--transition-fast);
+    }
+    .sg-remove-btn:hover { background: #fee2e2; }
+
+    /* Add member modal content */
+    .sg-add-list { max-height: 340px; overflow-y: auto; }
+    .sg-add-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 20px; border-bottom: 1px solid var(--color-border-light);
+      cursor: pointer; transition: background var(--transition-fast);
+    }
+    .sg-add-row:hover { background: var(--color-bg); }
+    .sg-add-row:last-child { border-bottom: none; }
+    .sg-add-check {
+      width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: border-color .15s, background .15s;
+    }
+    .sg-add-row.selected .sg-add-check { background: var(--color-primary); border-color: var(--color-primary); }
+    .sg-add-row.selected .sg-add-check::after { content: ''; width: 10px; height: 10px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath fill-rule='evenodd' d='M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z' clip-rule='evenodd'/%3E%3C/svg%3E") center/contain no-repeat; }
   </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
@@ -736,6 +826,10 @@
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"/></svg>
         Preguntas Rav
         <span class="tab-badge" id="rav-pending-badge" style="display:none"></span>
+      </button>
+            <button class="admin-tab" data-tab="subgrupos" onclick="if(typeof loadSubgrupos==='function')loadSubgrupos()">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
+        Subgrupos
       </button>
       <button class="admin-tab" data-tab="analytics" onclick="if(typeof loadAnalyticsDashboard!=='undefined')loadAnalyticsDashboard()">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
@@ -1004,6 +1098,100 @@
     <!-- ════════════════════════════════
          TAB: ANALÍTICAS
     ════════════════════════════════ -->
+        <!-- ════════════════════════════════
+         TAB: SUBGRUPOS
+    ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-subgrupos">
+
+      <!-- ── List view ── -->
+      <div id="sg-list-view" class="sg-list-view">
+        <div class="table-header-row" style="padding:0 0 16px;background:none;border:none;">
+          <p class="table-title">Subgrupos de la comunidad</p>
+          <button class="btn btn-primary btn-sm" onclick="openCrearSubgrupoModal()">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Nuevo subgrupo
+          </button>
+        </div>
+        <div class="sg-grid" id="sg-grid">
+          <p style="color:var(--color-text-muted);font-size:0.875rem;padding:20px 0;">Cargando subgrupos…</p>
+        </div>
+      </div>
+
+      <!-- ── Detail view ── -->
+      <div id="sg-detail-view" class="sg-detail">
+        <div class="sg-detail-header">
+          <button class="btn btn-ghost btn-sm" onclick="closeSgDetail()" style="display:flex;align-items:center;gap:6px;">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+            Volver
+          </button>
+          <span id="sg-detail-icon" class="sg-detail-icon">👥</span>
+          <div>
+            <p id="sg-detail-title" class="sg-detail-title">—</p>
+            <p id="sg-detail-desc" class="sg-detail-sub">—</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddMemberModal()" style="margin-left:auto;">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Añadir miembro
+          </button>
+        </div>
+        <div class="table-wrap">
+          <div id="sg-members-list">
+            <p style="padding:20px 16px;color:var(--color-text-muted);font-size:0.875rem;">Cargando miembros…</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: crear subgrupo -->
+    <div class="modal-overlay hidden" id="modal-crear-sg">
+      <div class="modal-box" style="max-width:440px;">
+        <div class="modal-header">
+          <h3 class="modal-title">Nuevo subgrupo</h3>
+          <button class="modal-close" onclick="closeModal('modal-crear-sg')">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;padding:20px 24px;">
+          <div>
+            <label class="form-label">Icono (emoji)</label>
+            <input type="text" id="sg-form-icon" class="form-input" value="👥" maxlength="4" style="width:80px;">
+          </div>
+          <div>
+            <label class="form-label">Nombre del subgrupo <span style="color:var(--color-danger)">*</span></label>
+            <input type="text" id="sg-form-nombre" class="form-input" placeholder="Ej: Mujeres, Flow Niño…">
+          </div>
+          <div>
+            <label class="form-label">Descripción (opcional)</label>
+            <input type="text" id="sg-form-desc" class="form-input" placeholder="Ej: Jóvenes de 9 a 13 años">
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:16px 24px;display:flex;justify-content:flex-end;gap:10px;">
+          <button class="btn btn-ghost" onclick="closeModal('modal-crear-sg')">Cancelar</button>
+          <button class="btn btn-primary" onclick="crearSubgrupo()">Crear subgrupo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: añadir miembro al subgrupo -->
+    <div class="modal-overlay hidden" id="modal-add-member">
+      <div class="modal-box" style="max-width:480px;">
+        <div class="modal-header">
+          <h3 class="modal-title">Añadir miembros</h3>
+          <button class="modal-close" onclick="closeModal('modal-add-member')">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div style="padding:12px 20px 0;">
+          <input type="text" id="sg-add-search" class="form-input" placeholder="Buscar usuario…" oninput="filterAddList()" style="width:100%;box-sizing:border-box;">
+        </div>
+        <div class="sg-add-list" id="sg-add-list" style="margin-top:10px;"></div>
+        <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:flex-end;gap:10px;">
+          <button class="btn btn-ghost" onclick="closeModal('modal-add-member')">Cancelar</button>
+          <button class="btn btn-primary" onclick="confirmarAddMiembros()">Añadir seleccionados</button>
+        </div>
+      </div>
+    </div>
+
     <div class="tab-panel" id="panel-analytics">
 
       <div class="analytics-period-bar">
@@ -2460,6 +2648,260 @@
     showToast('Respuesta publicada', 'success');
     loadPreguntas();
   }
+
+  /* ══════════════════════════════
+     TAB SUBGRUPOS
+  ══════════════════════════════ */
+  let sgState = [];           // [{id, nombre, descripcion, icono, count}]
+  let sgCurrentId = null;     // subgrupo abierto en detail view
+  let sgCurrentMembers = [];  // [{user_id, name, email, initials}]
+  let sgAddSelected = new Set();
+
+  const AVATAR_COLORS = ['#1b2e5e','#065F46','#92400E','#7c3aed','#b91c1c','#0369a1','#15803d','#9a3412'];
+  function sgAvatarColor(name) {
+    if (!name) return AVATAR_COLORS[0];
+    const c = name.charCodeAt(0) + (name.charCodeAt(1) || 0);
+    return AVATAR_COLORS[c % AVATAR_COLORS.length];
+  }
+
+  async function loadSubgrupos() {
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) { renderSgGrid([]); return; }
+    try {
+      // Load groups + member counts via a join
+      const { data: groups, error } = await sb
+        .from('subgrupos')
+        .select('id, nombre, descripcion, icono, creado_en')
+        .order('creado_en', { ascending: true });
+      if (error) throw error;
+
+      // Count members per group
+      const counts = {};
+      if (groups && groups.length > 0) {
+        const ids = groups.map(g => g.id);
+        const { data: mems } = await sb
+          .from('subgrupo_miembros')
+          .select('subgrupo_id')
+          .in('subgrupo_id', ids);
+        (mems || []).forEach(m => { counts[m.subgrupo_id] = (counts[m.subgrupo_id] || 0) + 1; });
+      }
+
+      sgState = (groups || []).map(g => ({ ...g, count: counts[g.id] || 0 }));
+      renderSgGrid(sgState);
+    } catch(e) {
+      console.warn('Error cargando subgrupos:', e);
+      renderSgGrid([]);
+    }
+  }
+
+  function renderSgGrid(groups) {
+    const el = document.getElementById('sg-grid');
+    if (!el) return;
+    if (!groups.length) {
+      el.innerHTML = '<p style="color:var(--color-text-muted);font-size:0.875rem;padding:20px 0;">No hay subgrupos todavía. Crea el primero.</p>';
+      return;
+    }
+    el.innerHTML = groups.map(g => `
+      <div class="sg-card" onclick="openSgDetail('${g.id}')">
+        <div class="sg-card-icon">${g.icono || '👥'}</div>
+        <div class="sg-card-name">${escHtml(g.nombre)}</div>
+        <div class="sg-card-desc">${escHtml(g.descripcion || '')}</div>
+        <div class="sg-card-footer">
+          <span class="sg-count">${g.count} miembro${g.count !== 1 ? 's' : ''}</span>
+          <button class="sg-del-btn" title="Eliminar subgrupo" onclick="event.stopPropagation();eliminarSubgrupo('${g.id}','${escHtml(g.nombre)}')">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  async function openSgDetail(id) {
+    sgCurrentId = id;
+    const group = sgState.find(g => g.id === id);
+    if (!group) return;
+
+    document.getElementById('sg-list-view').classList.add('hidden');
+    document.getElementById('sg-detail-view').classList.add('active');
+    document.getElementById('sg-detail-icon').textContent  = group.icono || '👥';
+    document.getElementById('sg-detail-title').textContent = group.nombre;
+    document.getElementById('sg-detail-desc').textContent  = group.descripcion || '';
+    document.getElementById('sg-members-list').innerHTML   = '<p style="padding:20px 16px;color:var(--color-text-muted);font-size:0.875rem;">Cargando…</p>';
+
+    await loadSgMembers(id);
+  }
+
+  function closeSgDetail() {
+    sgCurrentId = null;
+    document.getElementById('sg-detail-view').classList.remove('active');
+    document.getElementById('sg-list-view').classList.remove('hidden');
+    loadSubgrupos(); // refresh counts
+  }
+
+  async function loadSgMembers(sgId) {
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return;
+    try {
+      const { data, error } = await sb
+        .from('subgrupo_miembros')
+        .select('user_id, profiles(id, name, email, initials)')
+        .eq('subgrupo_id', sgId);
+      if (error) throw error;
+
+      sgCurrentMembers = (data || []).map(r => ({
+        user_id:  r.user_id,
+        name:     r.profiles?.name || r.user_id.slice(0,8),
+        email:    r.profiles?.email || '—',
+        initials: r.profiles?.initials || '??'
+      }));
+      renderSgMembers();
+    } catch(e) {
+      console.warn('Error cargando miembros:', e);
+      document.getElementById('sg-members-list').innerHTML = '<p style="padding:20px 16px;color:var(--color-danger);font-size:0.875rem;">Error al cargar miembros.</p>';
+    }
+  }
+
+  function renderSgMembers() {
+    const el = document.getElementById('sg-members-list');
+    if (!sgCurrentMembers.length) {
+      el.innerHTML = '<p style="padding:20px 16px;color:var(--color-text-muted);font-size:0.875rem;">Este subgrupo no tiene miembros todavía.</p>';
+      return;
+    }
+    el.innerHTML = sgCurrentMembers.map(m => `
+      <div class="sg-member-row">
+        <div class="sg-member-avatar" style="background:${sgAvatarColor(m.name)}">${escHtml(m.initials)}</div>
+        <div class="sg-member-info">
+          <div class="sg-member-name">${escHtml(m.name)}</div>
+          <div class="sg-member-email">${escHtml(m.email)}</div>
+        </div>
+        <button class="sg-remove-btn" onclick="quitarMiembro('${m.user_id}')">Quitar</button>
+      </div>
+    `).join('');
+  }
+
+  async function quitarMiembro(userId) {
+    if (!sgCurrentId) return;
+    if (!confirm('¿Quitar este miembro del subgrupo?')) return;
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return;
+    const { error } = await sb
+      .from('subgrupo_miembros')
+      .delete()
+      .eq('subgrupo_id', sgCurrentId)
+      .eq('user_id', userId);
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+    showToast('Miembro eliminado del subgrupo', 'success');
+    await loadSgMembers(sgCurrentId);
+  }
+
+  function openCrearSubgrupoModal() {
+    document.getElementById('sg-form-icon').value   = '👥';
+    document.getElementById('sg-form-nombre').value = '';
+    document.getElementById('sg-form-desc').value   = '';
+    openModal('modal-crear-sg');
+    setTimeout(() => document.getElementById('sg-form-nombre').focus(), 100);
+  }
+
+  async function crearSubgrupo() {
+    const nombre = document.getElementById('sg-form-nombre').value.trim();
+    const desc   = document.getElementById('sg-form-desc').value.trim();
+    const icono  = document.getElementById('sg-form-icon').value.trim() || '👥';
+    if (!nombre) { showToast('El nombre es obligatorio', 'warning'); return; }
+
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) { showToast('Supabase no disponible', 'error'); return; }
+
+    const { error } = await sb.from('subgrupos').insert({ nombre, descripcion: desc || null, icono });
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+
+    showToast(`Subgrupo "${nombre}" creado`, 'success');
+    closeModal('modal-crear-sg');
+    await loadSubgrupos();
+  }
+
+  async function eliminarSubgrupo(id, nombre) {
+    if (!confirm(`¿Eliminar el subgrupo "${nombre}"? Se quitarán también todos sus miembros.`)) return;
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return;
+    const { error } = await sb.from('subgrupos').delete().eq('id', id);
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+    showToast(`Subgrupo "${nombre}" eliminado`, 'success');
+    await loadSubgrupos();
+  }
+
+  // ── Add member modal ──────────────────────────────────────────
+  function openAddMemberModal() {
+    sgAddSelected.clear();
+    document.getElementById('sg-add-search').value = '';
+    renderAddList('');
+    openModal('modal-add-member');
+  }
+
+  function renderAddList(filter) {
+    const el = document.getElementById('sg-add-list');
+    const existingIds = new Set(sgCurrentMembers.map(m => m.user_id));
+    const q = filter.toLowerCase();
+    const candidates = usersState.filter(u =>
+      !existingIds.has(u.userId) &&
+      (!q || u.name.toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q))
+    );
+    if (!candidates.length) {
+      el.innerHTML = '<p style="padding:16px 20px;color:var(--color-text-muted);font-size:0.875rem;">No hay usuarios disponibles para añadir.</p>';
+      return;
+    }
+    el.innerHTML = candidates.map(u => `
+      <div class="sg-add-row ${sgAddSelected.has(u.userId) ? 'selected' : ''}"
+           onclick="toggleAddSelect('${u.userId}',this)"
+           data-name="${escHtml(u.name)}" data-email="${escHtml(u.email || '')}">
+        <div class="sg-add-check"></div>
+        <div class="sg-member-avatar" style="background:${sgAvatarColor(u.name)};width:32px;height:32px;font-size:0.75rem;">${escHtml(u.initials || '??')}</div>
+        <div class="sg-member-info">
+          <div class="sg-member-name">${escHtml(u.name)}</div>
+          <div class="sg-member-email">${escHtml(u.email || '—')}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function toggleAddSelect(userId, el) {
+    if (sgAddSelected.has(userId)) {
+      sgAddSelected.delete(userId);
+      el.classList.remove('selected');
+    } else {
+      sgAddSelected.add(userId);
+      el.classList.add('selected');
+    }
+  }
+
+  function filterAddList() {
+    const q = document.getElementById('sg-add-search').value;
+    renderAddList(q);
+  }
+
+  async function confirmarAddMiembros() {
+    if (!sgAddSelected.size) { showToast('Selecciona al menos un miembro', 'warning'); return; }
+    if (!sgCurrentId) return;
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return;
+
+    const rows = [...sgAddSelected].map(uid => ({ subgrupo_id: sgCurrentId, user_id: uid }));
+    const { error } = await sb.from('subgrupo_miembros').upsert(rows, { onConflict: 'subgrupo_id,user_id', ignoreDuplicates: true });
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+
+    showToast(`${rows.length} miembro${rows.length > 1 ? 's' : ''} añadido${rows.length > 1 ? 's' : ''}`, 'success');
+    closeModal('modal-add-member');
+    sgAddSelected.clear();
+    await loadSgMembers(sgCurrentId);
+  }
+
+  // Auto-load when tab is clicked (already handled by onclick in tab button)
+  // Also load on init if hash == subgrupos
+  if (location.hash === '#subgrupos') loadSubgrupos();
+
 
 </script>
   <script>
