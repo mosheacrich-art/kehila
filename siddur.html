@@ -492,42 +492,66 @@
   <script>
     // Detectar si cargamos dentro de iframe (hub de Fundamentos)
     (function() {
-      if (window.self !== window.top) {
-        document.documentElement.classList.add('in-iframe');
-        document.body.classList.add('in-iframe');
-
-        function fixLayout() {
-          // Forzar ancho completo via JS (nav.js puede sobreescribir CSS)
-          var main = document.querySelector('.main-content');
-          if (main) {
-            main.style.setProperty('margin-left', '0px', 'important');
-            main.style.setProperty('width', '100%', 'important');
-            main.style.setProperty('max-width', '100%', 'important');
-            main.style.setProperty('background', '#f8f9fc', 'important');
-            main.style.setProperty('height', '100vh', 'important');
-            main.style.setProperty('overflow', 'hidden', 'important');
-          }
-          var inner = document.querySelector('.siddur-inner');
-          if (inner) {
-            inner.style.setProperty('max-width', '100%', 'important');
-            inner.style.setProperty('width', '100%', 'important');
-            inner.style.setProperty('margin', '0', 'important');
-            inner.style.setProperty('padding', '0 32px', 'important');
-            inner.style.setProperty('box-sizing', 'border-box', 'important');
-          }
-          var sidebar = document.getElementById('sidebar-placeholder');
-          if (sidebar) sidebar.style.display = 'none';
-          var pageHeader = document.querySelector('.page-header');
-          if (pageHeader) pageHeader.style.display = 'none';
-        }
-
-        document.addEventListener('DOMContentLoaded', fixLayout);
-        window.addEventListener('load', fixLayout);
-        // nav.js carga el sidebar async, reforzar despues
-        setTimeout(fixLayout, 200);
-        setTimeout(fixLayout, 600);
+    if (window.self !== window.top) {
+      // Inject high-specificity style tag as last in <head> to override everything
+      function injectStyles() {
+        var existing = document.getElementById('iframe-override-styles');
+        if (existing) existing.parentNode.removeChild(existing);
+        var s = document.createElement('style');
+        s.id = 'iframe-override-styles';
+        s.textContent = [
+          'html, body { width: 100% !important; max-width: 100% !important; overflow-x: hidden !important; background: #000 !important; }',
+          '.app-layout { display: block !important; width: 100% !important; max-width: 100% !important; }',
+          '.sidebar, .side-nav, nav, .nav-sidebar, [class*="sidebar"], [class*="side-nav"] { display: none !important; }',
+          '.main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; left: 0 !important; right: 0 !important; box-sizing: border-box !important; }',
+          '.page-header, .top-header, header { display: none !important; }',
+          '.siddur-inner { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; padding: 0 16px !important; }',
+          '.siddur-btn-grid { width: 100% !important; box-sizing: border-box !important; }',
+          '#siddur-landing, #siddur-sections, #siddur-prayer { width: 100% !important; box-sizing: border-box !important; }'
+        ].join('\n');
+        document.head.appendChild(s);
       }
-    })();
+
+      function fixLayout() {
+        injectStyles();
+        // Also set directly via JS for maximum override
+        var layout = document.querySelector('.app-layout');
+        if (layout) {
+          layout.style.setProperty('display', 'block', 'important');
+          layout.style.setProperty('width', '100%', 'important');
+          layout.style.setProperty('max-width', '100%', 'important');
+        }
+        var main = document.querySelector('.main-content');
+        if (main) {
+          main.style.setProperty('margin-left', '0', 'important');
+          main.style.setProperty('margin-right', '0', 'important');
+          main.style.setProperty('padding-left', '0', 'important');
+          main.style.setProperty('padding-right', '0', 'important');
+          main.style.setProperty('width', '100%', 'important');
+          main.style.setProperty('max-width', '100%', 'important');
+          main.style.setProperty('left', '0', 'important');
+          main.style.setProperty('right', '0', 'important');
+          main.style.setProperty('box-sizing', 'border-box', 'important');
+        }
+        var sidebar = document.querySelector('.sidebar, .side-nav, nav');
+        if (sidebar) sidebar.style.setProperty('display', 'none', 'important');
+        var header = document.querySelector('.page-header, header, .top-header');
+        if (header) header.style.setProperty('display', 'none', 'important');
+        var inner = document.querySelector('.siddur-inner');
+        if (inner) {
+          inner.style.setProperty('width', '100%', 'important');
+          inner.style.setProperty('max-width', '100%', 'important');
+          inner.style.setProperty('box-sizing', 'border-box', 'important');
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', fixLayout);
+      window.addEventListener('load', fixLayout);
+      setTimeout(fixLayout, 100);
+      setTimeout(fixLayout, 400);
+      setTimeout(fixLayout, 1000);
+    }
+  })();
   </script>
   <div class="app-layout">
     <div id="sidebar-placeholder"></div>
