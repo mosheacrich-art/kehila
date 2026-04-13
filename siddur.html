@@ -500,15 +500,24 @@
         var s = document.createElement('style');
         s.id = 'iframe-override-styles';
         s.textContent = [
-          'html, body { width: 100% !important; max-width: 100% !important; overflow-x: hidden !important; background: #000 !important; }',
-          '.app-layout { display: block !important; width: 100% !important; max-width: 100% !important; }',
+          'html, body { width: 100% !important; max-width: 100% !important; overflow-x: hidden !important; background: #fff !important; color: #000 !important; }',
+          '.app-layout { display: block !important; width: 100% !important; max-width: 100% !important; background: #fff !important; }',
           '.sidebar, .side-nav, nav, .nav-sidebar, [class*="sidebar"], [class*="side-nav"] { display: none !important; }',
-          '.main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; left: 0 !important; right: 0 !important; box-sizing: border-box !important; }',
+          '.main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; left: 0 !important; right: 0 !important; box-sizing: border-box !important; background: #fff !important; }',
           '.page-header, .top-header, header { display: none !important; }',
-          '.siddur-inner { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; padding: 0 16px !important; }',
+          '.siddur-inner { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; padding: 0 16px !important; background: #fff !important; }',
           '.siddur-btn-grid { width: 100% !important; box-sizing: border-box !important; }',
-          '#siddur-landing, #siddur-sections, #siddur-prayer { width: 100% !important; box-sizing: border-box !important; }'
-        ].join('\n');
+          '#siddur-landing, #siddur-sections, #siddur-prayer { width: 100% !important; box-sizing: border-box !important; background: #fff !important; }',
+          '.siddur-btn { border-color: #ccc !important; background: #fff !important; }',
+          '.siddur-btn:hover { border-color: #888 !important; background: #f5f5f5 !important; }',
+          '.siddur-btn-heb { color: #000 !important; }',
+          '.siddur-btn-name { color: #666 !important; }',
+          '#text-area { overflow-y: auto !important; height: auto !important; max-height: none !important; }',
+          '.reader-content { overflow-y: auto !important; height: auto !important; max-height: none !important; }',
+          '.prayer-heb-block { color: #000 !important; }',
+          '.reader-top { background: #fff !important; border-bottom: 1px solid #eee !important; color: #000 !important; }',
+          '.reader-bottom { background: #fff !important; border-top: 1px solid #eee !important; color: #000 !important; }'
+        ]].join('\n');
         document.head.appendChild(s);
       }
 
