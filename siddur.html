@@ -346,8 +346,9 @@
     .siddur-btn-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      padding: 28px 0;
+      gap: 14px;
+      padding: 28px 4px;
+      box-sizing: border-box;
     }
     .siddur-btn {
       background: transparent;
@@ -392,7 +393,16 @@
       .siddur-btn { padding: 30px 14px; }
       .siddur-btn-heb { font-size: 1.55rem; }
     }
-  </style>
+  
+    /* ── Modo iframe (embebido en hub) ── */
+    body.in-iframe .main-content {
+      margin-left: 0 !important;
+      width: 100% !important;
+    }
+    body.in-iframe #sidebar-placeholder { display: none !important; }
+    body.in-iframe .siddur-inner { max-width: 100%; padding: 0 20px; box-sizing: border-box; }
+    body.in-iframe .page-header { padding-top: 12px; }
+</style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -401,6 +411,13 @@
   <link rel="apple-touch-icon" href="img/icon-192.png">
 </head>
 <body>
+  <script>
+    // Detectar si cargamos dentro de iframe (hub de Fundamentos)
+    if (window.self !== window.top) {
+      document.documentElement.classList.add('in-iframe');
+      document.body.classList.add('in-iframe');
+    }
+  </script>
   <div class="app-layout">
     <div id="sidebar-placeholder"></div>
 
