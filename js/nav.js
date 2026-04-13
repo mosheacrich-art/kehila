@@ -635,6 +635,7 @@ function buildBackBtn(activePage) {
  * @param {string} activePage - id de la página
  */
 function initNav(activePage) {
+  if (typeof trackPageView === 'function') trackPageView(activePage);
   // Cargar i18n.js si no está disponible
   if (typeof t === 'undefined' && !document.querySelector('script[src*="i18n"]')) {
     const s = document.createElement('script');
