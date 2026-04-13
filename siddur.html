@@ -394,59 +394,92 @@
       .siddur-btn-heb { font-size: 1.55rem; }
     }
   
-    /* ── Iframe embed: override completo ── */
-    body.in-iframe { background: #fff !important; }
+    /* ── Iframe embed: override completo (v3) ── */
+    body.in-iframe { background: #f8f9fc !important; }
     body.in-iframe #sidebar-placeholder { display: none !important; }
+
     body.in-iframe .main-content {
       margin-left: 0 !important;
       width: 100% !important;
-      background: #fff !important;
-      height: auto !important;
-      min-height: 100vh;
-      overflow: visible !important;
-    }
-    body.in-iframe .page-header   { display: none !important; }
-    body.in-iframe .siddur-topbar { background: #fff; border-bottom: 1px solid #eee; }
-    body.in-iframe .siddur-topbar-title { color: #111; }
-    body.in-iframe .topbar-icon-btn { border-color: #ddd; color: #444; }
-    body.in-iframe .siddur-inner {
       max-width: 100% !important;
-      overflow: visible !important;
-      padding: 0 20px;
-      box-sizing: border-box;
+      background: #f8f9fc !important;
+      height: 100vh !important;
+      overflow: hidden !important;
     }
-    body.in-iframe .siddur-btn-grid { padding: 20px 0; }
-    body.in-iframe .siddur-btn { background: #f5f7ff; border-color: #dce2f5; }
-    body.in-iframe .siddur-btn:hover { background: #eaeffc; border-color: #b0bfe8; }
-    body.in-iframe .siddur-btn-heb  { color: #1b2e5e; }
-    body.in-iframe .siddur-btn-name { color: #7a8aaa; }
-    body.in-iframe .siddur-text-area { background: #fff; }
+    body.in-iframe .siddur-inner {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 32px !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+    body.in-iframe .page-header { display: none !important; }
+
+    /* Topbar */
+    body.in-iframe .siddur-topbar { background: #f8f9fc; border-bottom: 1px solid #e8ecf5; }
+    body.in-iframe .siddur-topbar-title { color: #1b2e5e; }
+    body.in-iframe .topbar-icon-btn { border-color: #d0d8ee; color: #4a5a80; }
+    body.in-iframe .topbar-icon-btn:hover { background: #eef0f8; border-color: #9aafd8; }
+
+    /* Landing buttons — full width */
+    body.in-iframe #siddur-landing { width: 100% !important; box-sizing: border-box !important; }
+    body.in-iframe .siddur-btn-grid {
+      width: 100% !important;
+      box-sizing: border-box !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 20px !important;
+      padding: 24px 0 !important;
+    }
+    body.in-iframe .siddur-btn {
+      background: #fff;
+      border: 1.5px solid #dce4f5;
+      border-radius: 16px;
+      padding: 40px 16px !important;
+      min-height: 140px;
+      box-shadow: 0 2px 8px rgba(27,46,94,0.07);
+    }
+    body.in-iframe .siddur-btn:hover {
+      background: #f0f4ff;
+      border-color: #a8bcee;
+      box-shadow: 0 4px 16px rgba(27,46,94,0.12);
+    }
+    body.in-iframe .siddur-btn-heb  { color: #1b2e5e; font-size: 2rem; }
+    body.in-iframe .siddur-btn-name { color: #7a8aaa; font-size: 0.7rem; letter-spacing: 0.14em; }
+
+    /* Prayer reader on white */
+    body.in-iframe .siddur-text-area { background: #f8f9fc; }
     body.in-iframe .prayer-heb-block { color: #111; }
     body.in-iframe .prayer-heb-only  { color: #111; }
-    body.in-iframe .prayer-translit-block { color: #666; border-top-color: #eee; }
-    body.in-iframe .prayer-trans-block   { color: #555; border-top-color: #eee; }
-    body.in-iframe .prayer-note { background: #f9f9f9; border-left-color: #ccc; color: #666; }
-    body.in-iframe .prayer-section-sep { color: #ccc; }
-    body.in-iframe .reader-bottom { border-top: 1px solid #eee; background: #fff; }
-    body.in-iframe .reader-arrow-btn { border-color: #ddd; color: #333; }
-    body.in-iframe .reader-arrow-btn:hover { background: #f5f5f5; border-color: #999; }
-    body.in-iframe .reader-dot { background: #ddd; }
+    body.in-iframe .prayer-translit-block { color: #666; border-top-color: #e8e8e8; }
+    body.in-iframe .prayer-trans-block   { color: #555; border-top-color: #e8e8e8; }
+    body.in-iframe .prayer-note { background: #f0f4ff; border-left-color: #a8bcee; color: #555; }
+    body.in-iframe .prayer-note strong { color: #1b2e5e; }
+    body.in-iframe .prayer-section-sep { color: #ccd4e8; }
+
+    /* Reader controls */
+    body.in-iframe .reader-page-header { background: #f8f9fc; }
+    body.in-iframe .reader-section-tag { color: #9aafd8; }
+    body.in-iframe .reader-bottom { border-top: 1px solid #e8ecf5; background: #f8f9fc; }
+    body.in-iframe .reader-arrow-btn { border-color: #d0d8ee; color: #1b2e5e; }
+    body.in-iframe .reader-arrow-btn:hover { background: #eef0f8; border-color: #9aafd8; }
+    body.in-iframe .reader-dot { background: #d0d8ee; }
     body.in-iframe .reader-dot.active { background: #1b2e5e; }
-    body.in-iframe .view-toggle { border-color: #ddd; }
-    body.in-iframe .view-toggle-btn { color: #888; }
+    body.in-iframe .view-toggle { border-color: #d0d8ee; }
+    body.in-iframe .view-toggle-btn { color: #7a8aaa; }
     body.in-iframe .view-toggle-btn.active { background: #1b2e5e; color: #fff; }
-    body.in-iframe .sections-header { border-bottom-color: #eee; }
-    body.in-iframe .sections-header-heb { color: #111; }
-    body.in-iframe .section-item { border-bottom-color: #f0f0f0; }
-    body.in-iframe .section-item:hover { background: #f9f9f9; }
-    body.in-iframe .section-item-heb { color: #111; }
-    body.in-iframe .toc-tabbar { background: #fff; border-bottom-color: #eee; }
-    body.in-iframe .toc-tab { color: #aaa; }
+    body.in-iframe .toc-tabbar { background: #f8f9fc; border-bottom-color: #e8ecf5; }
+    body.in-iframe .toc-tab { color: #9aafd8; }
     body.in-iframe .toc-tab.active { color: #1b2e5e; border-bottom-color: #1b2e5e; }
     body.in-iframe .toc-heb-box { border-color: #1b2e5e; color: #1b2e5e; }
-    body.in-iframe .toc-list { background: #fff; }
-    body.in-iframe .sections-list-wrap { background: #fff; }
-    body.in-iframe .reader-section-tag { color: #aaa; }
+    body.in-iframe .toc-list,
+    body.in-iframe .sections-list-wrap { background: #f8f9fc; }
+    body.in-iframe .section-item { border-bottom-color: #eef0f8; }
+    body.in-iframe .section-item:hover { background: #f0f4ff; }
+    body.in-iframe .section-item-heb { color: #111; }
+    body.in-iframe .sections-header { border-bottom-color: #e8ecf5; }
+    body.in-iframe .sections-header-heb { color: #1b2e5e; }
+
 </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
