@@ -394,14 +394,59 @@
       .siddur-btn-heb { font-size: 1.55rem; }
     }
   
-    /* ── Modo iframe (embebido en hub) ── */
+    /* ── Iframe embed: override completo ── */
+    body.in-iframe { background: #fff !important; }
+    body.in-iframe #sidebar-placeholder { display: none !important; }
     body.in-iframe .main-content {
       margin-left: 0 !important;
       width: 100% !important;
+      background: #fff !important;
+      height: auto !important;
+      min-height: 100vh;
+      overflow: visible !important;
     }
-    body.in-iframe #sidebar-placeholder { display: none !important; }
-    body.in-iframe .siddur-inner { max-width: 100%; padding: 0 20px; box-sizing: border-box; }
-    body.in-iframe .page-header { padding-top: 12px; }
+    body.in-iframe .page-header   { display: none !important; }
+    body.in-iframe .siddur-topbar { background: #fff; border-bottom: 1px solid #eee; }
+    body.in-iframe .siddur-topbar-title { color: #111; }
+    body.in-iframe .topbar-icon-btn { border-color: #ddd; color: #444; }
+    body.in-iframe .siddur-inner {
+      max-width: 100% !important;
+      overflow: visible !important;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+    body.in-iframe .siddur-btn-grid { padding: 20px 0; }
+    body.in-iframe .siddur-btn { background: #f5f7ff; border-color: #dce2f5; }
+    body.in-iframe .siddur-btn:hover { background: #eaeffc; border-color: #b0bfe8; }
+    body.in-iframe .siddur-btn-heb  { color: #1b2e5e; }
+    body.in-iframe .siddur-btn-name { color: #7a8aaa; }
+    body.in-iframe .siddur-text-area { background: #fff; }
+    body.in-iframe .prayer-heb-block { color: #111; }
+    body.in-iframe .prayer-heb-only  { color: #111; }
+    body.in-iframe .prayer-translit-block { color: #666; border-top-color: #eee; }
+    body.in-iframe .prayer-trans-block   { color: #555; border-top-color: #eee; }
+    body.in-iframe .prayer-note { background: #f9f9f9; border-left-color: #ccc; color: #666; }
+    body.in-iframe .prayer-section-sep { color: #ccc; }
+    body.in-iframe .reader-bottom { border-top: 1px solid #eee; background: #fff; }
+    body.in-iframe .reader-arrow-btn { border-color: #ddd; color: #333; }
+    body.in-iframe .reader-arrow-btn:hover { background: #f5f5f5; border-color: #999; }
+    body.in-iframe .reader-dot { background: #ddd; }
+    body.in-iframe .reader-dot.active { background: #1b2e5e; }
+    body.in-iframe .view-toggle { border-color: #ddd; }
+    body.in-iframe .view-toggle-btn { color: #888; }
+    body.in-iframe .view-toggle-btn.active { background: #1b2e5e; color: #fff; }
+    body.in-iframe .sections-header { border-bottom-color: #eee; }
+    body.in-iframe .sections-header-heb { color: #111; }
+    body.in-iframe .section-item { border-bottom-color: #f0f0f0; }
+    body.in-iframe .section-item:hover { background: #f9f9f9; }
+    body.in-iframe .section-item-heb { color: #111; }
+    body.in-iframe .toc-tabbar { background: #fff; border-bottom-color: #eee; }
+    body.in-iframe .toc-tab { color: #aaa; }
+    body.in-iframe .toc-tab.active { color: #1b2e5e; border-bottom-color: #1b2e5e; }
+    body.in-iframe .toc-heb-box { border-color: #1b2e5e; color: #1b2e5e; }
+    body.in-iframe .toc-list { background: #fff; }
+    body.in-iframe .sections-list-wrap { background: #fff; }
+    body.in-iframe .reader-section-tag { color: #aaa; }
 </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
