@@ -640,7 +640,7 @@ function initNav(activePage) {
   if (typeof t === 'undefined' && !document.querySelector('script[src*="i18n"]')) {
     const s = document.createElement('script');
     s.src = 'js/i18n.js';
-    s.onload = () => { buildSidebar(activePage); buildBottomNav(activePage); buildHamburger(activePage); buildBackBtn(activePage); };
+    s.onload = () => { buildSidebar(activePage); buildBottomNav(activePage); buildHamburger(activePage); buildBackBtn(activePage); buildLegalFooter(); };
     document.head.appendChild(s);
     return;
   }
@@ -648,6 +648,7 @@ function initNav(activePage) {
   buildBottomNav(activePage);
   buildHamburger(activePage);
   buildBackBtn(activePage);
+  buildLegalFooter();
 }
 
 /**
@@ -684,4 +685,69 @@ function showToast(message, type = 'info', duration = 3500) {
 function removeToast(toast) {
   toast.classList.add('hide');
   setTimeout(() => toast.remove(), 350);
+}
+
+/* ─── Legal Footer ────────────────────────────────────────────────
+   Se inyecta automáticamente al final de .main-content en cada página
+   ────────────────────────────────────────────────────────────────── */
+function buildLegalFooter() {
+  if (document.getElementById('legal-footer')) return;
+
+  // Inyectar estilos una sola vez
+  if (!document.getElementById('legal-footer-styles')) {
+    const s = document.createElement('style');
+    s.id = 'legal-footer-styles';
+    s.textContent = `
+      .legal-footer {
+        border-top: 1px solid var(--color-border-light);
+        padding: 20px 24px;
+        margin-top: 48px;
+      }
+      .legal-footer-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .legal-footer-copy {
+        font-size: 0.775rem;
+        color: var(--color-text-muted);
+      }
+      .legal-footer-links {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      .legal-footer-links a {
+        font-size: 0.775rem;
+        color: var(--color-text-muted);
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      .legal-footer-links a:hover { color: var(--color-primary); }
+      @media (max-width: 480px) {
+        .legal-footer-inner { flex-direction: column; align-items: flex-start; gap: 8px; }
+      }
+    `;
+    document.head.appendChild(s);
+  }
+
+  const footer = document.createElement('footer');
+  footer.id = 'legal-footer';
+  footer.className = 'legal-footer';
+  footer.innerHTML = `
+    <div class="legal-footer-inner">
+      <span class="legal-footer-copy">&copy; ${new Date().getFullYear()} Jabad Barcelona</span>
+      <nav class="legal-footer-links">
+        <a href="privacidad.html">Pol&iacute;tica de Privacidad</a>
+        <a href="aviso-legal.html">Aviso Legal</a>
+        <a href="cookies.html">Cookies</a>
+      </nav>
+    </div>`;
+
+  const main = document.querySelector('.main-content');
+  if (main) main.appendChild(footer);
 }
