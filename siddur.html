@@ -491,10 +491,43 @@
 <body>
   <script>
     // Detectar si cargamos dentro de iframe (hub de Fundamentos)
-    if (window.self !== window.top) {
-      document.documentElement.classList.add('in-iframe');
-      document.body.classList.add('in-iframe');
-    }
+    (function() {
+      if (window.self !== window.top) {
+        document.documentElement.classList.add('in-iframe');
+        document.body.classList.add('in-iframe');
+
+        function fixLayout() {
+          // Forzar ancho completo via JS (nav.js puede sobreescribir CSS)
+          var main = document.querySelector('.main-content');
+          if (main) {
+            main.style.setProperty('margin-left', '0px', 'important');
+            main.style.setProperty('width', '100%', 'important');
+            main.style.setProperty('max-width', '100%', 'important');
+            main.style.setProperty('background', '#f8f9fc', 'important');
+            main.style.setProperty('height', '100vh', 'important');
+            main.style.setProperty('overflow', 'hidden', 'important');
+          }
+          var inner = document.querySelector('.siddur-inner');
+          if (inner) {
+            inner.style.setProperty('max-width', '100%', 'important');
+            inner.style.setProperty('width', '100%', 'important');
+            inner.style.setProperty('margin', '0', 'important');
+            inner.style.setProperty('padding', '0 32px', 'important');
+            inner.style.setProperty('box-sizing', 'border-box', 'important');
+          }
+          var sidebar = document.getElementById('sidebar-placeholder');
+          if (sidebar) sidebar.style.display = 'none';
+          var pageHeader = document.querySelector('.page-header');
+          if (pageHeader) pageHeader.style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', fixLayout);
+        window.addEventListener('load', fixLayout);
+        // nav.js carga el sidebar async, reforzar despues
+        setTimeout(fixLayout, 200);
+        setTimeout(fixLayout, 600);
+      }
+    })();
   </script>
   <div class="app-layout">
     <div id="sidebar-placeholder"></div>
