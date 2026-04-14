@@ -1161,6 +1161,10 @@
             <input type="text" id="sg-form-nombre" class="form-input" placeholder="Ej: Mujeres, Flow Niño…">
           </div>
           <div>
+            <label class="form-label">Tipo (opcional)</label>
+            <input type="text" id="sg-form-tipo" class="form-input" placeholder="Ej: Edad, Género, Función…">
+          </div>
+          <div>
             <label class="form-label">Descripción (opcional)</label>
             <input type="text" id="sg-form-desc" class="form-input" placeholder="Ej: Jóvenes de 9 a 13 años">
           </div>
@@ -2671,7 +2675,7 @@
       // Load groups + member counts via a join
       const { data: groups, error } = await sb
         .from('subgrupos')
-        .select('id, nombre, descripcion, icono, creado_en')
+        .select('id, nombre, tipo, descripcion, icono, creado_en')
         .order('creado_en', { ascending: true });
       if (error) throw error;
 
@@ -2705,6 +2709,7 @@
       <div class="sg-card" onclick="openSgDetail('${g.id}')">
         <div class="sg-card-icon">${g.icono || '👥'}</div>
         <div class="sg-card-name">${escHtml(g.nombre)}</div>
+        ${g.tipo ? `<div class="sg-card-desc" style="font-size:0.75rem;font-weight:600;color:var(--color-primary);text-transform:uppercase;letter-spacing:.04em;">${escHtml(g.tipo)}</div>` : ''}
         <div class="sg-card-desc">${escHtml(g.descripcion || '')}</div>
         <div class="sg-card-footer">
           <span class="sg-count">${g.count} miembro${g.count !== 1 ? 's' : ''}</span>
@@ -2729,7 +2734,7 @@
     document.getElementById('sg-detail-view').classList.add('active');
     document.getElementById('sg-detail-icon').textContent  = group.icono || '👥';
     document.getElementById('sg-detail-title').textContent = group.nombre;
-    document.getElementById('sg-detail-desc').textContent  = group.descripcion || '';
+    document.getElementById('sg-detail-desc').textContent  = [group.tipo, group.descripcion].filter(Boolean).join(' · ');
     document.getElementById('sg-members-list').innerHTML   = '<p style="padding:20px 16px;color:var(--color-text-muted);font-size:0.875rem;">Cargando…</p>';
 
     await loadSgMembers(id);
@@ -2801,6 +2806,7 @@
   function openCrearSubgrupoModal() {
     document.getElementById('sg-form-icon').value   = '👥';
     document.getElementById('sg-form-nombre').value = '';
+    document.getElementById('sg-form-tipo').value   = '';
     document.getElementById('sg-form-desc').value   = '';
     openModal('modal-crear-sg');
     setTimeout(() => document.getElementById('sg-form-nombre').focus(), 100);
@@ -2808,6 +2814,7 @@
 
   async function crearSubgrupo() {
     const nombre = document.getElementById('sg-form-nombre').value.trim();
+    const tipo   = document.getElementById('sg-form-tipo').value.trim();
     const desc   = document.getElementById('sg-form-desc').value.trim();
     const icono  = document.getElementById('sg-form-icon').value.trim() || '👥';
     if (!nombre) { showToast('El nombre es obligatorio', 'warning'); return; }
@@ -2815,7 +2822,7 @@
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) { showToast('Supabase no disponible', 'error'); return; }
 
-    const { error } = await sb.from('subgrupos').insert({ nombre, descripcion: desc || null, icono });
+    const { error } = await sb.from('subgrupos').insert({ nombre, tipo: tipo || null, descripcion: desc || null, icono });
     if (error) { showToast('Error: ' + error.message, 'error'); return; }
 
     showToast(`Subgrupo "${nombre}" creado`, 'success');
