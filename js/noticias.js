@@ -13,6 +13,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderFiltros();
     renderGrid('todas');
     initDelegation();
+
+    // Auto-open article from URL param ?id=xxx (e.g. when coming from home carousel)
+    const openId = new URLSearchParams(window.location.search).get('id');
+    if (openId) {
+      const n = getNoticias().find(x => x?.id == openId || String(x?.id) === openId);
+      if (n) {
+        // Small delay so the page renders first
+        setTimeout(() => abrirNoticia(n.id), 80);
+      }
+    }
   } catch (e) {
     console.error('Error iniciando noticias:', e);
   }
