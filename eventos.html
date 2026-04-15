@@ -463,36 +463,38 @@
 
   document.getElementById('btn-confirm-inscripcion').addEventListener('click', async () => {
     const evId = pendingEv;
-    inscrito.add(evId);
     const ev = MOCK_EVENTOS.find(e => e.id === evId);
+    inscrito.add(evId);
+    if (ev) ev.inscritos = (ev.inscritos || 0) + 1;  // actualizar contador local
     closeModal('modal-inscripcion');
     renderLista();
-    showToast(`¡Inscripción confirmada en "${ev.titulo}"!`, 'success');
+    showToast(`¡Inscripción confirmada en "${ev?.titulo}"!`, 'success');
     pendingEv = null;
 
     const sb = getSupabase();
     const user = getCurrentUser();
-    if (!sb) { showToast('⚠️ Supabase no disponible', 'error'); return; }
-    if (!user) { showToast('⚠️ Sesión no encontrada, vuelve a iniciar sesión', 'error'); return; }
+    if (!sb || !user) return;
 
-    const { data, error } = await sb.from('inscripciones').insert({
+    const { error } = await sb.from('inscripciones').insert({
       usuario_id: user.userId,
       evento_id: String(evId),
-      evento_titulo: ev.titulo
-    }).select();
+      evento_titulo: ev?.titulo
+    });
     if (error) {
-      console.error('Error inscripción:', error);
-      showToast('Error: ' + error.message + ' (code: ' + error.code + ')', 'error');
-    } else {
-      console.log('Inscripción guardada:', data);
+      // Revertir si falló
+      inscrito.delete(evId);
+      if (ev) ev.inscritos = Math.max(0, (ev.inscritos || 1) - 1);
+      renderLista();
+      showToast('Error al guardar inscripción: ' + error.message, 'error');
     }
   });
 
   async function cancelarInscripcion(id) {
-    inscrito.delete(id);
     const ev = MOCK_EVENTOS.find(e => e.id === id);
+    inscrito.delete(id);
+    if (ev) ev.inscritos = Math.max(0, (ev.inscritos || 1) - 1);  // actualizar contador local
     renderLista();
-    showToast(`Inscripción cancelada en "${ev.titulo}".`, 'warning');
+    showToast(`Inscripción cancelada en "${ev?.titulo}".`, 'warning');
 
     const sb = getSupabase();
     const user = getCurrentUser();
