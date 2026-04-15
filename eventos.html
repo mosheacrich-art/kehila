@@ -473,13 +473,15 @@
     const sb = getSupabase();
     const user = getCurrentUser();
     if (sb && user) {
-      try {
-        await sb.from('inscripciones').insert({
-          usuario_id: user.userId,
-          evento_id: String(evId),
-          evento_titulo: ev.titulo
-        });
-      } catch(e) { /* fallback silencioso */ }
+      const { error } = await sb.from('inscripciones').insert({
+        usuario_id: user.userId,
+        evento_id: String(evId),
+        evento_titulo: ev.titulo
+      });
+      if (error) {
+        console.error('Error inscripción:', error);
+        showToast('Error al guardar inscripción: ' + error.message, 'error');
+      }
     }
   });
 
@@ -492,12 +494,11 @@
     const sb = getSupabase();
     const user = getCurrentUser();
     if (sb && user) {
-      try {
-        await sb.from('inscripciones')
-          .delete()
-          .eq('usuario_id', user.userId)
-          .eq('evento_id', String(id));
-      } catch(e) { /* fallback silencioso */ }
+      const { error } = await sb.from('inscripciones')
+        .delete()
+        .eq('usuario_id', user.userId)
+        .eq('evento_id', String(id));
+      if (error) console.error('Error cancelar inscripción:', error);
     }
   }
 
