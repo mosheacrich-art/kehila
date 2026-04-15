@@ -1104,8 +1104,33 @@
       }).join('');
     }
 
-    /* ─── Init renders ─── */
-    renderEventos();
+    /* ─── Init renders — carga desde Supabase ─── */
+    async function loadHomeData() {
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (sb) {
+        try {
+          const [evRes, notRes] = await Promise.all([
+            sb.from('eventos').select('id,titulo,descripcion,fecha,hora,lugar,aforo,categoria,imagen_url').order('fecha', { ascending: true }).limit(4),
+            sb.from('noticias').select('id,titulo,resumen,categoria,autor,imagen_url,created_at').order('created_at', { ascending: false }).limit(3)
+          ]);
+          if (evRes.data && evRes.data.length) {
+            MOCK_EVENTOS.length = 0;
+            evRes.data.forEach(ev => { ev.inscritos = 0; MOCK_EVENTOS.push(ev); });
+          }
+          if (notRes.data && notRes.data.length) {
+            MOCK_NOTICIAS.length = 0;
+            notRes.data.forEach(n => {
+              n.fecha = n.created_at ? n.created_at.split('T')[0] : '';
+              MOCK_NOTICIAS.push(n);
+            });
+          }
+        } catch(e) { /* usa mock como fallback */ }
+      }
+      renderEventos();
+      renderNoticias();
+    }
+
+    loadHomeData();
 
     document.addEventListener('langchange', () => {
       renderEventos();

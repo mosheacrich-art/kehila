@@ -23,8 +23,13 @@ async function loadNoticiasSupabase() {
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) return;
     const { data } = await sb.from('noticias').select('*').order('created_at', { ascending: false });
-    if (data?.length && typeof MOCK_NOTICIAS_V2 !== 'undefined') {
-      data.forEach(n => MOCK_NOTICIAS_V2.unshift(n));
+    if (typeof MOCK_NOTICIAS_V2 !== 'undefined') {
+      if (data && data.length) {
+        // Reemplazar mock con datos reales de Supabase
+        MOCK_NOTICIAS_V2.length = 0;
+        data.forEach(n => MOCK_NOTICIAS_V2.push(n));
+      }
+      // Si no hay datos en Supabase, conservar mock como fallback
     }
   } catch(e) { console.warn('noticias supabase:', e); }
 }

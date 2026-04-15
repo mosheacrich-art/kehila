@@ -509,9 +509,8 @@
     if (!sb) return;
     try {
       const { data } = await sb
-        .from('wallap_anuncios')
+        .from('anuncios')
         .select('*')
-        .eq('activo', true)
         .order('created_at', { ascending: false })
         .limit(100);
       if (data && data.length) {

@@ -2141,24 +2141,45 @@
   /* ══════════════════════════════
      TAB EVENTOS
   ══════════════════════════════ */
-  let eventsState = MOCK_EVENTOS.map(e => ({ ...e, cancelado: false }));
+  let eventsState = [];
+
+  async function loadEventosAdmin() {
+    const container = document.getElementById('events-admin-list');
+    container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Cargando eventos…</p>';
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) {
+      const [evRes, insRes] = await Promise.all([
+        sb.from('eventos').select('*').order('fecha', { ascending: true }),
+        sb.from('inscripciones').select('evento_id')
+      ]);
+      const conteosMap = {};
+      if (insRes.data) insRes.data.forEach(r => { conteosMap[r.evento_id] = (conteosMap[r.evento_id] || 0) + 1; });
+      eventsState = (evRes.data || []).map(ev => ({ ...ev, inscritos: conteosMap[String(ev.id)] || 0 }));
+    }
+    renderEventosAdmin();
+  }
 
   function renderEventosAdmin() {
     const container = document.getElementById('events-admin-list');
+    if (!eventsState.length) {
+      container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">No hay eventos. Crea el primero.</p>';
+      return;
+    }
     container.innerHTML = eventsState.map(ev => {
       const fecha = new Date(ev.fecha + 'T00:00:00');
       const dia = fecha.getDate();
       const mes = MESES[fecha.getMonth()];
-      const pct = Math.round((ev.inscritos / ev.aforo) * 100);
+      const inscritos = ev.inscritos || 0;
+      const pct = ev.aforo ? Math.round((inscritos / ev.aforo) * 100) : 0;
       const fillColor = pct >= 90 ? 'var(--color-danger)' : pct >= 60 ? 'var(--color-warning)' : 'var(--color-success)';
 
       return `
-        <div class="event-admin-card" id="ev-card-${ev.id}" style="${ev.cancelado ? 'opacity:.5;' : ''}">
+        <div class="event-admin-card" id="ev-card-${ev.id}">
           <div class="event-admin-date">
             <div class="event-admin-day">${dia}</div>
             <div class="event-admin-mon">${mes}</div>
           </div>
-          ${ev.imagen ? `<img src="${ev.imagen}" class="ev-admin-thumb" alt="">` : ''}
+          ${ev.imagen_url ? `<img src="${ev.imagen_url}" class="ev-admin-thumb" alt="">` : ''}
           <div class="event-admin-info">
             <p class="event-admin-title">${ev.titulo}</p>
             <div class="event-admin-meta">
@@ -2175,28 +2196,27 @@
               <div class="progress-bar" style="max-width:100px;">
                 <div class="progress-fill" style="width:${pct}%;background:${fillColor};"></div>
               </div>
-              <span>${ev.inscritos}/${ev.aforo} inscritos</span>
+              <span>${inscritos}/${ev.aforo} inscritos</span>
             </div>
           </div>
           <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;">
-            ${ev.cancelado
-              ? `<span class="badge badge-banned">Cancelado</span>`
-              : `<span class="badge badge-active">Activo</span>`}
-            <button class="btn btn-sm btn-secondary" onclick="showToast('Edición de eventos próximamente','info')">Editar</button>
-            <button class="btn btn-sm btn-danger" onclick="cancelarEvento('${ev.id}')" ${ev.cancelado ? 'disabled' : ''}>Cancelar</button>
+            <span class="badge badge-active">Activo</span>
+            <button class="btn btn-sm btn-danger" onclick="eliminarEvento('${ev.id}')">Eliminar</button>
           </div>
         </div>`;
     }).join('');
   }
 
-  function cancelarEvento(id) {
+  async function eliminarEvento(id) {
     const ev = eventsState.find(e => e.id === id);
-    ev.cancelado = true;
+    eventsState = eventsState.filter(e => e.id !== id);
     renderEventosAdmin();
-    showToast(`Evento "${ev.titulo}" cancelado.`, 'warning');
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) { try { await sb.from('eventos').delete().eq('id', id); } catch(_) {} }
+    showToast(`Evento "${ev?.titulo}" eliminado.`, 'warning');
   }
 
-  function saveEvento() {
+  async function saveEvento() {
     const titulo = document.getElementById('ev-titulo').value.trim();
     const inicio = document.getElementById('ev-inicio').value;
     const lugar  = document.getElementById('ev-lugar').value.trim();
@@ -2207,39 +2227,33 @@
     ['ev-titulo','ev-inicio','ev-lugar'].forEach(id =>
       document.getElementById(id).classList.remove('error'));
 
-    if (!titulo) {
-      document.getElementById('ev-titulo-err').style.display = '';
-      document.getElementById('ev-titulo').classList.add('error');
-      valid = false;
-    }
-    if (!inicio) {
-      document.getElementById('ev-inicio-err').style.display = '';
-      document.getElementById('ev-inicio').classList.add('error');
-      valid = false;
-    }
-    if (!lugar) {
-      document.getElementById('ev-lugar-err').style.display = '';
-      document.getElementById('ev-lugar').classList.add('error');
-      valid = false;
-    }
+    if (!titulo) { document.getElementById('ev-titulo-err').style.display = ''; document.getElementById('ev-titulo').classList.add('error'); valid = false; }
+    if (!inicio) { document.getElementById('ev-inicio-err').style.display = ''; document.getElementById('ev-inicio').classList.add('error'); valid = false; }
+    if (!lugar) { document.getElementById('ev-lugar-err').style.display = ''; document.getElementById('ev-lugar').classList.add('error'); valid = false; }
     if (!valid) return;
 
-    const newEv = {
-      id: 'ev_' + Date.now(),
+    const evParaDB = {
       titulo,
       descripcion: document.getElementById('ev-desc').value,
       fecha: inicio.split('T')[0],
-      hora: inicio.split('T')[1] || '00:00',
+      hora: (inicio.split('T')[1] || '00:00').slice(0, 5),
       lugar,
       aforo: parseInt(document.getElementById('ev-aforo').value) || 50,
-      inscritos: 0,
       categoria: 'Comunidad',
-      organizador: getCurrentUser()?.name || 'Admin',
-      emoji: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>',
-      cancelado: false,
-      imagen: getUpload('ev') || null
+      created_by: getCurrentUser()?.name || 'Admin',
+      emoji: '📅',
+      imagen_url: getUpload('ev') || null
     };
-    eventsState.unshift(newEv);
+
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) {
+      const { data, error } = await sb.from('eventos').insert(evParaDB).select().single();
+      if (error) { showToast('Error al guardar: ' + error.message, 'error'); return; }
+      eventsState.unshift({ ...evParaDB, id: data.id, inscritos: 0 });
+    } else {
+      eventsState.unshift({ ...evParaDB, id: 'ev_' + Date.now(), inscritos: 0 });
+    }
+
     renderEventosAdmin();
     closeModal('modal-evento');
     document.getElementById('form-evento').reset();
@@ -2247,13 +2261,13 @@
     showToast(`Evento "${titulo}" creado correctamente.`, 'success');
   }
 
-  renderEventosAdmin();
+  loadEventosAdmin();
   uploadAreaSetup('ev');
 
   /* ══════════════════════════════
      TAB NOTICIAS
   ══════════════════════════════ */
-  let newsState = MOCK_NOTICIAS.map(n => ({ ...n }));
+  let newsState = [];
   let delNoticiaTarget = null;
 
   function renderNewsAdmin() {
@@ -2287,12 +2301,15 @@
     openModal('modal-del-noticia');
   }
 
-  document.getElementById('btn-confirm-del-noticia').addEventListener('click', () => {
-    newsState = newsState.filter(n => n.id !== delNoticiaTarget);
+  document.getElementById('btn-confirm-del-noticia').addEventListener('click', async () => {
+    const id = delNoticiaTarget;
+    newsState = newsState.filter(n => n.id !== id);
     closeModal('modal-del-noticia');
     renderNewsAdmin();
     showToast('Noticia eliminada.', 'warning');
     delNoticiaTarget = null;
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) { try { await sb.from('noticias').delete().eq('id', id); } catch(_) {} }
   });
 
   let _editNoticiaId = null;
@@ -2308,8 +2325,9 @@
     document.getElementById('news-contenido').value = n.contenido || '';
     document.getElementById('news-pin').checked = !!(n.destacada || n.isPinned);
     clearUpload('news');
-    if (n.imagen) {
-      document.getElementById('upload-img-news').src = n.imagen;
+    const imgSrc = n.imagen_url || n.imagen || null;
+    if (imgSrc) {
+      document.getElementById('upload-img-news').src = imgSrc;
       document.getElementById('upload-ph-news').style.display = 'none';
       document.getElementById('upload-filled-news').style.display = '';
     }
@@ -2338,17 +2356,20 @@
     const imagen = getUpload('news') || null;
     const destacada = document.getElementById('news-pin').checked;
 
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+
     if (_editNoticiaId) {
-      // Modo edición
       const n = newsState.find(n => n.id === _editNoticiaId);
       if (n) {
         n.titulo = titulo;
-        n.excerpt = extracto || contenido.slice(0, 120) + '…';
-        n.resumen = n.excerpt;
+        n.resumen = extracto || contenido.slice(0, 120) + '…';
         n.contenido = contenido;
-        n.destacada = destacada;
-        n.isPinned = destacada;
-        if (imagen) n.imagen = imagen;
+        if (imagen) n.imagen_url = imagen;
+      }
+      if (sb) {
+        const upd = { titulo, resumen: n?.resumen, contenido };
+        if (imagen) upd.imagen_url = imagen;
+        sb.from('noticias').update(upd).eq('id', _editNoticiaId).then(() => {});
       }
       renderNewsAdmin();
       closeModal('modal-noticia');
@@ -2357,22 +2378,24 @@
       _resetNoticiaModal();
       showToast(`Noticia "${titulo}" actualizada.`, 'success');
     } else {
-      // Modo creación
-      const newN = {
-        id: 'n_' + Date.now(),
+      const noticiaDB = {
         titulo,
         resumen: extracto || contenido.slice(0, 120) + '…',
-        excerpt: extracto || contenido.slice(0, 120) + '…',
+        contenido,
         categoria: 'Comunidad',
-        colorCategoria: '#1b2e5e',
-        fecha: new Date().toISOString().split('T')[0],
         autor: getCurrentUser()?.name || 'Admin',
-        destacada,
-        isPinned: destacada,
-        imagen: imagen
+        imagen_url: imagen || null
       };
-      newsState.unshift(newN);
-      renderNewsAdmin();
+      if (sb) {
+        sb.from('noticias').insert(noticiaDB).select().single().then(({ data, error }) => {
+          if (error) { showToast('Error al guardar: ' + error.message, 'error'); return; }
+          newsState.unshift({ ...noticiaDB, id: data.id, created_at: data.created_at });
+          renderNewsAdmin();
+        });
+      } else {
+        newsState.unshift({ ...noticiaDB, id: 'n_' + Date.now() });
+        renderNewsAdmin();
+      }
       closeModal('modal-noticia');
       document.getElementById('form-noticia').reset();
       clearUpload('news');
@@ -2381,13 +2404,63 @@
     }
   }
 
-  renderNewsAdmin();
+  async function loadNoticiasAdmin() {
+    const container = document.getElementById('news-admin-list');
+    container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Cargando noticias…</p>';
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) {
+      const { data } = await sb.from('noticias').select('*').order('created_at', { ascending: false });
+      newsState = data || [];
+    }
+    renderNewsAdmin();
+  }
+
+  function renderNewsAdmin() {
+    const container = document.getElementById('news-admin-list');
+    if (!newsState.length) {
+      container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">No hay noticias. Crea la primera.</p>';
+      return;
+    }
+    container.innerHTML = newsState.map(n => {
+      const imgSrc = n.imagen_url || n.imagen || null;
+      const fechaDisplay = n.created_at ? new Date(n.created_at).toLocaleDateString('es-ES') : (n.fecha || '');
+      return `
+      <div class="news-admin-row" id="news-row-${n.id}">
+        ${imgSrc ? `<img src="${imgSrc}" class="news-admin-thumb" alt="">` : `<div style="width:52px;height:52px;border-radius:10px;background:#1b2e5e;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700;font-size:1.05rem;text-transform:uppercase;">${(n.categoria||'N')[0]}</div>`}
+        <div class="news-admin-info">
+          <p class="news-admin-title">${n.titulo}</p>
+          <p class="news-admin-meta">${n.categoria} · ${fechaDisplay} · ${n.autor || ''}</p>
+        </div>
+        <button class="btn btn-sm btn-secondary" onclick="editNoticia('${n.id}')">Editar</button>
+        <button class="btn btn-sm btn-danger" onclick="promptDelNoticia('${n.id}')">Eliminar</button>
+      </div>`;
+    }).join('');
+  }
+
+  loadNoticiasAdmin();
   uploadAreaSetup('news');
 
   /* ══════════════════════════════
      TAB MARKETPLACE
   ══════════════════════════════ */
-  let wallapState = MOCK_WALLAP.map(w => ({ ...w }));
+  let wallapState = [];
+
+  async function loadMarketplaceAdmin() {
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) {
+      const { data } = await sb.from('anuncios').select('*').order('created_at', { ascending: false });
+      if (data) {
+        wallapState = data.map(r => ({
+          id: r.id, titulo: r.titulo, tipo: r.tipo || 'venta',
+          precio: r.precio || 0, categoria: r.categoria || 'General',
+          descripcion: r.descripcion || '', vendedor: r.usuario_nombre || 'Miembro',
+          ubicacion: r.ubicacion || 'España', emoji: r.emoji || '📦',
+          estado: r.estado || 'disponible'
+        }));
+      }
+    }
+    filterWallap();
+  }
 
   function filterWallap() {
     const q    = document.getElementById('wp-search').value.toLowerCase();
@@ -2448,14 +2521,16 @@
     showToast(`Listado ${item.estado === 'disponible' ? 'visible' : 'oculto'}.`, 'info');
   }
 
-  function deleteWallap(id) {
+  async function deleteWallap(id) {
     const item = wallapState.find(w => w.id === id);
     wallapState = wallapState.filter(w => w.id !== id);
     filterWallap();
-    showToast(`Listado "${item.titulo}" eliminado.`, 'warning');
+    showToast(`Listado "${item?.titulo}" eliminado.`, 'warning');
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) { try { await sb.from('anuncios').delete().eq('id', id); } catch(_) {} }
   }
 
-  filterWallap();
+  loadMarketplaceAdmin();
 
   /* ─── Solicitudes de registro (localStorage) ─── */
   function renderPendingSolicitudes() {
