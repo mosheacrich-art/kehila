@@ -716,30 +716,32 @@
       const imgFile = document.getElementById('ev-img-file').files[0];
       const imagen_url = imgFile ? await uploadMedia(imgFile, 'eventos') : null;
 
-      const newEv = {
+      // Payload exacto para Supabase (solo columnas que existen en la tabla)
+      const evParaDB = {
         titulo,
         descripcion: document.getElementById('ev-desc').value.trim(),
         fecha,
         hora: document.getElementById('ev-hora').value,
         lugar: document.getElementById('ev-lugar').value.trim(),
         aforo: parseInt(document.getElementById('ev-aforo').value) || 50,
-        inscritos: 0,
         categoria: document.getElementById('ev-categoria').value,
-        organizador: user.name,
+        created_by: user.name,
         emoji: document.getElementById('ev-emoji').value.trim() || '📅',
         imagen_url
       };
 
-      // Guardar en Supabase (sin 'inscritos', esa columna no existe en la tabla)
-      const { inscritos: _ins, ...evParaDB } = newEv;
       const sb = getSupabase();
+      let savedId = null;
       if (sb) {
         const { data, error } = await sb.from('eventos').insert(evParaDB).select().single();
-        if (!error && data) newEv.id = data.id;
-        else if (error) { showToast('Error al guardar: ' + error.message, 'error'); btn.textContent = 'Publicar evento'; btn.disabled = false; return; }
+        if (error) { showToast('Error al guardar: ' + error.message, 'error'); btn.textContent = 'Publicar evento'; btn.disabled = false; return; }
+        savedId = data.id;
       } else {
-        newEv.id = 'ev' + Date.now();
+        savedId = 'ev' + Date.now();
       }
+
+      // Objeto local (incluye campos extra para el renderizado)
+      const newEv = { ...evParaDB, id: savedId, inscritos: 0 };
 
       MOCK_EVENTOS.unshift(newEv);
       renderLista();
