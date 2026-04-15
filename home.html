@@ -1176,7 +1176,7 @@
           ? `background:url('${n.imagen_url}') center/cover no-repeat`
           : `background:var(--color-gold-light)`;
         return `
-          <a href="noticias.html?id=${n.id}" class="noticia-carousel-card">
+          <a href="noticia.html?id=${n.id}" class="noticia-carousel-card">
             <div class="noticia-carousel-img" style="${imgStyle}"></div>
             <div class="noticia-carousel-body">
               <div class="noticia-carousel-cat">${n.categoria || 'Noticia'}</div>
@@ -1197,7 +1197,7 @@
         try {
           const queries = [
             sb.from('eventos').select('id,titulo,descripcion,fecha,hora,lugar,aforo,categoria,imagen_url').order('fecha', { ascending: true }).limit(4),
-            sb.from('noticias').select('id,titulo,resumen,categoria,autor,imagen_url,created_at').order('created_at', { ascending: false }).limit(3)
+            sb.from('noticias').select('id,titulo,resumen,categoria,autor,imagen_url,created_at').order('created_at', { ascending: false }).limit(6)
           ];
           if (user) queries.push(sb.from('inscripciones').select('evento_id').eq('usuario_id', user.userId));
 
@@ -1216,6 +1216,7 @@
       }
       renderEventos();
       renderNoticias();
+      loadBanner(); // after noticias loaded so getNoticiaSlides() has real data
     }
 
     loadHomeData();
@@ -1316,7 +1317,7 @@
         subtitulo: n.excerpt || n.resumen || '',
         color: catColors[n.categoria] || 'linear-gradient(135deg,#1a202c 0%,#2d3748 100%)',
         _cat: n.categoria,
-        href: n.id ? `noticias.html?id=${n.id}` : 'noticias.html'
+        href: n.id ? `noticia.html?id=${n.id}` : 'noticias.html'
       }));
     }
 
@@ -1450,8 +1451,6 @@
     }
 
     document.getElementById('banner-admin-btn').addEventListener('click', abrirBannerAdmin);
-
-    loadBanner();
 
     /* ─── Cerrar dropdowns al click fuera ─── */
     document.addEventListener('click', function (e) {

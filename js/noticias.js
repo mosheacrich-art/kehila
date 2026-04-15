@@ -14,15 +14,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderGrid('todas');
     initDelegation();
 
-    // Auto-open article from URL param ?id=xxx (e.g. when coming from home carousel)
-    const openId = new URLSearchParams(window.location.search).get('id');
-    if (openId) {
-      const n = getNoticias().find(x => x?.id == openId || String(x?.id) === openId);
-      if (n) {
-        // Small delay so the page renders first
-        setTimeout(() => abrirNoticia(n.id), 80);
-      }
-    }
   } catch (e) {
     console.error('Error iniciando noticias:', e);
   }
@@ -237,7 +228,7 @@ function initDelegation() {
   document.addEventListener('click', (e) => {
     try {
       const card = e.target.closest('[data-action="abrir-noticia"]');
-      if (card) { abrirNoticia(card.dataset.id); return; }
+      if (card && card.dataset.id) { window.location.href = `noticia.html?id=${card.dataset.id}`; return; }
 
       const filtro = e.target.closest('.filter-chips [data-categoria]');
       if (filtro) {
