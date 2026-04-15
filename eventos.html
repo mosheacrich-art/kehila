@@ -472,16 +472,19 @@
 
     const sb = getSupabase();
     const user = getCurrentUser();
-    if (sb && user) {
-      const { error } = await sb.from('inscripciones').insert({
-        usuario_id: user.userId,
-        evento_id: String(evId),
-        evento_titulo: ev.titulo
-      });
-      if (error) {
-        console.error('Error inscripción:', error);
-        showToast('Error al guardar inscripción: ' + error.message, 'error');
-      }
+    if (!sb) { showToast('⚠️ Supabase no disponible', 'error'); return; }
+    if (!user) { showToast('⚠️ Sesión no encontrada, vuelve a iniciar sesión', 'error'); return; }
+
+    const { data, error } = await sb.from('inscripciones').insert({
+      usuario_id: user.userId,
+      evento_id: String(evId),
+      evento_titulo: ev.titulo
+    }).select();
+    if (error) {
+      console.error('Error inscripción:', error);
+      showToast('Error: ' + error.message + ' (code: ' + error.code + ')', 'error');
+    } else {
+      console.log('Inscripción guardada:', data);
     }
   });
 
