@@ -474,13 +474,14 @@
       precio: parseFloat(document.getElementById('pub-precio').value) || 0,
       categoria: document.getElementById('pub-cat').value,
       descripcion: document.getElementById('pub-desc').value || 'Sin descripción.',
-      vendedor: user?.name || 'Miembro',
-      vendedor_id: user?.userId || user?.id || '',
-      fecha: new Date().toISOString().split('T')[0],
+      usuario_nombre: user?.name || 'Miembro',
+      usuario_id: user?.userId || user?.id || '',
       ubicacion: document.getElementById('pub-loc').value || 'España',
       emoji: emojiMap[tipoVal] || '📦',
       estado: 'disponible'
     };
+    // Para renderizado local
+    const newItemLocal = { ...newItem, vendedor: newItem.usuario_nombre, fecha: new Date().toISOString().split('T')[0] };
 
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (sb) {
@@ -490,12 +491,12 @@
         showToast('Error al publicar: ' + error.message, 'error');
         return;
       }
-      if (data) newItem.id = data.id;
+      if (data) newItemLocal.id = data.id;
     } else {
-      newItem.id = 'wp_' + Date.now();
+      newItemLocal.id = 'wp_' + Date.now();
     }
 
-    wallapItems.unshift(newItem);
+    wallapItems.unshift(newItemLocal);
     closeModal('modal-publicar');
     document.getElementById('form-publicar').reset();
     document.getElementById('photo-previews-container').innerHTML = '';
