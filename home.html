@@ -1050,21 +1050,29 @@
             </div>
             <div class="evento-home-footer">
               <span class="plazas-badge ${plazasClass}">${plazasText}</span>
-              <button
-                class="btn btn-primary btn-sm"
-                ${lleno ? 'disabled' : ''}
-                onclick="inscribirse('${ev.id}', '${ev.titulo.replace(/'/g, "\\'")}', ${lleno})"
-              >
-                ${_lleno_txt}
-              </button>
+              ${homeInscrito.has(String(ev.id))
+                ? `<button class="btn btn-sm" style="background:var(--color-success-light);color:#065F46;border:1.5px solid var(--color-success);cursor:default;">✓ Inscrito</button>`
+                : `<button class="btn btn-primary btn-sm" ${lleno ? 'disabled' : ''} onclick="inscribirse('${ev.id}', '${ev.titulo.replace(/'/g, "\\'")}', ${lleno})">${_lleno_txt}</button>`
+              }
             </div>
           </div>`;
       }).join('');
     }
 
-    function inscribirse(id, titulo, lleno) {
+    async function inscribirse(id, titulo, lleno) {
       if (lleno) return;
-      showToast(`Inscripción confirmada en "${titulo}" ✓`, 'success');
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (!sb || !user) { window.location.href = 'eventos.html'; return; }
+      const { error } = await sb.from('inscripciones').insert({
+        usuario_id: user.userId,
+        evento_id: String(id),
+        evento_titulo: titulo
+      });
+      if (error) { showToast('Error: ' + error.message, 'error'); return; }
+      homeInscrito.add(String(id));
+      renderEventos();
+      showToast(`¡Inscripción confirmada en "${titulo}"!`, 'success');
     }
 
     /* ─── Renderizar noticias ─── */
@@ -1105,25 +1113,30 @@
     }
 
     /* ─── Init renders — carga desde Supabase ─── */
+    const homeInscrito = new Set();
+
     async function loadHomeData() {
       const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
       if (sb) {
         try {
-          const [evRes, notRes] = await Promise.all([
+          const queries = [
             sb.from('eventos').select('id,titulo,descripcion,fecha,hora,lugar,aforo,categoria,imagen_url').order('fecha', { ascending: true }).limit(4),
             sb.from('noticias').select('id,titulo,resumen,categoria,autor,imagen_url,created_at').order('created_at', { ascending: false }).limit(3)
-          ]);
+          ];
+          if (user) queries.push(sb.from('inscripciones').select('evento_id').eq('usuario_id', user.userId));
+
+          const [evRes, notRes, insRes] = await Promise.all(queries);
+
           if (evRes.data && evRes.data.length) {
             MOCK_EVENTOS.length = 0;
             evRes.data.forEach(ev => { ev.inscritos = 0; MOCK_EVENTOS.push(ev); });
           }
           if (notRes.data && notRes.data.length) {
             MOCK_NOTICIAS.length = 0;
-            notRes.data.forEach(n => {
-              n.fecha = n.created_at ? n.created_at.split('T')[0] : '';
-              MOCK_NOTICIAS.push(n);
-            });
+            notRes.data.forEach(n => { n.fecha = n.created_at ? n.created_at.split('T')[0] : ''; MOCK_NOTICIAS.push(n); });
           }
+          if (insRes?.data) insRes.data.forEach(r => homeInscrito.add(r.evento_id));
         } catch(e) { /* usa mock como fallback */ }
       }
       renderEventos();
