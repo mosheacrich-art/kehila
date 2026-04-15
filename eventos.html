@@ -600,11 +600,18 @@
     const user = getCurrentUser();
     if (sb) {
       try {
-        const [evRes, insRes] = await Promise.all([
+        const [evRes, insRes, allInsRes] = await Promise.all([
           sb.from('eventos').select('*').order('fecha', { ascending: true }),
-          user ? sb.from('inscripciones').select('evento_id').eq('usuario_id', user.userId) : Promise.resolve({ data: [] })
+          user ? sb.from('inscripciones').select('evento_id').eq('usuario_id', user.userId) : Promise.resolve({ data: [] }),
+          sb.from('inscripciones').select('evento_id')
         ]);
-        if (evRes.data?.length) evRes.data.forEach(ev => MOCK_EVENTOS.unshift(ev));
+        // Contar inscritos por evento
+        const conteosMap = {};
+        if (allInsRes.data) allInsRes.data.forEach(r => { conteosMap[r.evento_id] = (conteosMap[r.evento_id] || 0) + 1; });
+        if (evRes.data?.length) evRes.data.forEach(ev => {
+          ev.inscritos = conteosMap[String(ev.id)] || 0;
+          MOCK_EVENTOS.unshift(ev);
+        });
         if (insRes.data?.length) insRes.data.forEach(r => inscrito.add(r.evento_id));
       } catch(e) {}
     }
@@ -723,10 +730,11 @@
         imagen_url
       };
 
-      // Guardar en Supabase
+      // Guardar en Supabase (sin 'inscritos', esa columna no existe en la tabla)
+      const { inscritos: _ins, ...evParaDB } = newEv;
       const sb = getSupabase();
       if (sb) {
-        const { data, error } = await sb.from('eventos').insert(newEv).select().single();
+        const { data, error } = await sb.from('eventos').insert(evParaDB).select().single();
         if (!error && data) newEv.id = data.id;
         else if (error) { showToast('Error al guardar: ' + error.message, 'error'); btn.textContent = 'Publicar evento'; btn.disabled = false; return; }
       } else {
