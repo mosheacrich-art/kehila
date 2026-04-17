@@ -1,7 +1,31 @@
-/* =============================================
-   KEHILÁ — nav.js
-   Sidebar dinámico y bottom nav móvil
-   ============================================= */
+/**
+ * @file nav.js
+ * @description Navegación global: sidebar desktop, bottom nav móvil, hamburger y toasts.
+ *
+ * Este archivo se incluye en TODAS las páginas protegidas y genera la navegación
+ * de forma dinámica en el cliente (no hay servidor que genere el HTML).
+ *
+ * Componentes que genera:
+ *  - Sidebar izquierdo (desktop ≥ 769px): con avatar, nombre, links y logout
+ *  - Bottom navigation (móvil ≤ 768px): 4-5 iconos principales
+ *  - Menú "Más" drawer (móvil): el resto de secciones
+ *  - Hamburger menu: navegación completa en móvil
+ *  - Page header: título de sección + acciones contextuales
+ *  - Toast notifications: mensajes temporales de estado
+ *  - Legal footer: enlace a páginas legales
+ *
+ * DEPENDENCIAS:
+ *  - auth.js → getCurrentUser(), getAvatarColor(), renderAvatar(), logout()
+ *    Debe cargarse ANTES que nav.js.
+ *
+ * PUNTO DE ENTRADA: initNav(activePage) — llamar en DOMContentLoaded de cada página.
+ *
+ * AÑADIR UNA NUEVA SECCIÓN AL MENÚ:
+ *  1. Añadir entrada al array NAV_ITEMS (grupo + item con id, label, href, icon)
+ *  2. Si debe aparecer en bottom nav móvil, añadir a BOTTOM_NAV_ITEMS
+ *  3. Crear el archivo HTML correspondiente
+ *  4. Llamar initNav('id-de-la-nueva-seccion') en esa página
+ */
 
 const NAV_ITEMS = [
   {
@@ -80,6 +104,13 @@ const BOTTOM_NAV_ITEMS = [
 /**
  * Construye e inyecta el sidebar en .sidebar-placeholder o crea uno.
  * @param {string} activePage - id de la página activa
+ */
+/**
+ * Construye e inyecta el sidebar de navegación lateral (solo desktop).
+ * Si la página está en un iframe, oculta el sidebar y ajusta márgenes.
+ *
+ * @param {string} activePage - ID de la página activa (ej: 'home', 'eventos')
+ *   Debe coincidir con el campo `id` en NAV_ITEMS.
  */
 function buildSidebar(activePage) {
   // Si está en un iframe, suprimir sidebar y quitar márgenes
@@ -198,6 +229,12 @@ function buildSidebar(activePage) {
 /**
  * Construye e inyecta la barra de navegación móvil inferior.
  * @param {string} activePage - id de la página activa
+ */
+/**
+ * Construye e inyecta la barra de navegación inferior para móvil.
+ * Muestra los items definidos en BOTTOM_NAV_ITEMS + botón "Más".
+ *
+ * @param {string} activePage - ID de la página activa
  */
 function buildBottomNav(activePage) {
   if (window.self !== window.top) return;
@@ -343,6 +380,9 @@ function buildMoreDrawer(activePage) {
   document.body.insertAdjacentHTML('beforeend', drawerHTML);
 }
 
+/**
+ * Abre o cierra el drawer "Más" en móvil que muestra secciones secundarias.
+ */
 function toggleMoreDrawer() {
   const drawer   = document.getElementById('more-drawer');
   const backdrop = document.getElementById('more-drawer-backdrop');
@@ -634,6 +674,19 @@ function buildBackBtn(activePage) {
  * Inicializa sidebar y bottom nav.
  * @param {string} activePage - id de la página
  */
+/**
+ * Punto de entrada principal. Inicializa todos los componentes de navegación.
+ * Llamar en DOMContentLoaded en cada página protegida.
+ *
+ * @param {string} activePage - ID de la sección activa (debe existir en NAV_ITEMS)
+ *
+ * @example
+ * document.addEventListener('DOMContentLoaded', () => {
+ *   requireAuth();
+ *   initNav('eventos');
+ *   trackPageView('eventos');
+ * });
+ */
 function initNav(activePage) {
   if (typeof trackPageView === 'function') trackPageView(activePage);
   // Cargar i18n.js si no está disponible
@@ -656,6 +709,18 @@ function initNav(activePage) {
  * @param {string} message - Texto del mensaje
  * @param {'success'|'error'|'warning'|'info'} type
  * @param {number} duration - ms antes de desaparecer (default 3500)
+ */
+/**
+ * Muestra una notificación toast temporal en la esquina inferior de la pantalla.
+ * Se puede llamar desde cualquier página que haya cargado nav.js.
+ *
+ * @param {string} message        - Texto a mostrar
+ * @param {'info'|'success'|'warning'|'error'} [type='info'] - Tipo de toast
+ * @param {number} [duration=3500] - Duración en milisegundos antes de desaparecer
+ *
+ * @example
+ * showToast('Cambios guardados', 'success');
+ * showToast('Error al conectar', 'error', 5000);
  */
 function showToast(message, type = 'info', duration = 3500) {
   let container = document.querySelector('.toast-container');
@@ -690,6 +755,12 @@ function removeToast(toast) {
 /* ─── Legal Footer ────────────────────────────────────────────────
    Se inyecta automáticamente al final de .main-content en cada página
    ────────────────────────────────────────────────────────────────── */
+/**
+ * Genera el HTML del footer legal (Aviso Legal, Privacidad, Cookies).
+ * Se inyecta al final del sidebar desktop.
+ *
+ * @returns {string} HTML string del footer
+ */
 function buildLegalFooter() {
   if (document.getElementById('legal-footer')) return;
 

@@ -1,7 +1,31 @@
-/* =============================================
-   KEHILÁ — data.js
-   Datos mock realistas para el prototipo
-   ============================================= */
+/**
+ * @file data.js
+ * @description Datos de fallback / mock para desarrollo y UI inicial.
+ *
+ * ⚠️  ARCHIVO TEMPORAL — PENDIENTE DE ELIMINAR EN PRODUCCIÓN COMPLETA
+ * ─────────────────────────────────────────────────────────────────────
+ * Este archivo existe porque la migración a Supabase está en curso.
+ * Cada módulo intenta cargar datos reales de Supabase y, si no los tiene,
+ * usa estos mocks como fallback para que la UI no quede vacía.
+ *
+ * PLAN DE ELIMINACIÓN:
+ *  1. Completar migración de cada tabla a Supabase con datos reales
+ *  2. Eliminar la referencia a los MOCK_* del módulo correspondiente
+ *  3. Cuando todos los módulos estén migrados, eliminar este archivo
+ *     y quitarlo de todos los <script> en los HTML
+ *
+ * VARIABLES EXPORTADAS (accesibles globalmente):
+ *  - MOCK_USERS         → Usuarios de prueba (tabla: profiles)
+ *  - MOCK_EVENTOS       → Eventos (tabla: eventos)
+ *  - MOCK_NOTICIAS_V2   → Noticias (tabla: noticias) — MUTABLE, se sobrescribe
+ *  - MOCK_DONATIVOS     → Campañas de donación (tabla: donativos)
+ *  - MOCK_WALLAP        → Items de marketplace (tabla: wallap_items)
+ *  - MOCK_PREGUNTAS_RAV → Preguntas al Rav (tabla: preguntas_rav)
+ *  - CATEGORIA_CONFIG   → Configuración visual de categorías de noticias
+ *
+ * SEGURIDAD: No contiene contraseñas reales ni datos de usuarios reales.
+ * Los emails son ficticios (@kehila.es, @ejemplo.es).
+ */
 
 /* ─── USUARIOS ─── */
 const MOCK_USERS = [

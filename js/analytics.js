@@ -1,12 +1,29 @@
-/* ═══════════════════════════════════════════════════════════════
-   KEHILÁ ANALYTICS — js/analytics.js
-   Tracking real via Supabase. Fallback a datos simulados si
-   las tablas están vacías o Supabase no está disponible.
-
-   Tablas Supabase necesarias (ver supabase_analytics.sql):
-     · page_views  (page, user_id, created_at)
-     · news_reads  (news_id, user_id, created_at)
-   ═══════════════════════════════════════════════════════════════ */
+/**
+ * @file analytics.js
+ * @description Dashboard de métricas para el panel de administración.
+ *
+ * Estrategia de datos (dos capas):
+ *  1. Datos base simulados (_AN_PAGE_VIEWS_BASE, etc.) — se muestran inmediatamente
+ *     para dar una UI con contenido mientras llegan los datos reales.
+ *  2. Datos reales de Supabase — se suman a los base cuando lleguen.
+ *     Si Supabase falla o las tablas están vacías, se conservan los datos base.
+ *
+ * Tablas Supabase requeridas (ver supabase_analytics.sql):
+ *  - page_views  (page TEXT, user_id UUID, created_at TIMESTAMPTZ)
+ *  - news_reads  (news_id TEXT, user_id UUID, created_at TIMESTAMPTZ)
+ *
+ * DEPENDENCIAS (en orden):
+ *  - auth.js       → getSupabase(), getCurrentUser()
+ *  - data.js       → MOCK_USUARIOS, MOCK_EVENTOS, MOCK_DONATIVOS, MOCK_NOTICIAS_V2
+ *  - chart.js CDN  → window.Chart
+ *
+ * PUNTO DE ENTRADA: loadAnalyticsDashboard() — llamar desde admin.html al
+ * activar la pestaña de Analytics.
+ *
+ * NOTA: Las KPIs de usuarios, eventos y donaciones leen de MOCK_* (data.js).
+ * Cuando se complete la migración a Supabase completo, reemplazar esas referencias
+ * por queries reales y eliminar data.js.
+ */
 
 'use strict';
 
@@ -426,6 +443,13 @@ function _renderChartNuevos(monthlyData) {
 
 // ─── 11. Función principal ────────────────────────────────────────
 
+/**
+ * Punto de entrada principal del dashboard de analytics.
+ * Renderiza inmediatamente con datos fallback y luego actualiza con datos reales.
+ * Llamar desde admin.html al activar la pestaña de Analytics.
+ *
+ * @returns {Promise<void>}
+ */
 async function loadAnalyticsDashboard() {
   // 1. Render inmediato con datos mock/fallback
   _renderAnKPIs(null);

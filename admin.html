@@ -1653,7 +1653,45 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="js/analytics.js"></script>
 <script>
-  /* ── Upload helpers ── */
+/**
+ * @file admin.html — Script inline
+ * @description Lógica completa del panel de administración de Kehilá.
+ *
+ * DEPENDENCIAS (cargadas en el <head> en este orden):
+ *  supabase CDN → auth.js → nav.js → data.js → analytics.js
+ *
+ * SEGURIDAD [SEC-01]:
+ *  requireAdmin() solo verifica localStorage. Para producción completa,
+ *  usar verifyAdminRealtime() (definido en auth.js) en operaciones destructivas.
+ *
+ * XSS: Usar siempre escHtml() al insertar datos de usuario en innerHTML.
+ *  La función está definida en la sección SUBGRUPOS pero es global.
+ *  Ejemplo correcto:   el.innerHTML = `<span>${escHtml(user.name)}</span>`;
+ *  Ejemplo incorrecto: el.innerHTML = `<span>${user.name}</span>`;  ← XSS
+ *
+ * PESTAÑAS Y SUS FUNCIONES DE CARGA:
+ *  resumen     → initResumen() (automático al cargar)
+ *  usuarios    → cargarUsuariosReales()
+ *  eventos     → loadEventosAdmin()
+ *  noticias    → loadNoticiasAdmin()
+ *  marketplace → loadMarketplaceAdmin()
+ *  solicitudes → renderPendingSolicitudes()
+ *  preguntas   → loadPreguntas()
+ *  subgrupos   → loadSubgrupos()
+ *  analytics   → loadAnalyticsDashboard()
+ */
+
+  /* ══════════════════════════════════════════════════════════════
+     UPLOAD HELPERS
+     Gestión de zonas de carga de imagen en formularios admin.
+     Los IDs siguen el patrón: upload-area-{id}, file-{id},
+     upload-img-{id}, upload-ph-{id}, upload-filled-{id}
+  ══════════════════════════════════════════════════════════════ */
+
+  /**
+   * Inicializa una zona de arrastrar/clic para subir imagen.
+   * @param {string} id - Sufijo del ID (ej: 'evento' para upload-area-evento)
+   */
   function uploadAreaSetup(id) {
     var area  = document.getElementById('upload-area-' + id);
     var input = document.getElementById('file-' + id);
@@ -1671,12 +1709,21 @@
       reader.readAsDataURL(file);
     });
   }
+  /**
+   * Limpia una zona de upload, reseteando la previsualización y el input.
+   * @param {string} id - Sufijo del ID
+   */
   function clearUpload(id) {
     var input = document.getElementById('file-' + id); if (input) input.value = '';
     var img   = document.getElementById('upload-img-' + id); if (img) img.src = '';
     var ph    = document.getElementById('upload-ph-' + id); if (ph) ph.style.display = 'flex';
     var fd    = document.getElementById('upload-filled-' + id); if (fd) fd.style.display = 'none';
   }
+  /**
+   * Devuelve el Data URL de la imagen cargada en la zona de upload, o null si vacía.
+   * @param {string} id - Sufijo del ID
+   * @returns {string|null} Data URL de la imagen o null
+   */
   function getUpload(id) {
     var img = document.getElementById('upload-img-' + id);
     return (img && img.src && img.src.startsWith('data:')) ? img.src : null;
@@ -1701,10 +1748,20 @@
   /* ══════════════════════════════
      MODALES
   ══════════════════════════════ */
+  /**
+   * Abre un modal por su ID eliminando la clase 'hidden'.
+   * También bloquea el scroll del body mientras el modal está abierto.
+   * @param {string} id - ID del elemento .modal-overlay
+   */
   function openModal(id) {
     document.getElementById(id).classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
+  /**
+   * Cierra un modal por su ID añadiendo la clase 'hidden'.
+   * Restaura el scroll del body.
+   * @param {string} id - ID del elemento .modal-overlay
+   */
   function closeModal(id) {
     document.getElementById(id).classList.add('hidden');
     document.body.style.overflow = '';
@@ -1727,18 +1784,35 @@
   ══════════════════════════════ */
   const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
+  /**
+   * Versión local de getAvatarColor() para no depender del scope global de auth.js.
+   * Devuelve índice de color 0-7 basado en el nombre (determinístico).
+   * @param {string} name
+   * @returns {string}
+   */
   function getAvatarColorLocal(name) {
     if (!name) return '0';
     const code = name.charCodeAt(0) + (name.charCodeAt(1) || 0);
     return String(code % 8);
   }
 
+  /**
+   * Genera el HTML de un avatar circular con iniciales del usuario.
+   * @param {{name: string, initials: string}} user
+   * @param {'sm'|'md'|'lg'} [size='sm']
+   * @returns {string} HTML del avatar
+   */
   function avatarHTML(user, size = 'sm') {
     const color = getAvatarColorLocal(user.name);
     return `<div class="avatar avatar-${size}" data-color="${color}">${user.initials}</div>`;
   }
 
   const TAG = 'display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:3px;font-size:0.7rem;font-weight:600;letter-spacing:0.03em;border:1px solid;white-space:nowrap;';
+  /**
+   * Genera el HTML de un badge de estado de usuario.
+   * @param {'active'|'pending'|'banned'} status
+   * @returns {string} HTML del badge con color y punto indicador
+   */
   function badgeStatus(status) {
     const map = {
       active:  `<span style="${TAG}color:#15803d;background:#f0fdf4;border-color:#bbf7d0;"><span style="width:5px;height:5px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>Activo</span>`,
@@ -1748,6 +1822,11 @@
     return map[status] || `<span style="${TAG}color:var(--color-text-muted);background:var(--color-bg);border-color:var(--color-border);">${status}</span>`;
   }
 
+  /**
+   * Genera el HTML de un badge de rol de usuario.
+   * @param {'admin'|'mod'|'miembro'} role
+   * @returns {string} HTML del badge
+   */
   function badgeRole(role) {
     const map = {
       admin:   `<span style="${TAG}color:#1B2E5E;background:#eef2ff;border-color:#c7d2fe;">Admin</span>`,
@@ -1757,6 +1836,11 @@
     return map[role] || `<span style="${TAG}color:var(--color-text-muted);background:var(--color-bg);border-color:var(--color-border);">${role}</span>`;
   }
 
+  /**
+   * Formatea una fecha ISO (YYYY-MM-DD) como "17 Abr 2026".
+   * @param {string} str - Fecha en formato ISO YYYY-MM-DD
+   * @returns {string}
+   */
   function formatDate(str) {
     const d = new Date(str + 'T00:00:00');
     return `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;
@@ -1811,6 +1895,10 @@
   let usersState = MOCK_USERS.map(u => ({ ...u }));
   let pendingTarget = null; // userId en cola para acción
 
+  /**
+   * Muestra u oculta el banner de usuarios pendientes de aprobación en la cabecera.
+   * Lee de usersState (cargado por cargarUsuariosReales).
+   */
   function initPendingBanner() {
     const count = usersState.filter(u => u.status === 'pending').length;
     const banner = document.getElementById('pending-banner');
@@ -1829,12 +1917,19 @@
     document.getElementById('metric-pendientes').textContent = count;
   }
 
+  /**
+   * Filtra la tabla de usuarios para mostrar solo pendientes cuando hay pendientes.
+   */
   function filterPending() {
     document.getElementById('filter-status').value = 'pending';
     document.querySelector('[data-tab="usuarios"]').click();
     filterUsers();
   }
 
+  /**
+   * Filtra la tabla de usuarios según el valor del input de búsqueda (#search-users)
+   * y el filtro de estado activo (#filter-status). Llama a renderUsersTable().
+   */
   function filterUsers() {
     const q      = document.getElementById('user-search').value.toLowerCase();
     const status = document.getElementById('filter-status').value;
@@ -1852,6 +1947,15 @@
     renderUsersTable(filtered);
   }
 
+  /**
+   * Renderiza la tabla de usuarios en #users-tbody.
+   * Cada fila incluye avatar, nombre, email, badges de estado/rol y botones de acción.
+   *
+   * XSS: Los datos de usuario se pasan por escHtml() donde aplica.
+   * Ver CLAUDE.md §9 para la política de escaping.
+   *
+   * @param {Array<{userId, name, email, initials, status, role, joinDate}>} users
+   */
   function renderUsersTable(users) {
     const tbody = document.getElementById('users-table-body');
     tbody.innerHTML = users.map(u => {
@@ -1902,6 +2006,11 @@
     }).join('');
   }
 
+  /**
+   * Abre el modal de perfil de usuario con todos sus datos.
+   * Lee de usersState por userId.
+   * @param {string} userId - UUID del usuario
+   */
   function verPerfil(userId) {
     const u = usersState.find(x => x.userId === userId);
     if (!u) return;
@@ -1973,12 +2082,23 @@
     openModal('modal-perfil');
   }
 
+  /**
+   * Aprueba el usuario actualmente en el modal de perfil (#modal-usuario).
+   */
   function aprobarDesdeModal() {
     const userId = document.getElementById('perfil-btn-aprobar').dataset.userId;
     closeModal('modal-perfil');
     promptAprobar(userId);
   }
 
+  /**
+   * Muestra el modal de confirmación para aprobar un usuario pendiente.
+   * Al confirmar llama a aprobarEnSupabase().
+   *
+   * [SEC-01] Operación sensible. Pendiente añadir verifyAdminRealtime() antes de ejecutar.
+   *
+   * @param {string} userId - UUID del usuario a aprobar
+   */
   function promptAprobar(userId) {
     const user = usersState.find(u => u.userId === userId);
     pendingTarget = userId;
@@ -1998,6 +2118,14 @@
     pendingTarget = null;
   });
 
+  /**
+   * Muestra el modal de confirmación para banear un usuario activo.
+   * Al confirmar llama a banearEnSupabase().
+   *
+   * [SEC-01] Operación sensible. Pendiente añadir verifyAdminRealtime() antes de ejecutar.
+   *
+   * @param {string} userId - UUID del usuario a banear
+   */
   function promptBanear(userId) {
     const user = usersState.find(u => u.userId === userId);
     pendingTarget = userId;
@@ -2023,6 +2151,10 @@
     pendingTarget = null;
   });
 
+  /**
+   * Suspende temporalmente un usuario (status: suspended) en Supabase.
+   * @param {string} userId
+   */
   function suspenderUser(userId) {
     const user = usersState.find(u => u.userId === userId);
     user.status = 'banned';
@@ -2030,6 +2162,10 @@
     showToast(`${user.name} ha sido suspendido.`, 'warning');
   }
 
+  /**
+   * Reactiva un usuario suspendido o baneado (status: active).
+   * @param {string} userId
+   */
   function reactivarUser(userId) {
     const user = usersState.find(u => u.userId === userId);
     user.status = 'active';
@@ -2039,6 +2175,15 @@
   }
 
   // ── Cargar usuarios reales de Supabase ──────────────────────────
+  /**
+   * Carga todos los usuarios desde Supabase (tabla profiles) y los guarda en usersState.
+   * Actualiza la tabla, el banner de pendientes y los selectores de usuario.
+   *
+   * NOTA: Hace SELECT * de profiles — requiere RLS con política admin para
+   * que solo administradores puedan ver todos los perfiles.
+   *
+   * @returns {Promise<void>}
+   */
   async function cargarUsuariosReales() {
     const sb = getSupabase();
     if (!sb) return;
@@ -2096,6 +2241,11 @@
   }
 
   // Aprobar usuario real en Supabase
+  /**
+   * Actualiza el status del usuario a 'active' en Supabase y recarga la tabla.
+   * @param {string} userId
+   * @returns {Promise<void>}
+   */
   async function aprobarEnSupabase(userId) {
     const sb = getSupabase();
     if (!sb) return;
@@ -2103,6 +2253,11 @@
   }
 
   // Banear usuario real en Supabase
+  /**
+   * Actualiza el status del usuario a 'banned' en Supabase y recarga la tabla.
+   * @param {string} userId
+   * @returns {Promise<void>}
+   */
   async function banearEnSupabase(userId) {
     const sb = getSupabase();
     if (!sb) return;
@@ -2110,6 +2265,10 @@
   }
 
   // ── Crear cuenta de prueba ──────────────────────────────────────
+  /**
+   * Crea una cuenta de prueba en Supabase Auth para testing.
+   * ELIMINAR ANTES DE PRODUCCION.
+   */
   async function crearCuentaPrueba() {
     const btn = document.getElementById('btn-crear-prueba');
     btn.disabled = true;
@@ -2205,6 +2364,11 @@
   ══════════════════════════════ */
   let eventsState = [];
 
+  /**
+   * Carga eventos desde Supabase (tabla eventos) y renderiza la lista admin.
+   * Si Supabase no tiene datos, usa MOCK_EVENTOS como fallback.
+   * @returns {Promise<void>}
+   */
   async function loadEventosAdmin() {
     const container = document.getElementById('events-admin-list');
     container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Cargando eventos…</p>';
@@ -2221,6 +2385,10 @@
     renderEventosAdmin();
   }
 
+  /**
+   * Renderiza la lista de eventos en el panel admin con botones de editar/eliminar.
+   * Lee de eventosState (poblado por loadEventosAdmin).
+   */
   function renderEventosAdmin() {
     const container = document.getElementById('events-admin-list');
     if (!eventsState.length) {
@@ -2269,6 +2437,11 @@
     }).join('');
   }
 
+  /**
+   * Elimina un evento de Supabase y de eventosState, luego re-renderiza.
+   * @param {string} id - ID del evento a eliminar
+   * @returns {Promise<void>}
+   */
   async function eliminarEvento(id) {
     const ev = eventsState.find(e => e.id === id);
     eventsState = eventsState.filter(e => e.id !== id);
@@ -2278,6 +2451,12 @@
     showToast(`Evento "${ev?.titulo}" eliminado.`, 'warning');
   }
 
+  /**
+   * Guarda un evento nuevo o actualiza uno existente en Supabase.
+   * Lee los valores de los inputs del modal #modal-crear-evento.
+   * Si eventosEditId tiene valor, hace UPDATE; si no, INSERT.
+   * @returns {Promise<void>}
+   */
   async function saveEvento() {
     const titulo = document.getElementById('ev-titulo').value.trim();
     const inicio = document.getElementById('ev-inicio').value;
@@ -2332,6 +2511,9 @@
   let newsState = [];
   let delNoticiaTarget = null;
 
+  /**
+   * Renderiza la lista actualizada de noticias en el panel admin (segunda definicion usada tras reload).
+   */
   function renderNewsAdmin() {
     const container = document.getElementById('news-admin-list');
     container.innerHTML = newsState.map(n => `
@@ -2349,6 +2531,10 @@
       </div>`).join('');
   }
 
+  /**
+   * Alterna el estado 'fijado' (isPinned) de una noticia en Supabase.
+   * @param {string} id - ID de la noticia
+   */
   function togglePin(id) {
     const n = newsState.find(n => n.id === id);
     n.destacada = !n.destacada;
@@ -2356,6 +2542,10 @@
     showToast(n.destacada ? `"${n.titulo}" fijada en portada.` : `"${n.titulo}" desmarcada.`, 'info');
   }
 
+  /**
+   * Pide confirmación y elimina una noticia de Supabase.
+   * @param {string} id - ID de la noticia a eliminar
+   */
   function promptDelNoticia(id) {
     delNoticiaTarget = id;
     const n = newsState.find(n => n.id === id);
@@ -2376,6 +2566,10 @@
 
   let _editNoticiaId = null;
 
+  /**
+   * Abre el modal de edicion de noticia con los datos actuales.
+   * @param {string} id - ID de la noticia
+   */
   function editNoticia(id) {
     const n = newsState.find(n => n.id === id);
     if (!n) return;
@@ -2396,12 +2590,20 @@
     openModal('modal-noticia');
   }
 
+  /**
+   * Resetea todos los campos del modal de noticia a sus valores por defecto.
+   */
   function _resetNoticiaModal() {
     _editNoticiaId = null;
     document.getElementById('modal-noticia-title').textContent = 'Nueva noticia';
     document.getElementById('btn-save-noticia-txt').textContent = 'Publicar noticia';
   }
 
+  /**
+   * Guarda una noticia nueva o editada en Supabase.
+   * Lee los inputs del modal #modal-noticia.
+   * Si _noticiaEditId tiene valor, hace UPDATE; si no, INSERT.
+   */
   function saveNoticia() {
     const titulo    = document.getElementById('news-titulo').value.trim();
     const contenido = document.getElementById('news-contenido').value.trim();
@@ -2466,6 +2668,11 @@
     }
   }
 
+  /**
+   * Carga noticias desde Supabase y actualiza noticiasState.
+   * Si Supabase no tiene datos, usa MOCK_NOTICIAS_V2 como fallback.
+   * @returns {Promise<void>}
+   */
   async function loadNoticiasAdmin() {
     const container = document.getElementById('news-admin-list');
     container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Cargando noticias…</p>';
@@ -2477,6 +2684,11 @@
     renderNewsAdmin();
   }
 
+  /**
+   * Segunda definicion de renderNewsAdmin — renderiza la lista de noticias
+   * en el panel admin con botones de accion. Prevalece sobre la primera al ser
+   * declarada despues (JavaScript usa la ultima declaracion de funcion).
+   */
   function renderNewsAdmin() {
     const container = document.getElementById('news-admin-list');
     if (!newsState.length) {
@@ -2507,6 +2719,10 @@
   ══════════════════════════════ */
   let wallapState = [];
 
+  /**
+   * Carga items del marketplace (tabla wallap_items) y renderiza la tabla admin.
+   * @returns {Promise<void>}
+   */
   async function loadMarketplaceAdmin() {
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (sb) {
@@ -2524,6 +2740,9 @@
     filterWallap();
   }
 
+  /**
+   * Filtra items del marketplace por texto de busqueda (#search-wallap).
+   */
   function filterWallap() {
     const q    = document.getElementById('wp-search').value.toLowerCase();
     const cat  = document.getElementById('wp-cat').value;
@@ -2541,6 +2760,10 @@
     renderWallapTable(filtered);
   }
 
+  /**
+   * Renderiza la tabla de items del marketplace.
+   * @param {Array} items - Items a mostrar
+   */
   function renderWallapTable(items) {
     const tbody = document.getElementById('wallap-table-body');
     const tipoBadge = { venta: 'Venta', alquiler: 'Alquiler', servicio: 'Servicio' };
@@ -2576,6 +2799,10 @@
       </tr>`).join('');
   }
 
+  /**
+   * Activa o desactiva visibilidad de un item en el marketplace.
+   * @param {string} id
+   */
   function toggleWallap(id) {
     const item = wallapState.find(w => w.id === id);
     item.estado = item.estado === 'disponible' ? 'oculto' : 'disponible';
@@ -2583,6 +2810,10 @@
     showToast(`Listado ${item.estado === 'disponible' ? 'visible' : 'oculto'}.`, 'info');
   }
 
+  /**
+   * Elimina un item del marketplace de Supabase.
+   * @param {string} id - ID del item
+   */
   async function deleteWallap(id) {
     const item = wallapState.find(w => w.id === id);
     wallapState = wallapState.filter(w => w.id !== id);
@@ -2595,6 +2826,10 @@
   loadMarketplaceAdmin();
 
   /* ─── Solicitudes de registro (localStorage) ─── */
+  /**
+   * Renderiza solicitudes de registro pendientes desde localStorage.
+   * NOTA: Transitorio. En produccion persistir en tabla Supabase solicitudes.
+   */
   function renderPendingSolicitudes() {
     const list = JSON.parse(localStorage.getItem('kehila_pending') || '[]');
     const section = document.getElementById('pending-solicitudes-section');
@@ -2662,11 +2897,20 @@
     }).join('');
   }
 
+  /**
+   * Expande o contrae la tarjeta de detalle de una solicitud.
+   * @param {number} idx
+   */
   function toggleSolCard(idx) {
     const body = document.getElementById(`sol-body-${idx}`);
     if (body) body.classList.toggle('open');
   }
 
+  /**
+   * Aprueba la solicitud en el indice dado, crea cuenta en Supabase.
+   * [SEC-01] Pendiente verificar admin en servidor.
+   * @param {number} idx
+   */
   function aprobarSolicitud(idx) {
     const list = JSON.parse(localStorage.getItem('kehila_pending') || '[]');
     const activas = list.filter(s => s.status === 'PENDING');
@@ -2683,6 +2927,10 @@
     renderPendingSolicitudes();
   }
 
+  /**
+   * Rechaza la solicitud y la elimina de localStorage.
+   * @param {number} idx
+   */
   function rechazarSolicitud(idx) {
     const list = JSON.parse(localStorage.getItem('kehila_pending') || '[]');
     const activas = list.filter(s => s.status === 'PENDING');
@@ -2699,6 +2947,10 @@
     renderPendingSolicitudes();
   }
 
+  /**
+   * Marca una solicitud como 'necesita mas informacion' y notifica al solicitante.
+   * @param {number} idx
+   */
   function solicitarInfo(idx) {
     const list = JSON.parse(localStorage.getItem('kehila_pending') || '[]');
     const activas = list.filter(s => s.status === 'PENDING');
@@ -2718,6 +2970,10 @@
   ══════════════════════════════ */
   let _preguntas = [];
 
+  /**
+   * Carga preguntas al Rav desde Supabase (tabla preguntas_rav) y las renderiza.
+   * @returns {Promise<void>}
+   */
   async function loadPreguntas() {
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) return;
@@ -2734,6 +2990,9 @@
     }
   }
 
+  /**
+   * Renderiza la lista de preguntas al Rav con estado y respuestas.
+   */
   function renderPreguntas() {
     const estado = document.getElementById('rav-filter-estado')?.value || '';
     const cat    = document.getElementById('rav-filter-cat')?.value || '';
@@ -2779,6 +3038,11 @@
     }).join('');
   }
 
+  /**
+   * Guarda la respuesta a una pregunta del Rav en Supabase.
+   * @param {string} id - ID de la pregunta
+   * @returns {Promise<void>}
+   */
   async function responderPregunta(id) {
     const resp = document.getElementById('resp-' + id)?.value.trim();
     if (!resp) { showToast('Escribe una respuesta', 'warning'); return; }
@@ -2799,12 +3063,22 @@
   let sgAddSelected = new Set();
 
   const AVATAR_COLORS = ['#1b2e5e','#065F46','#92400E','#7c3aed','#b91c1c','#0369a1','#15803d','#9a3412'];
+  /**
+   * Devuelve un color HEX para el avatar del miembro basado en su nombre.
+   * @param {string} name
+   * @returns {string} Color HEX
+   */
   function sgAvatarColor(name) {
     if (!name) return AVATAR_COLORS[0];
     const c = name.charCodeAt(0) + (name.charCodeAt(1) || 0);
     return AVATAR_COLORS[c % AVATAR_COLORS.length];
   }
 
+  /**
+   * Carga subgrupos desde Supabase con conteo de miembros por grupo.
+   * Guarda en sgState y llama a renderSgGrid().
+   * @returns {Promise<void>}
+   */
   async function loadSubgrupos() {
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) { renderSgGrid([]); return; }
@@ -2835,6 +3109,11 @@
     }
   }
 
+  /**
+   * Renderiza tabla de subgrupos en #sg-grid (tbody).
+   * Columnas: Subgrupo | Descripcion | Miembros | Eventos | Acciones
+   * @param {Array} groups
+   */
   function renderSgGrid(groups) {
     const el = document.getElementById('sg-grid');
     if (!el) return;
@@ -2878,10 +3157,19 @@
     }).join('');
   }
 
+  /**
+   * Escapa HTML para prevenir XSS. USAR SIEMPRE al insertar datos de usuario en innerHTML.
+   * @param {string|any} str
+   * @returns {string}
+   */
   function escHtml(str) {
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  /**
+   * Navega a la vista detalle de un subgrupo y carga sus miembros.
+   * @param {string} id - UUID del subgrupo
+   */
   async function openSgDetail(id) {
     sgCurrentId = id;
     const group = sgState.find(g => g.id === id);
@@ -2897,6 +3185,9 @@
     await loadSgMembers(id);
   }
 
+  /**
+   * Vuelve de la vista detalle a la lista de subgrupos.
+   */
   function closeSgDetail() {
     sgCurrentId = null;
     document.getElementById('sg-detail-view').classList.remove('active');
@@ -2904,6 +3195,10 @@
     loadSubgrupos(); // refresh counts
   }
 
+  /**
+   * Carga miembros de un subgrupo con join a profiles.
+   * @param {string} sgId
+   */
   async function loadSgMembers(sgId) {
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) return;
@@ -2927,6 +3222,9 @@
     }
   }
 
+  /**
+   * Renderiza tabla de miembros del subgrupo activo en #sg-members-list.
+   */
   function renderSgMembers() {
     const el = document.getElementById('sg-members-list');
     if (!sgCurrentMembers.length) {
@@ -2951,6 +3249,10 @@
     `).join('');
   }
 
+  /**
+   * Elimina un usuario del subgrupo actual en Supabase.
+   * @param {string} userId
+   */
   async function quitarMiembro(userId) {
     if (!sgCurrentId) return;
     if (!confirm('¿Quitar este miembro del subgrupo?')) return;
@@ -2966,6 +3268,9 @@
     await loadSgMembers(sgCurrentId);
   }
 
+  /**
+   * Limpia y abre el modal de creacion de nuevo subgrupo.
+   */
   function openCrearSubgrupoModal() {
     document.getElementById('sg-form-icon').value   = '👥';
     document.getElementById('sg-form-nombre').value = '';
@@ -2975,6 +3280,9 @@
     setTimeout(() => document.getElementById('sg-form-nombre').focus(), 100);
   }
 
+  /**
+   * Crea un nuevo subgrupo en Supabase leyendo el modal #modal-crear-sg.
+   */
   async function crearSubgrupo() {
     const nombre = document.getElementById('sg-form-nombre').value.trim();
     const tipo   = document.getElementById('sg-form-tipo').value.trim();
@@ -2993,6 +3301,11 @@
     await loadSubgrupos();
   }
 
+  /**
+   * Elimina un subgrupo de Supabase. Si CASCADE activo, elimina sus miembros.
+   * @param {string} id
+   * @param {string} nombre - Para el confirm dialog
+   */
   async function eliminarSubgrupo(id, nombre) {
     if (!confirm(`¿Eliminar el subgrupo "${nombre}"? Se quitarán también todos sus miembros.`)) return;
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
@@ -3004,6 +3317,10 @@
   }
 
   // ── Add member modal ──────────────────────────────────────────
+  /**
+   * Abre modal de anadir miembro directamente desde la lista (sin entrar al detalle).
+   * @param {string} id - UUID del subgrupo
+   */
   async function quickAddMember(id) {
     // Set context and load current members so duplicates are excluded
     sgCurrentId = id;
@@ -3028,6 +3345,9 @@
     openAddMemberModal();
   }
 
+  /**
+   * Abre el modal #modal-add-member para el subgrupo activo (sgCurrentId).
+   */
   function openAddMemberModal() {
     sgAddSelected.clear();
     document.getElementById('sg-add-search').value = '';
@@ -3035,6 +3355,10 @@
     openModal('modal-add-member');
   }
 
+  /**
+   * Renderiza usuarios disponibles para anadir al subgrupo (excluye ya miembros).
+   * @param {string} filter - Texto de busqueda
+   */
   function renderAddList(filter) {
     const el = document.getElementById('sg-add-list');
     const existingIds = new Set(sgCurrentMembers.map(m => m.user_id));
@@ -3061,6 +3385,11 @@
     `).join('');
   }
 
+  /**
+   * Alterna la seleccion de un usuario en el modal de anadir miembros.
+   * @param {string} userId - UUID del usuario
+   * @param {HTMLElement} el - Fila del usuario en el modal
+   */
   function toggleAddSelect(userId, el) {
     if (sgAddSelected.has(userId)) {
       sgAddSelected.delete(userId);
@@ -3071,11 +3400,18 @@
     }
   }
 
+  /**
+   * Lee el input de busqueda (#sg-add-search) y actualiza la lista de candidatos.
+   */
   function filterAddList() {
     const q = document.getElementById('sg-add-search').value;
     renderAddList(q);
   }
 
+  /**
+   * Inserta los usuarios seleccionados (sgAddSelected) al subgrupo en Supabase.
+   * Usa upsert idempotente.
+   */
   async function confirmarAddMiembros() {
     if (!sgAddSelected.size) { showToast('Selecciona al menos un miembro', 'warning'); return; }
     if (!sgCurrentId) return;

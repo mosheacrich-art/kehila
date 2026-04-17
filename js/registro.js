@@ -1,7 +1,39 @@
-/* =============================================
-   KEHILÁ — registro.js
-   Sistema de registro en 4 pasos
-   ============================================= */
+/**
+ * @file registro.js
+ * @description Flujo de registro de nuevo miembro en 4 pasos.
+ *
+ * Pasos del formulario:
+ *  1. Datos personales  — nombre, apellidos, email, teléfono, contraseña
+ *  2. Documento         — tipo doc, nº, fecha nacimiento, nacionalidad, subida de foto
+ *  3. Comunidad         — dirección, comunidad, práctica, familiar
+ *  4. Confirmación      — checkboxes RGPD (ck1-ck4) + envío
+ *
+ * Estado del formulario:
+ *  Todo el estado se guarda en el objeto REG (en memoria durante la sesión).
+ *  En el paso final se envía a Supabase y se limpia REG.
+ *
+ * DEPENDENCIAS (en orden de carga):
+ *  - auth.js     → register(), getSupabase(), login()
+ *  - nav.js      → NO requerido (página pública antes de login)
+ *
+ * RGPD (Art. 9 — datos religiosos, categoría especial):
+ *  - ck1: Consentimiento tratamiento datos personales
+ *  - ck2: Consentimiento datos religiosos (categoría especial)
+ *  - ck3: Comunicaciones de la comunidad
+ *  - ck4: Normativa de la comunidad
+ *  Todos los checkboxes son obligatorios para completar el registro.
+ *
+ * SEGURIDAD:
+ *  - La contraseña mínima es 6 caracteres + mayúscula + número + símbolo.
+ *    Pendiente: subir mínimo a 8 caracteres (NIST SP 800-63B).
+ *  - El documento de identidad se sube a Supabase Storage (bucket community-media).
+ *  - Los datos de registro NO se guardan en localStorage permanentemente —
+ *    solo en el objeto REG en memoria.
+ *
+ * FLUJO POST-REGISTRO:
+ *  Usuario creado en Supabase Auth → perfil en tabla profiles con status='pending'
+ *  → Admin aprueba en panel → status='active' → usuario puede acceder a todo.
+ */
 
 // ─── Estado del formulario ───────────────────
 const REG = {
@@ -23,6 +55,10 @@ const REG = {
 };
 
 // ─── Navegación entre pasos ──────────────────
+/**
+ * Avanza al siguiente paso si la validación del paso actual es correcta.
+ * Si hay errores, los muestra en UI y no avanza.
+ */
 function regNextStep() {
   if (!regValidateCurrentStep()) return;
   if (REG.step < 4) {
@@ -31,6 +67,9 @@ function regNextStep() {
   }
 }
 
+/**
+ * Retrocede al paso anterior sin validar. No se pierden los datos.
+ */
 function regPrevStep() {
   if (REG.step > 1) {
     REG.step--;
@@ -38,6 +77,10 @@ function regPrevStep() {
   }
 }
 
+/**
+ * Salta directamente a un paso anterior (no permite saltar hacia adelante).
+ * @param {number} n - Número de paso destino (1-4)
+ */
 function regGoToStep(n) {
   // Only allow going back, not skipping forward
   if (n < REG.step) {
@@ -46,6 +89,10 @@ function regGoToStep(n) {
   }
 }
 
+/**
+ * Muestra el panel del paso actual y oculta los demás.
+ * Actualiza la barra de progreso y hace scroll al inicio del formulario.
+ */
 function regRenderStep() {
   // Show/hide step panels
   for (let i = 1; i <= 4; i++) {
@@ -59,6 +106,10 @@ function regRenderStep() {
   if (wrapper) wrapper.scrollTop = 0;
 }
 
+/**
+ * Actualiza visualmente los círculos de progreso (completado/activo/pendiente)
+ * y la barra de progreso dorada según el paso actual (REG.step).
+ */
 function regUpdateProgress() {
   for (let i = 1; i <= 4; i++) {
     const circle = document.getElementById(`step-circle-${i}`);

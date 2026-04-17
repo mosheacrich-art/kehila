@@ -1,7 +1,26 @@
-/* =============================================
-   KEHILÁ — auth.js
-   Autenticación real con Supabase
-   ============================================= */
+/**
+ * @file auth.js
+ * @description Autenticacion, gestion de sesion y guards de ruta para Kehila.
+ *
+ * Responsabilidades:
+ *  - Singleton Supabase via getSupabase()
+ *  - Login / Logout / Registro contra Supabase Auth
+ *  - Guards: requireAuth(), requireAdmin(), verifyAdminRealtime()
+ *  - Helpers: getAvatarColor(), renderAvatar()
+ *
+ * DEPENDENCIAS: cargar CDN supabase-js ANTES que este archivo.
+ *
+ * SEGURIDAD (ver CLAUDE.md apartado 8):
+ *  [SEC-01] requireAdmin() solo verifica localStorage (manipulable desde DevTools).
+ *           Usar verifyAdminRealtime() en operaciones destructivas de admin.
+ *  [SEC-02] Sesion en localStorage: persistente y legible por JS.
+ *  [SEC-03] anon key publica por diseno. Segura SOLO con RLS activo en Supabase.
+ *
+ * DEBUG: cambiar AUTH_DEBUG a true para ver logs en consola.
+ */
+
+/** Controla si se muestran logs de debug. Poner false en produccion. */
+const AUTH_DEBUG = false;
 
 // ─── Configuración Supabase ───────────────────
 const SUPABASE_URL = 'https://vvrvuhugpvqytelhsdnk.supabase.co';
@@ -9,6 +28,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 // Cliente Supabase
 let _supabase = null;
+/**
+ * Devuelve el cliente Supabase inicializado (singleton).
+ * Debe llamarse despues de que el CDN de Supabase haya cargado.
+ * @returns {object|null}
+ */
 function getSupabase() {
   if (_supabase) return _supabase;
   // El CDN de Supabase v2 expone supabase.createClient en window
@@ -25,6 +49,12 @@ function getSupabase() {
 const SESSION_KEY = 'kehila_user';
 
 // ─── Login ────────────────────────────────────
+/**
+ * Autentica un usuario con email y contrasena. Guarda sesion en localStorage.
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<{ok: boolean, status?: string, error?: string}>}
+ */
 async function login(email, password) {
   const normalizedEmail = email.toLowerCase().trim();
   const sb = getSupabase();
@@ -67,6 +97,13 @@ async function login(email, password) {
 /**
  * Registro de nuevo usuario en Supabase.
  */
+/**
+ * Crea nueva cuenta en Supabase Auth. Perfil extendido via trigger Supabase.
+ * @param {string} email
+ * @param {string} password - Min 8 chars recomendado (NIST SP 800-63B)
+ * @param {string} name
+ * @returns {Promise<{ok: boolean, userId?: string, error?: string}>}
+ */
 async function register(email, password, name) {
   const sb = getSupabase();
   if (!sb) return { ok: false, error: 'Registro solo disponible con conexión a internet.' };
@@ -84,6 +121,10 @@ async function register(email, password, name) {
 }
 
 // ─── Logout ───────────────────────────────────
+/**
+ * Cierra sesion: invalida JWT en Supabase y limpia localStorage.
+ * Redirige siempre a index.html.
+ */
 async function logout() {
   const sb = getSupabase();
   if (sb) {
@@ -94,6 +135,11 @@ async function logout() {
 }
 
 // ─── Sesión actual ────────────────────────────
+/**
+ * Devuelve datos de sesion de localStorage. NO valida el JWT.
+ * Para validar el token usar verifySession().
+ * @returns {{userId, name, email, role, status, comunidad, initials}|null}
+ */
 function getCurrentUser() {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
@@ -105,6 +151,11 @@ function getCurrentUser() {
 }
 
 // ─── Guards ───────────────────────────────────
+/**
+ * Guard basico. Sin sesion local redirige a index.html.
+ * Llamar en DOMContentLoaded de todas las paginas protegidas.
+ * @returns {{userId, name, email, role, ...}|null}
+ */
 function requireAuth() {
   const user = getCurrentUser();
   if (!user) {
@@ -114,6 +165,11 @@ function requireAuth() {
   return user;
 }
 
+/**
+ * Guard de admin rapido (solo localStorage).
+ * [SEC-01] Manipulable desde DevTools. Complementar con verifyAdminRealtime().
+ * @returns {{userId, name, role, ...}|null}
+ */
 function requireAdmin() {
   const user = requireAuth();
   if (!user) return null;
@@ -124,18 +180,35 @@ function requireAdmin() {
   return user;
 }
 
+/**
+ * Comprueba si el usuario actual es admin sin redirigir.
+ * Util para mostrar/ocultar elementos de UI.
+ * @returns {boolean}
+ */
 function isAdmin() {
   const user = getCurrentUser();
   return user && user.role === 'admin';
 }
 
 // ─── Helpers ──────────────────────────────────
+/**
+ * Devuelve indice de color 0-7 basado en el nombre (deterministico).
+ * Colores definidos en CSS via data-color atributo.
+ * @param {string} name
+ * @returns {string}
+ */
 function getAvatarColor(name) {
   if (!name) return '0';
   const code = name.charCodeAt(0) + (name.charCodeAt(1) || 0);
   return String(code % 8);
 }
 
+/**
+ * Genera HTML de avatar circular con iniciales del usuario.
+ * @param {{name?: string, initials?: string}} user
+ * @param {string} [size] - Clase CSS: sm | md | lg
+ * @returns {string} HTML del avatar
+ */
 function renderAvatar(user, size = 'md') {
   const color = getAvatarColor(user.name || user.initials || 'U');
   const initials = user.initials || (user.name ? user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '??');
@@ -143,6 +216,70 @@ function renderAvatar(user, size = 'md') {
 }
 
 // ─── Auto-init ────────────────────────────────
+
+/**
+ * Verifica que la sesion de Supabase siga activa (JWT no expirado).
+ * Mas lento que getCurrentUser() pero garantiza que el token es valido.
+ * @returns {Promise<boolean>}
+ * @example
+ * if (!(await verifySession())) { logout(); return; }
+ */
+async function verifySession() {
+  const sb = getSupabase();
+  if (!sb) return false;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    return session !== null;
+  } catch { return false; }
+}
+
+/**
+ * Guard de admin con verificacion real contra Supabase.
+ * Consulta profiles usando JWT activo - no puede falsificarse desde localStorage.
+ * Requiere RLS en profiles: CREATE POLICY ON profiles FOR SELECT USING (auth.uid() = id)
+ *
+ * Usar en operaciones destructivas de admin (aprobar/banear usuarios, borrar contenido).
+ *
+ * @returns {Promise<{userId, name, role, ...}|null>}
+ * @example
+ * const adminUser = await verifyAdminRealtime();
+ * if (!adminUser) return;
+ */
+async function verifyAdminRealtime() {
+  const localUser = getCurrentUser();
+  if (!localUser) { window.location.href = 'index.html'; return null; }
+
+  const sb = getSupabase();
+  if (!sb) return localUser; // Sin conexion: usar datos locales como fallback
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      localStorage.removeItem(SESSION_KEY);
+      window.location.href = 'index.html';
+      return null;
+    }
+    const { data: profile, error } = await sb
+      .from('profiles')
+      .select('role, status')
+      .eq('id', session.user.id)
+      .single();
+
+    if (error || !profile)           { window.location.href = 'home.html'; return null; }
+    if (profile.status === 'banned') { await logout(); return null; }
+    if (profile.role !== 'admin')    { window.location.href = 'home.html'; return null; }
+
+    // Sincronizar rol en localStorage por si cambio en BD
+    if (profile.role !== localUser.role) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ ...localUser, role: profile.role, status: profile.status }));
+    }
+    return localUser;
+  } catch (e) {
+    console.error('[auth] verifyAdminRealtime error:', e);
+    return localUser.role === 'admin' ? localUser : null;
+  }
+}
+
 (function () {
   const isLoginPage = window.location.pathname.endsWith('index.html') ||
                       window.location.pathname === '/' ||

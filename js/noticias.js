@@ -1,6 +1,31 @@
-/* =============================================
-   KEHILÁ — noticias.js
-   ============================================= */
+/**
+ * @file noticias.js
+ * @description Lógica completa de la página noticias.html.
+ *
+ * Responsabilidades:
+ *  - Cargar noticias desde Supabase (con fallback a MOCK_NOTICIAS_V2 de data.js)
+ *  - Renderizar el grid de tarjetas con filtros por categoría
+ *  - Abrir el drawer de lectura estilo periódico
+ *  - Crear/eliminar noticias (solo admin)
+ *  - Tracking de lecturas via analytics.js
+ *
+ * DEPENDENCIAS (en orden de carga):
+ *  - auth.js      → requireAuth(), getCurrentUser(), getSupabase()
+ *  - nav.js       → initNav(), renderPageHeader()
+ *  - data.js      → MOCK_NOTICIAS_V2, CATEGORIA_CONFIG
+ *  - analytics.js → trackPageView(), trackNewsRead()
+ *  - media.js     → uploadMedia() (solo para subir fotos)
+ *
+ * PUNTO DE ENTRADA: DOMContentLoaded al final de este archivo.
+ *
+ * DATOS:
+ *  Los datos se cargan de Supabase (tabla `noticias`) al iniciar.
+ *  Si Supabase no tiene datos, se usa MOCK_NOTICIAS_V2 como fallback.
+ *  La variable MOCK_NOTICIAS_V2 es mutable — se vacía y rellena con datos reales.
+ *
+ * XSS: Los datos de usuario no se pasan por innerHTML directamente en la mayoría
+ *  de casos, pero revisar títulos/autores si el contenido viene de usuarios finales.
+ */
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -19,6 +44,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+/**
+ * Carga todas las noticias desde Supabase y sobrescribe el array MOCK_NOTICIAS_V2.
+ * Si Supabase no tiene datos o falla, MOCK_NOTICIAS_V2 conserva sus valores de data.js.
+ * @returns {Promise<void>}
+ */
 async function loadNoticiasSupabase() {
   try {
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
@@ -37,6 +67,11 @@ async function loadNoticiasSupabase() {
 
 /* ── Helpers ── */
 
+/**
+ * Formatea una fecha ISO (YYYY-MM-DD) en formato largo en español.
+ * @param {string} fechaStr - Fecha en formato 'YYYY-MM-DD'
+ * @returns {string} Ej: "17 de abril de 2026"
+ */
 function formatearFecha(fechaStr) {
   try {
     const fecha = new Date(fechaStr + 'T12:00:00');
@@ -125,6 +160,11 @@ function renderFiltros() {
 
 const _TRASH_ICON = `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>`;
 
+/**
+ * Elimina una noticia del array local y de Supabase. Solo admin.
+ * @param {string} id - ID de la noticia a eliminar
+ * @param {MouseEvent} e - Evento de clic (para stopPropagation)
+ */
 async function deleteNoticia(id, e) {
   e.stopPropagation();
   if (typeof MOCK_NOTICIAS_V2 !== 'undefined') {
@@ -140,6 +180,10 @@ async function deleteNoticia(id, e) {
 
 /* ── Grid ── */
 
+/**
+ * Renderiza el grid de tarjetas de noticias, opcionalmente filtrado por categoría.
+ * @param {string} filtro - Categoría a mostrar ('todas' o slug de categoría)
+ */
 function renderGrid(filtro) {
   try {
     const container = document.getElementById('noticias-grid');
@@ -224,6 +268,13 @@ function renderGrid(filtro) {
 
 /* ── Delegación ── */
 
+/**
+ * Configura la delegación de eventos en document para gestionar clics en:
+ * - Tarjetas de noticias (abrir drawer)
+ * - Chips de filtro (cambiar categoría)
+ * - Botón "Nueva noticia" (solo admin)
+ * - Botones de cerrar modal/drawer
+ */
 function initDelegation() {
   document.addEventListener('click', (e) => {
     try {
@@ -248,6 +299,11 @@ function initDelegation() {
 
 /* ── Drawer newspaper style ── */
 
+/**
+ * Abre el drawer de lectura estilo periódico para una noticia.
+ * Registra la lectura via trackNewsRead() para analytics.
+ * @param {string} id - ID de la noticia a mostrar
+ */
 function abrirNoticia(id) {
   try {
     const n = getNoticias().find(x => x?.id === id);
@@ -341,6 +397,10 @@ function abrirNoticia(id) {
   } catch (e) { console.error('abrirNoticia:', e); }
 }
 
+/**
+ * Cierra cualquier drawer o modal activo actualmente.
+ * Usa animación de fade-out antes de eliminar del DOM.
+ */
 function cerrarModal() {
   try {
     const drawer = document.getElementById('noticia-drawer');
@@ -354,6 +414,10 @@ function cerrarModal() {
 
 /* ── Modal nueva noticia (admin) ── */
 
+/**
+ * Abre el modal de creación de nueva noticia. Solo admin.
+ * Gestiona la subida de imagen y el guardado en Supabase.
+ */
 function abrirModalNueva() {
   try {
     cerrarModal();
