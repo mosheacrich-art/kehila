@@ -75,9 +75,9 @@ kehila/
 | shiurim | Clases y contenido educativo | ✅ Activo |
 | page_views | Analytics de visitas | ✅ Activo |
 | news_reads | Analytics de lecturas | ✅ Activo |
-| citas | Citas con el rabino | ⚠️ Pendiente — tabla sin RLS |
-| inscripciones_voluntariado | Inscripciones voluntariado | ⚠️ Pendiente — tabla sin RLS |
-| voluntariados | Oportunidades de voluntariado | ⚠️ Pendiente — tabla sin RLS |
+| citas | Citas con el rabino | ✅ Activo |
+| inscripciones_voluntariado | Inscripciones voluntariado | ✅ Activo |
+| voluntariados | Oportunidades de voluntariado | ✅ Activo |
 
 ### Roles de usuario
 
@@ -216,7 +216,7 @@ el.innerHTML = `<span>${escHtml(user.name)}</span>`;
 | SEC-09 | Sin rate limiting en auth | MEDIO | Pendiente — configurar en Supabase |
 | SEC-10 | data.js con mock data en producción | MEDIO | Pendiente eliminar |
 | SEC-11 | usuario_id como text (sin FK ni validación) | ALTO | ✅ RESUELTO 2026-04-17 — migrado a uuid + FK |
-| SEC-12 | RLS pendiente en citas, inscripciones_voluntariado, voluntariados | MEDIO | Pendiente — tablas recientes sin políticas |
+| SEC-12 | RLS pendiente en citas, inscripciones_voluntariado, voluntariados | MEDIO | ✅ RESUELTO 2026-04-17 — tablas creadas con RLS |
 
 ### Solución para SEC-01 (más urgente)
 
