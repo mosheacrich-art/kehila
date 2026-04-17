@@ -729,6 +729,14 @@
       white-space: nowrap;
     }
     .sg-details-btn:hover { background: var(--color-primary); color: #fff; }
+    .sg-add-inline-btn {
+      font-size: 0.78rem; font-weight: 500; padding: 5px 12px;
+      border-radius: var(--radius-xs); border: 1px solid #16a34a;
+      background: transparent; color: #16a34a; cursor: pointer;
+      transition: background var(--transition-fast), color var(--transition-fast);
+      white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .sg-add-inline-btn:hover { background: #16a34a; color: #fff; }
     .sg-del-btn {
       background: none; border: none; cursor: pointer; padding: 5px;
       color: var(--color-text-muted); border-radius: var(--radius-xs);
@@ -2854,6 +2862,10 @@
         <td style="text-align:center;"><span class="sg-badge sg-badge-zero">—</span></td>
         <td>
           <div class="sg-actions">
+            <button class="sg-add-inline-btn" onclick="event.stopPropagation();quickAddMember('${g.id}')">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              Añadir
+            </button>
             <button class="sg-details-btn" onclick="event.stopPropagation();openSgDetail('${g.id}')">
               Ver detalles
             </button>
@@ -2992,6 +3004,30 @@
   }
 
   // ── Add member modal ──────────────────────────────────────────
+  async function quickAddMember(id) {
+    // Set context and load current members so duplicates are excluded
+    sgCurrentId = id;
+    const group = sgState.find(g => g.id === id);
+    if (group) {
+      document.getElementById('sg-detail-title').textContent = group.nombre;
+    }
+    // Load existing members silently so renderAddList can exclude them
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) {
+      const { data } = await sb
+        .from('subgrupo_miembros')
+        .select('user_id, profiles(id, name, email, initials)')
+        .eq('subgrupo_id', id);
+      sgCurrentMembers = (data || []).map(r => ({
+        user_id:  r.user_id,
+        name:     r.profiles?.name || r.user_id.slice(0,8),
+        email:    r.profiles?.email || '—',
+        initials: r.profiles?.initials || '??'
+      }));
+    }
+    openAddMemberModal();
+  }
+
   function openAddMemberModal() {
     sgAddSelected.clear();
     document.getElementById('sg-add-search').value = '';
