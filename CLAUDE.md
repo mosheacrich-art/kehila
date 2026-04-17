@@ -56,16 +56,28 @@ kehila/
 
 | Tabla | Descripción | RLS activo |
 |---|---|---|
-| profiles | Perfil extendido del usuario | ⚠️ Pendiente |
-| eventos | Eventos de la comunidad | ⚠️ Pendiente |
-| noticias | Artículos de noticias | ⚠️ Pendiente |
-| donativos | Campañas de donación | ⚠️ Pendiente |
-| subgrupos | Grupos dentro de la comunidad | ⚠️ Pendiente |
-| subgrupo_miembros | Relación N:M usuarios/subgrupos | ⚠️ Pendiente |
-| wallap_items | Marketplace interno | ⚠️ Pendiente |
-| preguntas_rav | Consultas al rabino | ⚠️ Pendiente |
+| profiles | Perfil extendido del usuario | ✅ Activo |
+| eventos | Eventos de la comunidad | ✅ Activo |
+| noticias | Artículos de noticias | ✅ Activo |
+| campanas | Campañas de donación | ✅ Activo |
+| donaciones | Donaciones de usuarios | ✅ Activo |
+| inscripciones | Inscripciones a eventos | ✅ Activo |
+| subgrupos | Grupos dentro de la comunidad | ✅ Activo |
+| subgrupo_miembros | Relación N:M usuarios/subgrupos | ✅ Activo |
+| anuncios | Anuncios del marketplace | ✅ Activo |
+| wallap_anuncios | Marketplace tipo Wallapop | ✅ Activo |
+| negocios | Directorio de negocios | ✅ Activo |
+| preguntas_rav | Consultas al rabino | ✅ Activo |
+| servicios_solicitudes | Solicitudes de servicios | ✅ Activo |
+| banner_slides | Banners del home | ✅ Activo |
+| calendario_eventos | Eventos del calendario | ✅ Activo |
+| horarios | Horarios de servicios | ✅ Activo |
+| shiurim | Clases y contenido educativo | ✅ Activo |
 | page_views | Analytics de visitas | ✅ Activo |
 | news_reads | Analytics de lecturas | ✅ Activo |
+| citas | Citas con el rabino | ⚠️ Pendiente — tabla sin RLS |
+| inscripciones_voluntariado | Inscripciones voluntariado | ⚠️ Pendiente — tabla sin RLS |
+| voluntariados | Oportunidades de voluntariado | ⚠️ Pendiente — tabla sin RLS |
 
 ### Roles de usuario
 
@@ -193,16 +205,18 @@ el.innerHTML = `<span>${escHtml(user.name)}</span>`;
 
 | # | Problema | Criticidad | Estado |
 |---|---|---|---|
-| SEC-01 | Admin check solo client-side (localStorage) | CRITICO | Pendiente |
-| SEC-02 | Sin RLS en tablas principales | CRITICO | Pendiente |
+| SEC-01 | Admin check solo client-side (localStorage) | CRITICO | Pendiente — usar verifyAdminRealtime() |
+| SEC-02 | Sin RLS en tablas principales | CRITICO | ✅ RESUELTO 2026-04-17 — 19 tablas protegidas |
 | SEC-03 | XSS en varios innerHTML | CRITICO | Parcialmente resuelto |
-| SEC-04 | Sin cabeceras HTTP (CSP, X-Frame) | ALTO | Pendiente — Cloudflare |
+| SEC-04 | Sin cabeceras HTTP (CSP, X-Frame) | ALTO | Pendiente — configurar via Cloudflare |
 | SEC-05 | PII en localStorage sin cifrar | ALTO | Pendiente |
 | SEC-06 | Sin tokens CSRF | ALTO | Pendiente |
 | SEC-07 | SW cachea respuestas autenticadas | MEDIO | Pendiente |
 | SEC-08 | Password mínimo 6 chars (NIST: 8+) | MEDIO | Pendiente |
-| SEC-09 | Sin rate limiting en auth | MEDIO | Configurar en Supabase |
-| SEC-10 | data.js con mock data en producción | MEDIO | Eliminar al migrar |
+| SEC-09 | Sin rate limiting en auth | MEDIO | Pendiente — configurar en Supabase |
+| SEC-10 | data.js con mock data en producción | MEDIO | Pendiente eliminar |
+| SEC-11 | usuario_id como text (sin FK ni validación) | ALTO | ✅ RESUELTO 2026-04-17 — migrado a uuid + FK |
+| SEC-12 | RLS pendiente en citas, inscripciones_voluntariado, voluntariados | MEDIO | Pendiente — tablas recientes sin políticas |
 
 ### Solución para SEC-01 (más urgente)
 

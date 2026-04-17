@@ -365,7 +365,7 @@
       const registro = {
         voluntariado_id: currentVolId,
         voluntariado_titulo: op?.titulo || '',
-        usuario_id: user?.userId || user?.id || email,
+        usuario_id: user?.userId || user?.id || null,
         usuario_nombre: nombre || user?.name || 'Miembro',
         usuario_email: email || user?.email || '',
         notas
