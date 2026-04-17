@@ -1732,6 +1732,7 @@
   /* ─── Init ─── */
   requireAdmin();
   buildSidebar('admin');
+  (async () => { await verifyAdminRealtime(); })();
 
   /* ══════════════════════════════
      TABS
@@ -2247,6 +2248,7 @@
    * @returns {Promise<void>}
    */
   async function aprobarEnSupabase(userId) {
+    if (!await verifyAdminRealtime()) return;
     const sb = getSupabase();
     if (!sb) return;
     await sb.from('profiles').update({ status: 'active' }).eq('id', userId);
@@ -2259,6 +2261,7 @@
    * @returns {Promise<void>}
    */
   async function banearEnSupabase(userId) {
+    if (!await verifyAdminRealtime()) return;
     const sb = getSupabase();
     if (!sb) return;
     await sb.from('profiles').update({ status: 'banned' }).eq('id', userId);
@@ -2443,6 +2446,7 @@
    * @returns {Promise<void>}
    */
   async function eliminarEvento(id) {
+    if (!await verifyAdminRealtime()) return;
     const ev = eventsState.find(e => e.id === id);
     eventsState = eventsState.filter(e => e.id !== id);
     renderEventosAdmin();
@@ -2554,6 +2558,7 @@
   }
 
   document.getElementById('btn-confirm-del-noticia').addEventListener('click', async () => {
+    if (!await verifyAdminRealtime()) return;
     const id = delNoticiaTarget;
     newsState = newsState.filter(n => n.id !== id);
     closeModal('modal-del-noticia');
@@ -2815,6 +2820,7 @@
    * @param {string} id - ID del item
    */
   async function deleteWallap(id) {
+    if (!await verifyAdminRealtime()) return;
     const item = wallapState.find(w => w.id === id);
     wallapState = wallapState.filter(w => w.id !== id);
     filterWallap();
@@ -3307,6 +3313,7 @@
    * @param {string} nombre - Para el confirm dialog
    */
   async function eliminarSubgrupo(id, nombre) {
+    if (!await verifyAdminRealtime()) return;
     if (!confirm(`¿Eliminar el subgrupo "${nombre}"? Se quitarán también todos sus miembros.`)) return;
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) return;
