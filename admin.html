@@ -1805,7 +1805,7 @@
    */
   function avatarHTML(user, size = 'sm') {
     const color = getAvatarColorLocal(user.name);
-    return `<div class="avatar avatar-${size}" data-color="${color}">${user.initials}</div>`;
+    return `<div class="avatar avatar-${size}" data-color="${color}">${escHtml(user.initials)}</div>`;
   }
 
   const TAG = 'display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:3px;font-size:0.7rem;font-weight:600;letter-spacing:0.03em;border:1px solid;white-space:nowrap;';
@@ -1987,10 +1987,10 @@
               ${avatarHTML(u, 'sm')}
               <div class="user-cell-info">
                 <div class="user-cell-name">
-                  ${u.name}
+                  ${escHtml(u.name)}
                   ${u.source === 'real' ? '<span style="display:inline-block;margin-left:6px;background:var(--color-bg);color:var(--color-text-muted);font-size:0.6rem;font-weight:600;padding:1px 5px;border-radius:3px;border:1px solid var(--color-border);vertical-align:middle;letter-spacing:.05em;">REAL</span>' : ''}
                 </div>
-                <div class="user-cell-email">${u.email}</div>
+                <div class="user-cell-email">${escHtml(u.email)}</div>
               </div>
             </div>
           </td>
@@ -2034,40 +2034,40 @@
       <div style="display:flex;align-items:center;gap:14px;padding-bottom:16px;margin-bottom:4px;">
         ${avatarHTML(u, 'lg')}
         <div>
-          <div style="font-size:1.1rem;font-weight:700;color:var(--color-text);letter-spacing:-0.01em;">${u.name}</div>
-          <div style="font-size:.85rem;color:var(--color-text-muted);margin-top:2px;">${u.email}</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--color-text);letter-spacing:-0.01em;">${escHtml(u.name)}</div>
+          <div style="font-size:.85rem;color:var(--color-text-muted);margin-top:2px;">${escHtml(u.email)}</div>
           <div style="margin-top:6px;display:flex;gap:8px;align-items:center;">
             ${badgeStatus(u.status)}
-            ${sol.solicitudNum ? `<span style="font-size:.7rem;color:var(--color-text-muted);font-family:monospace;">${sol.solicitudNum}</span>` : ''}
+            ${sol.solicitudNum ? `<span style="font-size:.7rem;color:var(--color-text-muted);font-family:monospace;">${escHtml(sol.solicitudNum)}</span>` : ''}
           </div>
         </div>
       </div>
 
       ${section('Datos personales')}
-      ${row('Nombre completo', (sol.nombre || u.name.split(' ')[0]) + ' ' + (sol.apellidos || u.name.split(' ').slice(1).join(' ')))}
-      ${row('Teléfono', sol.telefonoPrefijo ? sol.telefonoPrefijo + ' ' + sol.telefono : u.telefono)}
-      ${row('Fecha de nacimiento', sol.fechaNacDia && sol.fechaNacMes && sol.fechaNacAnio ? sol.fechaNacDia + '/' + sol.fechaNacMes + '/' + sol.fechaNacAnio : u.fecha_nac)}
-      ${row('Nacionalidad', sol.nacionalidad || u.nacionalidad)}
-      ${row('País de nacimiento', sol.paisNac || u.pais_nac)}
+      ${row('Nombre completo', escHtml((sol.nombre || u.name.split(' ')[0]) + ' ' + (sol.apellidos || u.name.split(' ').slice(1).join(' '))))}
+      ${row('Teléfono', escHtml(sol.telefonoPrefijo ? sol.telefonoPrefijo + ' ' + sol.telefono : u.telefono))}
+      ${row('Fecha de nacimiento', escHtml(sol.fechaNacDia && sol.fechaNacMes && sol.fechaNacAnio ? sol.fechaNacDia + '/' + sol.fechaNacMes + '/' + sol.fechaNacAnio : u.fecha_nac))}
+      ${row('Nacionalidad', escHtml(sol.nacionalidad || u.nacionalidad))}
+      ${row('País de nacimiento', escHtml(sol.paisNac || u.pais_nac))}
 
       ${section('Documento de identidad')}
-      ${row('Tipo', sol.docTipo || u.doc_tipo)}
-      ${row('Número', sol.docNumero ? '••••' + sol.docNumero.slice(-3) : (u.doc_numero || '—'))}
-      ${sol.docFileName ? row('Archivo', `<span style="color:var(--color-text-muted);">${sol.docFileName}</span>`) : ''}
+      ${row('Tipo', escHtml(sol.docTipo || u.doc_tipo))}
+      ${row('Número', escHtml(sol.docNumero ? '••••' + sol.docNumero.slice(-3) : (u.doc_numero || '—')))}
+      ${sol.docFileName ? row('Archivo', `<span style="color:var(--color-text-muted);">${escHtml(sol.docFileName)}</span>`) : ''}
       ${u.doc_url ? `<div style="padding:10px 0;border-bottom:1px solid var(--color-border-light);">
         <a href="${u.doc_url}" target="_blank"><img src="${u.doc_url}" style="max-width:100%;max-height:220px;border-radius:6px;border:1px solid var(--color-border);" onerror="this.style.display='none'"></a>
       </div>` : ''}
 
       ${section('Dirección')}
-      ${row('País', sol.pais || u.pais)}
-      ${row('Ciudad', (sol.ciudad || u.ciudad) + (sol.cp || u.cp ? ' (' + (sol.cp || u.cp) + ')' : ''))}
-      ${row('Dirección', sol.direccion || u.direccion)}
+      ${row('País', escHtml(sol.pais || u.pais))}
+      ${row('Ciudad', escHtml((sol.ciudad || u.ciudad) + (sol.cp || u.cp ? ' (' + (sol.cp || u.cp) + ')' : '')))}
+      ${row('Dirección', escHtml(sol.direccion || u.direccion))}
 
       ${section('Vinculación con la comunidad')}
-      ${row('Comunidad', sol.comunidad || u.comunidad)}
-      ${row('Práctica religiosa', sol.practica || u.practica)}
-      ${row('Familiar en kehilá', sol.familiar === 'si' ? (sol.familiarNombre || 'Sí') : (u.familiar ? (u.familiar_nombre || 'Sí') : 'No'))}
-      ${row('Cómo conoció Jabad Barcelona', sol.comoConocio || u.como_conocio)}
+      ${row('Comunidad', escHtml(sol.comunidad || u.comunidad))}
+      ${row('Práctica religiosa', escHtml(sol.practica || u.practica))}
+      ${row('Familiar en kehilá', escHtml(sol.familiar === 'si' ? (sol.familiarNombre || 'Sí') : (u.familiar ? (u.familiar_nombre || 'Sí') : 'No')))}
+      ${row('Cómo conoció Jabad Barcelona', escHtml(sol.comoConocio || u.como_conocio))}
 
       ${section('Registro')}
       ${row('Fecha solicitud', sol.submittedAt ? new Date(sol.submittedAt).toLocaleString('es-ES') : u.joinDate)}
@@ -2115,7 +2115,7 @@
     closeModal('modal-aprobar');
     filterUsers();
     initPendingBanner();
-    showToast(`Usuario aprobado. Email de bienvenida enviado a ${user.email}.`, 'success');
+    showToast(`Usuario aprobado. Email de bienvenida enviado a ${escHtml(user.email)}.`, 'success');
     pendingTarget = null;
   });
 
@@ -2148,7 +2148,7 @@
     closeModal('modal-banear');
     filterUsers();
     initPendingBanner();
-    showToast(`${user.name} ha sido baneado.`, 'error');
+    showToast(`${escHtml(user.name)} ha sido baneado.`, 'error');
     pendingTarget = null;
   });
 
@@ -2160,7 +2160,7 @@
     const user = usersState.find(u => u.userId === userId);
     user.status = 'banned';
     filterUsers();
-    showToast(`${user.name} ha sido suspendido.`, 'warning');
+    showToast(`${escHtml(user.name)} ha sido suspendido.`, 'warning');
   }
 
   /**
@@ -2172,7 +2172,7 @@
     user.status = 'active';
     filterUsers();
     initPendingBanner();
-    showToast(`${user.name} ha sido reactivado.`, 'success');
+    showToast(`${escHtml(user.name)} ha sido reactivado.`, 'success');
   }
 
   // ── Cargar usuarios reales de Supabase ──────────────────────────
@@ -2414,15 +2414,15 @@
           </div>
           ${ev.imagen_url ? `<img src="${ev.imagen_url}" class="ev-admin-thumb" alt="">` : ''}
           <div class="event-admin-info">
-            <p class="event-admin-title">${ev.titulo}</p>
+            <p class="event-admin-title">${escHtml(ev.titulo)}</p>
             <div class="event-admin-meta">
               <span>
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                ${ev.hora}
+                ${escHtml(ev.hora)}
               </span>
               <span>
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
-                ${ev.lugar.split(',')[0]}
+                ${escHtml(ev.lugar.split(',')[0])}
               </span>
             </div>
             <div class="aforo-bar">
@@ -2524,8 +2524,8 @@
       <div class="news-admin-row" id="news-row-${n.id}">
         ${n.imagen ? `<img src="${n.imagen}" class="news-admin-thumb" alt="">` : `<div style="width:52px;height:52px;border-radius:10px;background:${n.colorCategoria||'#1b2e5e'};display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700;font-size:1.05rem;text-transform:uppercase;">${(n.categoria||'N')[0]}</div>`}
         <div class="news-admin-info">
-          <p class="news-admin-title">${n.titulo}</p>
-          <p class="news-admin-meta">${n.categoria} · ${formatDate(n.fecha)} · ${n.autor}</p>
+          <p class="news-admin-title">${escHtml(n.titulo)}</p>
+          <p class="news-admin-meta">${escHtml(n.categoria)} · ${formatDate(n.fecha)} · ${escHtml(n.autor)}</p>
         </div>
         <button class="pin-btn ${(n.destacada||n.isPinned) ? 'pinned' : ''}"
           title="${(n.destacada||n.isPinned) ? 'Quitar de portada' : 'Fijar en portada'}"
@@ -2543,7 +2543,7 @@
     const n = newsState.find(n => n.id === id);
     n.destacada = !n.destacada;
     renderNewsAdmin();
-    showToast(n.destacada ? `"${n.titulo}" fijada en portada.` : `"${n.titulo}" desmarcada.`, 'info');
+    showToast(n.destacada ? `"${escHtml(n.titulo)}" fijada en portada.` : `"${escHtml(n.titulo)}" desmarcada.`, 'info');
   }
 
   /**
@@ -2707,8 +2707,8 @@
       <div class="news-admin-row" id="news-row-${n.id}">
         ${imgSrc ? `<img src="${imgSrc}" class="news-admin-thumb" alt="">` : `<div style="width:52px;height:52px;border-radius:10px;background:#1b2e5e;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700;font-size:1.05rem;text-transform:uppercase;">${(n.categoria||'N')[0]}</div>`}
         <div class="news-admin-info">
-          <p class="news-admin-title">${n.titulo}</p>
-          <p class="news-admin-meta">${n.categoria} · ${fechaDisplay} · ${n.autor || ''}</p>
+          <p class="news-admin-title">${escHtml(n.titulo)}</p>
+          <p class="news-admin-meta">${escHtml(n.categoria)} · ${fechaDisplay} · ${escHtml(n.autor || '')}</p>
         </div>
         <button class="btn btn-sm btn-secondary" onclick="editNoticia('${n.id}')">Editar</button>
         <button class="btn btn-sm btn-danger" onclick="promptDelNoticia('${n.id}')">Eliminar</button>
@@ -2776,11 +2776,11 @@
       <tr id="wp-row-${w.id}">
         <td style="max-width:200px;">
           <div style="font-weight:500;font-size:.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-            ${w.emoji} ${w.titulo}
+            ${escHtml(w.emoji)} ${escHtml(w.titulo)}
           </div>
         </td>
-        <td class="hide-sm" style="font-size:.8125rem;color:var(--color-text-muted);">${w.vendedor}</td>
-        <td class="hide-md"><span style="font-size:.75rem;background:var(--color-bg);padding:2px 8px;border-radius:999px;color:var(--color-text-muted);">${w.categoria}</span></td>
+        <td class="hide-sm" style="font-size:.8125rem;color:var(--color-text-muted);">${escHtml(w.vendedor)}</td>
+        <td class="hide-md"><span style="font-size:.75rem;background:var(--color-bg);padding:2px 8px;border-radius:999px;color:var(--color-text-muted);">${escHtml(w.categoria)}</span></td>
         <td>
           ${w.precio === 0
             ? '<span class="price-text free">Consultar</span>'
@@ -2860,8 +2860,8 @@
         <div class="pending-card-header" onclick="toggleSolCard(${idx})">
           <div class="avatar avatar-md" data-color="3">${initials}</div>
           <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;color:var(--color-text);font-size:14px;">${s.nombre || ''} ${s.apellidos || ''}</div>
-            <div style="font-size:12px;color:var(--color-text-muted);">${s.email || ''} &middot; ${s.solicitudNum || ''}</div>
+            <div style="font-weight:600;color:var(--color-text);font-size:14px;">${escHtml(s.nombre || '')} ${escHtml(s.apellidos || '')}</div>
+            <div style="font-size:12px;color:var(--color-text-muted);">${escHtml(s.email || '')} &middot; ${escHtml(s.solicitudNum || '')}</div>
           </div>
           <span class="risk-badge ${riesgo}">${riesgoLabel}</span>
           <span style="font-size:11px;color:var(--color-text-light);white-space:nowrap;">${fecha}</span>
@@ -2869,20 +2869,20 @@
         </div>
         <div class="pending-card-body" id="sol-body-${idx}">
           <div class="pending-detail-grid">
-            <div class="pending-detail-row"><div class="label">Teléfono</div><div class="value">${s.telefonoPrefijo || ''} ${s.telefono || '—'}</div></div>
-            <div class="pending-detail-row"><div class="label">Tipo de doc.</div><div class="value">${s.docTipo || '—'}</div></div>
-            <div class="pending-detail-row"><div class="label">Núm. documento</div><div class="value">${docMask}</div></div>
-            <div class="pending-detail-row"><div class="label">Fecha nacimiento</div><div class="value">${s.fechaNac || '—'}</div></div>
-            <div class="pending-detail-row"><div class="label">Nacionalidad</div><div class="value">${s.nacionalidad || '—'}</div></div>
-            <div class="pending-detail-row"><div class="label">País nacimiento</div><div class="value">${s.paisNac || '—'}</div></div>
-            <div class="pending-detail-row"><div class="label">País residencia</div><div class="value">${s.pais || '—'}</div></div>
-            <div class="pending-detail-row"><div class="label">Ciudad / CP</div><div class="value">${s.ciudad || '—'} ${s.cp ? '('+s.cp+')' : ''}</div></div>
-            <div class="pending-detail-row"><div class="label">Dirección</div><div class="value">${s.direccion || '—'}</div></div>
-            <div class="pending-detail-row"><div class="label">Comunidad solicitada</div><div class="value">${s.comunidad || '—'}</div></div>
-            <div class="pending-detail-row"><div class="label">Práctica judía</div><div class="value">${s.practica || '—'}</div></div>
-            <div class="pending-detail-row"><div class="label">Familiar en comunidad</div><div class="value">${s.familiar ? (s.familiarNombre || 'Sí') : 'No'}</div></div>
-            <div class="pending-detail-row"><div class="label">Cómo conoció Jabad Barcelona</div><div class="value">${s.comoConocio || '—'}</div></div>
-            <div class="pending-detail-row"><div class="label">Documento adjunto</div><div class="value">${s.docFileName ? `<span style="color:#16a34a;font-weight:600;">&#10003; ${s.docFileName}</span>` : '<span style="color:#ef4444;">No adjuntado</span>'}</div></div>
+            <div class="pending-detail-row"><div class="label">Teléfono</div><div class="value">${escHtml(s.telefonoPrefijo || '')} ${escHtml(s.telefono || '—')}</div></div>
+            <div class="pending-detail-row"><div class="label">Tipo de doc.</div><div class="value">${escHtml(s.docTipo || '—')}</div></div>
+            <div class="pending-detail-row"><div class="label">Núm. documento</div><div class="value">${escHtml(docMask)}</div></div>
+            <div class="pending-detail-row"><div class="label">Fecha nacimiento</div><div class="value">${escHtml(s.fechaNac || '—')}</div></div>
+            <div class="pending-detail-row"><div class="label">Nacionalidad</div><div class="value">${escHtml(s.nacionalidad || '—')}</div></div>
+            <div class="pending-detail-row"><div class="label">País nacimiento</div><div class="value">${escHtml(s.paisNac || '—')}</div></div>
+            <div class="pending-detail-row"><div class="label">País residencia</div><div class="value">${escHtml(s.pais || '—')}</div></div>
+            <div class="pending-detail-row"><div class="label">Ciudad / CP</div><div class="value">${escHtml(s.ciudad || '—')} ${s.cp ? escHtml('('+s.cp+')') : ''}</div></div>
+            <div class="pending-detail-row"><div class="label">Dirección</div><div class="value">${escHtml(s.direccion || '—')}</div></div>
+            <div class="pending-detail-row"><div class="label">Comunidad solicitada</div><div class="value">${escHtml(s.comunidad || '—')}</div></div>
+            <div class="pending-detail-row"><div class="label">Práctica judía</div><div class="value">${escHtml(s.practica || '—')}</div></div>
+            <div class="pending-detail-row"><div class="label">Familiar en comunidad</div><div class="value">${s.familiar ? escHtml(s.familiarNombre || 'Sí') : 'No'}</div></div>
+            <div class="pending-detail-row"><div class="label">Cómo conoció Jabad Barcelona</div><div class="value">${escHtml(s.comoConocio || '—')}</div></div>
+            <div class="pending-detail-row"><div class="label">Documento adjunto</div><div class="value">${s.docFileName ? `<span style="color:#16a34a;font-weight:600;">&#10003; ${escHtml(s.docFileName)}</span>` : '<span style="color:#ef4444;">No adjuntado</span>'}</div></div>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--color-border-light);">
             <button class="btn btn-sm btn-primary" onclick="aprobarSolicitud(${idx})" style="background:#15803d;border-color:#15803d;">
@@ -3024,7 +3024,7 @@
       const respHTML = p.respuesta
         ? `<div class="preg-respuesta">
              <div class="preg-respuesta-label">✓ Respuesta del Rav</div>
-             <div class="preg-respuesta-text">${p.respuesta}</div>
+             <div class="preg-respuesta-text">${escHtml(p.respuesta)}</div>
            </div>`
         : `<div class="preg-reply-area">
              <textarea id="resp-${p.id}" placeholder="Escribe la respuesta del Rav…"></textarea>
@@ -3033,12 +3033,12 @@
       return `
         <div class="preg-card ${p.estado || 'pendiente'}">
           <div class="preg-card-header">
-            <span class="preg-user">${p.anonima ? 'Anónimo' : (p.usuario_nombre || 'Usuario')}</span>
+            <span class="preg-user">${p.anonima ? 'Anónimo' : escHtml(p.usuario_nombre || 'Usuario')}</span>
             <span class="preg-cat">${catLabel}</span>
             <span class="preg-estado-badge ${p.estado || 'pendiente'}">${p.estado === 'respondida' ? 'Respondida' : 'Pendiente'}</span>
             <span class="preg-meta">${fecha}</span>
           </div>
-          <div class="preg-text">${p.pregunta}</div>
+          <div class="preg-text">${escHtml(p.pregunta)}</div>
           ${respHTML}
         </div>`;
     }).join('');
