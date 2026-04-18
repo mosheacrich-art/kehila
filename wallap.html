@@ -398,17 +398,17 @@
             <span class="wp-type-badge ${typeBadge[w.tipo]||'wp-type-venta'}">${typeLabel[w.tipo]||w.tipo}</span>
           </div>
           <div class="wp-card-body">
-            <span class="wp-cat-label">${w.categoria}</span>
-            <p class="wp-title">${w.titulo}</p>
+            <span class="wp-cat-label">${escHtml(w.categoria)}</span>
+            <p class="wp-title">${escHtml(w.titulo)}</p>
             ${priceHTML}
             <div class="wp-seller">
               <div class="wp-seller-avatar" style="background:${avatarColors[ci]};color:${avatarTextColors[ci]};">${initials}</div>
-              <span class="wp-seller-name">${w.vendedor}</span>
+              <span class="wp-seller-name">${escHtml(w.vendedor)}</span>
             </div>
             <div class="wp-meta-row">
               <div class="wp-meta">
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
-                ${w.ubicacion.split(' - ')[0]}
+                ${escHtml(w.ubicacion.split(' - ')[0])}
               </div>
               <span style="font-size:.7rem;color:var(--color-text-light);">${daysAgo(w.fecha)}</span>
             </div>

@@ -244,12 +244,12 @@ function renderGrid(filtro) {
             </div>
           </div>
           <div class="ev-card-body">
-            <div class="ev-title">${n.titulo ?? ''}</div>
-            <div class="ev-desc">${n.excerpt ?? ''}</div>
+            <div class="ev-title">${escHtml(n.titulo ?? '')}</div>
+            <div class="ev-desc">${escHtml(n.excerpt ?? '')}</div>
             <div class="ev-meta-row">
               <span class="ev-meta-item">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
-                ${n.autor ?? ''}
+                ${escHtml(n.autor ?? '')}
               </span>
               <span class="ev-meta-item">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
@@ -371,11 +371,11 @@ function abrirNoticia(id) {
       <div class="np-scroll">
         <div class="np-content">
           <div class="np-rule-double"><span>— ${catLabel(n.categoria).toUpperCase()} —</span></div>
-          <h2 class="np-headline">${n.titulo ?? ''}</h2>
+          <h2 class="np-headline">${escHtml(n.titulo ?? '')}</h2>
           <div class="np-byline-bar">
-            <div class="np-avatar"><span>${authorInitial}</span></div>
+            <div class="np-avatar"><span>${escHtml(authorInitial)}</span></div>
             <div>
-              <div class="np-byline-name">${n.autor ?? ''}</div>
+              <div class="np-byline-name">${escHtml(n.autor ?? '')}</div>
               <div class="np-byline-date">${formatearFecha(n.fecha)} · ${n.tiempoLectura ?? ''} lectura</div>
             </div>
           </div>

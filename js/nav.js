@@ -27,6 +27,21 @@
  *  4. Llamar initNav('id-de-la-nueva-seccion') en esa página
  */
 
+/**
+ * Escapa caracteres HTML peligrosos para prevenir XSS.
+ * Disponible globalmente — se usa en nav.js, noticias.js, wallap.html y otros.
+ * @param {*} str
+ * @returns {string}
+ */
+function escHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const NAV_ITEMS = [
   {
     group: '',
@@ -187,9 +202,9 @@ function buildSidebar(activePage) {
 
         <!-- Usuario -->
         <a href="perfil.html" class="sidebar-user" style="text-decoration:none;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background=''">
-          <div class="avatar avatar-md" data-color="${color}">${initials}</div>
+          <div class="avatar avatar-md" data-color="${color}">${escHtml(initials)}</div>
           <div class="sidebar-user-info">
-            <div class="sidebar-user-name">${user.name}</div>
+            <div class="sidebar-user-name">${escHtml(user.name)}</div>
             <div class="sidebar-user-role">${roleLabel} · ${verPerfil}</div>
           </div>
         </a>
@@ -446,9 +461,9 @@ function buildHamburger(activePage) {
         </button>
       </div>
       <div class="hb-user">
-        <div class="avatar avatar-md" data-color="${color}">${initials}</div>
+        <div class="avatar avatar-md" data-color="${color}">${escHtml(initials)}</div>
         <div class="hb-user-info">
-          <div class="hb-user-name">${user.name}</div>
+          <div class="hb-user-name">${escHtml(user.name)}</div>
           <div class="hb-user-role">${roleLabel}</div>
         </div>
       </div>

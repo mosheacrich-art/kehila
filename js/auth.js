@@ -212,7 +212,8 @@ function getAvatarColor(name) {
 function renderAvatar(user, size = 'md') {
   const color = getAvatarColor(user.name || user.initials || 'U');
   const initials = user.initials || (user.name ? user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '??');
-  return `<div class="avatar avatar-${size}" data-color="${color}">${initials}</div>`;
+  const safeInitials = String(initials || '??').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return `<div class="avatar avatar-${size}" data-color="${color}">${safeInitials}</div>`;
 }
 
 // ─── Auto-init ────────────────────────────────
