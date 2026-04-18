@@ -1654,17 +1654,33 @@
             <span class="form-error" id="news-cont-err" style="display:none;">El contenido es obligatorio.</span>
           </div>
           <div class="form-group">
-            <label class="form-label">Imagen <span style="color:var(--color-text-light);font-weight:400;">(opcional)</span></label>
+            <label class="form-label">Imagen de portada <span style="color:var(--color-text-light);font-weight:400;">(opcional)</span></label>
             <div class="upload-area" id="upload-area-news">
               <input type="file" id="file-news" accept="image/*" hidden>
               <div class="upload-placeholder" id="upload-ph-news" style="display:flex;">
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:28px;height:28px;"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
                 <span style="font-size:.85rem;font-weight:500;color:#718096;">Añadir imagen de portada</span>
-                <span class="upload-hint">JPG, PNG o WebP</span>
+                <span class="upload-hint">JPG, PNG o WebP · 16:9</span>
               </div>
               <div id="upload-filled-news" style="display:none;position:relative;">
                 <img id="upload-img-news" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;">
                 <button type="button" onclick="clearUpload('news')" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:22px;text-align:center;padding:0;">&times;</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Imagen para carrusel inicio <span style="color:var(--color-text-light);font-weight:400;">(opcional)</span></label>
+            <p style="font-size:0.78rem;color:#718096;margin:-6px 0 8px;">Esta imagen aparece como slide en el banner principal de inicio. Formato ancho (21:9).</p>
+            <div class="upload-area" id="upload-area-news-slide" style="height:90px;">
+              <input type="file" id="file-news-slide" accept="image/*" hidden>
+              <div class="upload-placeholder" id="upload-ph-news-slide" style="display:flex;">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+                <span style="font-size:.82rem;font-weight:500;color:#718096;">Añadir slide de carrusel</span>
+                <span class="upload-hint">JPG, PNG o WebP · 21:9</span>
+              </div>
+              <div id="upload-filled-news-slide" style="display:none;position:relative;">
+                <img id="upload-img-news-slide" style="width:100%;height:90px;object-fit:cover;border-radius:8px;">
+                <button type="button" onclick="clearUpload('news-slide')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:12px;line-height:20px;text-align:center;padding:0;">&times;</button>
               </div>
             </div>
           </div>
@@ -2661,11 +2677,18 @@
     document.getElementById('news-contenido').value = n.contenido || '';
     document.getElementById('news-pin').checked = !!(n.destacada || n.isPinned);
     clearUpload('news');
+    clearUpload('news-slide');
     const imgSrc = n.imagen_url || n.imagen || null;
     if (imgSrc) {
       document.getElementById('upload-img-news').src = imgSrc;
       document.getElementById('upload-ph-news').style.display = 'none';
       document.getElementById('upload-filled-news').style.display = '';
+    }
+    const slideSrc = n.imagen_carrusel || null;
+    if (slideSrc) {
+      document.getElementById('upload-img-news-slide').src = slideSrc;
+      document.getElementById('upload-ph-news-slide').style.display = 'none';
+      document.getElementById('upload-filled-news-slide').style.display = '';
     }
     openModal('modal-noticia');
   }
@@ -2677,6 +2700,7 @@
     _editNoticiaId = null;
     document.getElementById('modal-noticia-title').textContent = 'Nueva noticia';
     document.getElementById('btn-save-noticia-txt').textContent = 'Publicar noticia';
+    clearUpload('news-slide');
   }
 
   /**
@@ -2698,6 +2722,7 @@
 
     const extracto = document.getElementById('news-extracto').value.trim();
     const imagen = getUpload('news') || null;
+    const imagenSlide = getUpload('news-slide') || null;
     const destacada = document.getElementById('news-pin').checked;
 
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
@@ -2709,16 +2734,19 @@
         n.resumen = extracto || contenido.slice(0, 120) + '…';
         n.contenido = contenido;
         if (imagen) n.imagen_url = imagen;
+        if (imagenSlide) n.imagen_carrusel = imagenSlide;
       }
       if (sb) {
         const upd = { titulo, resumen: n?.resumen, contenido };
         if (imagen) upd.imagen_url = imagen;
+        if (imagenSlide) upd.imagen_carrusel = imagenSlide;
         sb.from('noticias').update(upd).eq('id', _editNoticiaId).then(() => {});
       }
       renderNewsAdmin();
       closeModal('modal-noticia');
       document.getElementById('form-noticia').reset();
       clearUpload('news');
+      clearUpload('news-slide');
       _resetNoticiaModal();
       showToast(`Noticia "${titulo}" actualizada.`, 'success');
     } else {
@@ -2728,7 +2756,8 @@
         contenido,
         categoria: 'Comunidad',
         autor: getCurrentUser()?.name || 'Admin',
-        imagen_url: imagen || null
+        imagen_url: imagen || null,
+        imagen_carrusel: imagenSlide || null
       };
       if (sb) {
         sb.from('noticias').insert(noticiaDB).select().single().then(({ data, error }) => {
@@ -2743,6 +2772,7 @@
       closeModal('modal-noticia');
       document.getElementById('form-noticia').reset();
       clearUpload('news');
+      clearUpload('news-slide');
       _resetNoticiaModal();
       showToast(`Noticia "${titulo}" publicada.`, 'success');
     }
@@ -2793,6 +2823,7 @@
 
   loadNoticiasAdmin();
   uploadAreaSetup('news');
+  uploadAreaSetup('news-slide');
 
   /* ══════════════════════════════
      TAB MARKETPLACE
@@ -3565,7 +3596,7 @@
   var _cropAspectRatio = 16/9;   // ratio por defecto; puede cambiarse por zona
 
   /* Aspect ratios por zona de upload */
-  var CROP_RATIOS = { 'ev': 16/9, 'news': 16/9 };
+  var CROP_RATIOS = { 'ev': 16/9, 'news': 16/9, 'news-slide': 21/9 };
 
   /**
    * Intercepta el cambio de archivo y abre el modal de recorte.
@@ -3638,7 +3669,9 @@
 
   function cropConfirm() {
     if (!_cropperInstance || !_cropTargetId) return;
-    var canvas = _cropperInstance.getCroppedCanvas({ width: 1200, height: 675, imageSmoothingQuality: 'high' });
+    // Dimensiones de salida según el ratio de la zona
+    var outW = 1200, outH = Math.round(1200 / _cropAspectRatio);
+    var canvas = _cropperInstance.getCroppedCanvas({ width: outW, height: outH, imageSmoothingQuality: 'high' });
     var dataUrl = canvas.toDataURL('image/jpeg', 0.88);
 
     // Aplicar al upload-area correspondiente
