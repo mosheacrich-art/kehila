@@ -2012,7 +2012,7 @@
    * Lee de usersState por userId.
    * @param {string} userId - UUID del usuario
    */
-  function verPerfil(userId) {
+  async function verPerfil(userId) {
     const u = usersState.find(x => x.userId === userId);
     if (!u) return;
 
@@ -2054,9 +2054,21 @@
       ${row('Tipo', escHtml(sol.docTipo || u.doc_tipo))}
       ${row('Número', escHtml(sol.docNumero ? '••••' + sol.docNumero.slice(-3) : (u.doc_numero || '—')))}
       ${sol.docFileName ? row('Archivo', `<span style="color:var(--color-text-muted);">${escHtml(sol.docFileName)}</span>`) : ''}
-      ${u.doc_url ? `<div style="padding:10px 0;border-bottom:1px solid var(--color-border-light);">
-        <a href="${u.doc_url}" target="_blank"><img src="${u.doc_url}" style="max-width:100%;max-height:220px;border-radius:6px;border:1px solid var(--color-border);" onerror="this.style.display='none'"></a>
-      </div>` : ''}
+      ${u.doc_url ? await (async () => {
+        // Generar URL firmada (1h) — bucket privado, nunca URL pública
+        const sb2 = typeof getSupabase === 'function' ? getSupabase() : null;
+        const docPath = u.doc_url.includes('/documentos/') ? u.doc_url.split('/documentos/')[1] : u.doc_url;
+        let signedUrl = null;
+        if (sb2 && docPath) {
+          const { data: sd } = await sb2.storage.from('documentos').createSignedUrl(docPath, 3600);
+          signedUrl = sd?.signedUrl || null;
+        }
+        if (!signedUrl) return '';
+        return `<div style="padding:10px 0;border-bottom:1px solid var(--color-border-light);">
+          <a href="${signedUrl}" target="_blank"><img src="${signedUrl}" style="max-width:100%;max-height:220px;border-radius:6px;border:1px solid var(--color-border);" onerror="this.style.display='none'"></a>
+          <div style="font-size:0.7rem;color:var(--color-text-muted);margin-top:4px;">Enlace válido 1 hora</div>
+        </div>`;
+      })() : ''}
 
       ${section('Dirección')}
       ${row('País', escHtml(sol.pais || u.pais))}

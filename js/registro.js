@@ -414,8 +414,7 @@ async function regSubmit() {
           .from('documentos')
           .upload(path, REG.data.docFile, { upsert: true });
         if (!uploadErr) {
-          const { data: urlData } = sb.storage.from('documentos').getPublicUrl(path);
-          doc_url = urlData?.publicUrl || null;
+          doc_url = path; // Guardar solo el path — bucket privado, URLs firmadas en admin
         } else {
           console.error('Error subiendo foto:', uploadErr.message);
         }
