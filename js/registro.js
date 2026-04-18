@@ -191,9 +191,9 @@ function regValidateStep1() {
   } else { regClearFieldError('r1-telefono', 'r1-telefono-err'); }
 
   const pw = REG.data.password;
-  const pwStrong = pw.length >= 6 && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw);
-  if (!pw || pw.length < 6) {
-    regShowFieldError('r1-password', 'r1-password-err', 'Mínimo 6 caracteres');
+  const pwStrong = pw.length >= 8 && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw);
+  if (!pw || pw.length < 8) {
+    regShowFieldError('r1-password', 'r1-password-err', 'Mínimo 8 caracteres');
     ok = false;
   } else if (!pwStrong) {
     regShowFieldError('r1-password', 'r1-password-err', 'Incluye mayúscula, minúscula, número y símbolo');
@@ -589,7 +589,7 @@ function regInitPasswordStrength() {
     container.parentElement.style.display = '';
 
     let score = 0;
-    if (pw.length >= 6) score++;
+    if (pw.length >= 8) score++;
     if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
     if (/\d/.test(pw)) score++;
     if (/[^A-Za-z0-9]/.test(pw)) score++;
