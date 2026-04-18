@@ -829,6 +829,10 @@
     .ev-bg-0, .ev-bg-1, .ev-bg-2, .ev-bg-3, .ev-bg-4, .ev-bg-5 {
       background: var(--color-primary);
     }
+    .don-chip { padding: 7px 18px; border: 2px solid var(--color-border); border-radius: 999px; background: var(--color-bg); color: var(--color-text); font-size: .9rem; font-weight: 600; cursor: pointer; transition: all .15s; font-family: inherit; }
+    .don-chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .don-chip.selected { border-color: var(--color-primary); background: var(--color-primary); color: #fff; }
+    .don-chip-otro { font-weight: 500; }
   </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
@@ -1045,6 +1049,48 @@
   <!-- Toast container -->
   <div class="toast-container" id="toast-container"></div>
 
+  <!-- Modal post-inscripción + donativo -->
+  <div class="modal-overlay hidden" id="modal-post-inscripcion" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;">
+    <div class="modal modal-sm" style="background:#fff;border-radius:16px;width:100%;max-width:420px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.18);">
+      <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 0;">
+        <h3 class="modal-title" style="font-size:1.05rem;font-weight:700;">¡Inscripción confirmada!</h3>
+        <button class="modal-close" onclick="closePostModal()" style="background:none;border:none;cursor:pointer;padding:4px;">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding:16px 20px;">
+        <div style="display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:22px;height:22px;color:#16a34a;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+          <span style="font-size:.9rem;font-weight:600;color:#15803d;" id="home-post-ev-titulo">Estás inscrito</span>
+        </div>
+        <p id="home-post-ev-mensaje" style="font-size:.875rem;color:#718096;margin-bottom:18px;line-height:1.55;display:none;"></p>
+        <div style="border-top:1px solid #e2e8f0;padding-top:16px;">
+          <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#718096;margin-bottom:10px;">Donativo voluntario</p>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+            <button class="don-chip" data-amount="18" onclick="homeSelectChip(this,18)">18 €</button>
+            <button class="don-chip" data-amount="50" onclick="homeSelectChip(this,50)">50 €</button>
+            <button class="don-chip don-chip-otro" data-amount="0" onclick="homeSelectChip(this,0)">Otra cantidad</button>
+          </div>
+          <div id="home-post-don-custom" style="display:none;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="number" id="home-post-don-input" min="1" placeholder="Cantidad en €"
+                style="flex:1;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:.9rem;font-family:inherit;">
+              <span style="font-size:.9rem;color:#718096;">€</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;padding:0 20px 18px;">
+        <button onclick="closePostModal()" style="padding:9px 18px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;font-size:.9rem;">No gracias</button>
+        <button id="home-btn-post-donar" onclick="homeDonarDesdeEvento()" disabled
+          style="display:flex;align-items:center;gap:6px;padding:9px 18px;border:none;border-radius:8px;background:#1B2E5E;color:#fff;cursor:pointer;font-family:inherit;font-size:.9rem;font-weight:600;opacity:.5;">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+          Donar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/data.js"></script>
   <script src="js/i18n.js"></script>
@@ -1143,6 +1189,8 @@
       }).join('');
     }
 
+    let homePostEvId = null;
+
     async function inscribirse(id, titulo, lleno) {
       if (lleno) return;
       const sb = typeof getSupabase === 'function' ? getSupabase() : null;
@@ -1156,7 +1204,74 @@
       if (error) { showToast('Error: ' + error.message, 'error'); return; }
       homeInscrito.add(String(id));
       renderEventos();
-      showToast(`¡Inscripción confirmada en "${titulo}"!`, 'success');
+
+      // Abrir modal post-inscripción
+      const ev = MOCK_EVENTOS.find(e => String(e.id) === String(id));
+      homePostEvId = id;
+      document.getElementById('home-post-ev-titulo').textContent = `¡Estás inscrito en "${titulo}"!`;
+      const msgEl = document.getElementById('home-post-ev-mensaje');
+      const msg = ev?.mensaje_inscripcion || '';
+      if (msg) { msgEl.textContent = msg; msgEl.style.display = ''; }
+      else { msgEl.style.display = 'none'; }
+      document.querySelectorAll('#modal-post-inscripcion .don-chip').forEach(c => c.classList.remove('selected'));
+      document.getElementById('home-post-don-custom').style.display = 'none';
+      document.getElementById('home-post-don-input').value = '';
+      const donarBtn = document.getElementById('home-btn-post-donar');
+      donarBtn.disabled = true;
+      donarBtn.style.opacity = '.5';
+      document.getElementById('modal-post-inscripcion').classList.remove('hidden');
+    }
+
+    function closePostModal() {
+      document.getElementById('modal-post-inscripcion').classList.add('hidden');
+    }
+
+    function homeSelectChip(btn, amount) {
+      document.querySelectorAll('#modal-post-inscripcion .don-chip').forEach(c => c.classList.remove('selected'));
+      btn.classList.add('selected');
+      const customDiv = document.getElementById('home-post-don-custom');
+      const donarBtn  = document.getElementById('home-btn-post-donar');
+      if (amount === 0) {
+        customDiv.style.display = '';
+        const val = parseFloat(document.getElementById('home-post-don-input').value);
+        donarBtn.disabled = !(val > 0);
+        donarBtn.style.opacity = (val > 0) ? '1' : '.5';
+      } else {
+        customDiv.style.display = 'none';
+        donarBtn.disabled = false;
+        donarBtn.style.opacity = '1';
+      }
+    }
+
+    document.getElementById('home-post-don-input')?.addEventListener('input', function() {
+      const val = parseFloat(this.value);
+      const donarBtn = document.getElementById('home-btn-post-donar');
+      donarBtn.disabled = !(val > 0);
+      donarBtn.style.opacity = (val > 0) ? '1' : '.5';
+    });
+
+    async function homeDonarDesdeEvento() {
+      const ev = MOCK_EVENTOS.find(e => String(e.id) === String(homePostEvId));
+      const selectedChip = document.querySelector('#modal-post-inscripcion .don-chip.selected');
+      let amount = selectedChip ? parseFloat(selectedChip.dataset.amount) : 0;
+      if (amount === 0) amount = parseFloat(document.getElementById('home-post-don-input').value) || 0;
+      if (!amount || amount <= 0) return;
+
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (sb && user) {
+        await sb.from('donaciones').insert({
+          usuario_id:     user.userId || null,
+          usuario_nombre: user.name   || 'Anonimo',
+          campana_nombre: `Donativo evento: ${ev?.titulo || ''}`,
+          campana_id:     null,
+          cantidad:       amount,
+          recurrente:     false,
+          dedicatoria:    null
+        });
+      }
+      closePostModal();
+      showToast(`Gracias por tu donativo de ${amount} euros!`, 'success');
     }
 
     /* ─── Renderizar noticias (carousel) ─── */
@@ -1196,7 +1311,7 @@
       if (sb) {
         try {
           const queries = [
-            sb.from('eventos').select('id,titulo,descripcion,fecha,hora,lugar,aforo,categoria,imagen_url').order('fecha', { ascending: true }).limit(4),
+            sb.from('eventos').select('id,titulo,descripcion,fecha,hora,lugar,aforo,categoria,imagen_url,mensaje_inscripcion').order('fecha', { ascending: true }).limit(4),
             sb.from('noticias').select('id,titulo,resumen,categoria,autor,imagen_url,created_at').order('created_at', { ascending: false }).limit(6)
           ];
           if (user) queries.push(sb.from('inscripciones').select('evento_id').eq('usuario_id', user.userId));
