@@ -814,6 +814,67 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Jabad Barcelona">
   <link rel="apple-touch-icon" href="img/icon-192.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+  <style>
+    /* ─── Crop modal ─── */
+    #crop-modal {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0;
+    }
+    #crop-modal.hidden { display: none; }
+    #crop-modal-header {
+      width: 100%; max-width: 600px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      color: #fff; font-size: 1rem; font-weight: 600;
+    }
+    #crop-modal-header button {
+      background: none; border: none; color: #fff;
+      font-size: 1.3rem; cursor: pointer; padding: 4px 8px;
+      opacity: 0.7; transition: opacity 0.15s;
+    }
+    #crop-modal-header button:hover { opacity: 1; }
+    #crop-canvas-wrap {
+      width: min(92vw, 600px);
+      height: min(55vh, 420px);
+      background: #111;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #crop-canvas-wrap img {
+      display: block;
+      max-width: 100%;
+    }
+    #crop-modal-controls {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px; flex-wrap: wrap; justify-content: center;
+    }
+    .crop-btn {
+      background: rgba(255,255,255,0.12); border: none;
+      color: #fff; border-radius: 8px;
+      padding: 9px 14px; font-size: 0.88rem; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      transition: background 0.15s;
+    }
+    .crop-btn:hover { background: rgba(255,255,255,0.22); }
+    .crop-btn-primary {
+      background: var(--color-primary, #1b2e5e);
+      padding: 9px 24px; font-weight: 600;
+    }
+    .crop-btn-primary:hover { background: #243d7a; }
+    #crop-zoom-range {
+      -webkit-appearance: none; appearance: none;
+      width: 110px; height: 4px;
+      background: rgba(255,255,255,0.3); border-radius: 2px; outline: none;
+    }
+    #crop-zoom-range::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px;
+      border-radius: 50%; background: #fff; cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
@@ -1705,13 +1766,8 @@
     input.addEventListener('change', function() {
       var file = input.files[0];
       if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('upload-img-' + id).src = e.target.result;
-        document.getElementById('upload-ph-' + id).style.display = 'none';
-        document.getElementById('upload-filled-' + id).style.display = 'block';
-      };
-      reader.readAsDataURL(file);
+      // Abrir modal de recorte WhatsApp-style en lugar de mostrar directamente
+      openCropModal(id, file);
     });
   }
   /**
@@ -3464,6 +3520,160 @@
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/kehila/sw.js").catch(()=>{});
     }
+  </script>
+
+  <!-- ═══════════════════════════════════════════════
+       CROP MODAL — WhatsApp-style image cropper
+  ═══════════════════════════════════════════════ -->
+  <div id="crop-modal" class="hidden" role="dialog" aria-modal="true" aria-label="Recortar imagen">
+    <div id="crop-modal-header">
+      <span>Ajustar imagen</span>
+      <button onclick="cropCancel()" title="Cancelar">✕</button>
+    </div>
+    <div id="crop-canvas-wrap">
+      <img id="crop-source" src="" alt="Imagen a recortar">
+    </div>
+    <div id="crop-modal-controls">
+      <button class="crop-btn" onclick="cropZoom(-0.1)" title="Alejar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </button>
+      <input id="crop-zoom-range" type="range" min="-1" max="1" step="0.05" value="0"
+             oninput="cropZoomTo(+this.value)" title="Zoom">
+      <button class="crop-btn" onclick="cropZoom(0.1)" title="Acercar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg>
+      </button>
+      <button class="crop-btn" onclick="cropRotate(-90)" title="Rotar izquierda">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.53"/></svg>
+      </button>
+      <button class="crop-btn" onclick="cropRotate(90)" title="Rotar derecha">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.53"/></svg>
+      </button>
+      <button class="crop-btn" onclick="cropFit()" title="Encajar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </button>
+      <button class="crop-btn crop-btn-primary" onclick="cropConfirm()">Confirmar</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+  <script>
+  /* ══════════════════════════════════════════════════════
+     IMAGE CROPPER — integración con uploadAreaSetup
+  ══════════════════════════════════════════════════════ */
+  var _cropperInstance = null;
+  var _cropTargetId    = null;   // sufijo del upload-area activo ('ev' o 'news')
+  var _cropAspectRatio = 16/9;   // ratio por defecto; puede cambiarse por zona
+
+  /* Aspect ratios por zona de upload */
+  var CROP_RATIOS = { 'ev': 16/9, 'news': 16/9 };
+
+  /**
+   * Intercepta el cambio de archivo y abre el modal de recorte.
+   * Llama a esta función desde uploadAreaSetup en lugar de leer FileReader directamente.
+   */
+  function openCropModal(id, file) {
+    _cropTargetId    = id;
+    _cropAspectRatio = CROP_RATIOS[id] !== undefined ? CROP_RATIOS[id] : 16/9;
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var modal = document.getElementById('crop-modal');
+      var imgEl = document.getElementById('crop-source');
+
+      // Destruir instancia anterior si existe
+      if (_cropperInstance) { _cropperInstance.destroy(); _cropperInstance = null; }
+
+      imgEl.src = e.target.result;
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      // Inicializar Cropper.js cuando la imagen esté lista
+      imgEl.onload = function() {
+        _cropperInstance = new Cropper(imgEl, {
+          aspectRatio    : _cropAspectRatio,
+          viewMode       : 1,          // no salir del contenedor
+          dragMode       : 'move',     // mover imagen, no crear recuadro nuevo
+          autoCropArea   : 0.92,       // recuadro ocupa 92% inicial
+          restore        : false,
+          guides         : true,
+          center         : true,
+          highlight      : false,
+          cropBoxMovable : false,      // el marco es fijo — el usuario mueve la foto
+          cropBoxResizable: false,
+          toggleDragModeOnDblclick: false,
+          ready: function() {
+            // Resetear slider
+            var sl = document.getElementById('crop-zoom-range');
+            if (sl) sl.value = 0;
+          }
+        });
+      };
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function cropZoom(delta) {
+    if (!_cropperInstance) return;
+    _cropperInstance.zoom(delta);
+  }
+
+  function cropZoomTo(val) {
+    // val de -1 a 1; mapeamos a zoom relativo
+    if (!_cropperInstance) return;
+    var ratio = Math.pow(2, val);  // -1→0.5x, 0→1x, 1→2x
+    _cropperInstance.zoomTo(ratio);
+  }
+
+  function cropRotate(deg) {
+    if (!_cropperInstance) return;
+    _cropperInstance.rotate(deg);
+  }
+
+  function cropFit() {
+    if (!_cropperInstance) return;
+    _cropperInstance.reset();
+    var sl = document.getElementById('crop-zoom-range');
+    if (sl) sl.value = 0;
+  }
+
+  function cropConfirm() {
+    if (!_cropperInstance || !_cropTargetId) return;
+    var canvas = _cropperInstance.getCroppedCanvas({ width: 1200, height: 675, imageSmoothingQuality: 'high' });
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+    // Aplicar al upload-area correspondiente
+    var imgEl = document.getElementById('upload-img-' + _cropTargetId);
+    var ph    = document.getElementById('upload-ph-'  + _cropTargetId);
+    var fd    = document.getElementById('upload-filled-' + _cropTargetId);
+    if (imgEl) imgEl.src = dataUrl;
+    if (ph)    ph.style.display  = 'none';
+    if (fd)    fd.style.display  = 'block';
+
+    cropCloseSilent();
+  }
+
+  function cropCancel() {
+    // Resetear el input para que no quede el archivo seleccionado
+    if (_cropTargetId) {
+      var inp = document.getElementById('file-' + _cropTargetId);
+      if (inp) inp.value = '';
+    }
+    cropCloseSilent();
+  }
+
+  function cropCloseSilent() {
+    if (_cropperInstance) { _cropperInstance.destroy(); _cropperInstance = null; }
+    document.getElementById('crop-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+    _cropTargetId = null;
+  }
+
+  /* Cerrar con Escape */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('crop-modal').classList.contains('hidden')) {
+      cropCancel();
+    }
+  });
   </script>
 </body>
 </html>
