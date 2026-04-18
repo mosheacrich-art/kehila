@@ -1546,6 +1546,11 @@
               <option value="familia">Familiar</option>
             </select>
           </div>
+          <div class="form-group">
+            <label class="form-label">Mensaje tras inscribirse <span style="color:var(--color-text-light);font-weight:400;">(opcional — se muestra con opción de donativo)</span></label>
+            <textarea class="form-textarea" id="ev-mensaje-inscripcion" rows="3"
+              placeholder="Ej: ¡Te esperamos! Este evento es posible gracias a vuestro apoyo. Si quieres contribuir, puedes hacer un donativo voluntario."></textarea>
+          </div>
         </div>
       </form>
     </div>
@@ -2499,7 +2504,8 @@
       categoria: 'Comunidad',
       created_by: getCurrentUser()?.name || 'Admin',
       emoji: '📅',
-      imagen_url: getUpload('ev') || null
+      imagen_url: getUpload('ev') || null,
+      mensaje_inscripcion: document.getElementById('ev-mensaje-inscripcion').value.trim() || null
     };
 
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
@@ -2514,6 +2520,7 @@
     renderEventosAdmin();
     closeModal('modal-evento');
     document.getElementById('form-evento').reset();
+    document.getElementById('ev-mensaje-inscripcion').value = '';
     clearUpload('ev');
     showToast(`Evento "${titulo}" creado correctamente.`, 'success');
   }
