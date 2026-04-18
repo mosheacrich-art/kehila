@@ -212,8 +212,8 @@ el.innerHTML = `<span>${escHtml(user.name)}</span>`;
 | SEC-05 | PII en localStorage sin cifrar | ALTO | Pendiente |
 | SEC-06 | Sin tokens CSRF | ALTO | Pendiente |
 | SEC-07 | SW cachea respuestas autenticadas | MEDIO | Pendiente |
-| SEC-08 | Password mínimo 6 chars (NIST: 8+) | MEDIO | Pendiente |
-| SEC-09 | Sin rate limiting en auth | MEDIO | Pendiente — configurar en Supabase |
+| SEC-08 | Password mínimo 6 chars (NIST: 8+) | MEDIO | RESUELTO 2026-04-18 — subido a 8 chars |
+| SEC-09 | Sin rate limiting en auth | MEDIO | Parcial — defaults Supabase OK; CAPTCHA Turnstile pendiente de activar |
 | SEC-10 | data.js con mock data en producción | MEDIO | Pendiente eliminar |
 | SEC-11 | usuario_id como text (sin FK ni validación) | ALTO | ✅ RESUELTO 2026-04-17 — migrado a uuid + FK |
 | SEC-12 | RLS pendiente en citas, inscripciones_voluntariado, voluntariados | MEDIO | ✅ RESUELTO 2026-04-17 — tablas creadas con RLS |
