@@ -1181,7 +1181,16 @@
             <div class="evento-home-footer">
               <span class="plazas-badge ${plazasClass}">${plazasText}</span>
               ${homeInscrito.has(String(ev.id))
-                ? `<button class="btn btn-sm" style="background:var(--color-success-light);color:#065F46;border:1.5px solid var(--color-success);cursor:default;">✓ Inscrito</button>`
+                ? `<div style="display:flex;align-items:center;gap:6px;">
+                     <span style="display:flex;align-items:center;gap:5px;background:var(--color-success-light);color:#065F46;border:1.5px solid var(--color-success);border-radius:8px;padding:5px 10px;font-size:.8rem;font-weight:600;">
+                       <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                       Inscrito
+                     </span>
+                     <button onclick="cancelarInscripcionHome('${ev.id}')" title="Cancelar inscripción"
+                       style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:1.5px solid #fca5a5;background:#fff5f5;color:#dc2626;cursor:pointer;flex-shrink:0;">
+                       <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                     </button>
+                   </div>`
                 : `<button class="btn btn-primary btn-sm" ${lleno ? 'disabled' : ''} onclick="inscribirse('${ev.id}', '${ev.titulo.replace(/'/g, "\\'")}', ${lleno})">${_lleno_txt}</button>`
               }
             </div>
@@ -1220,6 +1229,24 @@
       donarBtn.disabled = true;
       donarBtn.style.opacity = '.5';
       document.getElementById('modal-post-inscripcion').classList.remove('hidden');
+    }
+
+    async function cancelarInscripcionHome(id) {
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      homeInscrito.delete(String(id));
+      renderEventos();
+      if (sb && user) {
+        const { error } = await sb.from('inscripciones')
+          .delete()
+          .eq('usuario_id', user.userId)
+          .eq('evento_id', String(id));
+        if (error) {
+          homeInscrito.add(String(id));
+          renderEventos();
+          showToast('Error al cancelar: ' + error.message, 'error');
+        }
+      }
     }
 
     function closePostModal() {
