@@ -1314,8 +1314,9 @@
 
       container.innerHTML = noticias.map(n => {
         const fecha = n.fecha || (n.created_at ? n.created_at.split('T')[0] : '');
-        const imgStyle = n.imagen_url
-          ? `background:url('${n.imagen_url}') center/cover no-repeat`
+        const imgSrc = n.imagen_carrusel || n.imagen_url || null;
+        const imgStyle = imgSrc
+          ? `background:url('${imgSrc}') center/cover no-repeat`
           : `background:var(--color-gold-light)`;
         return `
           <a href="noticia.html?id=${n.id}" class="noticia-carousel-card">
@@ -1339,7 +1340,7 @@
         try {
           const queries = [
             sb.from('eventos').select('id,titulo,descripcion,fecha,hora,lugar,aforo,categoria,imagen_url,mensaje_inscripcion').order('fecha', { ascending: true }).limit(4),
-            sb.from('noticias').select('id,titulo,resumen,categoria,autor,imagen_url,created_at').order('created_at', { ascending: false }).limit(6)
+            sb.from('noticias').select('id,titulo,resumen,categoria,autor,imagen_url,imagen_carrusel,created_at').order('created_at', { ascending: false }).limit(6)
           ];
           if (user) queries.push(sb.from('inscripciones').select('evento_id').eq('usuario_id', user.userId));
 
