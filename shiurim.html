@@ -635,9 +635,9 @@
           if (!sbUp) throw new Error('Supabase no disponible');
           var ext = _contentFile.name.split('.').pop().toLowerCase();
           var path = 'shiurim/archivos/' + Date.now() + '.' + ext;
-          var upRes = await sbUp.storage.from('community-media').upload(path, _contentFile, { upsert: true });
+          var upRes = await sbUp.storage.from('community media').upload(path, _contentFile, { upsert: true });
           if (upRes.error) throw new Error(upRes.error.message);
-          contentUrl = sbUp.storage.from('community-media').getPublicUrl(path).data.publicUrl;
+          contentUrl = sbUp.storage.from('community media').getPublicUrl(path).data.publicUrl;
           bar.style.width = '100%';
           setTimeout(function() { prog.style.display = 'none'; bar.style.width = '0%'; }, 500);
         } catch(e) {

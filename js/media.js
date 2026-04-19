@@ -8,9 +8,9 @@ async function uploadMedia(file, folder) {
   if (!sb || !file) return null;
   const ext = file.name.split('.').pop().toLowerCase();
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const { error } = await sb.storage.from('community-media').upload(path, file, { upsert: true });
+  const { error } = await sb.storage.from('community media').upload(path, file, { upsert: true });
   if (error) { console.warn('upload error:', error.message); return null; }
-  const { data } = sb.storage.from('community-media').getPublicUrl(path);
+  const { data } = sb.storage.from('community media').getPublicUrl(path);
   return data.publicUrl;
 }
 
