@@ -603,14 +603,11 @@
       var contentUrl = null;
       var imgUrl = null;
 
-      // Subir imagen (si falla, continúa sin imagen — no bloquea el guardado)
-      try {
-        var imgFile = document.getElementById('pub-img-file').files[0];
-        if (imgFile && typeof uploadMedia === 'function') {
-          txt.textContent = 'Subiendo imagen...';
-          imgUrl = await uploadMedia(imgFile, 'shiurim/imagenes');
-        }
-      } catch(e) { console.warn('imagen upload fallida, continúa sin imagen:', e); imgUrl = null; }
+      // Leer imagen como DataURL (igual que noticias — no depende de Storage)
+      var preview = document.getElementById('pub-img-preview');
+      if (preview && preview.src && preview.src.startsWith('data:')) {
+        imgUrl = preview.src;
+      }
 
       // Subir archivo o usar URL
       try {

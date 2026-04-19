@@ -3791,13 +3791,11 @@
     var imgUrl = null;
     var contentUrl = null;
 
-    try {
-      var imgFile = document.getElementById('sh-img-file').files[0];
-      if (imgFile && typeof uploadMedia === 'function') {
-        txt.textContent = 'Subiendo imagen...';
-        imgUrl = await uploadMedia(imgFile, 'shiurim/imagenes');
-      }
-    } catch(e) { console.warn('imagen upload fallida:', e); imgUrl = null; }
+    // Leer imagen como DataURL (igual que noticias — no depende de Storage)
+    var shPreview = document.getElementById('sh-img-preview');
+    if (shPreview && shPreview.src && shPreview.src.startsWith('data:')) {
+      imgUrl = shPreview.src;
+    }
 
     try {
       var srcIsFile = document.getElementById('sh-src-file-btn').classList.contains('active');
