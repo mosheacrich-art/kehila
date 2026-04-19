@@ -370,13 +370,14 @@
       setTimeout(function() { t.classList.remove('show'); }, 3500);
     }
 
-    // Likes localStorage
-    function getLiked() { try { return JSON.parse(localStorage.getItem('sh_liked') || '[]'); } catch(e) { return []; } }
+    // Likes localStorage — clave por usuario para que cada cuenta tenga sus propios likes
+    var _likeKey = 'sh_liked_' + (getCurrentUser ? (getCurrentUser() || {}).userId || 'anon' : 'anon');
+    function getLiked() { try { return JSON.parse(localStorage.getItem(_likeKey) || '[]'); } catch(e) { return []; } }
     function isLiked(id) { return getLiked().indexOf(id) !== -1; }
     function toggleLiked(id) {
       var arr = getLiked(), idx = arr.indexOf(id);
       if (idx === -1) arr.push(id); else arr.splice(idx, 1);
-      localStorage.setItem('sh_liked', JSON.stringify(arr));
+      localStorage.setItem(_likeKey, JSON.stringify(arr));
       return idx === -1;
     }
     function incVistas(id, current) {
