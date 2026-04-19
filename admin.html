@@ -3791,26 +3791,52 @@
     var imgUrl = null;
     var contentUrl = null;
 
-    // Leer imagen como DataURL (igual que noticias — no depende de Storage)
+    // Imagen: comprimir con canvas
     var shPreview = document.getElementById('sh-img-preview');
     if (shPreview && shPreview.src && shPreview.src.startsWith('data:')) {
-      imgUrl = shPreview.src;
+      try {
+        imgUrl = await new Promise(function(resolve) {
+          var img = new Image();
+          img.onload = function() {
+            var canvas = document.createElement('canvas');
+            var maxW = 800, maxH = 450;
+            var scale = Math.min(maxW / img.width, maxH / img.height, 1);
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.75));
+          };
+          img.src = shPreview.src;
+        });
+      } catch(e) { imgUrl = null; }
     }
 
-    try {
-      var srcIsFile = document.getElementById('sh-src-file-btn').classList.contains('active');
-      if (srcIsFile && _shContentFile) {
-        txt.textContent = 'Subiendo archivo...';
-        var prog = document.getElementById('sh-progress');
-        var bar = document.getElementById('sh-progress-bar');
-        prog.style.display = ''; bar.style.width = '30%';
-        contentUrl = await uploadMedia(_shContentFile, 'shiurim/archivos');
+    // Archivo o URL de contenido
+    var srcIsFile = document.getElementById('sh-src-file-btn').classList.contains('active');
+    if (srcIsFile && _shContentFile) {
+      txt.textContent = 'Subiendo archivo...';
+      var prog = document.getElementById('sh-progress');
+      var bar = document.getElementById('sh-progress-bar');
+      prog.style.display = ''; bar.style.width = '30%';
+      try {
+        var sbUp = typeof getSupabase === 'function' ? getSupabase() : null;
+        if (!sbUp) throw new Error('Supabase no disponible');
+        var ext = _shContentFile.name.split('.').pop().toLowerCase();
+        var path = 'shiurim/archivos/' + Date.now() + '.' + ext;
+        var upRes = await sbUp.storage.from('community-media').upload(path, _shContentFile, { upsert: true });
+        if (upRes.error) throw new Error(upRes.error.message);
+        contentUrl = sbUp.storage.from('community-media').getPublicUrl(path).data.publicUrl;
         bar.style.width = '100%';
-        setTimeout(function() { prog.style.display = 'none'; bar.style.width = '0%'; }, 600);
-      } else {
-        contentUrl = document.getElementById('sh-url').value.trim() || null;
+        setTimeout(function() { prog.style.display = 'none'; bar.style.width = '0%'; }, 500);
+      } catch(e) {
+        prog.style.display = 'none'; bar.style.width = '0%';
+        showToast('Error subiendo archivo: ' + e.message, 'error');
+        btn.disabled = false; txt.textContent = 'Publicar shiur';
+        return;
       }
-    } catch(e) { console.warn('archivo upload fallido:', e); contentUrl = document.getElementById('sh-url').value.trim() || null; }
+    } else {
+      contentUrl = document.getElementById('sh-url').value.trim() || null;
+    }
 
     txt.textContent = 'Publicando...';
     var payload = {
