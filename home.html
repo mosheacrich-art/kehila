@@ -1314,7 +1314,7 @@
 
       container.innerHTML = noticias.map(n => {
         const fecha = n.fecha || (n.created_at ? n.created_at.split('T')[0] : '');
-        const imgSrc = n.imagen_carrusel || n.imagen_url || null;
+        const imgSrc = n.imagen_url || null;
         const imgStyle = imgSrc
           ? `background:url('${imgSrc}') center/cover no-repeat`
           : `background:var(--color-gold-light)`;
@@ -1454,7 +1454,7 @@
         'Calendario':'linear-gradient(135deg,#2a1a3a 0%,#5a1a8e 100%)',
       };
       return (typeof MOCK_NOTICIAS !== 'undefined' ? MOCK_NOTICIAS : []).map(n => ({
-        imagen_url: n.imagen_url || '',
+        imagen_url: n.imagen_carrusel || '',
         fotos: n.fotos || null,
         titulo: n.titulo,
         subtitulo: n.excerpt || n.resumen || '',
