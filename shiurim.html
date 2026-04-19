@@ -379,20 +379,21 @@
       return idx === -1;
     }
     function incVistas(id, current) {
-      if (!sb) return;
-      sb.from('shiurim').update({ vistas: (current || 0) + 1 }).eq('id', id).then(function() {});
+      var s = typeof getSupabase === 'function' ? getSupabase() : null; if (!s) return;
+      s.from('shiurim').update({ vistas: (current || 0) + 1 }).eq('id', id).then(function() {});
     }
     function updateLikes(id, cur, add) {
-      if (!sb) return;
-      sb.from('shiurim').update({ likes: Math.max(0, (cur || 0) + (add ? 1 : -1)) }).eq('id', id).then(function() {});
+      var s = typeof getSupabase === 'function' ? getSupabase() : null; if (!s) return;
+      s.from('shiurim').update({ likes: Math.max(0, (cur || 0) + (add ? 1 : -1)) }).eq('id', id).then(function() {});
     }
     window.incVistas = incVistas;
 
     // ── Load data ──
     var allData = [];
-    if (sb) {
+    var sbLoad = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sbLoad) {
       try {
-        var res = await sb.from('shiurim').select('*').order('created_at', { ascending: false });
+        var res = await sbLoad.from('shiurim').select('*').order('created_at', { ascending: false });
         if (!res.error && res.data) allData = res.data;
       } catch(e) { console.warn('shiurim:', e); }
     }
@@ -634,6 +635,7 @@
         vistas: 0, likes: 0
       };
 
+      var sb = typeof getSupabase === 'function' ? getSupabase() : null;
       if (!sb) { toast('Supabase no disponible.', 'error'); btn.disabled = false; txt.textContent = 'Publicar shiur'; return; }
       var r = await sb.from('shiurim').insert(payload).select().single();
       btn.disabled = false; txt.textContent = 'Publicar shiur';
