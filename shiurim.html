@@ -106,7 +106,7 @@
     .yt-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 400; display: flex; align-items: center; justify-content: center; padding: 16px; opacity: 0; pointer-events: none; transition: opacity .2s; }
     .yt-overlay.open { opacity: 1; pointer-events: all; }
     .yt-box { width: 100%; max-width: 900px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
-    .yt-box iframe { width: 100%; aspect-ratio: 16/9; display: block; border: none; }
+    .yt-box iframe, .yt-box video { width: 100%; aspect-ratio: 16/9; display: block; border: none; background: #000; }
     .yt-close-btn { position: absolute; top: -40px; right: 0; background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer; line-height: 1; opacity: .8; }
     .yt-close-btn:hover { opacity: 1; }
 
@@ -205,7 +205,8 @@
   <div class="yt-overlay" id="yt-overlay">
     <div class="yt-box">
       <button class="yt-close-btn" id="yt-close">&#10005;</button>
-      <iframe id="yt-iframe" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <iframe id="yt-iframe" src="" allow="autoplay; encrypted-media" allowfullscreen style="display:none;"></iframe>
+      <video id="yt-video" src="" controls autoplay playsinline style="display:none;"></video>
     </div>
   </div>
 
@@ -483,10 +484,23 @@
 
     // ── YouTube modal ──
     function openYt(vid, url) {
-      if (vid) { document.getElementById('yt-iframe').src = 'https://www.youtube.com/embed/' + vid + '?autoplay=1'; document.getElementById('yt-overlay').classList.add('open'); }
-      else if (url) { window.open(url, '_blank'); }
+      var iframe = document.getElementById('yt-iframe');
+      var video  = document.getElementById('yt-video');
+      if (vid) {
+        iframe.src = 'https://www.youtube.com/embed/' + vid + '?autoplay=1';
+        iframe.style.display = ''; video.style.display = 'none'; video.src = '';
+        document.getElementById('yt-overlay').classList.add('open');
+      } else if (url) {
+        video.src = url; video.style.display = '';
+        iframe.style.display = 'none'; iframe.src = '';
+        document.getElementById('yt-overlay').classList.add('open');
+      }
     }
-    function closeYt() { document.getElementById('yt-overlay').classList.remove('open'); document.getElementById('yt-iframe').src = ''; }
+    function closeYt() {
+      document.getElementById('yt-overlay').classList.remove('open');
+      document.getElementById('yt-iframe').src = '';
+      var v = document.getElementById('yt-video'); v.pause(); v.src = '';
+    }
     document.getElementById('yt-close').addEventListener('click', closeYt);
     document.getElementById('yt-overlay').addEventListener('click', function(e) { if (e.target === this) closeYt(); });
 
