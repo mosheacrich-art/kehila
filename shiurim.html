@@ -598,33 +598,37 @@
 
       var btn = document.getElementById('pub-save-btn');
       var txt = document.getElementById('pub-save-txt');
-      btn.disabled = true; txt.textContent = 'Subiendo...';
+      btn.disabled = true; txt.textContent = 'Guardando...';
 
       var contentUrl = null;
       var imgUrl = null;
 
-      // Subir imagen si hay
-      var imgFile = document.getElementById('pub-img-file').files[0];
-      if (imgFile && typeof uploadMedia === 'function') {
-        txt.textContent = 'Subiendo imagen...';
-        imgUrl = await uploadMedia(imgFile, 'shiurim/imagenes');
-      }
+      // Subir imagen (si falla, continúa sin imagen — no bloquea el guardado)
+      try {
+        var imgFile = document.getElementById('pub-img-file').files[0];
+        if (imgFile && typeof uploadMedia === 'function') {
+          txt.textContent = 'Subiendo imagen...';
+          imgUrl = await uploadMedia(imgFile, 'shiurim/imagenes');
+        }
+      } catch(e) { console.warn('imagen upload fallida, continúa sin imagen:', e); imgUrl = null; }
 
-      // Subir archivo de contenido o usar URL
-      var srcIsFile = document.getElementById('src-file-btn').classList.contains('active');
-      if (srcIsFile && _contentFile) {
-        txt.textContent = 'Subiendo archivo...';
-        // Mostrar barra de progreso (simulada, ya que uploadMedia no tiene progress)
-        var prog = document.getElementById('pub-progress');
-        var bar = document.getElementById('pub-progress-bar');
-        prog.style.display = ''; bar.style.width = '30%';
-        contentUrl = await uploadMedia(_contentFile, 'shiurim/archivos');
-        bar.style.width = '100%';
-        setTimeout(function() { prog.style.display = 'none'; bar.style.width = '0%'; }, 600);
-      } else {
-        contentUrl = document.getElementById('pub-url').value.trim() || null;
-      }
+      // Subir archivo o usar URL
+      try {
+        var srcIsFile = document.getElementById('src-file-btn').classList.contains('active');
+        if (srcIsFile && _contentFile) {
+          txt.textContent = 'Subiendo archivo...';
+          var prog = document.getElementById('pub-progress');
+          var bar = document.getElementById('pub-progress-bar');
+          prog.style.display = ''; bar.style.width = '30%';
+          contentUrl = await uploadMedia(_contentFile, 'shiurim/archivos');
+          bar.style.width = '100%';
+          setTimeout(function() { prog.style.display = 'none'; bar.style.width = '0%'; }, 600);
+        } else {
+          contentUrl = document.getElementById('pub-url').value.trim() || null;
+        }
+      } catch(e) { console.warn('archivo upload fallido:', e); contentUrl = document.getElementById('pub-url').value.trim() || null; }
 
+      txt.textContent = 'Publicando...';
       var payload = {
         titulo: titulo,
         apartado: document.getElementById('pub-apartado').value,
@@ -639,15 +643,16 @@
 
       var sb = typeof getSupabase === 'function' ? getSupabase() : null;
       if (!sb) { toast('Supabase no disponible.', 'error'); btn.disabled = false; txt.textContent = 'Publicar shiur'; return; }
-      var r = await sb.from('shiurim').insert(payload).select().single();
-      btn.disabled = false; txt.textContent = 'Publicar shiur';
+      try {
+        var r = await sb.from('shiurim').insert(payload).select().single();
+        btn.disabled = false; txt.textContent = 'Publicar shiur';
+        if (r.error) { toast('Error al guardar: ' + r.error.message, 'error'); return; }
+      } catch(e) { toast('Error inesperado: ' + e.message, 'error'); btn.disabled = false; txt.textContent = 'Publicar shiur'; return; }
 
-      if (r.error) { toast('Error: ' + r.error.message, 'error'); return; }
       window.closePubModal();
-      // Reset form
       ['pub-titulo','pub-desc','pub-url','pub-maestro','pub-duracion'].forEach(function(id) { document.getElementById(id).value = ''; });
       clearPubImg(); clearPubFile(); setSrc('url');
-      toast('Shiur publicado correctamente. Recarga para verlo.', 'success');
+      toast('Shiur publicado. Recarga para verlo.', 'success');
     };
 
   })();
