@@ -20,6 +20,15 @@ Cuando el usuario abra una nueva sesion, lee este archivo primero para saber el 
 
 ---
 
+## ⚙️ Precio editable por admin (21 abril 2026)
+
+- Nuevo tab "Ajustes" en `admin.html` donde el admin puede cambiar el precio de publicacion
+- Precio guardado en `localStorage` bajo la clave `kehila_precio_publicacion`
+- El modal de pago en `business.html` lee el precio dinamicamente desde localStorage
+- Si no hay precio guardado, el valor por defecto es 2,99 €/mes
+
+---
+
 ## 💳 Pago para publicar negocio (21 abril 2026)
 
 - Al hacer submit del formulario "Publicar negocio" en `business.html`, se abre un modal de pago antes de publicar

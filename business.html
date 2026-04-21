@@ -1221,7 +1221,7 @@
   <div class="payment-box">
     <div class="payment-header">
       <div class="payment-header-label">Suscripci&#243;n mensual</div>
-      <div class="payment-header-price">2,99 <span>&#8364; / mes</span></div>
+      <div class="payment-header-price" id="pay-header-price">2,99 <span>&#8364; / mes</span></div>
       <div class="payment-header-sub">Pago recurrente · Cancela cuando quieras</div>
     </div>
     <div class="payment-body">
@@ -1230,7 +1230,7 @@
           <div class="payment-plan-name">Perfil Profesional / Negocio</div>
           <div class="payment-plan-desc">Visible para toda la comunidad Keh&#237;l&#225;</div>
         </div>
-        <div class="payment-plan-amount">2,99 &#8364;</div>
+        <div class="payment-plan-amount" id="pay-plan-amount">2,99 &#8364;</div>
       </div>
 
       <div class="payment-field">
@@ -1256,10 +1256,10 @@
         <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
         </svg>
-        Pago seguro cifrado · Se cobrar&#225; 2,99 &#8364; cada mes
+        Pago seguro cifrado · Se cobrar&#225; <span id="pay-secure-amount">2,99 &#8364;</span> cada mes
       </div>
 
-      <button class="btn-pay" id="btn-confirmar-pago">Confirmar suscripci&#243;n &mdash; 2,99 &#8364;/mes</button>
+      <button class="btn-pay" id="btn-confirmar-pago">Confirmar suscripci&#243;n &mdash; <span id="pay-btn-amount">2,99 &#8364;</span>/mes</button>
       <button class="btn-pay-cancel" id="btn-cancelar-pago">Cancelar</button>
 
       <div class="payment-badge-row">
@@ -1781,6 +1781,15 @@
 
         pendingForm = e.target;
 
+        /* Leer precio dinámico desde localStorage */
+        var precioRaw = parseFloat(localStorage.getItem('kehila_precio_publicacion'));
+        if (isNaN(precioRaw)) precioRaw = 2.99;
+        var precioStr = precioRaw.toFixed(2).replace('.', ',');
+        document.getElementById('pay-header-price').innerHTML = precioStr + ' <span>\u20ac / mes</span>';
+        document.getElementById('pay-plan-amount').textContent = precioStr + ' \u20ac';
+        document.getElementById('pay-secure-amount').textContent = precioStr + ' \u20ac';
+        document.getElementById('pay-btn-amount').textContent = precioStr + ' \u20ac';
+
         /* Limpiar campos de pago y abrir modal */
         document.getElementById('pay-card').value = '';
         document.getElementById('pay-exp').value  = '';
@@ -1844,7 +1853,9 @@
         var first = bizGrid.querySelector('.biz-card');
         if (first) first.classList.add('new-card');
 
-        showToast('\u00a1Negocio publicado! Suscripci\u00f3n activa a 2,99\u20ac/mes.', 'success');
+        var precioToast = parseFloat(localStorage.getItem('kehila_precio_publicacion'));
+        if (isNaN(precioToast)) precioToast = 2.99;
+        showToast('\u00a1Negocio publicado! Suscripci\u00f3n activa a ' + precioToast.toFixed(2).replace('.', ',') + '\u20ac/mes.', 'success');
 
         if (pendingForm) {
           pendingForm.reset();
