@@ -574,6 +574,133 @@
     }
     .btn-publish:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 
+    /* ─── Modal Pago ─── */
+    .payment-modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .payment-modal-overlay.open { display: flex; }
+    .payment-box {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+      animation: modalIn .22s ease;
+      overflow: hidden;
+    }
+    .payment-header {
+      background: linear-gradient(135deg, #1B2E5E 0%, #2A4080 100%);
+      padding: 24px 28px 20px;
+    }
+    .payment-header-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.6);
+      margin-bottom: 6px;
+    }
+    .payment-header-price {
+      font-family: var(--font-brand);
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+    }
+    .payment-header-price span {
+      font-size: .9rem;
+      font-weight: 400;
+      color: rgba(255,255,255,.65);
+      margin-left: 4px;
+    }
+    .payment-header-sub {
+      font-size: .8rem;
+      color: rgba(255,255,255,.55);
+      margin-top: 6px;
+    }
+    .payment-body { padding: 24px 28px 28px; }
+    .payment-plan-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+    }
+    .payment-plan-name { font-weight: 700; font-size: .9rem; color: #1a202c; }
+    .payment-plan-desc { font-size: .75rem; color: #718096; margin-top: 2px; }
+    .payment-plan-amount { font-weight: 800; font-size: 1rem; color: #1B2E5E; }
+    .payment-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .payment-field-label { font-size: .75rem; font-weight: 600; color: #4a5568; letter-spacing: .04em; }
+    .payment-field input {
+      padding: 10px 13px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 7px;
+      font-size: .875rem;
+      color: #1a202c;
+      font-family: var(--font-ui);
+      outline: none;
+      transition: border-color .15s;
+      background: #fff;
+    }
+    .payment-field input:focus { border-color: #1B2E5E; }
+    .payment-field-row { display: flex; gap: 12px; }
+    .payment-field-row .payment-field { flex: 1; }
+    .payment-secure-note {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .72rem;
+      color: #a0aec0;
+      margin-bottom: 16px;
+    }
+    .payment-secure-note svg { width: 13px; height: 13px; flex-shrink: 0; color: #48bb78; }
+    .btn-pay {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #1B2E5E 0%, #2A4080 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .9375rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      letter-spacing: .01em;
+      transition: opacity .15s;
+    }
+    .btn-pay:hover { opacity: .9; }
+    .btn-pay-cancel {
+      width: 100%;
+      padding: 10px;
+      background: none;
+      border: none;
+      font-size: .8125rem;
+      color: #a0aec0;
+      cursor: pointer;
+      margin-top: 8px;
+      font-family: var(--font-ui);
+    }
+    .btn-pay-cancel:hover { color: #718096; }
+    .payment-badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }
+    .payment-badge {
+      font-size: .68rem;
+      font-weight: 600;
+      color: #718096;
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      padding: 3px 9px;
+      border-radius: 4px;
+    }
+
     /* ─── Modals ─── */
     .modal-overlay {
       display: none;
@@ -1089,6 +1216,62 @@
   </div>
 </div>
 
+<!-- Modal: Pago suscripción -->
+<div class="payment-modal-overlay" id="modal-pago" role="dialog" aria-modal="true" aria-label="Pago de suscripción">
+  <div class="payment-box">
+    <div class="payment-header">
+      <div class="payment-header-label">Suscripci&#243;n mensual</div>
+      <div class="payment-header-price">2,99 <span>&#8364; / mes</span></div>
+      <div class="payment-header-sub">Pago recurrente · Cancela cuando quieras</div>
+    </div>
+    <div class="payment-body">
+      <div class="payment-plan-row">
+        <div>
+          <div class="payment-plan-name">Perfil Profesional / Negocio</div>
+          <div class="payment-plan-desc">Visible para toda la comunidad Keh&#237;l&#225;</div>
+        </div>
+        <div class="payment-plan-amount">2,99 &#8364;</div>
+      </div>
+
+      <div class="payment-field">
+        <div class="payment-field-label">N&#250;MERO DE TARJETA</div>
+        <input type="text" id="pay-card" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number">
+      </div>
+      <div class="payment-field-row">
+        <div class="payment-field">
+          <div class="payment-field-label">CADUCIDAD</div>
+          <input type="text" id="pay-exp" placeholder="MM / AA" maxlength="7" autocomplete="cc-exp">
+        </div>
+        <div class="payment-field">
+          <div class="payment-field-label">CVV</div>
+          <input type="text" id="pay-cvv" placeholder="123" maxlength="4" autocomplete="cc-csc">
+        </div>
+      </div>
+      <div class="payment-field">
+        <div class="payment-field-label">NOMBRE EN LA TARJETA</div>
+        <input type="text" id="pay-name" placeholder="Como aparece en la tarjeta">
+      </div>
+
+      <div class="payment-secure-note">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+        </svg>
+        Pago seguro cifrado · Se cobrar&#225; 2,99 &#8364; cada mes
+      </div>
+
+      <button class="btn-pay" id="btn-confirmar-pago">Confirmar suscripci&#243;n &mdash; 2,99 &#8364;/mes</button>
+      <button class="btn-pay-cancel" id="btn-cancelar-pago">Cancelar</button>
+
+      <div class="payment-badge-row">
+        <span class="payment-badge">Visa</span>
+        <span class="payment-badge">Mastercard</span>
+        <span class="payment-badge">Amex</span>
+        <span class="payment-badge">SSL seguro</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
@@ -1549,7 +1732,10 @@
       try { sociosSectionEl.style.display = toggleSociosEl.checked ? '' : 'none'; } catch (e) { console.error(e); }
     });
 
-    /* Submit */
+    /* Submit — abre modal de pago */
+    var pendingBiz = null;
+    var pendingForm = null;
+
     document.getElementById('publish-form').addEventListener('submit', function (e) {
       try {
         e.preventDefault();
@@ -1560,7 +1746,7 @@
         var descCortaVal = descCortaInput.value.trim() || 'Nuevo negocio en la comunidad.';
         var descFull     = document.getElementById('f-desc-full').value.trim() || descCortaVal;
 
-        var newBiz = {
+        pendingBiz = {
           id: 'biz-new-' + Date.now(),
           nombre: nombre,
           categoria: cat,
@@ -1587,57 +1773,102 @@
           if (cb && cb.checked) {
             var o  = (document.getElementById('open-'  + d.key) || {}).value || '09:00';
             var cl = (document.getElementById('close-' + d.key) || {}).value || '18:00';
-            newBiz.horario[d.key] = o + '-' + cl;
+            pendingBiz.horario[d.key] = o + '-' + cl;
           } else {
-            newBiz.horario[d.key] = 'Cerrado';
+            pendingBiz.horario[d.key] = 'Cerrado';
           }
         });
 
-        if (typeof MOCK_BUSINESSES !== 'undefined') MOCK_BUSINESSES.unshift(newBiz);
+        pendingForm = e.target;
+
+        /* Limpiar campos de pago y abrir modal */
+        document.getElementById('pay-card').value = '';
+        document.getElementById('pay-exp').value  = '';
+        document.getElementById('pay-cvv').value  = '';
+        document.getElementById('pay-name').value = '';
+        document.getElementById('modal-pago').classList.add('open');
+      } catch (err) { console.error(err); }
+    });
+
+    /* Formateo automático tarjeta */
+    document.getElementById('pay-card').addEventListener('input', function () {
+      var v = this.value.replace(/\D/g, '').slice(0, 16);
+      this.value = v.replace(/(.{4})/g, '$1 ').trim();
+    });
+    document.getElementById('pay-exp').addEventListener('input', function () {
+      var v = this.value.replace(/\D/g, '').slice(0, 4);
+      if (v.length >= 3) v = v.slice(0,2) + ' / ' + v.slice(2);
+      this.value = v;
+    });
+
+    /* Confirmar pago */
+    document.getElementById('btn-confirmar-pago').addEventListener('click', function () {
+      try {
+        var card = document.getElementById('pay-card').value.replace(/\s/g, '');
+        var exp  = document.getElementById('pay-exp').value.replace(/\s/g, '').replace('/', '');
+        var cvv  = document.getElementById('pay-cvv').value;
+        var name = document.getElementById('pay-name').value.trim();
+        if (card.length < 16 || exp.length < 4 || cvv.length < 3 || !name) {
+          showToast('Completa todos los datos de pago.', 'warning'); return;
+        }
+
+        document.getElementById('modal-pago').classList.remove('open');
+
+        if (!pendingBiz) return;
+
+        if (typeof MOCK_BUSINESSES !== 'undefined') MOCK_BUSINESSES.unshift(pendingBiz);
 
         /* Guardar en Supabase */
         var sb = typeof getSupabase === 'function' ? getSupabase() : null;
         if (sb) {
           sb.from('negocios').insert({
-            nombre: newBiz.nombre,
-            categoria: newBiz.categoria,
-            descripcion: newBiz.descripcion,
-            ciudad: newBiz.ciudad,
-            direccion: newBiz.direccion,
-            telefono: newBiz.telefono,
-            email: newBiz.email,
-            web: newBiz.web,
-            kosher: document.getElementById('f-kosher') ? document.getElementById('f-kosher').checked : false,
-            cierra_shabat: document.getElementById('f-shabat') ? document.getElementById('f-shabat').checked : false,
+            nombre: pendingBiz.nombre,
+            categoria: pendingBiz.categoria,
+            descripcion: pendingBiz.descripcion,
+            ciudad: pendingBiz.ciudad,
+            direccion: pendingBiz.direccion,
+            telefono: pendingBiz.telefono,
+            email: pendingBiz.email,
+            web: pendingBiz.web,
+            kosher: false,
+            cierra_shabat: false,
             verificado: false,
             usuario_id: (typeof getCurrentUser === 'function' && getCurrentUser()) ? getCurrentUser().userId : null
           }).then(function () {}).catch(function () {});
         }
 
-        /* Switch to tab 1 and re-render */
         activateTab('tab-directorio');
         searchEl.value = ''; filterCat.value = ''; filterCity.value = '';
         filterAndRender();
 
-        /* Fade-in first card */
         var first = bizGrid.querySelector('.biz-card');
         if (first) first.classList.add('new-card');
 
-        showToast('\u00a1Negocio publicado!', 'success');
+        showToast('\u00a1Negocio publicado! Suscripci\u00f3n activa a 2,99\u20ac/mes.', 'success');
 
-        /* Reset form */
-        e.target.reset();
-        formServices.length = 0;
-        renderFormServices();
-        clearBizLogo();
-        logoPreview.textContent = 'AB';
-        logoPreview.style.background = '#1B5E20';
-        selectedColor = '#1B5E20';
-        colorCircles.forEach(function (c, i) { c.classList.toggle('selected', i === 0); });
-        charCounter.textContent = '0 / 150';
-        charCounter.classList.remove('over');
-        sociosSectionEl.style.display = 'none';
+        if (pendingForm) {
+          pendingForm.reset();
+          formServices.length = 0;
+          renderFormServices();
+          clearBizLogo();
+          logoPreview.textContent = 'AB';
+          logoPreview.style.background = '#1B5E20';
+          selectedColor = '#1B5E20';
+          colorCircles.forEach(function (c, i) { c.classList.toggle('selected', i === 0); });
+          charCounter.textContent = '0 / 150';
+          charCounter.classList.remove('over');
+          sociosSectionEl.style.display = 'none';
+        }
+        pendingBiz = null; pendingForm = null;
       } catch (err) { console.error(err); }
+    });
+
+    /* Cancelar pago */
+    document.getElementById('btn-cancelar-pago').addEventListener('click', function () {
+      try { document.getElementById('modal-pago').classList.remove('open'); } catch (e) { console.error(e); }
+    });
+    document.getElementById('modal-pago').addEventListener('click', function (e) {
+      try { if (e.target === this) this.classList.remove('open'); } catch (err) { console.error(err); }
     });
 
   } catch (e) { console.error(e); }
@@ -1661,5 +1892,3 @@
       navigator.serviceWorker.register("/kehila/sw.js").catch(()=>{});
     }
   </script>
-</body>
-</html>

@@ -1,6 +1,6 @@
 # Kehila — Jabad Barcelona · Registro de Progreso
 
-> Ultima actualizacion: 13 abril 2026
+> Ultima actualizacion: 21 abril 2026
 > Estado: **Backend Supabase conectado — Analytics real — Legal completo — Listo para stores**
 
 ---
@@ -17,6 +17,18 @@ Cuando el usuario abra una nueva sesion, lee este archivo primero para saber el 
 - **Supabase URL:** `https://vvrvuhugpvqytelhsdnk.supabase.co`
 - **Funcion Supabase:** `getSupabase()` esta en `js/auth.js`
 - **Tabla usuarios:** `profiles`
+
+---
+
+## 💳 Pago para publicar negocio (21 abril 2026)
+
+- Al hacer submit del formulario "Publicar negocio" en `business.html`, se abre un modal de pago antes de publicar
+- Precio: **2,99 € / mes** (pago recurrente)
+- Modal con campos de tarjeta: numero (formateo automatico), caducidad, CVV, nombre
+- Validacion basica de todos los campos antes de confirmar
+- Al confirmar: se publica el negocio, se muestra toast con precio y se activa la suscripcion
+- Cancelar cierra el modal sin publicar
+- Acepta Visa, Mastercard, Amex
 
 ---
 
