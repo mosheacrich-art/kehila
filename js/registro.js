@@ -281,11 +281,8 @@ function regValidateStep3() {
   REG.data.ciudad = document.getElementById('r3-ciudad')?.value.trim() || '';
   REG.data.cp = document.getElementById('r3-cp')?.value.trim() || '';
   REG.data.direccion = document.getElementById('r3-direccion')?.value.trim() || '';
-  REG.data.comunidad = document.getElementById('r3-comunidad')?.value || '';
-  REG.data.practica = document.querySelector('input[name="practica"]:checked')?.value || '';
   REG.data.familiar = document.getElementById('r3-familiar-toggle')?.checked || false;
   REG.data.familiarNombre = document.getElementById('r3-familiar-nombre')?.value.trim() || '';
-  REG.data.comoConocio = document.getElementById('r3-conocio')?.value || '';
 
   if (!REG.data.pais) {
     regShowFieldError('r3-pais', 'r3-pais-err', 'Selecciona tu país de residencia');
@@ -307,24 +304,6 @@ function regValidateStep3() {
     ok = false;
   } else { regClearFieldError('r3-direccion', 'r3-dir-err'); }
 
-  if (!REG.data.comunidad) {
-    regShowFieldError('r3-comunidad', 'r3-com-err', 'Selecciona una comunidad');
-    ok = false;
-  } else { regClearFieldError('r3-comunidad', 'r3-com-err'); }
-
-  if (!REG.data.practica) {
-    const err = document.getElementById('r3-practica-err');
-    if (err) { err.textContent = 'Selecciona una opción'; err.style.display = ''; }
-    ok = false;
-  } else {
-    const err = document.getElementById('r3-practica-err');
-    if (err) { err.textContent = ''; err.style.display = 'none'; }
-  }
-
-  if (!REG.data.comoConocio) {
-    regShowFieldError('r3-conocio', 'r3-conocio-err', 'Cuéntanos cómo nos conociste');
-    ok = false;
-  } else { regClearFieldError('r3-conocio', 'r3-conocio-err'); }
 
   return ok;
 }
