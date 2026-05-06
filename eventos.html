@@ -316,8 +316,18 @@
       <!-- Mensaje del admin -->
       <p id="post-ev-mensaje" style="font-size:.875rem;color:var(--color-text-muted);margin-bottom:18px;line-height:1.55;display:none;"></p>
 
-      <!-- Donativo -->
-      <div style="border-top:1px solid var(--color-border);padding-top:16px;">
+      <!-- PAGO (evento de precio) -->
+      <div id="post-pago-section" style="display:none;border-top:1px solid var(--color-border);padding-top:16px;">
+        <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--color-text-muted);margin-bottom:10px;">Resumen del pago</p>
+        <div id="post-pago-desglose" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--color-primary);border-radius:var(--radius-sm);">
+          <span style="font-size:.875rem;font-weight:600;color:#fff;">Total a pagar</span>
+          <span id="post-pago-total" style="font-family:var(--font-brand);font-size:1.1rem;font-weight:700;color:#C9A84C;"></span>
+        </div>
+      </div>
+
+      <!-- DONATIVO (evento gratuito) -->
+      <div id="post-don-section" style="border-top:1px solid var(--color-border);padding-top:16px;">
         <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--color-text-muted);margin-bottom:10px;">Donativo voluntario</p>
         <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;" id="post-don-chips">
           <button class="don-chip" data-amount="18" onclick="selectDonChip(this,18)">18 €</button>
@@ -334,10 +344,10 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-post-inscripcion')">No gracias</button>
-      <button class="btn btn-primary" id="btn-post-donar" onclick="donarDesdeEvento()" disabled>
-        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
-        Donar
+      <button class="btn btn-ghost" onclick="closeModal('modal-post-inscripcion')" id="btn-post-skip">Ahora no</button>
+      <button class="btn btn-primary" id="btn-post-donar" onclick="pagarODonar()" disabled>
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 21Z"/></svg>
+        <span id="btn-post-donar-label">Pagar</span>
       </button>
     </div>
   </div>
@@ -570,22 +580,61 @@
       }
     }
 
-    // Abrir modal post-inscripción con mensaje y donativo
+    // Abrir modal post-inscripción
     postInscripcionEvId = evId;
+    postInscripcionFamilia = familiaChecked.map(ck => ck.dataset.familiaName);
+
     document.getElementById('post-ev-titulo').textContent = `¡Estás inscrito en "${ev?.titulo}"!`;
     const msgEl = document.getElementById('post-ev-mensaje');
     const msg = ev?.mensaje_inscripcion || '';
     if (msg) { msgEl.textContent = msg; msgEl.style.display = ''; }
     else { msgEl.style.display = 'none'; }
-    // Resetear chips
-    document.querySelectorAll('.don-chip').forEach(c => c.classList.remove('selected'));
-    document.getElementById('post-don-custom').style.display = 'none';
-    document.getElementById('post-don-input').value = '';
-    document.getElementById('btn-post-donar').disabled = true;
+
+    const precio = parseFloat(ev?.precio) || 0;
+    const pagoSection = document.getElementById('post-pago-section');
+    const donSection  = document.getElementById('post-don-section');
+    const btnDonar    = document.getElementById('btn-post-donar');
+    const btnLabel    = document.getElementById('btn-post-donar-label');
+    const btnSkip     = document.getElementById('btn-post-skip');
+
+    if (precio > 0) {
+      // Evento de pago — mostrar desglose familiar
+      pagoSection.style.display = '';
+      donSection.style.display  = 'none';
+
+      const currentUser = getCurrentUser();
+      const userName = currentUser?.name || 'Tú';
+      const personas = [{ name: userName }, ...postInscripcionFamilia.map(n => ({ name: n }))];
+      const total = precio * personas.length;
+
+      document.getElementById('post-pago-desglose').innerHTML = personas.map(p => `
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:.875rem;color:var(--color-text-muted);">
+          <span>${p.name}</span>
+          <span style="font-weight:500;color:var(--color-text);">${precio.toFixed(2)} €</span>
+        </div>`).join('');
+      document.getElementById('post-pago-total').textContent = `${total.toFixed(2)} €`;
+      btnLabel.textContent = personas.length > 1
+        ? `Pagar ${total.toFixed(2)} € (${personas.length} personas)`
+        : `Pagar ${total.toFixed(2)} €`;
+      btnSkip.textContent = 'Pagar después';
+      btnDonar.disabled = false;
+    } else {
+      // Evento gratuito — donativo
+      pagoSection.style.display = 'none';
+      donSection.style.display  = '';
+      document.querySelectorAll('.don-chip').forEach(c => c.classList.remove('selected'));
+      document.getElementById('post-don-custom').style.display = 'none';
+      document.getElementById('post-don-input').value = '';
+      btnLabel.textContent = 'Donar';
+      btnSkip.textContent  = 'No gracias';
+      btnDonar.disabled = true;
+    }
+
     openModal('modal-post-inscripcion');
   });
 
   let postInscripcionEvId = null;
+  let postInscripcionFamilia = [];
 
   function selectDonChip(btn, amount) {
     document.querySelectorAll('.don-chip').forEach(c => c.classList.remove('selected'));
@@ -608,29 +657,53 @@
     document.getElementById('btn-post-donar').disabled = !(val > 0);
   });
 
-  async function donarDesdeEvento() {
+  async function pagarODonar() {
     const ev = MOCK_EVENTOS.find(e => e.id === postInscripcionEvId);
-    const selectedChip = document.querySelector('.don-chip.selected');
-    let amount = selectedChip ? parseFloat(selectedChip.dataset.amount) : 0;
-    if (amount === 0) amount = parseFloat(document.getElementById('post-don-input').value) || 0;
-    if (!amount || amount <= 0) return;
-
+    const precio = parseFloat(ev?.precio) || 0;
     const sb = getSupabase();
     const user = getCurrentUser();
-    if (sb && user) {
-      await sb.from('donaciones').insert({
-        usuario_id:     user.userId || null,
-        usuario_nombre: user.name   || 'Anónimo',
-        campana_nombre: `Donativo evento: ${ev?.titulo || ''}`,
-        campana_id:     null,
-        cantidad:       amount,
-        recurrente:     false,
-        dedicatoria:    null
-      });
-    }
 
-    closeModal('modal-post-inscripcion');
-    showToast(`¡Gracias por tu donativo de ${amount} €! 🙏`, 'success');
+    if (precio > 0) {
+      // Pago de evento: precio × (yo + familiares)
+      const total = precio * (1 + postInscripcionFamilia.length);
+      if (sb && user) {
+        await sb.from('donaciones').insert({
+          usuario_id:     user.userId || null,
+          usuario_nombre: user.name   || 'Anónimo',
+          campana_nombre: `Pago evento: ${ev?.titulo || ''}`,
+          campana_id:     null,
+          cantidad:       total,
+          recurrente:     false,
+          dedicatoria:    postInscripcionFamilia.length
+            ? `Incluye: ${[user.name, ...postInscripcionFamilia].join(', ')}`
+            : null
+        });
+      }
+      closeModal('modal-post-inscripcion');
+      const quienes = postInscripcionFamilia.length
+        ? ` para ti y ${postInscripcionFamilia.join(', ')}`
+        : '';
+      showToast(`Pago de ${total.toFixed(2)} € registrado${quienes}`, 'success');
+    } else {
+      // Donativo voluntario
+      const selectedChip = document.querySelector('.don-chip.selected');
+      let amount = selectedChip ? parseFloat(selectedChip.dataset.amount) : 0;
+      if (amount === 0) amount = parseFloat(document.getElementById('post-don-input').value) || 0;
+      if (!amount || amount <= 0) return;
+      if (sb && user) {
+        await sb.from('donaciones').insert({
+          usuario_id:     user.userId || null,
+          usuario_nombre: user.name   || 'Anónimo',
+          campana_nombre: `Donativo evento: ${ev?.titulo || ''}`,
+          campana_id:     null,
+          cantidad:       amount,
+          recurrente:     false,
+          dedicatoria:    null
+        });
+      }
+      closeModal('modal-post-inscripcion');
+      showToast(`¡Gracias por tu donativo de ${amount} €!`, 'success');
+    }
   }
 
   async function cancelarInscripcion(id) {
