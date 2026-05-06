@@ -615,7 +615,7 @@ function openTermsModal(type) {
       <p><strong>Artículo 1 — Objeto y ámbito de aplicación</strong><br>
       Los presentes Términos de Uso regulan el acceso y utilización de la plataforma Jabad Barcelona, destinada exclusivamente a miembros de comunidades judías en España y sus familias.</p>
       <p><strong>Artículo 2 — Requisitos de membresía</strong><br>
-      El acceso requiere ser judío/a, familiar directo de un miembro, o encontrarse en proceso de guiur (conversión). La solicitud es revisada manualmente por la administración de cada comunidad.</p>
+      El acceso requiere ser judío/a o familiar directo de un miembro. La solicitud es revisada manualmente por la administración de cada comunidad.</p>
       <p><strong>Artículo 3 — Normas de conducta</strong><br>
       Los miembros se comprometen a mantener un comportamiento respetuoso, acorde con los valores de la comunidad judía y las normas de convivencia establecidas por cada kehilá.</p>
       <p><strong>Artículo 4 — Uso aceptable de la plataforma</strong><br>

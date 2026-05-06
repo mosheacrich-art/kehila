@@ -87,7 +87,7 @@ const MOCK_USERS = [
     comunidad: 'Jabad Barcelona',
     joinDate: '2024-02-18',
     telefono: '+34 612 000 111',
-    bio: 'Interesado en la conversión. Lleva 6 meses asistiendo a clases.'
+    bio: 'Lleva 6 meses asistiendo a clases y eventos de la comunidad.'
   },
   {
     userId: 'u006',
