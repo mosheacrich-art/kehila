@@ -1229,16 +1229,17 @@
         const btn = document.getElementById('banner-admin-btn');
         if (btn) btn.style.display = 'flex';
       }
-      const lsSlides = JSON.parse(localStorage.getItem('banner_custom') || '[]');
-      if (lsSlides.length) { renderBanner(lsSlides); return; }
-      if (!sb) { renderBanner(BANNER_FALLBACK); return; }
-      try {
-        const { data } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
-        renderBanner(data?.length ? data : BANNER_FALLBACK);
-      } catch(e) { renderBanner(BANNER_FALLBACK); }
+      if (sb) {
+        try {
+          const { data } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
+          if (data?.length) { renderBanner(data); return; }
+        } catch(e) { /* fallback a localStorage */ }
+      }
+      const lsSlides = _lsBannerGet();
+      renderBanner(lsSlides.length ? lsSlides : BANNER_FALLBACK);
     }
 
-    /* ── Admin: gestionar slides (localStorage) ── */
+    /* ── Admin: localStorage como caché offline ── */
     function _lsBannerGet() { return JSON.parse(localStorage.getItem('banner_custom') || '[]'); }
     function _lsBannerSave(arr) { localStorage.setItem('banner_custom', JSON.stringify(arr)); }
 
@@ -1361,36 +1362,61 @@
         donativos:  'linear-gradient(135deg,#1a2a3a 0%,#1a4a6e 100%)',
       };
 
-      function refreshList() {
-        const slides = _lsBannerGet();
+      let _cachedSlides = [];
+
+      async function refreshList() {
+        const sb = typeof getSupabase === 'function' ? getSupabase() : null;
         const container = overlay.querySelector('#banner-list-container');
-        if (!slides.length) {
+        container.innerHTML = '<p style="font-size:0.8rem;color:#94a3b8;padding:6px 0;">Cargando…</p>';
+
+        if (sb) {
+          try {
+            const { data } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
+            _cachedSlides = data || [];
+          } catch(e) { _cachedSlides = _lsBannerGet(); }
+        } else {
+          _cachedSlides = _lsBannerGet();
+        }
+
+        if (!_cachedSlides.length) {
           container.innerHTML = '<p style="font-size:0.82rem;color:#94a3b8;padding:8px 0 12px;">Sin anuncios activos — se muestra el banner predeterminado.</p>';
           return;
         }
-        container.innerHTML = slides.map((s, i) => {
+
+        container.innerHTML = _cachedSlides.map((s, i) => {
           const tipoLabel = TIPOS_BANNER.find(t => t.value === s.tipo)?.label || s.tipo || 'Anuncio';
           return `
             <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;">
               ${s.imagen_url
-                ? `<img src="${s.imagen_url}" style="width:72px;height:44px;object-fit:cover;border-radius:7px;flex-shrink:0;" onerror="this.style.cssText='width:72px;height:44px;border-radius:7px;background:${s.color||'#1b2e5e'};flex-shrink:0;'">`
-                : `<div style="width:72px;height:44px;border-radius:7px;background:${s.color||'#1b2e5e'};flex-shrink:0;display:flex;align-items:center;justify-content:center;">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="rgba(255,255,255,0.6)"><path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 1 8.835-2.535m0 0A23.74 23.74 0 0 1 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m-1.394-9.195c.09.576.135 1.167.135 1.77 0 2.33-.542 4.534-1.51 6.488"/></svg>
-                  </div>`
-              }
+                ? `<img src="${s.imagen_url}" style="width:72px;height:44px;object-fit:cover;border-radius:7px;flex-shrink:0;">`
+                : `<div style="width:72px;height:44px;border-radius:7px;background:${s.color||'#1b2e5e'};flex-shrink:0;"></div>`}
               <div style="flex:1;min-width:0;">
-                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#c9a84c;margin-bottom:2px;">${tipoLabel}</div>
+                <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#c9a84c;margin-bottom:2px;">${tipoLabel}</div>
                 <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#1a202c;">${s.titulo||'(sin título)'}</div>
                 ${s.subtitulo ? `<div style="font-size:0.73rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.subtitulo}</div>` : ''}
               </div>
-              <button data-del="${i}" style="background:#fef2f2;border:1px solid #fecaca;cursor:pointer;color:#dc2626;padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;flex-shrink:0;">Eliminar</button>
+              <button data-del-id="${s.id}" data-del-idx="${i}" style="background:#fef2f2;border:1px solid #fecaca;cursor:pointer;color:#dc2626;padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;flex-shrink:0;">Eliminar</button>
             </div>`;
         }).join('');
-        container.querySelectorAll('[data-del]').forEach(btn => {
-          btn.addEventListener('click', () => {
+
+        container.querySelectorAll('[data-del-id]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id  = btn.dataset.delId;
+            const idx = parseInt(btn.dataset.delIdx);
+            btn.disabled = true;
+            btn.textContent = '…';
+
+            // Borrar en Supabase
+            const sb2 = typeof getSupabase === 'function' ? getSupabase() : null;
+            if (sb2 && id && !String(id).startsWith('ls_')) {
+              try { await sb2.from('banner_slides').delete().eq('id', id); } catch(e) {}
+            }
+            // Borrar en localStorage
             const arr = _lsBannerGet();
-            arr.splice(parseInt(btn.dataset.del), 1);
+            const lsIdx = arr.findIndex(s => s.id === id);
+            if (lsIdx !== -1) arr.splice(lsIdx, 1);
             _lsBannerSave(arr);
+
             loadBanner();
             refreshList();
           });
@@ -1424,7 +1450,7 @@
       });
 
       // Guardar
-      overlay.querySelector('#bnew-save').addEventListener('click', () => {
+      overlay.querySelector('#bnew-save').addEventListener('click', async () => {
         const titulo = overlay.querySelector('#bnew-titulo').value.trim();
         const errEl  = overlay.querySelector('#bnew-titulo-err');
         if (!titulo) {
@@ -1434,23 +1460,32 @@
         }
         errEl.style.display = 'none';
 
+        const saveBtn = overlay.querySelector('#bnew-save');
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Publicando…';
+
         const tipo       = overlay.querySelector('#bnew-tipo').value;
         const subtitulo  = overlay.querySelector('#bnew-subtitulo').value.trim();
         const imagen_url = _pickedDataUrl || overlay.querySelector('#bnew-url').value.trim();
-        const href       = overlay.querySelector('#bnew-enlace').value;
-        const hasta      = overlay.querySelector('#bnew-hasta').value;
+        const href       = overlay.querySelector('#bnew-enlace').value || null;
+        const hasta      = overlay.querySelector('#bnew-hasta').value || null;
+        const color      = TIPO_COLORS[tipo] || TIPO_COLORS.novedad;
 
+        const newSlide = { tipo, titulo, subtitulo, imagen_url, color, href, hasta, activo: true, orden: Date.now() };
+
+        // Guardar en Supabase (fuente principal)
+        const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+        if (sb) {
+          try {
+            const { data, error } = await sb.from('banner_slides').insert(newSlide).select().single();
+            if (!error && data) newSlide.id = data.id;
+          } catch(e) { /* fallback a localStorage */ }
+        }
+
+        // Guardar en localStorage como caché offline
+        if (!newSlide.id) newSlide.id = 'ls_' + Date.now();
         const arr = _lsBannerGet();
-        arr.push({
-          id: 'ls_' + Date.now(),
-          tipo,
-          titulo,
-          subtitulo,
-          imagen_url,
-          color: TIPO_COLORS[tipo] || TIPO_COLORS.novedad,
-          href: href || undefined,
-          hasta: hasta || undefined,
-        });
+        arr.push(newSlide);
         _lsBannerSave(arr);
 
         // Reset form
@@ -1463,8 +1498,10 @@
         overlay.querySelector('#bnew-tipo').selectedIndex = 0;
         overlay.querySelector('#bnew-enlace').selectedIndex = 0;
         _pickedDataUrl = '';
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicar anuncio';
 
-        showToast('Anuncio publicado en el banner', 'success');
+        showToast('Anuncio publicado y guardado', 'success');
         loadBanner();
         refreshList();
       });
