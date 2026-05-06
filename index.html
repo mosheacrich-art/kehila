@@ -192,7 +192,7 @@
     .auth-form-wrapper {
       flex: 1;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
       padding: 40px 52px;
       min-height: min-content;
@@ -734,9 +734,8 @@
             <button type="button" onclick="showRegister()">Solicitar acceso →</button>
           </div>
 
-          <!-- Credenciales demo -->
-          <div style="margin-top:28px; padding:14px 16px; background:var(--color-bg); border-radius:var(--radius-sm); border:1px dashed var(--color-border);">
-            <p style="font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-text-muted); margin-bottom:8px;">Cuentas de prueba</p>
+          <!-- Credenciales demo (oculto visualmente) -->
+          <div style="display:none;">
             <div style="display:flex; flex-direction:column; gap:4px;">
               <button type="button" class="demo-fill" data-email="admin@jabad.barcelona" data-pw="Admin1234"
                 style="text-align:left; font-size:0.8rem; color:var(--color-primary); background:none; border:none; cursor:pointer; padding:2px 0;">
