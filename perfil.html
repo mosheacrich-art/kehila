@@ -187,6 +187,120 @@
       border-top: 1px solid var(--color-border);
     }
 
+    /* ─── Mi familia ─── */
+    .familia-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .familia-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+
+    .familia-card-info { flex: 1; min-width: 0; }
+    .familia-card-name { font-size: .875rem; font-weight: 600; color: var(--color-text); }
+    .familia-card-rel  { font-size: .75rem; color: var(--color-text-muted); margin-top: 2px; }
+
+    .familia-remove-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-light);
+      padding: 4px;
+      border-radius: var(--radius-xs);
+      display: flex;
+      align-items: center;
+      transition: color var(--transition-fast);
+      flex-shrink: 0;
+    }
+    .familia-remove-btn:hover { color: var(--color-danger); }
+    .familia-remove-btn svg  { width: 15px; height: 15px; }
+
+    .familia-empty {
+      font-size: .875rem;
+      color: var(--color-text-light);
+      font-style: italic;
+    }
+
+    /* ─── Modal añadir familiar ─── */
+    .modal-familiar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      background: rgba(0,0,0,.45);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-familiar-overlay.open { display: flex; }
+
+    .modal-familiar-box {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .modal-familiar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .modal-familiar-header h3 {
+      font-family: var(--font-brand);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    .modal-familiar-body { padding: 20px; }
+
+    .familia-search-results {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .familia-result-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      border: 1px solid transparent;
+    }
+    .familia-result-item:hover { background: var(--color-bg); }
+    .familia-result-item.selected { background: var(--color-primary-light, #eef2ff); border-color: var(--color-primary); }
+
+    .familia-result-name { font-size: .875rem; font-weight: 500; color: var(--color-text); }
+    .familia-result-email { font-size: .75rem; color: var(--color-text-muted); }
+
+    .modal-familiar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
     /* ─── Solicitud card ─── */
     .solicitud-card {
       background: var(--color-bg);
@@ -339,6 +453,20 @@
         </div>
       </div>
 
+      <!-- ══ SECCIÓN: MI FAMILIA ══ -->
+      <div class="perfil-section" id="section-familia">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--color-border);">
+          <div class="perfil-section-title" style="margin-bottom:0;padding-bottom:0;border-bottom:none;">Mi familia</div>
+          <button class="btn btn-secondary btn-sm" onclick="openAddFamiliarModal()">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Añadir familiar
+          </button>
+        </div>
+        <div class="familia-list" id="familia-list">
+          <p class="familia-empty">Sin familiares vinculados.</p>
+        </div>
+      </div>
+
       <!-- ══ SECCIÓN: DOCUMENTO ══ -->
       <div class="perfil-section" id="section-doc">
         <div class="perfil-section-title">Documento de identidad</div>
@@ -375,6 +503,43 @@
     </div>
   </div>
 
+  <!-- Modal añadir familiar -->
+  <div class="modal-familiar-overlay" id="modal-familiar-overlay">
+    <div class="modal-familiar-box">
+      <div class="modal-familiar-header">
+        <h3>Añadir familiar</h3>
+        <button onclick="closeAddFamiliarModal()" style="background:none;border:none;cursor:pointer;color:#9ca3af;padding:4px;line-height:0;">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-familiar-body">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Buscar miembro por nombre</label>
+          <input type="text" id="familiar-search-input" class="form-input" placeholder="Escribe un nombre..." oninput="onFamiliarSearch(this.value)">
+        </div>
+        <div class="familia-search-results" id="familiar-search-results">
+          <p style="font-size:.8rem;color:var(--color-text-light);">Escribe al menos 2 caracteres para buscar.</p>
+        </div>
+        <div class="form-group" style="margin-top:16px;" id="familiar-relation-group">
+          <label class="form-label">Parentesco</label>
+          <select id="familiar-relation-select" class="form-input">
+            <option value="">Selecciona parentesco</option>
+            <option value="conyuge">Cónyuge</option>
+            <option value="hijo">Hijo/a</option>
+            <option value="padre">Padre / Madre</option>
+            <option value="hermano">Hermano/a</option>
+            <option value="abuelo">Abuelo/a</option>
+            <option value="otro">Otro familiar</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-familiar-footer">
+        <button class="btn btn-ghost btn-sm" onclick="closeAddFamiliarModal()">Cancelar</button>
+        <button class="btn btn-primary btn-sm" id="btn-confirm-familiar" onclick="confirmAddFamiliar()" disabled>Vincular</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Bottom nav móvil -->
   <div id="bottom-nav-placeholder"></div>
 
@@ -382,6 +547,7 @@
   <script src="js/i18n.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
+  <script src="js/familia.js"></script>
   <script>
     const user = requireAuth();
     let editMode = false;
@@ -450,6 +616,7 @@
       }
 
       renderPerfil();
+      renderFamiliaSection();
     }
 
     function renderPerfil() {
@@ -586,6 +753,7 @@
 
       cancelarEdit();
       renderPerfil();
+      renderFamiliaSection();
 
       if (typeof showToast === 'function') {
         showToast('Perfil actualizado', 'success');
@@ -615,6 +783,112 @@
     }
 
     init();
+
+    /* ══ FAMILIA ══ */
+    let _familiarSelected = null;
+
+    const REL_LABELS = {
+      conyuge: 'Cónyuge', hijo: 'Hijo/a', padre: 'Padre / Madre',
+      hermano: 'Hermano/a', abuelo: 'Abuelo/a', otro: 'Otro familiar'
+    };
+
+    function renderFamiliaSection() {
+      if (!user) return;
+      const links = getFamilyLinks(user.userId || user.email);
+      const list = document.getElementById('familia-list');
+      if (!links.length) {
+        list.innerHTML = '<p class="familia-empty">Sin familiares vinculados.</p>';
+        return;
+      }
+      list.innerHTML = links.map(f => {
+        const color = getAvatarColor(f.name);
+        return `
+          <div class="familia-card">
+            <div class="avatar" data-color="${color}" style="width:36px;height:36px;font-size:.8rem;flex-shrink:0;">${f.initials}</div>
+            <div class="familia-card-info">
+              <div class="familia-card-name">${f.name}</div>
+              <div class="familia-card-rel">${REL_LABELS[f.relation] || f.relation}</div>
+            </div>
+            <button class="familia-remove-btn" onclick="removeMyFamiliar('${f.id}')" title="Desvincular">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            </button>
+          </div>`;
+      }).join('');
+    }
+
+    function openAddFamiliarModal() {
+      _familiarSelected = null;
+      document.getElementById('familiar-search-input').value = '';
+      document.getElementById('familiar-search-results').innerHTML =
+        '<p style="font-size:.8rem;color:var(--color-text-light);">Escribe al menos 2 caracteres para buscar.</p>';
+      document.getElementById('familiar-relation-select').value = '';
+      document.getElementById('btn-confirm-familiar').disabled = true;
+      document.getElementById('modal-familiar-overlay').classList.add('open');
+    }
+
+    function closeAddFamiliarModal() {
+      document.getElementById('modal-familiar-overlay').classList.remove('open');
+    }
+
+    function onFamiliarSearch(query) {
+      const userId = user.userId || user.email;
+      const existing = getFamilyLinks(userId).map(l => l.id);
+      existing.push(userId);
+      const results = searchMembers(query, existing);
+      const container = document.getElementById('familiar-search-results');
+      if (!results.length) {
+        const msg = query.length < 2 ? 'Escribe al menos 2 caracteres para buscar.' : 'Sin resultados.';
+        container.innerHTML = `<p style="font-size:.8rem;color:var(--color-text-light);">${msg}</p>`;
+        _familiarSelected = null;
+        updateConfirmBtn();
+        return;
+      }
+      container.innerHTML = results.map(m => `
+        <div class="familia-result-item" id="res-${m.id}" onclick="selectFamiliarResult('${m.id}')">
+          <div class="avatar" data-color="${getAvatarColor(m.name)}" style="width:32px;height:32px;font-size:.75rem;flex-shrink:0;">${m.initials}</div>
+          <div>
+            <div class="familia-result-name">${m.name}</div>
+            <div class="familia-result-email">${m.email}</div>
+          </div>
+        </div>`).join('');
+      _familiarSelected = null;
+      updateConfirmBtn();
+    }
+
+    function selectFamiliarResult(id) {
+      document.querySelectorAll('.familia-result-item').forEach(el => el.classList.remove('selected'));
+      const el = document.getElementById('res-' + id);
+      if (el) el.classList.add('selected');
+      _familiarSelected = MOCK_MIEMBROS_BUSQUEDA.find(m => m.id === id) || null;
+      updateConfirmBtn();
+    }
+
+    function updateConfirmBtn() {
+      const rel = document.getElementById('familiar-relation-select').value;
+      document.getElementById('btn-confirm-familiar').disabled = !(_familiarSelected && rel);
+    }
+
+    document.getElementById('familiar-relation-select')?.addEventListener('change', updateConfirmBtn);
+
+    function confirmAddFamiliar() {
+      const rel = document.getElementById('familiar-relation-select').value;
+      if (!_familiarSelected || !rel) return;
+      const userId = user.userId || user.email;
+      const ok = addFamilyLink(userId, _familiarSelected, rel);
+      closeAddFamiliarModal();
+      renderFamiliaSection();
+      if (typeof showToast === 'function') {
+        showToast(ok ? `${_familiarSelected.name} vinculado como familiar` : 'Ya está vinculado', ok ? 'success' : 'warning');
+      }
+    }
+
+    function removeMyFamiliar(memberId) {
+      const userId = user.userId || user.email;
+      removeFamilyLink(userId, memberId);
+      renderFamiliaSection();
+      if (typeof showToast === 'function') showToast('Familiar desvinculado', 'success');
+    }
+
   </script>
 </body>
 </html>
