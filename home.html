@@ -173,6 +173,36 @@
       display: block;
     }
 
+    /* ── Banner imagen adaptativa (cualquier ratio) ── */
+    .banner-img-wrap { position: absolute; inset: 0; overflow: hidden; }
+    /* Capa trasera: imagen difuminada que rellena todo el espacio */
+    .banner-img-blur {
+      position: absolute;
+      inset: -8%;
+      width: 116%;
+      height: 116%;
+      object-fit: cover;
+      object-position: center;
+      filter: blur(22px) brightness(0.5) saturate(1.3);
+      pointer-events: none;
+      display: block;
+    }
+    /* Imagen principal encima */
+    .banner-img-main {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    /* Si es retrato/cuadrada: contener sin recortar, el blur rellena los bordes */
+    .banner-img-main.is-portrait {
+      object-fit: contain;
+      object-position: center center;
+    }
+
     .banner-slide-placeholder {
       width: 100%;
       height: 100%;
@@ -1177,7 +1207,18 @@
         const cols = s.fotos.map(f => `<div style="flex:1;height:100%;background:url('${f}') center/cover no-repeat;"></div>`).join('');
         slide.innerHTML = `<div style="display:flex;width:100%;height:100%;gap:2px;">${cols}</div>${textHTML}`;
       } else if (s.imagen_url) {
-        slide.innerHTML = `<img src="${s.imagen_url}" alt="${s.titulo || ''}" loading="lazy" onerror="this.style.display='none'">${textHTML}`;
+        slide.innerHTML = `
+          <div class="banner-img-wrap">
+            <img class="banner-img-blur" src="${s.imagen_url}" aria-hidden="true" loading="lazy">
+            <img class="banner-img-main" src="${s.imagen_url}" alt="${s.titulo || ''}" loading="lazy"
+              onerror="this.closest('.banner-img-wrap').style.display='none'">
+          </div>
+          ${textHTML}`;
+        slide.querySelector('.banner-img-main').addEventListener('load', function() {
+          if (this.naturalWidth > 0 && this.naturalHeight > 0 && this.naturalWidth / this.naturalHeight < 1.4) {
+            this.classList.add('is-portrait');
+          }
+        });
       } else {
         slide.innerHTML = `
           <div class="banner-slide-placeholder" style="background:${s.color || '#1a1a2e'}">
