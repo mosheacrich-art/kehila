@@ -677,26 +677,6 @@
         usuario_id: user?.userId || null
       };
 
-      closeModal('modalOfrecer');
-      document.getElementById('prof-pay-card').value = '';
-      document.getElementById('prof-pay-exp').value = '';
-      document.getElementById('prof-pay-cvv').value = '';
-      document.getElementById('prof-pay-name').value = '';
-      document.getElementById('modal-pago-prof').classList.add('open');
-    }
-
-    async function confirmProfPayment() {
-      const card = document.getElementById('prof-pay-card').value.replace(/\s/g, '');
-      const exp  = document.getElementById('prof-pay-exp').value.replace(/\s/g, '').replace('/', '');
-      const cvv  = document.getElementById('prof-pay-cvv').value;
-      const name = document.getElementById('prof-pay-name').value.trim();
-      if (card.length < 16 || exp.length < 4 || cvv.length < 3 || !name) {
-        showToast('Completa todos los datos de pago.', 'warning'); return;
-      }
-      if (!pendingProf) return;
-
-      document.getElementById('modal-pago-prof').classList.remove('open');
-
       // Guardar en localStorage
       PROFESSIONALS.unshift(pendingProf);
       saveProfessionals(PROFESSIONALS);
@@ -720,6 +700,7 @@
       }
 
       renderProfessionals();
+      closeModal('modalOfrecer');
       clearProfImg();
       document.getElementById('ofrecerCat').value = '';
       document.getElementById('ofrecerTitulo').value = '';
@@ -730,7 +711,7 @@
       document.getElementById('ofrecerPrecio').value = '';
       document.getElementById('ofrecerCiudad').value = '';
       pendingProf = null;
-      showToast('¡Perfil publicado! Suscripción activa a 2,99 €/mes.', 'success');
+      showToast('Perfil publicado correctamente.', 'success');
     }
 
     function closeModal(id) {
