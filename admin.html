@@ -2309,7 +2309,7 @@
 
       ${section('Documento de identidad')}
       ${row('Tipo', escHtml(sol.docTipo || u.doc_tipo))}
-      ${row('Número', escHtml(sol.docNumero ? '••••' + sol.docNumero.slice(-3) : (u.doc_numero || '—')))}
+      ${row('Número', escHtml(sol.docNumero || u.doc_numero || '—'))}
       ${sol.docFileName ? row('Archivo', `<span style="color:var(--color-text-muted);">${escHtml(sol.docFileName)}</span>`) : ''}
       ${u.doc_url ? await (async () => {
         // Generar URL firmada (1h) — bucket privado, nunca URL pública
@@ -3142,7 +3142,7 @@
 
     container.innerHTML = activas.map((s, idx) => {
       const initials = ((s.nombre || '?')[0] + (s.apellidos || '?')[0]).toUpperCase();
-      const docMask = s.docNumero ? s.docNumero.slice(0,-3).replace(/[A-Za-z0-9]/g,'*') + s.docNumero.slice(-3) : '—';
+      const docMask = s.docNumero || '—';
       const fecha = s.timestamp ? new Date(s.timestamp).toLocaleDateString('es-ES', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
       const riesgo = s.docFileName ? 'amarillo' : 'rojo';
       const riesgoLabel = riesgo === 'amarillo' ? 'Revisar documento' : 'Sin documento';
