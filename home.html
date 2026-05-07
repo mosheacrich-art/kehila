@@ -1846,8 +1846,21 @@
     const HORARIOS_DEFAULT = [
       { nombre: 'Shajarit',       hora: '07:30', tipo: 'semana' },
       { nombre: 'Minjá',          hora: '19:30', tipo: 'semana' },
-      { nombre: 'Entrada Shabat', hora: '19:42', tipo: 'shabat' }
+      { nombre: 'Entrada Shabat', hora: '—',     tipo: 'shabat' }
     ];
+
+    // Hora real de HebCal — se fija cuando llega la API
+    let _hebcalCandleTime = null;
+
+    function applyCandleSync() {
+      if (!_hebcalCandleTime) return;
+      document.querySelectorAll('#horarios-shabat .tefila-row').forEach(row => {
+        const n = (row.querySelector('.tefila-name')?.textContent || '').toLowerCase();
+        if (n.includes('entrada') || n.includes('velas') || n.includes('encendido')) {
+          row.querySelector('.tefila-time').textContent = _hebcalCandleTime;
+        }
+      });
+    }
 
     function renderHorarios(items) {
       const semana = items.filter(it => it.tipo !== 'shabat');
@@ -1861,8 +1874,9 @@
         `<div class="tefila-section-label">Días de semana</div>
          <div id="horarios-semana">${rowsHTML(semana)}</div>
          <hr class="tefila-divider">
-         <div class="tefila-section-label">Shabbat</div>
+         <div class="tefila-section-label" onclick="document.getElementById('shabat-card-section').scrollIntoView({behavior:'smooth',block:'start'})" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;opacity:0.6;">Shabbat ↓</div>
          <div id="horarios-shabat">${rowsHTML(shabat)}</div>`;
+      applyCandleSync();
     }
 
     async function loadHorarios() {
@@ -2108,16 +2122,10 @@
 
         // Encendido
         if (candles) {
-          const candleTime = fmtTime(candles.date);
-          document.getElementById('shabat-velas-time').textContent = candleTime;
+          _hebcalCandleTime = fmtTime(candles.date);
+          document.getElementById('shabat-velas-time').textContent = _hebcalCandleTime;
           document.getElementById('shabat-velas-day').textContent  = fmtDay(candles.date);
-          // Sync: actualizar "Entrada Shabat" en la card de horarios de tefila
-          document.querySelectorAll('#horarios-shabat .tefila-row').forEach(row => {
-            const name = row.querySelector('.tefila-name')?.textContent?.toLowerCase() || '';
-            if (name.includes('entrada') || name.includes('velas') || name.includes('encendido')) {
-              row.querySelector('.tefila-time').textContent = candleTime;
-            }
-          });
+          applyCandleSync();
         }
 
         // Havdalá
