@@ -759,7 +759,7 @@
               <div class="tefila-row"><span class="tefila-name">Minjá</span><span class="tefila-time">19:30</span></div>
             </div>
             <hr class="tefila-divider">
-            <div class="tefila-section-label">Shabbat</div>
+            <div class="tefila-section-label" onclick="document.getElementById('shabat-card-section').scrollIntoView({behavior:'smooth',block:'start'})" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;opacity:0.6;">Shabbat ↓</div>
             <div id="horarios-shabat">
               <div class="tefila-row"><span class="tefila-name">Entrada Shabat</span><span class="tefila-time">19:42</span></div>
             </div>
@@ -873,7 +873,7 @@
            6. SHABAT DE ESTA SEMANA
       ══════════════════════════════════ -->
       <div class="home-section">
-        <div class="shabat-card">
+        <div class="shabat-card" id="shabat-card-section">
           <div class="shabat-card-top">
             <div>
               <p class="shabat-label">Shabat esta semana</p>
