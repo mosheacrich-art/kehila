@@ -1202,11 +1202,41 @@
           </div>
         </div>`;
 
-      if (s.fotos && s.fotos.length >= 2) {
-        // Mosaico de 3 fotos
-        const cols = s.fotos.map(f => `<div style="flex:1;height:100%;background:url('${f}') center/cover no-repeat;"></div>`).join('');
+      // Función para construir una celda de slot con posición/zoom
+      function buildSlotCell(slotOrUrl, flex) {
+        const url  = typeof slotOrUrl === 'string' ? slotOrUrl : (slotOrUrl?.url || '');
+        const ox   = typeof slotOrUrl === 'object' ? (slotOrUrl?.pos_x ?? 50) : 50;
+        const oy   = typeof slotOrUrl === 'object' ? (slotOrUrl?.pos_y ?? 50) : 50;
+        const zoom = typeof slotOrUrl === 'object' ? (slotOrUrl?.zoom  ?? 1)  : 1;
+        if (!url) return `<div style="flex:${flex};height:100%;background:#2a3a5e;"></div>`;
+        return `<div style="flex:${flex};height:100%;position:relative;overflow:hidden;">
+          <img src="${url}" aria-hidden="true" style="position:absolute;inset:-8%;width:116%;height:116%;object-fit:cover;object-position:${ox}% ${oy}%;filter:blur(18px) brightness(0.5) saturate(1.2);pointer-events:none;">
+          <img src="${url}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${ox}% ${oy}%;transform:scale(${zoom});transform-origin:${ox}% ${oy}%;display:block;">
+        </div>`;
+      }
+
+      if (s.slots && s.slots.length) {
+        // Nuevo formato con layout
+        const layout = s.layout || 'single';
+        let cells = '';
+        if (layout === 'single') {
+          cells = buildSlotCell(s.slots[0], 1);
+        } else if (layout === 'split2') {
+          cells = buildSlotCell(s.slots[0], 1) + buildSlotCell(s.slots[1] || '', 1);
+        } else if (layout === 'mosaic_l') {
+          cells = buildSlotCell(s.slots[0], 1.6) + buildSlotCell(s.slots[1] || '', 1);
+        } else if (layout === 'mosaic_r') {
+          cells = buildSlotCell(s.slots[0], 1) + buildSlotCell(s.slots[1] || '', 1.6);
+        } else if (layout === 'split3') {
+          cells = buildSlotCell(s.slots[0], 1) + buildSlotCell(s.slots[1] || '', 1) + buildSlotCell(s.slots[2] || '', 1);
+        }
+        slide.innerHTML = `<div style="display:flex;width:100%;height:100%;gap:2px;">${cells}</div>${textHTML}`;
+      } else if (s.fotos && s.fotos.length >= 2) {
+        // Formato antiguo con múltiples fotos
+        const cols = s.fotos.map(f => buildSlotCell(f, 1)).join('');
         slide.innerHTML = `<div style="display:flex;width:100%;height:100%;gap:2px;">${cols}</div>${textHTML}`;
       } else if (s.imagen_url) {
+        // Formato antiguo foto única — usa blur adaptativo
         slide.innerHTML = `
           <div class="banner-img-wrap">
             <img class="banner-img-blur" src="${s.imagen_url}" aria-hidden="true" loading="lazy">
@@ -1284,6 +1314,43 @@
     function _lsBannerGet() { return JSON.parse(localStorage.getItem('banner_custom') || '[]'); }
     function _lsBannerSave(arr) { localStorage.setItem('banner_custom', JSON.stringify(arr)); }
 
+    /* ── Banner: layouts disponibles ── */
+    const BANNER_LAYOUTS = [
+      { id: 'single',    label: '1 foto',      slots: 1, icon: '▬' },
+      { id: 'split2',    label: '2 iguales',   slots: 2, icon: '▬▬' },
+      { id: 'mosaic_l',  label: 'Grande izq.', slots: 2, icon: '▬▬' },
+      { id: 'mosaic_r',  label: 'Grande der.', slots: 2, icon: '▬▬' },
+      { id: 'split3',    label: '3 columnas',  slots: 3, icon: '▬▬▬' },
+    ];
+
+    /* ── Drag-to-position helper ── */
+    function setupPosDrag(wrap, img, onUpdate) {
+      let dragging = false, sx, sy, sox, soy;
+      const start = (cx, cy) => {
+        dragging = true; sx = cx; sy = cy;
+        sox = parseFloat(img.dataset.ox || 50); soy = parseFloat(img.dataset.oy || 50);
+        wrap.style.cursor = 'grabbing';
+      };
+      const move = (cx, cy) => {
+        if (!dragging) return;
+        const r = wrap.getBoundingClientRect();
+        const ox = Math.max(0, Math.min(100, sox - (cx - sx) / r.width  * 100));
+        const oy = Math.max(0, Math.min(100, soy - (cy - sy) / r.height * 100));
+        img.dataset.ox = ox; img.dataset.oy = oy;
+        img.style.objectPosition = `${ox}% ${oy}%`;
+        img.style.transformOrigin = `${ox}% ${oy}%`;
+        onUpdate(ox, oy);
+      };
+      const end = () => { dragging = false; wrap.style.cursor = 'grab'; };
+      wrap.addEventListener('mousedown',  e => { start(e.clientX, e.clientY); e.preventDefault(); });
+      document.addEventListener('mousemove', e => move(e.clientX, e.clientY));
+      document.addEventListener('mouseup', end);
+      wrap.addEventListener('touchstart',  e => { start(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
+      document.addEventListener('touchmove',  e => { if (dragging) { move(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); } }, { passive: false });
+      document.addEventListener('touchend', end);
+      wrap.style.cursor = 'grab';
+    }
+
     function abrirBannerAdmin() {
       if (document.getElementById('banner-overlay')) return;
 
@@ -1357,15 +1424,28 @@
                 <input id="bnew-subtitulo" type="text" placeholder="Breve descripción — 1 o 2 líneas" style="${iStyle}">
               </div>
 
+              <!-- Layout selector -->
               <div style="${groupStyle}">
-                <label style="${labelStyle}">Imagen</label>
-                <label style="display:flex;align-items:center;gap:8px;border:1.5px dashed #cbd5e1;border-radius:8px;padding:10px 14px;cursor:pointer;font-size:0.83rem;color:#64748b;background:#f8fafc;margin-bottom:6px;">
-                  <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
-                  <span id="bnew-file-text">Subir imagen desde el dispositivo</span>
-                  <input type="file" id="bnew-file" accept="image/*" style="display:none;">
-                </label>
-                <input id="bnew-url" type="text" placeholder="O pegar URL de imagen" style="${iStyle}margin-bottom:6px;">
-                <img id="bnew-preview" src="" alt="" style="display:none;width:100%;height:120px;object-fit:cover;border-radius:8px;margin-top:4px;">
+                <label style="${labelStyle}">Diseño del banner</label>
+                <div id="layout-selector" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+                  ${BANNER_LAYOUTS.map(l => `
+                    <button type="button" data-layout="${l.id}" style="border:2px solid #e2e8f0;border-radius:8px;padding:7px 4px 5px;background:#f8fafc;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center;">
+                      <div style="font-size:0.6rem;letter-spacing:.05em;color:#1b2e5e;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${l.label}</div>
+                      <div style="display:flex;gap:2px;height:18px;border-radius:3px;overflow:hidden;">
+                        ${l.id === 'single'   ? '<div style="flex:1;background:#1b2e5e;border-radius:2px;"></div>' : ''}
+                        ${l.id === 'split2'   ? '<div style="flex:1;background:#1b2e5e;border-radius:2px;"></div><div style="flex:1;background:#c9a84c;border-radius:2px;"></div>' : ''}
+                        ${l.id === 'mosaic_l' ? '<div style="flex:1.6;background:#1b2e5e;border-radius:2px;"></div><div style="flex:1;background:#c9a84c;border-radius:2px;"></div>' : ''}
+                        ${l.id === 'mosaic_r' ? '<div style="flex:1;background:#c9a84c;border-radius:2px;"></div><div style="flex:1.6;background:#1b2e5e;border-radius:2px;"></div>' : ''}
+                        ${l.id === 'split3'   ? '<div style="flex:1;background:#1b2e5e;border-radius:2px;"></div><div style="flex:1;background:#c9a84c;border-radius:2px;"></div><div style="flex:1;background:#4a7c5e;border-radius:2px;"></div>' : ''}
+                      </div>
+                    </button>`).join('')}
+                </div>
+              </div>
+
+              <!-- Slots de fotos (se generan dinámicamente) -->
+              <div id="banner-slots-wrap" style="${groupStyle}">
+                <label style="${labelStyle}">Fotos</label>
+                <div id="banner-slots"></div>
               </div>
 
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
@@ -1466,85 +1546,190 @@
 
       refreshList();
 
-      // Preview imagen
-      let _pickedDataUrl = '';
-      overlay.querySelector('#bnew-file').addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        overlay.querySelector('#bnew-file-text').textContent = file.name;
-        const reader = new FileReader();
-        reader.onload = ev => {
-          _pickedDataUrl = ev.target.result;
-          const prev = overlay.querySelector('#bnew-preview');
-          prev.src = _pickedDataUrl;
-          prev.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-      });
+      /* ── Estado slots ── */
+      let _activeLayout = 'single';
+      // slotData[i] = { url, pos_x, pos_y, zoom }
+      let _slotData = [{ url:'', pos_x:50, pos_y:50, zoom:1 }];
 
-      overlay.querySelector('#bnew-url').addEventListener('input', e => {
-        const url = e.target.value.trim();
-        _pickedDataUrl = '';
-        const prev = overlay.querySelector('#bnew-preview');
-        if (url) { prev.src = url; prev.style.display = 'block'; }
-        else { prev.style.display = 'none'; }
+      function slotCount() {
+        return BANNER_LAYOUTS.find(l => l.id === _activeLayout)?.slots || 1;
+      }
+
+      function renderSlots() {
+        const wrap = overlay.querySelector('#banner-slots');
+        const n = slotCount();
+        // Ajustar array
+        while (_slotData.length < n) _slotData.push({ url:'', pos_x:50, pos_y:50, zoom:1 });
+
+        wrap.innerHTML = '';
+        for (let i = 0; i < n; i++) {
+          const sd = _slotData[i];
+          const div = document.createElement('div');
+          div.style.cssText = 'margin-bottom:12px;';
+          div.innerHTML = `
+            <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:5px;">
+              ${n > 1 ? `Foto ${i+1}` : 'Foto'}
+            </div>
+            <label style="display:flex;align-items:center;gap:8px;border:1.5px dashed #cbd5e1;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:0.82rem;color:#64748b;background:#f8fafc;margin-bottom:5px;">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M10.5 8.25h.008v.008H10.5V8.25Z"/></svg>
+              <span class="slot-file-label">Subir desde dispositivo</span>
+              <input type="file" class="slot-file" accept="image/*" style="display:none;" data-slot="${i}">
+            </label>
+            <input type="text" class="slot-url" placeholder="O pegar URL de imagen" data-slot="${i}"
+              style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.83rem;font-family:inherit;outline:none;box-sizing:border-box;color:#1a202c;background:#fff;margin-bottom:6px;"
+              value="${sd.url}">
+
+            <!-- Vista previa + posicionador -->
+            <div class="slot-preview-wrap" data-slot="${i}"
+              style="position:relative;width:100%;height:90px;border-radius:8px;overflow:hidden;background:#e2e8f0;${sd.url ? '' : 'display:none;'}cursor:grab;user-select:none;">
+              <img class="slot-preview-img" data-ox="${sd.pos_x}" data-oy="${sd.pos_y}"
+                src="${sd.url}"
+                style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${sd.pos_x}% ${sd.pos_y}%;transform:scale(${sd.zoom});transform-origin:${sd.pos_x}% ${sd.pos_y}%;display:block;">
+              <div style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.5);color:#fff;font-size:0.62rem;padding:2px 6px;border-radius:4px;pointer-events:none;">Arrastra para posicionar</div>
+            </div>
+
+            <!-- Zoom -->
+            <div style="display:${sd.url ? 'flex' : 'none'};align-items:center;gap:8px;margin-top:5px;" class="slot-zoom-row" data-slot="${i}">
+              <span style="font-size:0.72rem;color:#64748b;white-space:nowrap;">Zoom</span>
+              <input type="range" class="slot-zoom" data-slot="${i}" min="1" max="2.5" step="0.05" value="${sd.zoom}"
+                style="flex:1;accent-color:#1b2e5e;">
+              <span class="slot-zoom-val" style="font-size:0.72rem;color:#64748b;width:28px;text-align:right;">${Math.round(sd.zoom*100)}%</span>
+            </div>`;
+
+          wrap.appendChild(div);
+
+          // Drag-to-position
+          const pwrap = div.querySelector('.slot-preview-wrap');
+          const pimg  = div.querySelector('.slot-preview-img');
+          setupPosDrag(pwrap, pimg, (ox, oy) => { _slotData[i].pos_x = ox; _slotData[i].pos_y = oy; });
+
+          // Zoom slider
+          div.querySelector('.slot-zoom').addEventListener('input', function() {
+            const z = parseFloat(this.value);
+            _slotData[i].zoom = z;
+            pimg.style.transform = `scale(${z})`;
+            pimg.style.transformOrigin = `${_slotData[i].pos_x}% ${_slotData[i].pos_y}%`;
+            div.querySelector('.slot-zoom-val').textContent = Math.round(z * 100) + '%';
+          });
+
+          // File upload
+          div.querySelector('.slot-file').addEventListener('change', async function() {
+            const file = this.files[0]; if (!file) return;
+            div.querySelector('.slot-file-label').textContent = file.name;
+            const url = await resizeImageBanner(file);
+            if (!url) return;
+            _slotData[i].url = url;
+            div.querySelector('.slot-url').value = '';
+            applySlotUrl(div, i, url);
+          });
+
+          // URL input
+          div.querySelector('.slot-url').addEventListener('input', function() {
+            const url = this.value.trim();
+            _slotData[i].url = url;
+            applySlotUrl(div, i, url);
+          });
+        }
+      }
+
+      function applySlotUrl(div, i, url) {
+        const pwrap = div.querySelector('.slot-preview-wrap');
+        const pimg  = div.querySelector('.slot-preview-img');
+        const zrow  = div.querySelector('.slot-zoom-row');
+        if (url) {
+          pimg.src = url;
+          pimg.style.objectPosition = `${_slotData[i].pos_x}% ${_slotData[i].pos_y}%`;
+          pwrap.style.display = 'relative';
+          pwrap.style.display = '';
+          zrow.style.display  = 'flex';
+        } else {
+          pwrap.style.display = 'none';
+          zrow.style.display  = 'none';
+        }
+      }
+
+      async function resizeImageBanner(file) {
+        return new Promise(resolve => {
+          const img = new Image();
+          const u = URL.createObjectURL(file);
+          img.onload = () => {
+            URL.revokeObjectURL(u);
+            const maxW = 1200, maxH = 600;
+            let w = img.width, h = img.height;
+            if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+            if (h > maxH) { w = Math.round(w * maxH / h); h = maxH; }
+            const c = document.createElement('canvas'); c.width = w; c.height = h;
+            c.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(c.toDataURL('image/jpeg', 0.88));
+          };
+          img.onerror = () => { URL.revokeObjectURL(u); resolve(null); };
+          img.src = u;
+        });
+      }
+
+      // Layout selector click
+      overlay.querySelectorAll('#layout-selector button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          _activeLayout = btn.dataset.layout;
+          overlay.querySelectorAll('#layout-selector button').forEach(b => {
+            b.style.borderColor = b === btn ? '#1b2e5e' : '#e2e8f0';
+            b.style.background  = b === btn ? '#eff6ff' : '#f8fafc';
+          });
+          renderSlots();
+        });
       });
+      // Activar el primero por defecto
+      overlay.querySelector('#layout-selector button[data-layout="single"]').click();
 
       // Guardar
       overlay.querySelector('#bnew-save').addEventListener('click', async () => {
         const titulo = overlay.querySelector('#bnew-titulo').value.trim();
         const errEl  = overlay.querySelector('#bnew-titulo-err');
-        if (!titulo) {
-          errEl.style.display = 'block';
-          overlay.querySelector('#bnew-titulo').focus();
-          return;
-        }
+        if (!titulo) { errEl.style.display = 'block'; overlay.querySelector('#bnew-titulo').focus(); return; }
         errEl.style.display = 'none';
 
         const saveBtn = overlay.querySelector('#bnew-save');
         saveBtn.disabled = true;
         saveBtn.textContent = 'Publicando…';
 
-        const tipo       = overlay.querySelector('#bnew-tipo').value;
-        const subtitulo  = overlay.querySelector('#bnew-subtitulo').value.trim();
-        const imagen_url = _pickedDataUrl || overlay.querySelector('#bnew-url').value.trim();
-        const href       = overlay.querySelector('#bnew-enlace').value || null;
-        const hasta      = overlay.querySelector('#bnew-hasta').value || null;
-        const color      = TIPO_COLORS[tipo] || TIPO_COLORS.novedad;
+        const tipo      = overlay.querySelector('#bnew-tipo').value;
+        const subtitulo = overlay.querySelector('#bnew-subtitulo').value.trim();
+        const href      = overlay.querySelector('#bnew-enlace').value || null;
+        const hasta     = overlay.querySelector('#bnew-hasta').value || null;
+        const color     = TIPO_COLORS[tipo] || TIPO_COLORS.novedad;
 
-        const newSlide = { tipo, titulo, subtitulo, imagen_url, color, href, hasta, activo: true, orden: Date.now() };
+        const slots = _slotData.slice(0, slotCount()).map(sd => ({
+          url: sd.url, pos_x: Math.round(sd.pos_x), pos_y: Math.round(sd.pos_y), zoom: +sd.zoom.toFixed(2)
+        }));
+        const imagen_url = slots[0]?.url || '';
 
-        // Guardar en Supabase (fuente principal)
+        const newSlide = { tipo, titulo, subtitulo, imagen_url, color, href, hasta, activo: true,
+          orden: Date.now(), layout: _activeLayout, slots };
+
         const sb = typeof getSupabase === 'function' ? getSupabase() : null;
         if (sb) {
           try {
             const { data, error } = await sb.from('banner_slides').insert(newSlide).select().single();
             if (!error && data) newSlide.id = data.id;
-          } catch(e) { /* fallback a localStorage */ }
+          } catch(e) {}
         }
-
-        // Guardar en localStorage como caché offline
         if (!newSlide.id) newSlide.id = 'ls_' + Date.now();
-        const arr = _lsBannerGet();
-        arr.push(newSlide);
-        _lsBannerSave(arr);
+        const arr = _lsBannerGet(); arr.push(newSlide); _lsBannerSave(arr);
 
-        // Reset form
-        overlay.querySelector('#bnew-titulo').value    = '';
+        // Reset
+        overlay.querySelector('#bnew-titulo').value = '';
         overlay.querySelector('#bnew-subtitulo').value = '';
-        overlay.querySelector('#bnew-url').value       = '';
-        overlay.querySelector('#bnew-hasta').value     = '';
-        overlay.querySelector('#bnew-file-text').textContent = 'Subir imagen desde el dispositivo';
-        overlay.querySelector('#bnew-preview').style.display = 'none';
+        overlay.querySelector('#bnew-hasta').value = '';
         overlay.querySelector('#bnew-tipo').selectedIndex = 0;
         overlay.querySelector('#bnew-enlace').selectedIndex = 0;
-        _pickedDataUrl = '';
+        _slotData = [{ url:'', pos_x:50, pos_y:50, zoom:1 }];
+        _activeLayout = 'single';
+        overlay.querySelector('#layout-selector button[data-layout="single"]').click();
+
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicar anuncio';
-
         showToast('Anuncio publicado y guardado', 'success');
-        loadBanner();
-        refreshList();
+        loadBanner(); refreshList();
       });
     }
 
