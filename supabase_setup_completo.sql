@@ -10,24 +10,30 @@
 -- ─────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS profesionales (
-  id           uuid        DEFAULT gen_random_uuid() PRIMARY KEY,
-  created_at   timestamptz DEFAULT now(),
-  nombre       text,
-  titulo       text,
-  especialidad text,
-  ciudad       text,
-  modalidad    text,
-  experiencia  int         DEFAULT 0,
-  idiomas      text[]      DEFAULT '{}',
-  precio       text,
-  bio          text,
-  formacion    text,
-  telefono     text,
+  id             uuid        DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at     timestamptz DEFAULT now(),
+  nombre         text,
+  titulo         text,
+  especialidad   text,
+  ciudad         text,
+  modalidad      text,
+  experiencia    int         DEFAULT 0,
+  idiomas        text[]      DEFAULT '{}',
+  precio         text,
+  bio            text,
+  formacion      text,
+  telefono       text,
   email_contacto text,
-  servicios    jsonb       DEFAULT '[]',
-  usuario_id   uuid        REFERENCES auth.users(id) ON DELETE SET NULL,
-  activo       boolean     DEFAULT true
+  servicios      jsonb       DEFAULT '[]',
+  foto           text,
+  galeria        jsonb       DEFAULT '[]',
+  usuario_id     uuid        REFERENCES auth.users(id) ON DELETE SET NULL,
+  activo         boolean     DEFAULT true
 );
+
+-- Si la tabla ya existía, añadir columnas nuevas
+ALTER TABLE profesionales ADD COLUMN IF NOT EXISTS foto    text;
+ALTER TABLE profesionales ADD COLUMN IF NOT EXISTS galeria jsonb DEFAULT '[]';
 
 ALTER TABLE profesionales ENABLE ROW LEVEL SECURITY;
 
@@ -94,6 +100,7 @@ CREATE POLICY "banners_admin_delete"  ON storage.objects FOR DELETE USING (
   bucket_id = 'banners' AND auth.uid() IN (SELECT id FROM profiles WHERE role = 'admin'));
 
 -- COMMUNITY MEDIA: lectura pública, escritura para miembros autenticados
+-- (usado para fotos de perfil y galería de profesionales, shiurim, noticias...)
 CREATE POLICY "media_public_read"    ON storage.objects FOR SELECT USING (bucket_id = 'community media');
 CREATE POLICY "media_member_insert"  ON storage.objects FOR INSERT WITH CHECK (
   bucket_id = 'community media' AND auth.uid() IS NOT NULL);

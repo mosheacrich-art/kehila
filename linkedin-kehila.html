@@ -474,6 +474,23 @@
       });
     }
 
+    /* ── Upload to Supabase Storage (community media bucket) ── */
+    async function uploadProfImage(dataUrl, filename) {
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (!sb || !dataUrl.startsWith('data:')) return null;
+      try {
+        const res  = await fetch(dataUrl);
+        const blob = await res.blob();
+        const path = `profesionales/${Date.now()}_${filename}`;
+        const { data, error } = await sb.storage.from('community media').upload(path, blob, {
+          contentType: 'image/jpeg', upsert: false
+        });
+        if (error) return null;
+        const { data: pub } = sb.storage.from('community media').getPublicUrl(data.path);
+        return pub?.publicUrl || null;
+      } catch(e) { return null; }
+    }
+
     /* ── Prof photo upload ── */
     document.getElementById('prof-img-file').addEventListener('change', async function() {
       const file = this.files[0]; if (!file) return;
@@ -482,6 +499,8 @@
       document.getElementById('prof-img-preview').src = data;
       document.getElementById('prof-img-ph').style.display = 'none';
       document.getElementById('prof-img-filled').style.display = 'block';
+      const url = await uploadProfImage(data, 'foto_' + Date.now() + '.jpg');
+      if (url) document.getElementById('prof-img-preview').src = url;
       this.value = '';
     });
     function clearProfImg() {
@@ -492,7 +511,7 @@
     }
     function getProfImg() {
       var img = document.getElementById('prof-img-preview');
-      return (img && img.src && img.src.startsWith('data:')) ? img.src : null;
+      return (img && img.src && (img.src.startsWith('data:') || img.src.startsWith('http'))) ? img.src : null;
     }
 
     /* ── Lightbox ── */
@@ -527,8 +546,9 @@
                 color: String(Math.floor(Math.random() * 8)),
                 ...lp,
                 ...p,
-                galeria: lp.galeria || [],
-                foto: lp.foto || null,
+                // Prefer Storage URLs from Supabase; fall back to cached base64
+                galeria: (p.galeria && p.galeria.length > 0) ? p.galeria : (lp.galeria || []),
+                foto: p.foto || lp.foto || null,
                 servicios: p.servicios || lp.servicios || [],
                 idiomas: p.idiomas || lp.idiomas || ['ES']
               };
@@ -771,8 +791,12 @@
     async function handleGalleryFiles(files) {
       const remaining = 6 - galleryPhotos.length;
       const toLoad = Array.from(files).slice(0, remaining);
-      const results = await Promise.all(toLoad.map(f => resizeImage(f, 900, 0.82)));
-      results.forEach(r => { if (r) galleryPhotos.push(r); });
+      for (const f of toLoad) {
+        const data = await resizeImage(f, 900, 0.82);
+        if (!data) continue;
+        const url = await uploadProfImage(data, 'gal_' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.jpg');
+        galleryPhotos.push(url || data);
+      }
       document.getElementById('gallery-file-input').value = '';
       renderGalleryGrid();
     }
@@ -858,6 +882,9 @@
       };
 
       const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      // Only store Storage URLs (http*) in Supabase — never base64
+      const fotoDb = (pendingProf.foto && pendingProf.foto.startsWith('http')) ? pendingProf.foto : null;
+      const galeriaDb = (pendingProf.galeria || []).filter(u => u && u.startsWith('http'));
       const dbPayload = {
         nombre: pendingProf.nombre,
         titulo: pendingProf.titulo,
@@ -872,6 +899,8 @@
         telefono: pendingProf.telefono,
         email_contacto: pendingProf.email_contacto,
         servicios: pendingProf.servicios,
+        foto: fotoDb,
+        galeria: galeriaDb,
         usuario_id: pendingProf.usuario_id
       };
 
