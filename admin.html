@@ -3248,11 +3248,14 @@
     showToast('Negocio eliminado.', 'warning');
   }
 
-  function deleteProfesional(id) {
+  async function deleteProfesional(id) {
+    if (!await verifyAdminRealtime()) return;
     let profesionales = [];
     try { profesionales = JSON.parse(localStorage.getItem('kehila_professionals') || '[]'); } catch(_) {}
     profesionales = profesionales.filter(p => p.id !== id);
     localStorage.setItem('kehila_professionals', JSON.stringify(profesionales));
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) { try { await sb.from('profesionales').delete().eq('id', id); } catch(_) {} }
     const row = document.getElementById('prof-row-' + id);
     if (row) row.remove();
     const count = document.getElementById('profesionales-admin-body').querySelectorAll('tr').length;
