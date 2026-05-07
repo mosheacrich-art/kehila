@@ -148,20 +148,35 @@
     .foto-upload-box:hover { border-color:var(--color-primary); }
     .foto-upload-box img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
 
-    /* galería de experiencia */
+    /* galería de experiencia (formulario) */
     .gallery-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
     @media(max-width:480px){ .gallery-grid { grid-template-columns:repeat(2,1fr); } }
-    .gallery-thumb { position:relative; aspect-ratio:1; border-radius:var(--radius-sm); overflow:hidden; background:var(--color-bg); border:1px solid var(--color-border); }
+    .gallery-thumb { position:relative; aspect-ratio:4/3; border-radius:var(--radius-sm); overflow:hidden; background:var(--color-bg); border:1px solid var(--color-border); }
     .gallery-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
-    .gallery-thumb-remove { position:absolute; top:4px; right:4px; width:22px; height:22px; background:rgba(0,0,0,.6); color:#fff; border:none; border-radius:50%; cursor:pointer; font-size:13px; line-height:22px; text-align:center; padding:0; transition:background var(--transition-fast); }
-    .gallery-thumb-remove:hover { background:rgba(220,38,38,.85); }
-    .gallery-add-btn { aspect-ratio:1; border:2px dashed var(--color-border); border-radius:var(--radius-sm); background:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--color-text-muted); font-size:0.72rem; font-family:var(--font-ui); transition:all var(--transition-fast); }
+    .gallery-thumb-remove { position:absolute; top:4px; right:4px; width:22px; height:22px; background:rgba(0,0,0,.6); color:#fff; border:none; border-radius:50%; cursor:pointer; font-size:13px; line-height:22px; text-align:center; padding:0; }
+    .gallery-thumb-remove:hover { background:rgba(220,38,38,.9); }
+    .gallery-add-btn { aspect-ratio:4/3; border:2px dashed var(--color-border); border-radius:var(--radius-sm); background:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--color-text-muted); font-size:0.72rem; font-family:var(--font-ui); transition:all var(--transition-fast); }
     .gallery-add-btn:hover { border-color:var(--color-primary); color:var(--color-primary); }
     .gallery-add-btn svg { width:22px; height:22px; }
     /* galería en modal de perfil */
-    .prof-gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:10px; }
-    .prof-gallery img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:var(--radius-sm); cursor:pointer; transition:opacity var(--transition-fast); }
-    .prof-gallery img:hover { opacity:.85; }
+    .prof-gallery { display:grid; gap:6px; margin-top:10px; }
+    .prof-gallery.n1 { grid-template-columns:1fr; }
+    .prof-gallery.n2 { grid-template-columns:1fr 1fr; }
+    .prof-gallery.n3 { grid-template-columns:1fr 1fr 1fr; }
+    .prof-gallery.n4 { grid-template-columns:1fr 1fr; }
+    .prof-gallery.n5,.prof-gallery.n6 { grid-template-columns:1fr 1fr 1fr; }
+    .prof-gallery img { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:var(--radius-sm); cursor:pointer; display:block; transition:transform .15s,box-shadow .15s; box-shadow:var(--shadow-sm); }
+    .prof-gallery img:hover { transform:scale(1.02); box-shadow:var(--shadow-md); }
+    /* lightbox */
+    .lightbox-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:9000; align-items:center; justify-content:center; cursor:zoom-out; }
+    .lightbox-overlay.open { display:flex; }
+    .lightbox-overlay img { max-width:90vw; max-height:90vh; border-radius:8px; object-fit:contain; box-shadow:0 0 60px rgba(0,0,0,.5); }
+    /* owner card actions */
+    .card-owner-bar { display:flex; gap:6px; border-top:1px solid var(--color-border); padding-top:10px; margin-top:4px; }
+    .btn-card-edit { flex:1; padding:6px 10px; background:none; border:1px solid var(--color-border); border-radius:var(--radius-sm); font-size:0.75rem; color:var(--color-text-muted); cursor:pointer; font-family:var(--font-ui); transition:all var(--transition-fast); }
+    .btn-card-edit:hover { border-color:var(--color-primary); color:var(--color-primary); }
+    .btn-card-delete { padding:6px 10px; background:none; border:1px solid #fca5a5; border-radius:var(--radius-sm); font-size:0.75rem; color:#dc2626; cursor:pointer; font-family:var(--font-ui); transition:all var(--transition-fast); }
+    .btn-card-delete:hover { background:#fee2e2; }
   </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
@@ -428,20 +443,46 @@
     </div>
   </div>
 
+  <!-- Lightbox -->
+  <div class="lightbox-overlay" id="lightbox" onclick="this.classList.remove('open')">
+    <img id="lightbox-img" src="" alt="">
+  </div>
+
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
   <script>
+    /* ── Utilidad resize imagen ── */
+    function resizeImage(file, maxDim, quality) {
+      return new Promise(resolve => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w >= h) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(c.toDataURL('image/jpeg', quality || 0.82));
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+        img.src = url;
+      });
+    }
+
     /* ── Prof photo upload ── */
-    document.getElementById('prof-img-file').addEventListener('change', function() {
-      var file = this.files[0]; if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('prof-img-preview').src = e.target.result;
-        document.getElementById('prof-img-ph').style.display = 'none';
-        document.getElementById('prof-img-filled').style.display = 'block';
-      };
-      reader.readAsDataURL(file);
+    document.getElementById('prof-img-file').addEventListener('change', async function() {
+      const file = this.files[0]; if (!file) return;
+      const data = await resizeImage(file, 300, 0.85);
+      if (!data) return;
+      document.getElementById('prof-img-preview').src = data;
+      document.getElementById('prof-img-ph').style.display = 'none';
+      document.getElementById('prof-img-filled').style.display = 'block';
+      this.value = '';
     });
     function clearProfImg() {
       document.getElementById('prof-img-file').value = '';
@@ -454,16 +495,54 @@
       return (img && img.src && img.src.startsWith('data:')) ? img.src : null;
     }
 
+    /* ── Lightbox ── */
+    function openLightbox(src) {
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox').classList.add('open');
+    }
+
     const PROFESSIONALS_KEY = 'kehila_professionals';
 
     function loadProfessionals() {
       try { return JSON.parse(localStorage.getItem(PROFESSIONALS_KEY) || '[]'); } catch(e) { return []; }
     }
     function saveProfessionals(list) {
-      localStorage.setItem(PROFESSIONALS_KEY, JSON.stringify(list));
+      try { localStorage.setItem(PROFESSIONALS_KEY, JSON.stringify(list)); } catch(e) { /* quota */ }
     }
 
-    let PROFESSIONALS = loadProfessionals();
+    let PROFESSIONALS = [];
+
+    async function initProfessionals() {
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (sb) {
+        try {
+          const { data, error } = await sb.from('profesionales').select('*').order('created_at', { ascending: false });
+          if (!error && data && data.length > 0) {
+            // Supabase es la fuente de verdad; enriquecemos con datos locales (galería/foto = base64)
+            const localMap = {};
+            loadProfessionals().forEach(p => { if (p.id) localMap[String(p.id)] = p; });
+            PROFESSIONALS = data.map(p => {
+              const lp = localMap[String(p.id)] || {};
+              return {
+                color: String(Math.floor(Math.random() * 8)),
+                ...lp,
+                ...p,
+                galeria: lp.galeria || [],
+                foto: lp.foto || null,
+                servicios: p.servicios || lp.servicios || [],
+                idiomas: p.idiomas || lp.idiomas || ['ES']
+              };
+            });
+            saveProfessionals(PROFESSIONALS);
+          } else {
+            PROFESSIONALS = loadProfessionals();
+          }
+        } catch(e) { PROFESSIONALS = loadProfessionals(); }
+      } else {
+        PROFESSIONALS = loadProfessionals();
+      }
+      renderProfessionals();
+    }
 
     const REVIEWS_MOCK = {
       default: [{ autor:'Miembro comunidad', texto:'Excelente profesional, muy recomendable.' }, { autor:'Usuario verificado', texto:'Muy buena experiencia, volvería a contratar.' }, { autor:'Jabad Barcelona', texto:'Un profesional que aporta mucho a nuestra comunidad.' }]
@@ -501,31 +580,35 @@
         return;
       }
 
-      grid.innerHTML = filtered.map(p => `
+      const me = getCurrentUser();
+      grid.innerHTML = filtered.map(p => {
+        const isOwner = me && p.usuario_id && String(p.usuario_id) === String(me.userId);
+        return `
         <div class="prof-card">
-          ${p.foto ? `<img src="${p.foto}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 4px;display:block;">` : `<div class="prof-avatar" data-color="${p.color}">${p.nombre.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>`}
+          ${p.foto ? `<img src="${p.foto}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 4px;display:block;">` : `<div class="prof-avatar" data-color="${p.color||'0'}">${p.nombre.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>`}
           <div class="prof-name">${p.nombre}</div>
           <div style="text-align:center"><span class="prof-badge-main">${p.especialidad}</span></div>
-          <p class="prof-bio">${p.bio}</p>
+          <p class="prof-bio">${p.bio||''}</p>
           <div class="prof-meta">
             <span class="prof-meta-item">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
-              ${p.ciudad}
+              ${p.ciudad||''}
             </span>
-            <span class="prof-meta-item">· ${p.experiencia} años exp.</span>
-            <span style="background:var(--color-info-light);color:var(--color-info);font-size:0.68rem;font-weight:600;padding:2px 8px;border-radius:var(--radius-full);">${p.modalidad}</span>
+            <span class="prof-meta-item">· ${p.experiencia||0} años exp.</span>
+            <span style="background:var(--color-info-light);color:var(--color-info);font-size:0.68rem;font-weight:600;padding:2px 8px;border-radius:var(--radius-full);">${p.modalidad||''}</span>
           </div>
-          <div class="prof-langs">${p.idiomas.map(l=>`<span class="lang-pill">${l}</span>`).join('')}</div>
+          <div class="prof-langs">${(p.idiomas||[]).map(l=>`<span class="lang-pill">${l}</span>`).join('')}</div>
           <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div class="prof-rating">${getStars(p.rating)} ${p.rating} <span style="font-weight:400;color:var(--color-text-muted);font-size:0.75rem">(${p.valoraciones})</span></div>
-            <span class="prof-price">${p.precio}</span>
+            <div class="prof-rating">${getStars(p.rating||0)} ${p.rating||0} <span style="font-weight:400;color:var(--color-text-muted);font-size:0.75rem">(${p.valoraciones||0})</span></div>
+            <span class="prof-price">${p.precio||''}</span>
           </div>
           <div class="prof-actions">
             <button class="btn-outline-primary" onclick="openPerfil('${p.id}')">Ver perfil</button>
             <button class="btn-gold" onclick="openSesion('${p.id}')">Contactar</button>
           </div>
-        </div>
-      `).join('');
+          ${isOwner ? `<div class="card-owner-bar"><button class="btn-card-edit" onclick="editarMiPerfil('${p.id}')">✏ Editar mi perfil</button><button class="btn-card-delete" onclick="eliminarMiPerfil('${p.id}')">Eliminar</button></div>` : ''}
+        </div>`;
+      }).join('');
     }
 
     function openPerfil(id) {
@@ -547,8 +630,8 @@
         ${(p.galeria && p.galeria.length) ? `
         <div>
           <div class="section-divider">Fotos de experiencia</div>
-          <div class="prof-gallery">
-            ${p.galeria.map(src => `<img src="${src}" onclick="this.requestFullscreen&&this.requestFullscreen()" alt="foto experiencia">`).join('')}
+          <div class="prof-gallery n${Math.min(p.galeria.length,6)}">
+            ${p.galeria.map(src => `<img src="${src}" onclick="openLightbox('${src}')" alt="foto experiencia">`).join('')}
           </div>
         </div>` : ''}
         <div>
@@ -595,8 +678,71 @@
       showToast(`Solicitud enviada a ${currentProf.nombre}. Te responderá en máximo 24h.`, 'success');
     }
 
+    let editingProfId = null;
+
     function openOfrecerModal() {
+      editingProfId = null;
+      document.querySelector('#modalOfrecer .modal-title').textContent = 'Publica tu perfil profesional';
+      document.querySelector('#modalOfrecer .btn-publish-prof').textContent = 'Publicar perfil';
       document.getElementById('modalOfrecer').classList.add('open');
+    }
+
+    function editarMiPerfil(id) {
+      const p = PROFESSIONALS.find(x => String(x.id) === String(id));
+      if (!p) return;
+      editingProfId = id;
+      document.querySelector('#modalOfrecer .modal-title').textContent = 'Editar mi perfil';
+      document.querySelector('#modalOfrecer .btn-publish-prof').textContent = 'Guardar cambios';
+
+      document.getElementById('ofrecerCat').value = p.especialidad || '';
+      document.getElementById('ofrecerTitulo').value = p.titulo || '';
+      document.getElementById('ofrecerBio').value = p.bio || '';
+      document.getElementById('ofrecerBioCount').textContent = (p.bio || '').length;
+      document.getElementById('ofrecerFormacion').value = p.formacion || '';
+      document.getElementById('ofrecerExp').value = p.experiencia || '';
+      document.getElementById('ofrecerPrecio').value = p.precio || '';
+      document.getElementById('ofrecerCiudad').value = p.ciudad || '';
+      document.getElementById('ofrecerTelefono').value = p.telefono || '';
+      document.getElementById('ofrecerEmail').value = p.email_contacto || '';
+
+      const modRadio = document.querySelector(`input[name="ofrecerMod"][value="${p.modalidad}"]`);
+      if (modRadio) modRadio.checked = true;
+
+      const LANG_IDX = {ES:0, EN:1, HE:2, FR:3, AR:4};
+      const cbs = document.querySelectorAll('#modalOfrecer .lang-check-item input[type="checkbox"]');
+      cbs.forEach(cb => cb.checked = false);
+      (p.idiomas || []).forEach(l => { const i = LANG_IDX[l]; if (i !== undefined && cbs[i]) cbs[i].checked = true; });
+
+      const list = document.getElementById('serviciosList');
+      list.innerHTML = '';
+      const svcs = (p.servicios && p.servicios.length) ? p.servicios : [{ nombre:'', precio:'' }];
+      svcs.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'service-row';
+        row.innerHTML = `<input type="text" class="form-input svc-name" value="${s.nombre||''}" placeholder="Ej: Clase individual"><input type="text" class="form-input svc-price" value="${s.precio||''}" placeholder="40€/h"><button type="button" class="btn-remove-svc" onclick="removeServiceRow(this)">×</button>`;
+        list.appendChild(row);
+      });
+
+      if (p.foto) {
+        document.getElementById('prof-img-preview').src = p.foto;
+        document.getElementById('prof-img-ph').style.display = 'none';
+        document.getElementById('prof-img-filled').style.display = 'block';
+      } else { clearProfImg(); }
+
+      galleryPhotos = [...(p.galeria || [])];
+      renderGalleryGrid();
+
+      document.getElementById('modalOfrecer').classList.add('open');
+    }
+
+    async function eliminarMiPerfil(id) {
+      if (!confirm('¿Seguro que quieres eliminar tu perfil profesional? Esta acción no se puede deshacer.')) return;
+      PROFESSIONALS = PROFESSIONALS.filter(p => String(p.id) !== String(id));
+      saveProfessionals(PROFESSIONALS);
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (sb) { try { await sb.from('profesionales').delete().eq('id', id); } catch(_) {} }
+      renderProfessionals();
+      showToast('Perfil eliminado correctamente.', 'success');
     }
 
     /* ── Galería ── */
@@ -622,20 +768,13 @@
       }
     }
 
-    function handleGalleryFiles(files) {
+    async function handleGalleryFiles(files) {
       const remaining = 6 - galleryPhotos.length;
       const toLoad = Array.from(files).slice(0, remaining);
-      let loaded = 0;
-      toLoad.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          galleryPhotos.push(e.target.result);
-          loaded++;
-          if (loaded === toLoad.length) renderGalleryGrid();
-        };
-        reader.readAsDataURL(file);
-      });
+      const results = await Promise.all(toLoad.map(f => resizeImage(f, 900, 0.82)));
+      results.forEach(r => { if (r) galleryPhotos.push(r); });
       document.getElementById('gallery-file-input').value = '';
+      renderGalleryGrid();
     }
 
     function removeGalleryPhoto(i) {
@@ -718,26 +857,42 @@
         usuario_id: user?.userId || null
       };
 
-      // Guardar en localStorage
-      PROFESSIONALS.unshift(pendingProf);
-      saveProfessionals(PROFESSIONALS);
-
-      // Guardar en Supabase
       const sb = typeof getSupabase === 'function' ? getSupabase() : null;
-      if (sb) {
-        sb.from('profesionales').insert({
-          nombre: pendingProf.nombre,
-          titulo: pendingProf.titulo,
-          especialidad: pendingProf.especialidad,
-          ciudad: pendingProf.ciudad,
-          modalidad: pendingProf.modalidad,
-          experiencia: pendingProf.experiencia,
-          idiomas: pendingProf.idiomas,
-          precio: pendingProf.precio,
-          bio: pendingProf.bio,
-          formacion: pendingProf.formacion,
-          usuario_id: pendingProf.usuario_id
-        }).then(() => {}).catch(() => {});
+      const dbPayload = {
+        nombre: pendingProf.nombre,
+        titulo: pendingProf.titulo,
+        especialidad: pendingProf.especialidad,
+        ciudad: pendingProf.ciudad,
+        modalidad: pendingProf.modalidad,
+        experiencia: pendingProf.experiencia,
+        idiomas: pendingProf.idiomas,
+        precio: pendingProf.precio,
+        bio: pendingProf.bio,
+        formacion: pendingProf.formacion,
+        telefono: pendingProf.telefono,
+        email_contacto: pendingProf.email_contacto,
+        servicios: pendingProf.servicios,
+        usuario_id: pendingProf.usuario_id
+      };
+
+      if (editingProfId) {
+        // UPDATE
+        const idx = PROFESSIONALS.findIndex(p => String(p.id) === String(editingProfId));
+        if (idx !== -1) PROFESSIONALS[idx] = { ...PROFESSIONALS[idx], ...pendingProf, id: PROFESSIONALS[idx].id };
+        saveProfessionals(PROFESSIONALS);
+        if (sb) sb.from('profesionales').update(dbPayload).eq('id', editingProfId).then(()=>{}).catch(()=>{});
+        editingProfId = null;
+      } else {
+        // INSERT
+        PROFESSIONALS.unshift(pendingProf);
+        saveProfessionals(PROFESSIONALS);
+        if (sb) sb.from('profesionales').insert(dbPayload).then(async ({ data }) => {
+          // Si Supabase devuelve el ID real, actualizamos el local
+          if (data && data[0] && data[0].id) {
+            const idx = PROFESSIONALS.findIndex(p => p.id === pendingProf.id);
+            if (idx !== -1) { PROFESSIONALS[idx].id = data[0].id; saveProfessionals(PROFESSIONALS); }
+          }
+        }).catch(()=>{});
       }
 
       renderProfessionals();
@@ -772,7 +927,7 @@
     } else {
       document.body.classList.add('in-iframe');
     }
-    renderProfessionals();
+    initProfessionals();
   </script>
   <script>
     if ("serviceWorker" in navigator) {
