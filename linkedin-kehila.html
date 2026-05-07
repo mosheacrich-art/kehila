@@ -445,21 +445,18 @@
       return (img && img.src && img.src.startsWith('data:')) ? img.src : null;
     }
 
-    const PROFESSIONALS = [
-      { id:'p1', nombre:'Rabino Moshé Katz', especialidad:'Profesor Bar Mitzvá', ciudad:'Madrid', modalidad:'Presencial', experiencia:15, idiomas:['ES','HE'], rating:4.9, valoraciones:47, precio:'Desde €60/h', bio:'Especialista en preparación de Bar y Bat Mitzvá con más de 15 años de experiencia. Método personalizado adaptado a cada alumno y su familia.', color:'0', formacion:'Semicha del Beit Din de Madrid. Licenciado en Ciencias de la Educación. Formación pedagógica avanzada.' },
-      { id:'p2', nombre:'Dvora Mizrahi', especialidad:'Profesora Hebreo', ciudad:'Barcelona', modalidad:'Online', experiencia:8, idiomas:['ES','EN','HE'], rating:4.8, valoraciones:32, precio:'Desde €45/h', bio:'Profesora nativa de hebreo moderno y bíblico. Clases para todos los niveles, desde principiantes hasta avanzados. Método comunicativo y dinámico.', color:'1', formacion:'Licenciada en Filología Hebrea por la Universidad Hebrea de Jerusalén. Certificación de enseñanza de hebreo como segunda lengua.' },
-      { id:'p3', nombre:'Iosef Ben David', especialidad:'Sofer STaM', ciudad:'Madrid', modalidad:'Presencial', experiencia:20, idiomas:['ES','HE'], rating:4.9, valoraciones:18, precio:'A consultar', bio:'Sofer certificado especialista en mezuzot, tefilim y meguilot. Verificación y restauración de klaf. Cada pieza escrita con máxima precisión halachica.', color:'2', formacion:'Formación en scritura sagrada en Bnei Brak. Certificación del Vaad Mishmeret STaM. 20 años de práctica continua.' },
-      { id:'p4', nombre:'Lea Cohen', especialidad:'Tutora académica', ciudad:'Barcelona', modalidad:'Online', experiencia:6, idiomas:['ES','EN'], rating:4.7, valoraciones:24, precio:'Desde €35/h', bio:'Tutora de matemáticas, física y química para ESO y Bachillerato. Método claro y estructurado con resultados probados en selectividad.', color:'3', formacion:'Grado en Ingeniería por la UPC. Máster en Pedagogía. Experiencia en academia desde 2018.' },
-      { id:'p5', nombre:'Jazán Aaron Peretz', especialidad:'Músico/Jazán', ciudad:'Madrid', modalidad:'Ambos', experiencia:12, idiomas:['ES','HE'], rating:5.0, valoraciones:28, precio:'A consultar', bio:'Jazán con voz de tenor. Especialista en bodas, Bar y Bat Mitzvá y eventos comunitarios. Estilo sefaradí tradicional y repertorio moderno.', color:'4', formacion:'Conservatorio Superior de Música de Madrid. Formación en hazanut sefaradí con maestros en Israel.' },
-      { id:'p6', nombre:'David Levi', especialidad:'Profesor Torah adultos', ciudad:'Online', modalidad:'Online', experiencia:10, idiomas:['EN','HE'], rating:4.8, valoraciones:41, precio:'Desde €50/h', bio:'Shiurim personalizados en Torah, Talmud y Halaká para adultos. Enfoque académico y práctico. Ideal para baalei teshuva y aquellos que desean profundizar.', color:'5', formacion:'Yeshivá Kerem B\'Yavneh. Semicha. Doctorado en Talmud por la Universidad Bar-Ilan.' },
-      { id:'p7', nombre:'Miriam Goldberg', especialidad:'Orientadora espiritual', ciudad:'Online', modalidad:'Online', experiencia:9, idiomas:['ES','EN'], rating:4.9, valoraciones:37, precio:'Desde €70/h', bio:'Acompañamiento espiritual en el retorno a la práctica judía y orientación personal desde una perspectiva judía contemporánea.', color:'6', formacion:'Máster en Psicología Humanista. Formación en orientación espiritual judía. Supervisada por el Beit Din de Madrid.' },
-      { id:'p8', nombre:'Yair Katz', especialidad:'Fotógrafo smajot', ciudad:'Madrid/BCN', modalidad:'Presencial', experiencia:7, idiomas:['ES','EN'], rating:5.0, valoraciones:61, precio:'Desde €400/evento', bio:'Fotógrafo especialista en smajot judíos. Bar y Bat Mitzvá, bodas y brit milá. Estilo reportaje natural que captura la emoción de cada momento.', color:'7', formacion:'Escuela de Fotografía EFTI Madrid. Especialización en fotografía de eventos y celebraciones. Portfolio disponible bajo solicitud.' }
-    ];
+    const PROFESSIONALS_KEY = 'kehila_professionals';
+
+    function loadProfessionals() {
+      try { return JSON.parse(localStorage.getItem(PROFESSIONALS_KEY) || '[]'); } catch(e) { return []; }
+    }
+    function saveProfessionals(list) {
+      localStorage.setItem(PROFESSIONALS_KEY, JSON.stringify(list));
+    }
+
+    let PROFESSIONALS = loadProfessionals();
 
     const REVIEWS_MOCK = {
-      p1: [{ autor:'Familia Benveniste', texto:'Moshé preparó a nuestro hijo para su Bar Mitzvá de forma excepcional. El niño disfrutó cada clase y el resultado fue emocionante.' }, { autor:'Rachel A.', texto:'Muy profesional y paciente. Adapta su método a cada alumno.' }, { autor:'David M.', texto:'Altamente recomendado. Sabe transmitir no solo el texto sino el significado.' }],
-      p2: [{ autor:'Sara T.', texto:'Dvora es una profesora increíble. En 6 meses pasé de cero a poder leer el siddur.' }, { autor:'Avi G.', texto:'Clases muy dinámicas, nunca me aburro. Aprendo muchísimo en cada sesión.' }, { autor:'Noa B.', texto:'Perfecta para comenzar con el hebreo. Mucha paciencia y claridad.' }],
-      p3: [{ autor:'Beit El Madrid', texto:'Las mezuzot de Iosef son kasher al 100%. Lleva años sirviendo a nuestra comunidad.' }, { autor:'Moshe G.', texto:'Verificó mis tefilim y me explicó todo el proceso. Muy serio y profesional.' }, { autor:'Admin', texto:'De confianza total. Lo recomendamos para toda la comunidad.' }],
       default: [{ autor:'Miembro comunidad', texto:'Excelente profesional, muy recomendable.' }, { autor:'Usuario verificado', texto:'Muy buena experiencia, volvería a contratar.' }, { autor:'Jabad Barcelona', texto:'Un profesional que aporta mucho a nuestra comunidad.' }]
     };
 
@@ -572,27 +569,49 @@
     }
 
     function publicarPerfil() {
+      const cat = document.getElementById('ofrecerCat').value;
+      if (!cat) { showToast('Selecciona una categoría para continuar.', 'error'); return; }
+
       const foto = getProfImg();
-      const nombre = getCurrentUser()?.name || 'Nuevo profesional';
+      const user = getCurrentUser();
+      const nombre = document.getElementById('ofrecerTitulo').value.trim() || user?.name || 'Nuevo profesional';
+
+      const idiomasChecked = [];
+      const checks = document.querySelectorAll('#modalOfrecer .np-check-item input[type="checkbox"]');
+      const LANG_MAP = ['ES','EN','HE','FR','AR'];
+      checks.forEach((cb, i) => { if (cb.checked && LANG_MAP[i]) idiomasChecked.push(LANG_MAP[i]); });
+
       const newProf = {
-        id: 'p_new_' + Date.now(),
-        nombre,
-        especialidad: document.querySelector('#modalOfrecer .form-select')?.value || 'Profesional',
-        ciudad: document.querySelector('#modalOfrecer input[placeholder="Ej: Madrid"]')?.value || 'España',
+        id: 'p_' + Date.now(),
+        nombre: user?.name || nombre,
+        titulo: nombre,
+        especialidad: cat,
+        ciudad: document.getElementById('ofrecerCiudad').value.trim() || 'España',
         modalidad: document.querySelector('input[name="ofrecerMod"]:checked')?.value || 'Online',
-        experiencia: parseInt(document.querySelector('#modalOfrecer input[placeholder="5"]')?.value) || 0,
-        idiomas: ['ES'],
+        experiencia: parseInt(document.getElementById('ofrecerExp').value) || 0,
+        idiomas: idiomasChecked.length ? idiomasChecked : ['ES'],
         rating: 0, valoraciones: 0,
-        precio: document.querySelector('#modalOfrecer input[placeholder="Ej: Desde €40/h"]')?.value || 'A consultar',
-        bio: document.getElementById('ofrecerBio')?.value || '',
+        precio: document.getElementById('ofrecerPrecio').value.trim() || 'A consultar',
+        bio: document.getElementById('ofrecerBio').value.trim(),
         color: String(Math.floor(Math.random() * 8)),
-        formacion: document.querySelector('#modalOfrecer input[placeholder*="Semicha"]')?.value || '',
-        foto
+        formacion: document.getElementById('ofrecerFormacion').value.trim(),
+        foto,
+        pendiente: true
       };
+
       PROFESSIONALS.unshift(newProf);
+      saveProfessionals(PROFESSIONALS);
       renderProfessionals();
       closeModal('modalOfrecer');
       clearProfImg();
+      document.getElementById('ofrecerCat').value = '';
+      document.getElementById('ofrecerTitulo').value = '';
+      document.getElementById('ofrecerBio').value = '';
+      document.getElementById('ofrecerBioCount').textContent = '0';
+      document.getElementById('ofrecerFormacion').value = '';
+      document.getElementById('ofrecerExp').value = '';
+      document.getElementById('ofrecerPrecio').value = '';
+      document.getElementById('ofrecerCiudad').value = '';
       showToast('Tu perfil ha sido enviado para revisión. El equipo lo aprobará en 24-48h.', 'success');
     }
 
