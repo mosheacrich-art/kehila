@@ -128,6 +128,21 @@
     .btn-publish-prof { width:100%; padding:14px; background:linear-gradient(135deg,var(--color-primary) 0%,#2A4080 100%); color:#fff; border:none; border-radius:var(--radius-md); font-size:1rem; font-weight:700; cursor:pointer; font-family:var(--font-ui); transition:all var(--transition-fast); box-shadow:var(--shadow-md); margin-top:4px; }
     .btn-publish-prof:hover { transform:translateY(-1px); box-shadow:var(--shadow-lg); }
 
+    /* servicios dinámicos */
+    .services-list { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+    .service-row { display:flex; gap:8px; align-items:center; }
+    .service-row .svc-name { flex:1; }
+    .service-row .svc-price { width:120px; flex-shrink:0; }
+    .btn-remove-svc { width:30px; height:30px; border:none; background:var(--color-bg); border-radius:var(--radius-sm); cursor:pointer; color:var(--color-text-muted); font-size:1.1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background var(--transition-fast); padding:0; }
+    .btn-remove-svc:hover { background:#fee2e2; color:#dc2626; }
+    .btn-add-svc { padding:8px 14px; border:1.5px dashed var(--color-border); border-radius:var(--radius-sm); background:none; color:var(--color-text-muted); font-family:var(--font-ui); font-size:0.8rem; cursor:pointer; width:100%; margin-top:6px; transition:all var(--transition-fast); }
+    .btn-add-svc:hover { border-color:var(--color-primary); color:var(--color-primary); }
+    .svc-header { display:flex; gap:8px; margin-bottom:4px; }
+    .svc-header span { font-size:0.72rem; font-weight:600; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:.04em; }
+    .svc-header .sh-name { flex:1; }
+    .svc-header .sh-price { width:120px; flex-shrink:0; }
+    .svc-header .sh-gap { width:30px; flex-shrink:0; }
+
     /* foto perfil upload */
     .foto-upload-box { width:80px; height:80px; border:2px dashed var(--color-border); border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; background:var(--color-bg); overflow:hidden; flex-shrink:0; transition:border-color var(--transition-fast); }
     .foto-upload-box:hover { border-color:var(--color-primary); }
@@ -296,6 +311,16 @@
                 </div>
               </div>
             </div>
+            <div class="form-row" style="margin-top:4px">
+              <div class="form-group">
+                <label class="form-label">WhatsApp / Teléfono</label>
+                <input type="tel" class="form-input" id="ofrecerTelefono" placeholder="+34 600 000 000">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email de contacto <span style="font-weight:400;color:var(--color-text-muted)">(opcional)</span></label>
+                <input type="email" class="form-input" id="ofrecerEmail" placeholder="tu@email.com">
+              </div>
+            </div>
           </div>
 
           <!-- Perfil profesional -->
@@ -323,9 +348,25 @@
                 <input type="number" class="form-input" id="ofrecerExp" min="0" max="50" placeholder="5">
               </div>
               <div class="form-group">
-                <label class="form-label">Precio orientativo</label>
+                <label class="form-label">Precio orientativo (tarjeta)</label>
                 <input type="text" class="form-input" id="ofrecerPrecio" placeholder="Desde €40/h">
               </div>
+            </div>
+            <div class="form-group" style="margin-top:4px">
+              <label class="form-label">Servicios y tarifas <span style="font-weight:400;color:var(--color-text-muted)">(hasta 6)</span></label>
+              <div class="svc-header">
+                <span class="sh-name">Servicio</span>
+                <span class="sh-price">Precio</span>
+                <span class="sh-gap"></span>
+              </div>
+              <div class="services-list" id="serviciosList">
+                <div class="service-row">
+                  <input type="text" class="form-input svc-name" placeholder="Ej: Clase individual">
+                  <input type="text" class="form-input svc-price" placeholder="40€/h">
+                  <button type="button" class="btn-remove-svc" onclick="removeServiceRow(this)">×</button>
+                </div>
+              </div>
+              <button type="button" class="btn-add-svc" onclick="addServiceRow()">+ Añadir servicio</button>
             </div>
           </div>
 
@@ -484,6 +525,21 @@
           <div class="section-divider">Formación y certificaciones</div>
           <p style="font-size:0.875rem;color:var(--color-text-muted);line-height:1.6;margin-top:10px">${p.formacion}</p>
         </div>
+        ${(p.servicios && p.servicios.length) ? `
+        <div>
+          <div class="section-divider">Servicios y tarifas</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+            ${p.servicios.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--color-bg);border-radius:var(--radius-sm);font-size:0.875rem"><span style="color:var(--color-text)">${s.nombre}</span><span style="font-weight:700;color:var(--color-primary)">${s.precio}</span></div>`).join('')}
+          </div>
+        </div>` : ''}
+        ${(p.telefono || p.email_contacto) ? `
+        <div>
+          <div class="section-divider">Contacto directo</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+            ${p.telefono ? `<a href="https://wa.me/${p.telefono.replace(/\D/g,'')}" target="_blank" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:#25D366;color:white;border-radius:var(--radius-sm);font-size:0.8rem;font-weight:700;text-decoration:none">WhatsApp · ${p.telefono}</a>` : ''}
+            ${p.email_contacto ? `<a href="mailto:${p.email_contacto}" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:1.5px solid var(--color-border);color:var(--color-text);border-radius:var(--radius-sm);font-size:0.8rem;font-weight:600;text-decoration:none">${p.email_contacto}</a>` : ''}
+          </div>
+        </div>` : ''}
         <div>
           <div class="section-divider">Valoraciones de la comunidad</div>
           <div class="modal-reviews" style="margin-top:10px">
@@ -513,6 +569,38 @@
       document.getElementById('modalOfrecer').classList.add('open');
     }
 
+    function addServiceRow() {
+      const list = document.getElementById('serviciosList');
+      if (list.children.length >= 6) { showToast('Máximo 6 servicios.', 'error'); return; }
+      const row = document.createElement('div');
+      row.className = 'service-row';
+      row.innerHTML = '<input type="text" class="form-input svc-name" placeholder="Ej: Clase individual"><input type="text" class="form-input svc-price" placeholder="40€/h"><button type="button" class="btn-remove-svc" onclick="removeServiceRow(this)">×</button>';
+      list.appendChild(row);
+    }
+
+    function removeServiceRow(btn) {
+      const list = document.getElementById('serviciosList');
+      if (list.children.length <= 1) { btn.closest('.service-row').querySelectorAll('input').forEach(i => i.value = ''); return; }
+      btn.closest('.service-row').remove();
+    }
+
+    function getServicios() {
+      const rows = document.querySelectorAll('#serviciosList .service-row');
+      const result = [];
+      rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        const nombre = inputs[0].value.trim();
+        const precio = inputs[1].value.trim();
+        if (nombre) result.push({ nombre, precio: precio || 'A consultar' });
+      });
+      return result;
+    }
+
+    function resetServiciosList() {
+      const list = document.getElementById('serviciosList');
+      list.innerHTML = '<div class="service-row"><input type="text" class="form-input svc-name" placeholder="Ej: Clase individual"><input type="text" class="form-input svc-price" placeholder="40€/h"><button type="button" class="btn-remove-svc" onclick="removeServiceRow(this)">×</button></div>';
+    }
+
     let pendingProf = null;
 
     function publicarPerfil() {
@@ -526,6 +614,7 @@
       const LANG_MAP = ['ES','EN','HE','FR','AR'];
       checks.forEach((cb, i) => { if (cb.checked && LANG_MAP[i]) idiomasChecked.push(LANG_MAP[i]); });
 
+      const servicios = getServicios();
       pendingProf = {
         id: 'p_' + Date.now(),
         nombre: user?.name || 'Profesional',
@@ -536,10 +625,13 @@
         experiencia: parseInt(document.getElementById('ofrecerExp').value) || 0,
         idiomas: idiomasChecked.length ? idiomasChecked : ['ES'],
         rating: 0, valoraciones: 0,
-        precio: document.getElementById('ofrecerPrecio').value.trim() || 'A consultar',
+        precio: document.getElementById('ofrecerPrecio').value.trim() || (servicios[0] ? servicios[0].precio : 'A consultar'),
         bio: document.getElementById('ofrecerBio').value.trim(),
         color: String(Math.floor(Math.random() * 8)),
         formacion: document.getElementById('ofrecerFormacion').value.trim(),
+        telefono: document.getElementById('ofrecerTelefono').value.trim(),
+        email_contacto: document.getElementById('ofrecerEmail').value.trim(),
+        servicios,
         foto,
         usuario_id: user?.userId || null
       };
@@ -577,6 +669,9 @@
       document.getElementById('ofrecerExp').value = '';
       document.getElementById('ofrecerPrecio').value = '';
       document.getElementById('ofrecerCiudad').value = '';
+      document.getElementById('ofrecerTelefono').value = '';
+      document.getElementById('ofrecerEmail').value = '';
+      resetServiciosList();
       pendingProf = null;
       showToast('Perfil publicado correctamente.', 'success');
     }
