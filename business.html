@@ -1467,6 +1467,7 @@
                   descripcion: n.descripcion || '', descripcionCorta: (n.descripcion || '').slice(0, 80),
                   ciudad: n.ciudad || 'España', direccion: n.direccion || '',
                   telefono: n.telefono || '', email: n.email || '', web: n.web || '',
+                  propietario: n.propietario || 'Comunidad',
                   kosher: n.kosher || false, cierraShabat: n.cierra_shabat || false,
                   verificado: n.verificado || false, color: '#1B2E5E', horario: {}
                 });
@@ -1842,6 +1843,7 @@
             telefono: pendingBiz.telefono,
             email: pendingBiz.email,
             web: pendingBiz.web,
+            propietario: pendingBiz.propietario || null,
             kosher: false,
             cierra_shabat: false,
             verificado: false,

@@ -35,6 +35,9 @@ CREATE TABLE IF NOT EXISTS profesionales (
 ALTER TABLE profesionales ADD COLUMN IF NOT EXISTS foto    text;
 ALTER TABLE profesionales ADD COLUMN IF NOT EXISTS galeria jsonb DEFAULT '[]';
 
+-- Columna propietario en negocios (nombre del dueño)
+ALTER TABLE negocios ADD COLUMN IF NOT EXISTS propietario text;
+
 ALTER TABLE profesionales ENABLE ROW LEVEL SECURITY;
 
 -- Cualquier miembro autenticado puede ver perfiles
