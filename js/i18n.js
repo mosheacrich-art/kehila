@@ -40,7 +40,7 @@ const TRANSLATIONS = {
     // Nav extra
     nav_comunidad:    'Comunidad',
     nav_rav_hub:      'Beit HaRav',
-    nav_esencial:     'Fundamentos',
+    nav_esencial:     'Servicios Comunitarios',
 
     // Común
     save:             'Guardar cambios',
@@ -179,7 +179,7 @@ const TRANSLATIONS = {
     // Nav extra
     nav_comunidad:    'Community',
     nav_rav_hub:      'Beit HaRav',
-    nav_esencial:     'Fundamentos',
+    nav_esencial:     'Servicios Comunitarios',
 
     // Common
     save:             'Save changes',
