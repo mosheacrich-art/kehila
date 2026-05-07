@@ -2108,8 +2108,16 @@
 
         // Encendido
         if (candles) {
-          document.getElementById('shabat-velas-time').textContent = fmtTime(candles.date);
+          const candleTime = fmtTime(candles.date);
+          document.getElementById('shabat-velas-time').textContent = candleTime;
           document.getElementById('shabat-velas-day').textContent  = fmtDay(candles.date);
+          // Sync: actualizar "Entrada Shabat" en la card de horarios de tefila
+          document.querySelectorAll('#horarios-shabat .tefila-row').forEach(row => {
+            const name = row.querySelector('.tefila-name')?.textContent?.toLowerCase() || '';
+            if (name.includes('entrada') || name.includes('velas') || name.includes('encendido')) {
+              row.querySelector('.tefila-time').textContent = candleTime;
+            }
+          });
         }
 
         // Havdalá
