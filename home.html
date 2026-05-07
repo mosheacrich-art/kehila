@@ -872,8 +872,12 @@
       <!-- ══════════════════════════════════
            6. SHABAT DE ESTA SEMANA
       ══════════════════════════════════ -->
-      <div class="home-section">
-        <div class="shabat-card" id="shabat-card-section">
+      <div class="home-section" id="shabat-card-section">
+        <h2 class="home-section-title" style="margin-bottom:14px;">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/></svg>
+          Horarios Shabbat
+        </h2>
+        <div class="shabat-card">
           <div class="shabat-card-top">
             <div>
               <p class="shabat-label">Shabat esta semana</p>
@@ -1879,8 +1883,13 @@
           .single();
 
         if (!error && data?.items?.length) {
-          // Retrocompatibilidad: items sin 'tipo' se asignan a 'semana'
-          const items = data.items.map(it => ({ tipo: 'semana', ...it }));
+          // Retrocompatibilidad: si no tiene 'tipo', inferirlo por nombre
+          const items = data.items.map(it => {
+            if (it.tipo) return it;
+            const n = (it.nombre || '').toLowerCase();
+            const tipo = (n.includes('shabat') || n.includes('shabbat') || n.includes('havdal') || n.includes('havdalá')) ? 'shabat' : 'semana';
+            return { ...it, tipo };
+          });
           renderHorarios(items);
         }
       } catch (e) {
