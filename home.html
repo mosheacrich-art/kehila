@@ -1303,7 +1303,25 @@
       if (sb) {
         try {
           const { data } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
-          if (data?.length) { renderBanner(data); return; }
+          if (data?.length) {
+            // Enriquecer con base64 del caché local si los slots de Supabase tienen URLs vacías
+            const localMap = {};
+            _lsBannerGet().forEach(s => { if (s.id) localMap[String(s.id)] = s; });
+            const merged = data.map(s => {
+              const ls = localMap[String(s.id)];
+              if (!ls) return s;
+              // Si los slots de Supabase tienen url vacía pero los locales tienen base64, usar el local
+              const mergedSlots = (s.slots || []).map((sl, i) => {
+                const lsl = ls.slots?.[i];
+                return (!sl.url && lsl?.url) ? { ...sl, url: lsl.url } : sl;
+              });
+              return { ...s, slots: mergedSlots.length ? mergedSlots : (ls.slots || []),
+                imagen_url: s.imagen_url || ls.imagen_url || '' };
+            });
+            _lsBannerSave(merged); // sincronizar caché local con Supabase
+            renderBanner(merged);
+            return;
+          }
         } catch(e) { /* fallback a localStorage */ }
       }
       const lsSlides = _lsBannerGet();
@@ -1311,8 +1329,39 @@
     }
 
     /* ── Admin: localStorage como caché offline ── */
-    function _lsBannerGet() { return JSON.parse(localStorage.getItem('banner_custom') || '[]'); }
-    function _lsBannerSave(arr) { localStorage.setItem('banner_custom', JSON.stringify(arr)); }
+    function _lsBannerGet() {
+      try { return JSON.parse(localStorage.getItem('banner_custom') || '[]'); } catch(e) { return []; }
+    }
+    function _lsBannerSave(arr) {
+      // Guardar en localStorage — si hay base64 las guardamos tal cual; si hay URLs de Storage, mejor aún
+      try { localStorage.setItem('banner_custom', JSON.stringify(arr)); }
+      catch(e) {
+        // Cuota superada: guardar versión ligera (sin base64)
+        const light = arr.map(s => ({
+          ...s,
+          imagen_url: s.imagen_url?.startsWith('data:') ? '' : (s.imagen_url || ''),
+          slots: (s.slots || []).map(sl => ({ ...sl, url: sl.url?.startsWith('data:') ? '' : (sl.url || '') }))
+        }));
+        try { localStorage.setItem('banner_custom', JSON.stringify(light)); } catch(_) {}
+      }
+    }
+
+    /* ── Subir imagen al bucket "banners" de Supabase Storage ── */
+    async function uploadBannerImage(dataUrl, filename) {
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (!sb || !dataUrl.startsWith('data:')) return null;
+      try {
+        const res  = await fetch(dataUrl);
+        const blob = await res.blob();
+        const path = `slides/${Date.now()}_${filename}`;
+        const { data, error } = await sb.storage.from('banners').upload(path, blob, {
+          contentType: 'image/jpeg', upsert: false
+        });
+        if (error) return null;
+        const { data: pub } = sb.storage.from('banners').getPublicUrl(data.path);
+        return pub?.publicUrl || null;
+      } catch(e) { return null; }
+    }
 
     /* ── Banner: layouts disponibles ── */
     const BANNER_LAYOUTS = [
@@ -1612,15 +1661,20 @@
             div.querySelector('.slot-zoom-val').textContent = Math.round(z * 100) + '%';
           });
 
-          // File upload
+          // File upload → intenta Supabase Storage, cae en base64
           div.querySelector('.slot-file').addEventListener('change', async function() {
             const file = this.files[0]; if (!file) return;
-            div.querySelector('.slot-file-label').textContent = file.name;
-            const url = await resizeImageBanner(file);
-            if (!url) return;
-            _slotData[i].url = url;
-            div.querySelector('.slot-url').value = '';
-            applySlotUrl(div, i, url);
+            const label = div.querySelector('.slot-file-label');
+            label.textContent = 'Subiendo…';
+            const dataUrl = await resizeImageBanner(file);
+            if (!dataUrl) { label.textContent = 'Error al procesar imagen'; return; }
+            // Intenta subir a Supabase Storage (URL pública permanente)
+            const storageUrl = await uploadBannerImage(dataUrl, `slot${i}.jpg`);
+            const finalUrl = storageUrl || dataUrl; // fallback a base64 si Storage no disponible
+            label.textContent = storageUrl ? '✓ Guardada en servidor' : file.name;
+            _slotData[i].url = finalUrl;
+            div.querySelector('.slot-url').value = storageUrl ? storageUrl : '';
+            applySlotUrl(div, i, finalUrl);
           });
 
           // URL input
@@ -1707,14 +1761,30 @@
           orden: Date.now(), layout: _activeLayout, slots };
 
         const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+        let savedToSupabase = false;
         if (sb) {
           try {
-            const { data, error } = await sb.from('banner_slides').insert(newSlide).select().single();
-            if (!error && data) newSlide.id = data.id;
+            // Para Supabase: no mandar base64 (demasiado grande) — solo URLs de Storage o vacío
+            const slotsForDb = slots.map(s => ({
+              ...s, url: s.url?.startsWith('data:') ? '' : (s.url || '')
+            }));
+            const slideForDb = {
+              ...newSlide,
+              imagen_url: imagen_url?.startsWith('data:') ? '' : imagen_url,
+              slots: slotsForDb
+            };
+            const { data, error } = await sb.from('banner_slides').insert(slideForDb).select().single();
+            if (!error && data) { newSlide.id = data.id; savedToSupabase = true; }
           } catch(e) {}
         }
+
         if (!newSlide.id) newSlide.id = 'ls_' + Date.now();
+        // En localStorage guardamos TODO (incluido base64 si aplica, para offline)
         const arr = _lsBannerGet(); arr.push(newSlide); _lsBannerSave(arr);
+
+        if (!savedToSupabase) {
+          showToast('Guardado localmente. Para persistencia total ejecuta el SQL del archivo supabase_banner_setup.sql en Supabase.', 'warning');
+        }
 
         // Reset
         overlay.querySelector('#bnew-titulo').value = '';
