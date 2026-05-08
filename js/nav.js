@@ -317,6 +317,7 @@ function buildMoreDrawer(activePage) {
 
   let sectionsHTML = '';
   NAV_ITEMS.forEach(group => {
+    if (!group.group) return; // skip unlabelled groups (Inicio) — always reachable from bottom nav
     const groupLabel = _t(GROUP_KEYS[group.group] || group.group);
     let rowsHTML = '';
     group.items.forEach(item => {
@@ -379,7 +380,7 @@ function buildMoreDrawer(activePage) {
     style.textContent = `
       .more-drawer-section { margin-bottom: 16px; }
       .more-drawer-group-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #a0aec0; padding: 0 4px; margin-bottom: 6px; }
-      .more-drawer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+      .more-drawer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
       .more-drawer-item { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 4px; border-radius: 10px; text-decoration: none; color: #4a5568; font-size: 0.72rem; font-weight: 500; transition: background 0.15s; }
       .more-drawer-item:active { background: #f7fafc; }
       .more-drawer-icon { color: #1B2E5E; }
