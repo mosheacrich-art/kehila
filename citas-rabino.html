@@ -174,11 +174,11 @@
   <script src="js/nav.js"></script>
   <script>
     const TIPOS_CITA = [
-      { id:'halacha', titulo:'Consulta halachica (30 min)', duracion:'30 min', desc:'Para preguntas que requieren respuesta personalizada', emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>' },
-      { id:'espiritual', titulo:'Orientación espiritual (45 min)', duracion:'45 min', desc:'Conversación sobre tu camino judío', emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/></svg>' },
-      { id:'barmitzvah', titulo:'Preparación Bar/Bat Mitzvá — familia (60 min)', duracion:'60 min', desc:'Planificación y orientación para la familia', emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 3.741-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>' },
-      { id:'matrimonial', titulo:'Consulta pre-matrimonial (60 min)', duracion:'60 min', desc:'Orientación halachica y espiritual para parejas', emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>' },
-      { id:'kosher', titulo:'Certificación Kosher empresarial (45 min)', duracion:'45 min', desc:'El Rav certifica empresas alimentarias. Acceso a 25M de consumidores en el mundo.', emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>' }
+      { id:'halacha', titulo:'Consulta halachica', duracion:'', desc:'Para preguntas que requieren respuesta personalizada', emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>' },
+      { id:'espiritual', titulo:'Orientación espiritual', duracion:'', desc:'Conversación sobre tu camino judío', emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/></svg>' },
+      { id:'barmitzvah', titulo:'Preparación Bar/Bat Mitzvá — familia', duracion:'', desc:'Planificación y orientación para la familia', emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 3.741-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>' },
+      { id:'matrimonial', titulo:'Consulta pre-matrimonial', duracion:'', desc:'Orientación halachica y espiritual para parejas', emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>' },
+      { id:'kosher', titulo:'Certificación Kosher empresarial', duracion:'', desc:'El Rav certifica empresas alimentarias. Acceso a 25M de consumidores en el mundo.', emoji:'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:20px;height:20px;display:inline-block;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>' }
     ];
 
     const SLOTS_DATA = [
@@ -203,7 +203,6 @@
         <button class="tipo-card ${selectedTipo === t.id ? 'selected' : ''}" onclick="selectTipo('${t.id}')" id="tipo-${t.id}">
           <div class="tipo-emoji">${t.emoji}</div>
           <div class="tipo-titulo">${t.titulo}</div>
-          <span class="tipo-duracion">${t.duracion}</span>
           ${t.desc ? `<div class="tipo-desc">${t.desc}</div>` : ''}
           ${t.hasInput ? `<input class="tipo-input" placeholder="Especifica el tema..." id="otroInput" onclick="event.stopPropagation()">` : ''}
         </button>
@@ -283,10 +282,6 @@
           <div class="resumen-item">
             <span class="resumen-label">Hora</span>
             <span class="resumen-val">${selectedSlot.h}</span>
-          </div>
-          <div class="resumen-item">
-            <span class="resumen-label">Duración</span>
-            <span class="resumen-val">${tipo.duracion}</span>
           </div>
         </div>
         <div class="form-group">
@@ -368,7 +363,6 @@
             <div class="conf-row"><span>Tipo de consulta</span><span>${tipo.titulo}</span></div>
             <div class="conf-row"><span>Fecha</span><span>${selectedSlot.dia}</span></div>
             <div class="conf-row"><span>Hora</span><span>${selectedSlot.h}</span></div>
-            <div class="conf-row"><span>Duración</span><span>${tipo.duracion}</span></div>
             <div class="conf-row"><span>Modalidad</span><span>${mod}</span></div>
           </div>
           <div class="conf-nota">
