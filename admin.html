@@ -936,9 +936,9 @@
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5"/></svg>
         Eventos
       </button>
-      <button class="admin-tab" data-tab="noticias">
-        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z"/></svg>
-        Noticias
+      <button class="admin-tab" data-tab="noticias" onclick="loadBannersAdmin()">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M13.5 12a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
+        Banner
       </button>
       <button class="admin-tab" data-tab="marketplace">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72"/></svg>
@@ -1130,26 +1130,21 @@
     ════════════════════════════════ -->
     <div class="tab-panel" id="panel-noticias">
 
-      <!-- Banner del inicio -->
-      <div style="background:#1b2e5e;border-radius:14px;padding:18px 22px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;">
         <div>
-          <p style="color:#c9a84c;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Banner del inicio</p>
-          <p style="color:#fff;font-size:0.9rem;font-weight:600;margin:0;">Slides del carrusel principal</p>
-          <p style="color:rgba(255,255,255,0.55);font-size:0.78rem;margin:2px 0 0;">Añade, edita y elimina los slides que se ven en la pantalla de inicio</p>
+          <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin:0 0 2px;">Banner del inicio</p>
+          <p style="font-size:0.82rem;color:#94a3b8;margin:0;">Slides del carrusel principal de la app</p>
         </div>
-        <a href="home.html" target="_blank" style="background:#c9a84c;color:#1b2e5e;border:none;border-radius:10px;padding:10px 18px;font-size:0.85rem;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none;flex-shrink:0;">Gestionar Banner</a>
+        <a href="home.html" target="_blank" style="display:inline-flex;align-items:center;gap:7px;background:#1b2e5e;color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:0.83rem;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none;">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Añadir banner
+        </a>
       </div>
 
-      <!-- Noticias -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin:0;">Noticias publicadas</p>
-        <button class="btn btn-primary" onclick="openModal('modal-noticia')">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:17px;height:17px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-          Nueva noticia
-        </button>
+      <div id="banner-admin-list">
+        <p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Cargando banners…</p>
       </div>
-
-      <div class="news-admin-list" id="news-admin-list"></div>
     </div>
 
     <!-- ════════════════════════════════
@@ -3022,51 +3017,120 @@
   }
 
   /**
-   * Carga noticias desde Supabase y actualiza noticiasState.
-   * Si Supabase no tiene datos, usa MOCK_NOTICIAS_V2 como fallback.
-   * @returns {Promise<void>}
+   * Carga banners desde Supabase y los muestra en el panel admin.
    */
-  async function loadNoticiasAdmin() {
-    const container = document.getElementById('news-admin-list');
-    container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Cargando noticias…</p>';
-    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
-    if (sb) {
-      const { data } = await sb.from('noticias').select('*').order('created_at', { ascending: false });
-      newsState = data || [];
-    }
-    renderNewsAdmin();
-  }
+  const TIPOS_BANNER_LABEL = {
+    evento:'Evento', novedad:'Novedad', comunicado:'Comunicado',
+    shabat:'Shabat', festividad:'Festividad', donativos:'Donativos'
+  };
 
-  /**
-   * Segunda definicion de renderNewsAdmin — renderiza la lista de noticias
-   * en el panel admin con botones de accion. Prevalece sobre la primera al ser
-   * declarada despues (JavaScript usa la ultima declaracion de funcion).
-   */
-  function renderNewsAdmin() {
-    const container = document.getElementById('news-admin-list');
-    if (!newsState.length) {
-      container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">No hay noticias. Crea la primera.</p>';
+  async function loadBannersAdmin() {
+    const container = document.getElementById('banner-admin-list');
+    if (!container) return;
+    container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Cargando banners…</p>';
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) { container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Sin conexión a Supabase.</p>'; return; }
+
+    const { data, error } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
+    if (error || !data || !data.length) {
+      container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">No hay banners activos.</p>';
       return;
     }
-    container.innerHTML = newsState.map(n => {
-      const imgSrc = n.imagen_url || n.imagen || null;
-      const fechaDisplay = n.created_at ? new Date(n.created_at).toLocaleDateString('es-ES') : (n.fecha || '');
+
+    container.innerHTML = data.map(s => {
+      const tipo   = TIPOS_BANNER_LABEL[s.tipo] || s.tipo || 'Anuncio';
+      const hasta  = s.hasta ? `Válido hasta ${new Date(s.hasta).toLocaleDateString('es-ES')}` : '';
+      const thumb  = s.imagen_url
+        ? `<img src="${escHtml(s.imagen_url)}" style="width:80px;height:50px;object-fit:cover;border-radius:8px;flex-shrink:0;">`
+        : `<div style="width:80px;height:50px;border-radius:8px;background:#1b2e5e;flex-shrink:0;"></div>`;
       return `
-      <div class="news-admin-row" id="news-row-${n.id}">
-        ${imgSrc ? `<img src="${imgSrc}" class="news-admin-thumb" alt="">` : `<div style="width:52px;height:52px;border-radius:10px;background:#1b2e5e;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700;font-size:1.05rem;text-transform:uppercase;">${(n.categoria||'N')[0]}</div>`}
-        <div class="news-admin-info">
-          <p class="news-admin-title">${escHtml(n.titulo)}</p>
-          <p class="news-admin-meta">${escHtml(n.categoria)} · ${fechaDisplay} · ${escHtml(n.autor || '')}</p>
-        </div>
-        <button class="btn btn-sm btn-secondary" onclick="editNoticia('${n.id}')">Editar</button>
-        <button class="btn btn-sm btn-danger" onclick="promptDelNoticia('${n.id}')">Eliminar</button>
-      </div>`;
+        <div id="banner-row-${escHtml(String(s.id))}" style="background:#fff;border:1px solid var(--color-border);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow-sm);">
+          <div style="display:flex;align-items:center;gap:12px;">
+            ${thumb}
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#c9a84c;margin-bottom:2px;">${escHtml(tipo)}</div>
+              <div style="font-size:0.9rem;font-weight:600;color:#1a202c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(s.titulo || '(sin título)')}</div>
+              ${s.subtitulo ? `<div style="font-size:0.75rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(s.subtitulo)}</div>` : ''}
+              ${hasta ? `<div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">${escHtml(hasta)}</div>` : ''}
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+              <button data-banner-edit="${escHtml(String(s.id))}" style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:5px 12px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;">Editar</button>
+              <button data-banner-del="${escHtml(String(s.id))}" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:5px 12px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;">Eliminar</button>
+            </div>
+          </div>
+          <div id="banner-edit-form-${escHtml(String(s.id))}" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid #f1f5f9;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+              <div style="grid-column:1/-1;">
+                <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Título</label>
+                <input id="be-titulo-${escHtml(String(s.id))}" value="${escHtml(s.titulo||'')}" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;">
+              </div>
+              <div style="grid-column:1/-1;">
+                <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Descripción</label>
+                <input id="be-subtitulo-${escHtml(String(s.id))}" value="${escHtml(s.subtitulo||'')}" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;">
+              </div>
+              <div>
+                <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Tipo</label>
+                <select id="be-tipo-${escHtml(String(s.id))}" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;">
+                  ${Object.entries(TIPOS_BANNER_LABEL).map(([v,l]) => `<option value="${v}"${s.tipo===v?' selected':''}>${l}</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Válido hasta</label>
+                <input id="be-hasta-${escHtml(String(s.id))}" type="date" value="${escHtml(s.hasta||'')}" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;">
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+              <button data-banner-cancel="${escHtml(String(s.id))}" style="background:none;border:1.5px solid #e2e8f0;color:#64748b;padding:7px 16px;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;">Cancelar</button>
+              <button data-banner-save="${escHtml(String(s.id))}" style="background:#1b2e5e;color:#fff;border:none;padding:7px 16px;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;">Guardar cambios</button>
+            </div>
+          </div>
+        </div>`;
     }).join('');
+
+    // Listeners
+    container.querySelectorAll('[data-banner-edit]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.bannerEdit;
+        const form = document.getElementById(`banner-edit-form-${id}`);
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      });
+    });
+    container.querySelectorAll('[data-banner-cancel]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById(`banner-edit-form-${btn.dataset.bannerCancel}`).style.display = 'none';
+      });
+    });
+    container.querySelectorAll('[data-banner-save]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.bannerSave;
+        const titulo    = document.getElementById(`be-titulo-${id}`).value.trim();
+        const subtitulo = document.getElementById(`be-subtitulo-${id}`).value.trim();
+        const tipo      = document.getElementById(`be-tipo-${id}`).value;
+        const hasta     = document.getElementById(`be-hasta-${id}`).value || null;
+        btn.textContent = 'Guardando…'; btn.disabled = true;
+        const sb2 = typeof getSupabase === 'function' ? getSupabase() : null;
+        if (sb2) {
+          const { error } = await sb2.from('banner_slides').update({ titulo, subtitulo, tipo, hasta }).eq('id', id);
+          if (error) { showAdminToast('Error: ' + error.message, 'error'); btn.textContent = 'Guardar cambios'; btn.disabled = false; return; }
+        }
+        showAdminToast('Banner actualizado', 'success');
+        loadBannersAdmin();
+      });
+    });
+    container.querySelectorAll('[data-banner-del]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Eliminar este banner?')) return;
+        const id = btn.dataset.bannerDel;
+        btn.disabled = true; btn.textContent = '…';
+        const sb2 = typeof getSupabase === 'function' ? getSupabase() : null;
+        if (sb2) await sb2.from('banner_slides').delete().eq('id', id);
+        showAdminToast('Banner eliminado', 'success');
+        loadBannersAdmin();
+      });
+    });
   }
 
-  loadNoticiasAdmin();
-  uploadAreaSetup('news');
-  uploadAreaSetup('news-slide');
+  loadBannersAdmin();
 
   /* ══════════════════════════════
      TAB MARKETPLACE

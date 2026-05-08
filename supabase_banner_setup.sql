@@ -27,3 +27,26 @@ CREATE POLICY "Banners admin delete" ON storage.objects
     bucket_id = 'banners'
     AND auth.uid() IN (SELECT id FROM profiles WHERE role = 'admin')
   );
+
+-- ═══════════════════════════════════════════════════════════
+--  POLÍTICAS RLS PARA TABLA banner_slides
+--  (sin estas, los INSERT/UPDATE/DELETE fallan → van a localStorage)
+-- ═══════════════════════════════════════════════════════════
+
+CREATE POLICY "banner_slides_public_read" ON banner_slides
+  FOR SELECT USING (activo = true);
+
+CREATE POLICY "banner_slides_admin_insert" ON banner_slides
+  FOR INSERT WITH CHECK (
+    auth.uid() IN (SELECT id FROM profiles WHERE role = 'admin')
+  );
+
+CREATE POLICY "banner_slides_admin_update" ON banner_slides
+  FOR UPDATE USING (
+    auth.uid() IN (SELECT id FROM profiles WHERE role = 'admin')
+  );
+
+CREATE POLICY "banner_slides_admin_delete" ON banner_slides
+  FOR DELETE USING (
+    auth.uid() IN (SELECT id FROM profiles WHERE role = 'admin')
+  );
