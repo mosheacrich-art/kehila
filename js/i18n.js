@@ -39,7 +39,7 @@ const TRANSLATIONS = {
 
     // Nav extra
     nav_comunidad:    'Comunidad',
-    nav_rav_hub:      'Beit HaRav',
+    nav_rav_hub:      'Torá y Comunidad',
     nav_esencial:     'Servicios Comunitarios',
 
     // Común
@@ -178,7 +178,7 @@ const TRANSLATIONS = {
 
     // Nav extra
     nav_comunidad:    'Community',
-    nav_rav_hub:      'Beit HaRav',
+    nav_rav_hub:      'Torá y Comunidad',
     nav_esencial:     'Servicios Comunitarios',
 
     // Common
