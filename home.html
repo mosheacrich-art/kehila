@@ -1022,6 +1022,8 @@
         else if (pocas) plazasText = _plazas_pocas;
         else plazasText = _plazas_libre;
 
+        const conteoText = ev.aforo ? `${ev.inscritos}/${ev.aforo}` : null;
+
         return `
           <div class="evento-home-card">
             <div class="evento-home-thumb ${bgClasses[i % bgClasses.length]}">
@@ -1048,7 +1050,7 @@
               </div>
             </div>
             <div class="evento-home-footer">
-              <span class="plazas-badge ${plazasClass}">${plazasText}</span>
+              <span class="plazas-badge ${plazasClass}">${conteoText ? `${conteoText} · ` : ''}${plazasText}</span>
               ${homeInscrito.has(String(ev.id))
                 ? `<div style="display:flex;align-items:center;gap:6px;">
                      <span style="display:flex;align-items:center;gap:5px;background:var(--color-success-light);color:#065F46;border:1.5px solid var(--color-success);border-radius:8px;padding:5px 10px;font-size:.8rem;font-weight:600;">
@@ -1180,14 +1182,18 @@
         try {
           const queries = [
             sb.from('eventos').select('id,titulo,descripcion,fecha,hora,lugar,aforo,categoria,imagen_url,mensaje_inscripcion').order('fecha', { ascending: true }).limit(4),
+            sb.from('inscripciones').select('evento_id'),
           ];
           if (user) queries.push(sb.from('inscripciones').select('evento_id').eq('usuario_id', user.userId));
 
-          const [evRes, insRes] = await Promise.all(queries);
+          const [evRes, allInsRes, insRes] = await Promise.all(queries);
+
+          const conteosMap = {};
+          if (allInsRes?.data) allInsRes.data.forEach(r => { conteosMap[r.evento_id] = (conteosMap[r.evento_id] || 0) + 1; });
 
           if (evRes.data && evRes.data.length) {
             MOCK_EVENTOS.length = 0;
-            evRes.data.forEach(ev => { ev.inscritos = 0; MOCK_EVENTOS.push(ev); });
+            evRes.data.forEach(ev => { ev.inscritos = conteosMap[String(ev.id)] || 0; MOCK_EVENTOS.push(ev); });
           }
           if (insRes?.data) insRes.data.forEach(r => homeInscrito.add(r.evento_id));
         } catch(e) { /* usa mock como fallback */ }
