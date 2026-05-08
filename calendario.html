@@ -19,6 +19,20 @@
     .cal-wrap { display: grid; grid-template-columns: 1fr 400px; gap: 28px; align-items: start; }
     @media (max-width: 900px) { .cal-wrap { grid-template-columns: 1fr; } }
 
+    /* ── Fecha hebrea ── */
+    .cal-side-hebrew { font-size: .8rem; color: var(--color-text-muted); margin-top: 2px; margin-bottom: 14px; font-style: italic; letter-spacing: .01em; }
+    .cal-month-hebrew { font-size: .85rem; font-weight: 500; color: var(--color-text-muted); margin-left: 8px; }
+
+    /* ── Mobile: reordenar — evento arriba, ciudad abajo ── */
+    @media (max-width: 768px) {
+      .cal-heb-inner { display: flex; flex-direction: column; }
+      .page-header  { order: 1; }
+      #cal-container { order: 2; }
+      .city-selector-bar { order: 3; margin-bottom: 0; margin-top: 16px; }
+      .cal-wrap { display: flex; flex-direction: column; }
+      .cal-side { order: -1; position: static; max-height: none; margin-bottom: 16px; }
+    }
+
     /* ── Selector de ciudad ── */
     .city-selector-bar {
       display: flex; align-items: center; gap: 10px;
@@ -697,6 +711,11 @@ function renderCal() {
   }
 
   const monthLabel = `${MESES[curMonth]} ${curYear}`;
+  let hebMonthLabel = '';
+  try {
+    const fmt = new Intl.DateTimeFormat('he-u-ca-hebrew', { month: 'long', year: 'numeric' });
+    hebMonthLabel = fmt.format(firstDay);
+  } catch(e) {}
 
   document.getElementById('cal-container').innerHTML = `
     <div class="cal-wrap">
@@ -705,7 +724,10 @@ function renderCal() {
           <button class="cal-nav-btn" onclick="navMonth(-1)">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
           </button>
-          <span class="cal-month-label">${monthLabel}</span>
+          <div style="text-align:center;">
+            <span class="cal-month-label">${monthLabel}</span>
+            ${hebMonthLabel ? `<div class="cal-month-hebrew">${hebMonthLabel}</div>` : ''}
+          </div>
           <button class="cal-nav-btn" onclick="navMonth(1)">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
           </button>
@@ -773,8 +795,21 @@ function selectDate(key) {
   const dateObj = new Date(key + 'T12:00:00');
   const label = dateObj.toLocaleDateString('es-ES',{ weekday:'long', day:'numeric', month:'long' });
   const labelCap = label.charAt(0).toUpperCase() + label.slice(1);
+  let hebDayLabel = '';
+  try {
+    hebDayLabel = new Intl.DateTimeFormat('he-u-ca-hebrew', { day: 'numeric', month: 'long', year: 'numeric' }).format(dateObj);
+  } catch(e) {}
 
   document.getElementById('cal-side-title').textContent = labelCap;
+  // Fecha hebrea bajo el título gregoriano
+  let hebEl = document.getElementById('cal-side-heb');
+  if (!hebEl) {
+    hebEl = document.createElement('p');
+    hebEl.id = 'cal-side-heb';
+    hebEl.className = 'cal-side-hebrew';
+    document.getElementById('cal-side-title').after(hebEl);
+  }
+  hebEl.textContent = hebDayLabel;
 
   let html = '';
   let hasContent = false;

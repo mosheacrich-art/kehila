@@ -847,7 +847,7 @@
 
     let pendingProf = null;
 
-    function publicarPerfil() {
+    async function publicarPerfil() {
       const cat = document.getElementById('ofrecerCat').value;
       if (!cat) { showToast('Selecciona una categoría para continuar.', 'error'); return; }
 
@@ -882,6 +882,17 @@
       };
 
       const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+
+      // Obtener uid real de la sesión Supabase (no localStorage) para que pase la RLS
+      let realUid = pendingProf.usuario_id;
+      if (sb) {
+        try {
+          const { data: sessionData } = await sb.auth.getSession();
+          realUid = sessionData?.session?.user?.id || realUid;
+        } catch(e) {}
+      }
+      pendingProf.usuario_id = realUid;
+
       // Only store Storage URLs (http*) in Supabase — never base64
       const fotoDb = (pendingProf.foto && pendingProf.foto.startsWith('http')) ? pendingProf.foto : null;
       const galeriaDb = (pendingProf.galeria || []).filter(u => u && u.startsWith('http'));
@@ -901,7 +912,7 @@
         servicios: pendingProf.servicios,
         foto: fotoDb,
         galeria: galeriaDb,
-        usuario_id: pendingProf.usuario_id
+        usuario_id: realUid
       };
 
       if (editingProfId) {
@@ -909,19 +920,24 @@
         const idx = PROFESSIONALS.findIndex(p => String(p.id) === String(editingProfId));
         if (idx !== -1) PROFESSIONALS[idx] = { ...PROFESSIONALS[idx], ...pendingProf, id: PROFESSIONALS[idx].id };
         saveProfessionals(PROFESSIONALS);
-        if (sb) sb.from('profesionales').update(dbPayload).eq('id', editingProfId).then(()=>{}).catch(()=>{});
+        if (sb) {
+          const { error } = await sb.from('profesionales').update(dbPayload).eq('id', editingProfId);
+          if (error) showToast('Error al actualizar: ' + error.message, 'error');
+        }
         editingProfId = null;
       } else {
         // INSERT
         PROFESSIONALS.unshift(pendingProf);
         saveProfessionals(PROFESSIONALS);
-        if (sb) sb.from('profesionales').insert(dbPayload).then(async ({ data }) => {
-          // Si Supabase devuelve el ID real, actualizamos el local
-          if (data && data[0] && data[0].id) {
+        if (sb) {
+          const { data, error } = await sb.from('profesionales').insert(dbPayload).select();
+          if (error) {
+            showToast('Error al guardar en servidor: ' + error.message, 'error');
+          } else if (data && data[0] && data[0].id) {
             const idx = PROFESSIONALS.findIndex(p => p.id === pendingProf.id);
             if (idx !== -1) { PROFESSIONALS[idx].id = data[0].id; saveProfessionals(PROFESSIONALS); }
           }
-        }).catch(()=>{});
+        }
       }
 
       renderProfessionals();
