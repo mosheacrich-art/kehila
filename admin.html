@@ -1144,41 +1144,92 @@
 
       <!-- Formulario nuevo banner (colapsable) -->
       <div id="banner-new-form" style="display:none;background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:20px;margin-bottom:18px;">
-        <p style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b;margin:0 0 14px;">Nuevo banner</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div style="grid-column:1/-1;">
-            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Imagen</label>
-            <input type="file" id="bn-imagen" accept="image/jpeg,image/png,image/webp" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:0.83rem;font-family:inherit;box-sizing:border-box;cursor:pointer;">
-            <div id="bn-preview" style="margin-top:8px;display:none;"><img id="bn-preview-img" style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;"></div>
+        <p style="font-size:0.875rem;font-weight:700;color:#1b2e5e;margin:0 0 16px;">Nuevo banner</p>
+
+        <!-- Tipo -->
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Tipo de anuncio <span style="color:#ef4444;">*</span></label>
+          <select id="bn-tipo" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;background:#fff;color:#1a202c;">
+            <option value="evento">Evento próximo</option>
+            <option value="novedad">Novedad</option>
+            <option value="comunicado">Comunicado</option>
+            <option value="shabat">Shabat especial</option>
+            <option value="festividad">Festividad</option>
+            <option value="donativos">Campaña de donativos</option>
+          </select>
+        </div>
+
+        <!-- Título -->
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Título <span style="color:#ef4444;">*</span></label>
+          <input id="bn-titulo" type="text" placeholder="Ej. Seudá de Purim — ¡Este sábado!" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;box-sizing:border-box;color:#1a202c;background:#fff;">
+          <p id="bn-titulo-err" style="display:none;color:#ef4444;font-size:0.75rem;margin-top:4px;">El título es obligatorio.</p>
+        </div>
+
+        <!-- Descripción -->
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Descripción <span style="color:#94a3b8;font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+          <input id="bn-subtitulo" type="text" placeholder="Breve descripción — 1 o 2 líneas" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;box-sizing:border-box;color:#1a202c;background:#fff;">
+        </div>
+
+        <!-- Layout selector -->
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Diseño del banner</label>
+          <div id="bn-layout-selector" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+            <button type="button" data-layout="single" style="border:2px solid #e2e8f0;border-radius:8px;padding:7px 4px 5px;background:#f8fafc;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center;">
+              <div style="font-size:0.6rem;letter-spacing:.05em;color:#1b2e5e;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">1 foto</div>
+              <div style="display:flex;gap:2px;height:18px;border-radius:3px;overflow:hidden;"><div style="flex:1;background:#1b2e5e;border-radius:2px;"></div></div>
+            </button>
+            <button type="button" data-layout="split2" style="border:2px solid #e2e8f0;border-radius:8px;padding:7px 4px 5px;background:#f8fafc;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center;">
+              <div style="font-size:0.6rem;letter-spacing:.05em;color:#1b2e5e;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">2 iguales</div>
+              <div style="display:flex;gap:2px;height:18px;border-radius:3px;overflow:hidden;"><div style="flex:1;background:#1b2e5e;border-radius:2px;"></div><div style="flex:1;background:#c9a84c;border-radius:2px;"></div></div>
+            </button>
+            <button type="button" data-layout="mosaic_l" style="border:2px solid #e2e8f0;border-radius:8px;padding:7px 4px 5px;background:#f8fafc;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center;">
+              <div style="font-size:0.6rem;letter-spacing:.05em;color:#1b2e5e;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Grande izq.</div>
+              <div style="display:flex;gap:2px;height:18px;border-radius:3px;overflow:hidden;"><div style="flex:1.6;background:#1b2e5e;border-radius:2px;"></div><div style="flex:1;background:#c9a84c;border-radius:2px;"></div></div>
+            </button>
+            <button type="button" data-layout="mosaic_r" style="border:2px solid #e2e8f0;border-radius:8px;padding:7px 4px 5px;background:#f8fafc;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center;">
+              <div style="font-size:0.6rem;letter-spacing:.05em;color:#1b2e5e;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Grande der.</div>
+              <div style="display:flex;gap:2px;height:18px;border-radius:3px;overflow:hidden;"><div style="flex:1;background:#c9a84c;border-radius:2px;"></div><div style="flex:1.6;background:#1b2e5e;border-radius:2px;"></div></div>
+            </button>
+            <button type="button" data-layout="split3" style="border:2px solid #e2e8f0;border-radius:8px;padding:7px 4px 5px;background:#f8fafc;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center;">
+              <div style="font-size:0.6rem;letter-spacing:.05em;color:#1b2e5e;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">3 columnas</div>
+              <div style="display:flex;gap:2px;height:18px;border-radius:3px;overflow:hidden;"><div style="flex:1;background:#1b2e5e;border-radius:2px;"></div><div style="flex:1;background:#c9a84c;border-radius:2px;"></div><div style="flex:1;background:#4a7c5e;border-radius:2px;"></div></div>
+            </button>
           </div>
-          <div style="grid-column:1/-1;">
-            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Título</label>
-            <input id="bn-titulo" type="text" placeholder="Título del banner" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;">
-          </div>
-          <div style="grid-column:1/-1;">
-            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Descripción</label>
-            <input id="bn-subtitulo" type="text" placeholder="Texto secundario (opcional)" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;">
-          </div>
+        </div>
+
+        <!-- Slots fotos -->
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Fotos</label>
+          <div id="bn-slots"></div>
+        </div>
+
+        <!-- Enlace + Hasta -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
           <div>
-            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Tipo</label>
-            <select id="bn-tipo" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;">
-              <option value="novedad">Novedad</option>
-              <option value="evento">Evento</option>
-              <option value="comunicado">Comunicado</option>
-              <option value="shabat">Shabat</option>
-              <option value="festividad">Festividad</option>
-              <option value="donativos">Donativos</option>
+            <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Enlace al pulsar</label>
+            <select id="bn-enlace" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;background:#fff;color:#1a202c;">
+              <option value="">Sin enlace</option>
+              <option value="eventos.html">Eventos</option>
+              <option value="calendario.html">Calendario</option>
+              <option value="donativos.html">Donativos</option>
+              <option value="kosher.html">Kosher</option>
+              <option value="rav.html">Rav / Preguntas</option>
+              <option value="shiurim.html">Shiurim</option>
+              <option value="servicios.html">Servicios</option>
             </select>
           </div>
           <div>
-            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Válido hasta</label>
-            <input id="bn-hasta" type="date" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;">
+            <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Válido hasta <span style="color:#94a3b8;font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+            <input id="bn-hasta" type="date" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;box-sizing:border-box;">
           </div>
         </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;">
-          <button onclick="toggleBannerForm()" style="background:none;border:1.5px solid #e2e8f0;color:#64748b;padding:7px 16px;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;">Cancelar</button>
-          <button id="bn-save-btn" onclick="saveNewBannerAdmin()" style="background:#1b2e5e;color:#fff;border:none;padding:7px 20px;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;">Publicar</button>
-        </div>
+
+        <button id="bn-save-btn" onclick="saveNewBannerAdmin()" style="width:100%;background:#1b2e5e;color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:0.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Publicar anuncio
+        </button>
       </div>
 
       <div id="banner-admin-list">
@@ -3063,6 +3114,147 @@
     shabat:'Shabat', festividad:'Festividad', donativos:'Donativos'
   };
 
+  /* ── Banner admin: layouts ── */
+  const BN_LAYOUTS = [
+    { id: 'single',   slots: 1 },
+    { id: 'split2',   slots: 2 },
+    { id: 'mosaic_l', slots: 2 },
+    { id: 'mosaic_r', slots: 2 },
+    { id: 'split3',   slots: 3 },
+  ];
+  const BN_TIPO_COLORS = {
+    evento:'linear-gradient(135deg,#1b2e5e 0%,#2d4a9e 100%)',
+    novedad:'linear-gradient(135deg,#1a3a2a 0%,#1f6b4a 100%)',
+    comunicado:'linear-gradient(135deg,#2a1a3a 0%,#5a2a8e 100%)',
+    shabat:'linear-gradient(135deg,#3a2a10 0%,#8a6420 100%)',
+    festividad:'linear-gradient(135deg,#3a1a10 0%,#9a3010 100%)',
+    donativos:'linear-gradient(135deg,#1a2a3a 0%,#1a4a6e 100%)',
+  };
+  let _bnLayout  = 'single';
+  let _bnSlots   = [{ url:'', pos_x:50, pos_y:50, zoom:1 }];
+
+  function _bnSlotCount() {
+    return BN_LAYOUTS.find(l => l.id === _bnLayout)?.slots || 1;
+  }
+
+  function _bnSetupDrag(wrap, img, i) {
+    let dragging = false, sx, sy, sox, soy;
+    const start = (cx,cy) => { dragging=true; sx=cx; sy=cy; sox=parseFloat(img.dataset.ox||50); soy=parseFloat(img.dataset.oy||50); wrap.style.cursor='grabbing'; };
+    const move  = (cx,cy) => {
+      if (!dragging) return;
+      const r = wrap.getBoundingClientRect();
+      const ox = Math.max(0,Math.min(100, sox-(cx-sx)/r.width*100));
+      const oy = Math.max(0,Math.min(100, soy-(cy-sy)/r.height*100));
+      img.dataset.ox=ox; img.dataset.oy=oy;
+      img.style.objectPosition=`${ox}% ${oy}%`;
+      img.style.transformOrigin=`${ox}% ${oy}%`;
+      _bnSlots[i].pos_x=ox; _bnSlots[i].pos_y=oy;
+    };
+    const end = () => { dragging=false; wrap.style.cursor='grab'; };
+    wrap.addEventListener('mousedown', e=>{ start(e.clientX,e.clientY); e.preventDefault(); });
+    document.addEventListener('mousemove', e=>move(e.clientX,e.clientY));
+    document.addEventListener('mouseup', end);
+    wrap.addEventListener('touchstart', e=>{ start(e.touches[0].clientX,e.touches[0].clientY); e.preventDefault(); },{passive:false});
+    document.addEventListener('touchmove', e=>{ if(dragging){move(e.touches[0].clientX,e.touches[0].clientY);e.preventDefault();} },{passive:false});
+    document.addEventListener('touchend', end);
+    wrap.style.cursor='grab';
+  }
+
+  function _bnApplyUrl(div, i, url) {
+    const pw = div.querySelector('.bn-pw');
+    const pi = div.querySelector('.bn-pi');
+    const zr = div.querySelector('.bn-zrow');
+    if (url) { pi.src=url; pi.style.objectPosition=`${_bnSlots[i].pos_x}% ${_bnSlots[i].pos_y}%`; pw.style.display=''; zr.style.display='flex'; }
+    else     { pw.style.display='none'; zr.style.display='none'; }
+  }
+
+  async function _bnResizeImg(file) {
+    return new Promise(resolve => {
+      const img = new Image(), u = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(u);
+        const maxW=1200,maxH=600; let w=img.width,h=img.height;
+        if(w>maxW){h=Math.round(h*maxW/w);w=maxW;} if(h>maxH){w=Math.round(w*maxH/h);h=maxH;}
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h); resolve(c.toDataURL('image/jpeg',0.88));
+      };
+      img.onerror=()=>{URL.revokeObjectURL(u);resolve(null);}; img.src=u;
+    });
+  }
+
+  async function _bnUploadImg(dataUrl, filename) {
+    const sb = typeof getSupabase==='function' ? getSupabase() : null;
+    if (!sb) return null;
+    try {
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const path = `banner_${Date.now()}_${filename}`;
+      const { data, error } = await sb.storage.from('banners').upload(path, blob, { upsert:true, contentType:'image/jpeg' });
+      if (error || !data) return null;
+      return sb.storage.from('banners').getPublicUrl(data.path).data?.publicUrl || null;
+    } catch(e) { return null; }
+  }
+
+  function _bnRenderSlots() {
+    const wrap = document.getElementById('bn-slots');
+    if (!wrap) return;
+    const n = _bnSlotCount();
+    while (_bnSlots.length < n) _bnSlots.push({ url:'', pos_x:50, pos_y:50, zoom:1 });
+    wrap.innerHTML = '';
+    for (let i=0; i<n; i++) {
+      const sd = _bnSlots[i];
+      const div = document.createElement('div');
+      div.style.marginBottom = '12px';
+      div.innerHTML = `
+        <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:5px;">${n>1?`Foto ${i+1}`:'Foto'}</div>
+        <label style="display:flex;align-items:center;gap:8px;border:1.5px dashed #cbd5e1;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:0.82rem;color:#64748b;background:#f8fafc;margin-bottom:5px;">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M10.5 8.25h.008v.008H10.5V8.25Z"/></svg>
+          <span class="bn-file-lbl">Subir desde dispositivo</span>
+          <input type="file" class="bn-file" accept="image/*" style="display:none;" data-slot="${i}">
+        </label>
+        <input type="text" class="bn-url" placeholder="O pegar URL de imagen" data-slot="${i}"
+          style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.83rem;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"
+          value="${sd.url}">
+        <div class="bn-pw" data-slot="${i}"
+          style="position:relative;width:100%;height:90px;border-radius:8px;overflow:hidden;background:#e2e8f0;${sd.url?'':'display:none;'}cursor:grab;user-select:none;">
+          <img class="bn-pi" data-ox="${sd.pos_x}" data-oy="${sd.pos_y}" src="${sd.url}"
+            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${sd.pos_x}% ${sd.pos_y}%;transform:scale(${sd.zoom});transform-origin:${sd.pos_x}% ${sd.pos_y}%;display:block;">
+          <div style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.5);color:#fff;font-size:0.62rem;padding:2px 6px;border-radius:4px;pointer-events:none;">Arrastra para posicionar</div>
+        </div>
+        <div class="bn-zrow" data-slot="${i}" style="display:${sd.url?'flex':'none'};align-items:center;gap:8px;margin-top:5px;">
+          <span style="font-size:0.72rem;color:#64748b;white-space:nowrap;">Zoom</span>
+          <input type="range" class="bn-zoom" data-slot="${i}" min="0.3" max="2.5" step="0.05" value="${sd.zoom}" style="flex:1;accent-color:#1b2e5e;">
+          <span class="bn-zval" style="font-size:0.72rem;color:#64748b;width:28px;text-align:right;">${Math.round(sd.zoom*100)}%</span>
+        </div>`;
+      wrap.appendChild(div);
+
+      _bnSetupDrag(div.querySelector('.bn-pw'), div.querySelector('.bn-pi'), i);
+
+      div.querySelector('.bn-zoom').addEventListener('input', function() {
+        const z = parseFloat(this.value); _bnSlots[i].zoom=z;
+        const pi=div.querySelector('.bn-pi');
+        pi.style.transform=`scale(${z})`; pi.style.transformOrigin=`${_bnSlots[i].pos_x}% ${_bnSlots[i].pos_y}%`;
+        div.querySelector('.bn-zval').textContent=Math.round(z*100)+'%';
+      });
+
+      div.querySelector('.bn-file').addEventListener('change', async function() {
+        const file=this.files[0]; if(!file) return;
+        const lbl=div.querySelector('.bn-file-lbl'); lbl.textContent='Subiendo…';
+        const dataUrl=await _bnResizeImg(file); if(!dataUrl){lbl.textContent='Error';return;}
+        const storageUrl=await _bnUploadImg(dataUrl,`slot${i}.jpg`);
+        const finalUrl=storageUrl||dataUrl;
+        lbl.textContent=storageUrl?'✓ Guardada en servidor':file.name;
+        _bnSlots[i].url=finalUrl;
+        div.querySelector('.bn-url').value=storageUrl||'';
+        _bnApplyUrl(div,i,finalUrl);
+      });
+
+      div.querySelector('.bn-url').addEventListener('input', function() {
+        const url=this.value.trim(); _bnSlots[i].url=url; _bnApplyUrl(div,i,url);
+      });
+    }
+  }
+
   function toggleBannerForm() {
     const form = document.getElementById('banner-new-form');
     const open = form.style.display === 'none';
@@ -3072,65 +3264,60 @@
       ? `<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg> Cancelar`
       : `<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Añadir banner`;
     if (open) {
-      // preview listener
-      document.getElementById('bn-imagen').addEventListener('change', function() {
-        const file = this.files[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-          document.getElementById('bn-preview-img').src = e.target.result;
-          document.getElementById('bn-preview').style.display = 'block';
+      _bnLayout='single'; _bnSlots=[{url:'',pos_x:50,pos_y:50,zoom:1}];
+      // Activar layout selector
+      document.querySelectorAll('#bn-layout-selector button').forEach(b => {
+        const sel = b.dataset.layout==='single';
+        b.style.borderColor=sel?'#1b2e5e':'#e2e8f0';
+        b.style.background=sel?'#eff6ff':'#f8fafc';
+        b.onclick=()=>{
+          _bnLayout=b.dataset.layout;
+          document.querySelectorAll('#bn-layout-selector button').forEach(x=>{x.style.borderColor=x===b?'#1b2e5e':'#e2e8f0';x.style.background=x===b?'#eff6ff':'#f8fafc';});
+          _bnRenderSlots();
         };
-        reader.readAsDataURL(file);
-      }, { once: true });
+      });
+      _bnRenderSlots();
     }
   }
 
   async function saveNewBannerAdmin() {
-    const btn = document.getElementById('bn-save-btn');
-    const titulo    = document.getElementById('bn-titulo').value.trim();
+    const btn    = document.getElementById('bn-save-btn');
+    const titulo = document.getElementById('bn-titulo').value.trim();
+    const errEl  = document.getElementById('bn-titulo-err');
+    if (!titulo) { errEl.style.display='block'; document.getElementById('bn-titulo').focus(); return; }
+    errEl.style.display='none';
+
+    btn.disabled=true;
+    btn.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicando…';
+
+    const sb = typeof getSupabase==='function' ? getSupabase() : null;
+    if (!sb) { showAdminToast('Sin conexión a Supabase','error'); btn.disabled=false; btn.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicar anuncio'; return; }
+
     const subtitulo = document.getElementById('bn-subtitulo').value.trim();
     const tipo      = document.getElementById('bn-tipo').value;
+    const href      = document.getElementById('bn-enlace').value || null;
     const hasta     = document.getElementById('bn-hasta').value || null;
-    const fileInput = document.getElementById('bn-imagen');
-    const file      = fileInput.files[0];
+    const color     = BN_TIPO_COLORS[tipo] || BN_TIPO_COLORS.novedad;
 
-    if (!titulo) { showAdminToast('El título es obligatorio', 'error'); return; }
+    const slots = _bnSlots.slice(0,_bnSlotCount()).map(sd=>({
+      url: sd.url?.startsWith('data:') ? '' : (sd.url||''),
+      pos_x: Math.round(sd.pos_x), pos_y: Math.round(sd.pos_y), zoom: +sd.zoom.toFixed(2)
+    }));
+    const imagen_url = slots[0]?.url || '';
 
-    btn.textContent = 'Publicando…'; btn.disabled = true;
-
-    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
-    if (!sb) { showAdminToast('Sin conexión a Supabase', 'error'); btn.textContent = 'Publicar'; btn.disabled = false; return; }
-
-    let imagen_url = '';
-    if (file) {
-      try {
-        const ext  = file.name.split('.').pop();
-        const path = `banner_${Date.now()}.${ext}`;
-        const { data: upData, error: upErr } = await sb.storage.from('banners').upload(path, file, { upsert: true });
-        if (!upErr && upData) {
-          const { data: urlData } = sb.storage.from('banners').getPublicUrl(upData.path);
-          imagen_url = urlData?.publicUrl || '';
-        } else if (upErr) {
-          console.error('[Banner upload error]', upErr.message);
-        }
-      } catch(e) { console.error('[Banner upload exception]', e); }
-    }
-
-    const slide = { titulo, subtitulo, tipo, hasta, imagen_url, activo: true, orden: Date.now(), layout: 'single', slots: imagen_url ? [{ url: imagen_url, pos_x: 50, pos_y: 50, zoom: 1 }] : [] };
+    const slide = { titulo, subtitulo, tipo, href, hasta, color, imagen_url, activo:true, orden:Date.now(), layout:_bnLayout, slots };
     const { error } = await sb.from('banner_slides').insert(slide);
     if (error) {
-      showAdminToast('Error: ' + error.message, 'error');
-      btn.textContent = 'Publicar'; btn.disabled = false;
+      showAdminToast('Error: '+error.message,'error');
+      btn.disabled=false; btn.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicar anuncio';
       return;
     }
 
-    showAdminToast('Banner publicado', 'success');
-    // Reset form
-    document.getElementById('bn-titulo').value = '';
-    document.getElementById('bn-subtitulo').value = '';
-    document.getElementById('bn-hasta').value = '';
-    fileInput.value = '';
-    document.getElementById('bn-preview').style.display = 'none';
+    showAdminToast('Banner publicado','success');
+    document.getElementById('bn-titulo').value='';
+    document.getElementById('bn-subtitulo').value='';
+    document.getElementById('bn-hasta').value='';
+    _bnSlots=[{url:'',pos_x:50,pos_y:50,zoom:1}];
     toggleBannerForm();
     loadBannersAdmin();
   }
