@@ -1131,15 +1131,54 @@
     <div class="tab-panel" id="panel-noticias">
 
       <!-- Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
         <div>
           <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin:0 0 2px;">Banner del inicio</p>
           <p style="font-size:0.82rem;color:#94a3b8;margin:0;">Slides del carrusel principal de la app</p>
         </div>
-        <a href="home.html" target="_blank" style="display:inline-flex;align-items:center;gap:7px;background:#1b2e5e;color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:0.83rem;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none;">
+        <button id="btn-toggle-banner-form" onclick="toggleBannerForm()" style="display:inline-flex;align-items:center;gap:7px;background:#1b2e5e;color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:0.83rem;font-weight:600;cursor:pointer;white-space:nowrap;">
           <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
           Añadir banner
-        </a>
+        </button>
+      </div>
+
+      <!-- Formulario nuevo banner (colapsable) -->
+      <div id="banner-new-form" style="display:none;background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:20px;margin-bottom:18px;">
+        <p style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b;margin:0 0 14px;">Nuevo banner</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="grid-column:1/-1;">
+            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Imagen</label>
+            <input type="file" id="bn-imagen" accept="image/jpeg,image/png,image/webp" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:0.83rem;font-family:inherit;box-sizing:border-box;cursor:pointer;">
+            <div id="bn-preview" style="margin-top:8px;display:none;"><img id="bn-preview-img" style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;"></div>
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Título</label>
+            <input id="bn-titulo" type="text" placeholder="Título del banner" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;">
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Descripción</label>
+            <input id="bn-subtitulo" type="text" placeholder="Texto secundario (opcional)" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Tipo</label>
+            <select id="bn-tipo" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;">
+              <option value="novedad">Novedad</option>
+              <option value="evento">Evento</option>
+              <option value="comunicado">Comunicado</option>
+              <option value="shabat">Shabat</option>
+              <option value="festividad">Festividad</option>
+              <option value="donativos">Donativos</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Válido hasta</label>
+            <input id="bn-hasta" type="date" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;">
+          <button onclick="toggleBannerForm()" style="background:none;border:1.5px solid #e2e8f0;color:#64748b;padding:7px 16px;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;">Cancelar</button>
+          <button id="bn-save-btn" onclick="saveNewBannerAdmin()" style="background:#1b2e5e;color:#fff;border:none;padding:7px 20px;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;">Publicar</button>
+        </div>
       </div>
 
       <div id="banner-admin-list">
@@ -3023,6 +3062,78 @@
     evento:'Evento', novedad:'Novedad', comunicado:'Comunicado',
     shabat:'Shabat', festividad:'Festividad', donativos:'Donativos'
   };
+
+  function toggleBannerForm() {
+    const form = document.getElementById('banner-new-form');
+    const open = form.style.display === 'none';
+    form.style.display = open ? 'block' : 'none';
+    const toggleBtn = document.getElementById('btn-toggle-banner-form');
+    toggleBtn.innerHTML = open
+      ? `<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg> Cancelar`
+      : `<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Añadir banner`;
+    if (open) {
+      // preview listener
+      document.getElementById('bn-imagen').addEventListener('change', function() {
+        const file = this.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          document.getElementById('bn-preview-img').src = e.target.result;
+          document.getElementById('bn-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }, { once: true });
+    }
+  }
+
+  async function saveNewBannerAdmin() {
+    const btn = document.getElementById('bn-save-btn');
+    const titulo    = document.getElementById('bn-titulo').value.trim();
+    const subtitulo = document.getElementById('bn-subtitulo').value.trim();
+    const tipo      = document.getElementById('bn-tipo').value;
+    const hasta     = document.getElementById('bn-hasta').value || null;
+    const fileInput = document.getElementById('bn-imagen');
+    const file      = fileInput.files[0];
+
+    if (!titulo) { showAdminToast('El título es obligatorio', 'error'); return; }
+
+    btn.textContent = 'Publicando…'; btn.disabled = true;
+
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) { showAdminToast('Sin conexión a Supabase', 'error'); btn.textContent = 'Publicar'; btn.disabled = false; return; }
+
+    let imagen_url = '';
+    if (file) {
+      try {
+        const ext  = file.name.split('.').pop();
+        const path = `banner_${Date.now()}.${ext}`;
+        const { data: upData, error: upErr } = await sb.storage.from('banners').upload(path, file, { upsert: true });
+        if (!upErr && upData) {
+          const { data: urlData } = sb.storage.from('banners').getPublicUrl(upData.path);
+          imagen_url = urlData?.publicUrl || '';
+        } else if (upErr) {
+          console.error('[Banner upload error]', upErr.message);
+        }
+      } catch(e) { console.error('[Banner upload exception]', e); }
+    }
+
+    const slide = { titulo, subtitulo, tipo, hasta, imagen_url, activo: true, orden: Date.now(), layout: 'single', slots: imagen_url ? [{ url: imagen_url, pos_x: 50, pos_y: 50, zoom: 1 }] : [] };
+    const { error } = await sb.from('banner_slides').insert(slide);
+    if (error) {
+      showAdminToast('Error: ' + error.message, 'error');
+      btn.textContent = 'Publicar'; btn.disabled = false;
+      return;
+    }
+
+    showAdminToast('Banner publicado', 'success');
+    // Reset form
+    document.getElementById('bn-titulo').value = '';
+    document.getElementById('bn-subtitulo').value = '';
+    document.getElementById('bn-hasta').value = '';
+    fileInput.value = '';
+    document.getElementById('bn-preview').style.display = 'none';
+    toggleBannerForm();
+    loadBannersAdmin();
+  }
 
   async function loadBannersAdmin() {
     const container = document.getElementById('banner-admin-list');
