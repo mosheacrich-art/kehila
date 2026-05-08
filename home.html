@@ -1485,7 +1485,7 @@
           <!-- Formulario nuevo anuncio -->
           <div style="padding:16px 24px 20px;overflow-y:auto;flex:1;">
             <div style="border-top:1px solid #f1f5f9;padding-top:16px;margin-bottom:4px;">
-              <p style="font-size:0.875rem;font-weight:700;color:#1b2e5e;margin:0 0 14px;">Nuevo anuncio</p>
+              <p id="form-section-title" style="font-size:0.875rem;font-weight:700;color:#1b2e5e;margin:0 0 14px;">Nuevo anuncio</p>
 
               <div style="${groupStyle}">
                 <label style="${labelStyle}">Tipo de anuncio <span style="color:#ef4444;">*</span></label>
@@ -1565,6 +1565,7 @@
       };
 
       let _cachedSlides = [];
+      let _editingId = null;
 
       async function refreshList() {
         const sb = typeof getSupabase === 'function' ? getSupabase() : null;
@@ -1597,9 +1598,16 @@
                 <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#1a202c;">${s.titulo||'(sin título)'}</div>
                 ${s.subtitulo ? `<div style="font-size:0.73rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.subtitulo}</div>` : ''}
               </div>
-              <button data-del-id="${s.id}" data-del-idx="${i}" style="background:#fef2f2;border:1px solid #fecaca;cursor:pointer;color:#dc2626;padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;flex-shrink:0;">Eliminar</button>
+              <div style="display:flex;gap:5px;flex-shrink:0;">
+                <button data-edit-idx="${i}" style="background:#eff6ff;border:1px solid #bfdbfe;cursor:pointer;color:#1d4ed8;padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;">Editar</button>
+                <button data-del-id="${s.id}" data-del-idx="${i}" style="background:#fef2f2;border:1px solid #fecaca;cursor:pointer;color:#dc2626;padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;">Eliminar</button>
+              </div>
             </div>`;
         }).join('');
+
+        container.querySelectorAll('[data-edit-idx]').forEach(btn => {
+          btn.addEventListener('click', () => startEdit(_cachedSlides[parseInt(btn.dataset.editIdx)]));
+        });
 
         container.querySelectorAll('[data-del-id]').forEach(btn => {
           btn.addEventListener('click', async () => {
@@ -1626,6 +1634,27 @@
       }
 
       refreshList();
+
+      function startEdit(s) {
+        if (!s) return;
+        _editingId = s.id;
+        overlay.querySelector('#bnew-titulo').value    = s.titulo    || '';
+        overlay.querySelector('#bnew-subtitulo').value = s.subtitulo || '';
+        overlay.querySelector('#bnew-hasta').value     = s.hasta     || '';
+        const tipoSel   = overlay.querySelector('#bnew-tipo');
+        const enlaceSel = overlay.querySelector('#bnew-enlace');
+        if (tipoSel   && s.tipo) tipoSel.value   = s.tipo;
+        if (enlaceSel && s.href) enlaceSel.value  = s.href;
+        _activeLayout = s.layout || 'single';
+        _slotData = (s.slots && s.slots.length)
+          ? s.slots.map(sl => ({ url: sl.url || '', pos_x: sl.pos_x ?? 50, pos_y: sl.pos_y ?? 50, zoom: sl.zoom ?? 1 }))
+          : [{ url: s.imagen_url || '', pos_x: 50, pos_y: 50, zoom: 1 }];
+        const layoutBtn = overlay.querySelector(`#layout-selector button[data-layout="${_activeLayout}"]`);
+        if (layoutBtn) layoutBtn.click(); else renderSlots();
+        overlay.querySelector('#form-section-title').textContent = 'Editar anuncio';
+        overlay.querySelector('#bnew-save').innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg> Guardar cambios';
+        overlay.querySelector('#bnew-titulo').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
 
       /* ── Estado slots ── */
       let _activeLayout = 'single';
@@ -1796,7 +1825,6 @@
         let savedToSupabase = false;
         if (sb) {
           try {
-            // Para Supabase: no mandar base64 (demasiado grande) — solo URLs de Storage o vacío
             const slotsForDb = slots.map(s => ({
               ...s, url: s.url?.startsWith('data:') ? '' : (s.url || '')
             }));
@@ -1805,32 +1833,46 @@
               imagen_url: imagen_url?.startsWith('data:') ? '' : imagen_url,
               slots: slotsForDb
             };
-            const { data, error } = await sb.from('banner_slides').insert(slideForDb).select().single();
-            if (!error && data) { newSlide.id = data.id; savedToSupabase = true; }
+            if (_editingId && !String(_editingId).startsWith('ls_')) {
+              const { error } = await sb.from('banner_slides').update(slideForDb).eq('id', _editingId);
+              if (!error) { newSlide.id = _editingId; savedToSupabase = true; }
+            } else {
+              const { data, error } = await sb.from('banner_slides').insert(slideForDb).select().single();
+              if (!error && data) { newSlide.id = data.id; savedToSupabase = true; }
+            }
           } catch(e) {}
         }
 
-        if (!newSlide.id) newSlide.id = 'ls_' + Date.now();
-        // En localStorage guardamos TODO (incluido base64 si aplica, para offline)
-        const arr = _lsBannerGet(); arr.push(newSlide); _lsBannerSave(arr);
+        if (!newSlide.id) newSlide.id = _editingId || ('ls_' + Date.now());
+        // localStorage: update or push
+        const arr = _lsBannerGet();
+        if (_editingId) {
+          const idx = arr.findIndex(s => s.id === _editingId);
+          if (idx !== -1) arr[idx] = newSlide; else arr.push(newSlide);
+        } else {
+          arr.push(newSlide);
+        }
+        _lsBannerSave(arr);
 
         if (!savedToSupabase) {
-          showToast('Guardado localmente. Para persistencia total ejecuta el SQL del archivo supabase_banner_setup.sql en Supabase.', 'warning');
+          showToast('Guardado localmente.', 'warning');
         }
 
-        // Reset
+        // Reset form
+        _editingId = null;
         overlay.querySelector('#bnew-titulo').value = '';
         overlay.querySelector('#bnew-subtitulo').value = '';
         overlay.querySelector('#bnew-hasta').value = '';
         overlay.querySelector('#bnew-tipo').selectedIndex = 0;
         overlay.querySelector('#bnew-enlace').selectedIndex = 0;
+        overlay.querySelector('#form-section-title').textContent = 'Nuevo anuncio';
         _slotData = [{ url:'', pos_x:50, pos_y:50, zoom:1 }];
         _activeLayout = 'single';
         overlay.querySelector('#layout-selector button[data-layout="single"]').click();
 
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicar anuncio';
-        showToast('Anuncio publicado y guardado', 'success');
+        showToast(_editingId ? 'Anuncio actualizado' : 'Anuncio publicado y guardado', 'success');
         loadBanner(); refreshList();
       });
     }
