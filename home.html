@@ -1672,7 +1672,7 @@
             <!-- Zoom -->
             <div style="display:${sd.url ? 'flex' : 'none'};align-items:center;gap:8px;margin-top:5px;" class="slot-zoom-row" data-slot="${i}">
               <span style="font-size:0.72rem;color:#64748b;white-space:nowrap;">Zoom</span>
-              <input type="range" class="slot-zoom" data-slot="${i}" min="1" max="2.5" step="0.05" value="${sd.zoom}"
+              <input type="range" class="slot-zoom" data-slot="${i}" min="0.3" max="2.5" step="0.05" value="${sd.zoom}"
                 style="flex:1;accent-color:#1b2e5e;">
               <span class="slot-zoom-val" style="font-size:0.72rem;color:#64748b;width:28px;text-align:right;">${Math.round(sd.zoom*100)}%</span>
             </div>`;
