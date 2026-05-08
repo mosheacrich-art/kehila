@@ -1847,8 +1847,9 @@
             } else {
               const { data, error } = await sb.from('banner_slides').insert(slideForDb).select().single();
               if (!error && data) { newSlide.id = data.id; savedToSupabase = true; }
+              else if (error) { console.error('[Banner INSERT error]', error.message, error); }
             }
-          } catch(e) {}
+          } catch(e) { console.error('[Banner save exception]', e); }
         }
 
         if (!newSlide.id) newSlide.id = _editingId || ('ls_' + Date.now());

@@ -3032,7 +3032,11 @@
     if (!sb) { container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Sin conexión a Supabase.</p>'; return; }
 
     const { data, error } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
-    if (error || !data || !data.length) {
+    if (error) {
+      container.innerHTML = `<p style="text-align:center;color:#dc2626;padding:40px 0;">Error al cargar banners: ${escHtml(error.message)}</p>`;
+      return;
+    }
+    if (!data || !data.length) {
       container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">No hay banners activos.</p>';
       return;
     }
@@ -3129,8 +3133,6 @@
       });
     });
   }
-
-  loadBannersAdmin();
 
   /* ══════════════════════════════
      TAB MARKETPLACE
