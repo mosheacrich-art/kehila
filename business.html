@@ -1643,6 +1643,37 @@
   /* ══════════════════════════════════
      TAB 3 — PUBLISH FORM
   ══════════════════════════════════ */
+
+  /* Editar negocio existente — fuera del try para ser visible en strict mode */
+  function editBiz(id) {
+    var b = (MOCK_BUSINESSES || []).find(function (x) { return String(x.id) === String(id); });
+    if (!b) return;
+    editingBizId    = id;
+    existingLogoUrl = b.logoImg || null;
+
+    document.getElementById('f-nombre').value    = b.nombre || '';
+    document.getElementById('f-cat').value       = b.categoria || '';
+    document.getElementById('f-desc-full').value = b.descripcion || '';
+    document.getElementById('f-ciudad').value    = b.ciudad || '';
+    document.getElementById('f-dir').value       = b.direccion || '';
+    document.getElementById('f-tel').value       = b.telefono || '';
+    document.getElementById('f-email').value     = b.email || '';
+    document.getElementById('f-web').value       = b.web || '';
+
+    clearBizLogo();
+    if (b.logoImg) {
+      var img = document.getElementById('upload-img-biz');
+      img.src = b.logoImg;
+      document.getElementById('upload-ph-biz').style.display    = 'none';
+      document.getElementById('upload-filled-biz').style.display = 'block';
+    }
+
+    document.querySelector('#publish-form .btn-publish').textContent = 'Guardar cambios';
+    activateTab('tab-publicar');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast('Editando: ' + b.nombre, 'info');
+  }
+
   try {
     /* Char counter */
     var descCortaInput = document.getElementById('f-desc-corta');
@@ -1745,37 +1776,6 @@
     toggleSociosEl.addEventListener('change', function () {
       try { sociosSectionEl.style.display = toggleSociosEl.checked ? '' : 'none'; } catch (e) { console.error(e); }
     });
-
-    /* Editar negocio existente */
-    function editBiz(id) {
-      var b = (MOCK_BUSINESSES || []).find(function (x) { return String(x.id) === String(id); });
-      if (!b) return;
-      editingBizId   = id;
-      existingLogoUrl = b.logoImg || null;
-
-      document.getElementById('f-nombre').value    = b.nombre || '';
-      document.getElementById('f-cat').value       = b.categoria || '';
-      document.getElementById('f-desc-full').value = b.descripcion || '';
-      document.getElementById('f-ciudad').value    = b.ciudad || '';
-      document.getElementById('f-dir').value       = b.direccion || '';
-      document.getElementById('f-tel').value       = b.telefono || '';
-      document.getElementById('f-email').value     = b.email || '';
-      document.getElementById('f-web').value       = b.web || '';
-
-      // Logo existente
-      clearBizLogo();
-      if (b.logoImg) {
-        var img = document.getElementById('upload-img-biz');
-        img.src = b.logoImg;
-        document.getElementById('upload-ph-biz').style.display   = 'none';
-        document.getElementById('upload-filled-biz').style.display = 'block';
-      }
-
-      document.querySelector('#publish-form .btn-publish').textContent = 'Guardar cambios';
-      activateTab('tab-publicar');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      showToast('Editando: ' + b.nombre, 'info');
-    }
 
     /* Submit — abre modal de pago */
     var pendingBiz = null;
