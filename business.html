@@ -1838,9 +1838,9 @@
             var res = await fetch(logoData);
             var blob = await res.blob();
             var filename = 'negocio_' + Date.now() + '.jpg';
-            var upRes = await sbUp.storage.from('banners').upload(filename, blob, { upsert: true, contentType: 'image/jpeg' });
+            var upRes = await sbUp.storage.from('negocios').upload(filename, blob, { upsert: true, contentType: 'image/jpeg' });
             if (!upRes.error && upRes.data) {
-              logoUrl = sbUp.storage.from('banners').getPublicUrl(upRes.data.path).data?.publicUrl || null;
+              logoUrl = sbUp.storage.from('negocios').getPublicUrl(upRes.data.path).data?.publicUrl || null;
             }
           } catch (uploadErr) { console.error('[Logo upload]', uploadErr); }
         }
