@@ -1331,6 +1331,9 @@
   var formServices  = [];
   uploadAreaSetup('biz');
   var currentConectarNombre = '';
+  var editingBizId   = null;
+  var existingLogoUrl = null;
+  var currentUserId  = (JSON.parse(localStorage.getItem('kehila_user') || '{}')).userId || null;
 
   /* ─── Helpers ─── */
   function getInitials(name) {
@@ -1424,7 +1427,9 @@
       + (tags ? '<div class="biz-tags">' + tags + '</div>' : '')
       + '<div class="biz-card-actions">'
         + '<button class="btn-ver-mas" data-id="' + b.id + '">Ver m\u00e1s</button>'
-        + '<button class="btn-contactar" data-id="' + b.id + '" data-tel="' + (b.telefono || '') + '">Contactar</button>'
+        + (b.usuario_id && b.usuario_id === currentUserId
+            ? '<button class="btn-editar-biz" data-id="' + b.id + '" style="background:#eff6ff;border:1.5px solid #bfdbfe;color:#1d4ed8;padding:8px 16px;border-radius:8px;font-size:.875rem;font-weight:600;cursor:pointer;">Editar</button>'
+            : '<button class="btn-contactar" data-id="' + b.id + '" data-tel="' + (b.telefono || '') + '">Contactar</button>')
       + '</div>'
     + '</div>';
   }
@@ -1470,7 +1475,8 @@
                   propietario: n.propietario || 'Comunidad',
                   kosher: n.kosher || false, cierraShabat: n.cierra_shabat || false,
                   verificado: n.verificado || false, color: '#1B2E5E', horario: {},
-                  logoImg: n.logo_url || null
+                  logoImg: n.logo_url || null,
+                  usuario_id: n.usuario_id || null
                 });
               }
             });
@@ -1555,6 +1561,8 @@
           if (tel) { window.open('https://wa.me/' + tel, '_blank'); }
           else { showToast('Contacto no disponible', 'info'); }
         }
+        var editBtn = e.target.closest('.btn-editar-biz');
+        if (editBtn) { editBiz(editBtn.dataset.id); }
       } catch (err) { console.error(err); }
     });
 
@@ -1738,6 +1746,37 @@
       try { sociosSectionEl.style.display = toggleSociosEl.checked ? '' : 'none'; } catch (e) { console.error(e); }
     });
 
+    /* Editar negocio existente */
+    function editBiz(id) {
+      var b = (MOCK_BUSINESSES || []).find(function (x) { return String(x.id) === String(id); });
+      if (!b) return;
+      editingBizId   = id;
+      existingLogoUrl = b.logoImg || null;
+
+      document.getElementById('f-nombre').value    = b.nombre || '';
+      document.getElementById('f-cat').value       = b.categoria || '';
+      document.getElementById('f-desc-full').value = b.descripcion || '';
+      document.getElementById('f-ciudad').value    = b.ciudad || '';
+      document.getElementById('f-dir').value       = b.direccion || '';
+      document.getElementById('f-tel').value       = b.telefono || '';
+      document.getElementById('f-email').value     = b.email || '';
+      document.getElementById('f-web').value       = b.web || '';
+
+      // Logo existente
+      clearBizLogo();
+      if (b.logoImg) {
+        var img = document.getElementById('upload-img-biz');
+        img.src = b.logoImg;
+        document.getElementById('upload-ph-biz').style.display   = 'none';
+        document.getElementById('upload-filled-biz').style.display = 'block';
+      }
+
+      document.querySelector('#publish-form .btn-publish').textContent = 'Guardar cambios';
+      activateTab('tab-publicar');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast('Editando: ' + b.nombre, 'info');
+    }
+
     /* Submit — abre modal de pago */
     var pendingBiz = null;
     var pendingForm = null;
@@ -1808,37 +1847,48 @@
         pendingBiz.logoImg = logoUrl || pendingBiz.logoImg;
 
         /* Guardar en Supabase directamente (sin modal de pago) */
+        var finalLogoUrl = logoUrl || (editingBizId ? existingLogoUrl : null);
+        var dbPayload = {
+          nombre: pendingBiz.nombre,
+          categoria: pendingBiz.categoria,
+          descripcion: pendingBiz.descripcion,
+          ciudad: pendingBiz.ciudad,
+          direccion: pendingBiz.direccion,
+          telefono: pendingBiz.telefono,
+          email: pendingBiz.email,
+          web: pendingBiz.web,
+          logo_url: finalLogoUrl
+        };
         if (sbUp) {
-          var { error: insErr } = await sbUp.from('negocios').insert({
-            nombre: pendingBiz.nombre,
-            categoria: pendingBiz.categoria,
-            descripcion: pendingBiz.descripcion,
-            ciudad: pendingBiz.ciudad,
-            direccion: pendingBiz.direccion,
-            telefono: pendingBiz.telefono,
-            email: pendingBiz.email,
-            web: pendingBiz.web,
-            logo_url: logoUrl,
-            propietario: pendingBiz.propietario || null,
-            kosher: false,
-            cierra_shabat: false,
-            verificado: false,
-            usuario_id: (typeof getCurrentUser === 'function' && getCurrentUser()) ? getCurrentUser().userId : null
-          });
-          if (insErr) {
-            showToast('Error al guardar: ' + insErr.message, 'error');
-            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Publicar negocio'; }
+          var dbOp = editingBizId
+            ? sbUp.from('negocios').update(dbPayload).eq('id', editingBizId)
+            : sbUp.from('negocios').insert(Object.assign({}, dbPayload, {
+                propietario: pendingBiz.propietario || null,
+                kosher: false, cierra_shabat: false, verificado: false,
+                usuario_id: currentUserId
+              }));
+          var { error: dbErr } = await dbOp;
+          if (dbErr) {
+            showToast('Error al guardar: ' + dbErr.message, 'error');
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = editingBizId ? 'Guardar cambios' : 'Publicar negocio'; }
             return;
           }
         }
 
-        if (typeof MOCK_BUSINESSES !== 'undefined') MOCK_BUSINESSES.unshift(pendingBiz);
+        pendingBiz.logoImg = finalLogoUrl;
+        if (editingBizId) {
+          var idx = (MOCK_BUSINESSES || []).findIndex(function (x) { return String(x.id) === String(editingBizId); });
+          if (idx !== -1) Object.assign(MOCK_BUSINESSES[idx], pendingBiz);
+        } else {
+          if (typeof MOCK_BUSINESSES !== 'undefined') MOCK_BUSINESSES.unshift(pendingBiz);
+        }
         activateTab('tab-directorio');
         searchEl.value = ''; filterCat.value = ''; filterCity.value = '';
         filterAndRender();
         var first = bizGrid.querySelector('.biz-card');
         if (first) first.classList.add('new-card');
-        showToast('¡Negocio publicado!', 'success');
+        showToast(editingBizId ? '¡Negocio actualizado!' : '¡Negocio publicado!', 'success');
+        editingBizId = null; existingLogoUrl = null;
 
         if (pendingForm) {
           pendingForm.reset();
@@ -1855,6 +1905,7 @@
         }
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Publicar negocio'; }
         pendingBiz = null; pendingForm = null;
+        editingBizId = null; existingLogoUrl = null;
       } catch (err) { console.error(err); }
     });
 
