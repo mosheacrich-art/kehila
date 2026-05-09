@@ -1469,7 +1469,8 @@
                   telefono: n.telefono || '', email: n.email || '', web: n.web || '',
                   propietario: n.propietario || 'Comunidad',
                   kosher: n.kosher || false, cierraShabat: n.cierra_shabat || false,
-                  verificado: n.verificado || false, color: '#1B2E5E', horario: {}
+                  verificado: n.verificado || false, color: '#1B2E5E', horario: {},
+                  logoImg: n.logo_url || null
                 });
               }
             });
@@ -1513,7 +1514,10 @@
           + '</div>';
       }
 
-      modalBizHeader.innerHTML = '<div class="modal-biz-logo-large" style="background:' + b.color + '">' + initials + '</div>'
+      var logoHeaderHTML = b.logoImg
+        ? '<img src="' + b.logoImg + '" style="width:80px;height:80px;border-radius:12px;object-fit:contain;background:#f8fafc;border:1px solid #e2e8f0;flex-shrink:0;" alt="' + b.nombre + '">'
+        : '<div class="modal-biz-logo-large" style="background:' + b.color + '">' + initials + '</div>';
+      modalBizHeader.innerHTML = logoHeaderHTML
         + '<div class="modal-biz-name">' + b.nombre + '</div>'
         + '<div class="modal-biz-owner">Por ' + b.propietario + (b.a\u00f1oFundacion ? ' \u00b7 Fundado en ' + b.a\u00f1oFundacion : '') + '</div>'
         + '<div class="biz-badges"><span class="badge-categoria">' + b.categoria + '</span>' + verif + '</div>';
@@ -1525,7 +1529,7 @@
         + '<div class="modal-section-label">Horario</div>'
         + '<div class="modal-schedule-grid">' + scheduleHTML + '</div>'
         + '<div class="modal-section-label">Contacto</div>'
-        + '<div class="modal-contact-row"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg><a href="tel:' + b.telefono + '">' + (b.telefono || 'N/D') + '</a></div>'
+        + (b.telefono ? '<div class="modal-contact-row"><a href="https://wa.me/' + b.telefono.replace(/\D/g,'') + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;background:#25D366;color:#fff;padding:8px 16px;border-radius:8px;font-weight:600;font-size:.85rem;text-decoration:none;"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.107 1.51 5.833L.057 23.18a.75.75 0 0 0 .93.899l5.49-1.437A11.935 11.935 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.73 9.73 0 0 1-4.95-1.35l-.355-.211-3.678.963.98-3.593-.231-.369A9.718 9.718 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>WhatsApp ' + b.telefono + '</a></div>' : '<div class="modal-contact-row" style="color:#94a3b8;">Teléfono no disponible</div>')
         + '<div class="modal-contact-row"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg><a href="mailto:' + b.email + '">' + (b.email || 'N/D') + '</a></div>'
         + (b.web ? '<div class="modal-contact-row"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253M3 12a8.959 8.959 0 0 0 .284 2.253"/></svg><a href="https://' + b.web + '" target="_blank" rel="noopener">' + b.web + '</a></div>' : '')
         + '<div class="modal-section-label">Ubicaci\u00f3n</div>'
@@ -1550,8 +1554,9 @@
         if (verBtn) { openBizModal(verBtn.dataset.id); return; }
         var conBtn = e.target.closest('.btn-contactar');
         if (conBtn) {
-          var tel = conBtn.dataset.tel;
-          showToast(tel ? 'Tel\u00e9fono: ' + tel : 'Contacto no disponible', 'info');
+          var tel = (conBtn.dataset.tel || '').replace(/\D/g, '');
+          if (tel) { window.open('https://wa.me/' + tel, '_blank'); }
+          else { showToast('Contacto no disponible', 'info'); }
         }
       } catch (err) { console.error(err); }
     });
@@ -1740,7 +1745,7 @@
     var pendingBiz = null;
     var pendingForm = null;
 
-    document.getElementById('publish-form').addEventListener('submit', function (e) {
+    document.getElementById('publish-form').addEventListener('submit', async function (e) {
       try {
         e.preventDefault();
         var nombre = document.getElementById('f-nombre').value.trim();
@@ -1785,56 +1790,29 @@
 
         pendingForm = e.target;
 
-        /* Leer precio dinámico desde localStorage */
-        var precioRaw = parseFloat(localStorage.getItem('kehila_precio_publicacion'));
-        if (isNaN(precioRaw)) precioRaw = 2.99;
-        var precioStr = precioRaw.toFixed(2).replace('.', ',');
-        document.getElementById('pay-header-price').innerHTML = precioStr + ' <span>\u20ac / mes</span>';
-        document.getElementById('pay-plan-amount').textContent = precioStr + ' \u20ac';
-        document.getElementById('pay-secure-amount').textContent = precioStr + ' \u20ac';
-        document.getElementById('pay-btn-amount').textContent = precioStr + ' \u20ac';
+        /* Subir logo a Supabase Storage si hay imagen */
+        var submitBtn = document.querySelector('#publish-form .btn-publish');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Publicando…'; }
 
-        /* Limpiar campos de pago y abrir modal */
-        document.getElementById('pay-card').value = '';
-        document.getElementById('pay-exp').value  = '';
-        document.getElementById('pay-cvv').value  = '';
-        document.getElementById('pay-name').value = '';
-        document.getElementById('modal-pago').classList.add('open');
-      } catch (err) { console.error(err); }
-    });
-
-    /* Formateo automático tarjeta */
-    document.getElementById('pay-card').addEventListener('input', function () {
-      var v = this.value.replace(/\D/g, '').slice(0, 16);
-      this.value = v.replace(/(.{4})/g, '$1 ').trim();
-    });
-    document.getElementById('pay-exp').addEventListener('input', function () {
-      var v = this.value.replace(/\D/g, '').slice(0, 4);
-      if (v.length >= 3) v = v.slice(0,2) + ' / ' + v.slice(2);
-      this.value = v;
-    });
-
-    /* Confirmar pago */
-    document.getElementById('btn-confirmar-pago').addEventListener('click', function () {
-      try {
-        var card = document.getElementById('pay-card').value.replace(/\s/g, '');
-        var exp  = document.getElementById('pay-exp').value.replace(/\s/g, '').replace('/', '');
-        var cvv  = document.getElementById('pay-cvv').value;
-        var name = document.getElementById('pay-name').value.trim();
-        if (card.length < 16 || exp.length < 4 || cvv.length < 3 || !name) {
-          showToast('Completa todos los datos de pago.', 'warning'); return;
+        var logoUrl = null;
+        var logoData = getBizLogo();
+        var sbUp = typeof getSupabase === 'function' ? getSupabase() : null;
+        if (logoData && sbUp) {
+          try {
+            var res = await fetch(logoData);
+            var blob = await res.blob();
+            var filename = 'negocio_' + Date.now() + '.jpg';
+            var upRes = await sbUp.storage.from('banners').upload(filename, blob, { upsert: true, contentType: 'image/jpeg' });
+            if (!upRes.error && upRes.data) {
+              logoUrl = sbUp.storage.from('banners').getPublicUrl(upRes.data.path).data?.publicUrl || null;
+            }
+          } catch (uploadErr) { console.error('[Logo upload]', uploadErr); }
         }
+        pendingBiz.logoImg = logoUrl || pendingBiz.logoImg;
 
-        document.getElementById('modal-pago').classList.remove('open');
-
-        if (!pendingBiz) return;
-
-        if (typeof MOCK_BUSINESSES !== 'undefined') MOCK_BUSINESSES.unshift(pendingBiz);
-
-        /* Guardar en Supabase */
-        var sb = typeof getSupabase === 'function' ? getSupabase() : null;
-        if (sb) {
-          sb.from('negocios').insert({
+        /* Guardar en Supabase directamente (sin modal de pago) */
+        if (sbUp) {
+          var { error: insErr } = await sbUp.from('negocios').insert({
             nombre: pendingBiz.nombre,
             categoria: pendingBiz.categoria,
             descripcion: pendingBiz.descripcion,
@@ -1843,24 +1821,27 @@
             telefono: pendingBiz.telefono,
             email: pendingBiz.email,
             web: pendingBiz.web,
+            logo_url: logoUrl,
             propietario: pendingBiz.propietario || null,
             kosher: false,
             cierra_shabat: false,
             verificado: false,
             usuario_id: (typeof getCurrentUser === 'function' && getCurrentUser()) ? getCurrentUser().userId : null
-          }).then(function () {}).catch(function () {});
+          });
+          if (insErr) {
+            showToast('Error al guardar: ' + insErr.message, 'error');
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Publicar negocio'; }
+            return;
+          }
         }
 
+        if (typeof MOCK_BUSINESSES !== 'undefined') MOCK_BUSINESSES.unshift(pendingBiz);
         activateTab('tab-directorio');
         searchEl.value = ''; filterCat.value = ''; filterCity.value = '';
         filterAndRender();
-
         var first = bizGrid.querySelector('.biz-card');
         if (first) first.classList.add('new-card');
-
-        var precioToast = parseFloat(localStorage.getItem('kehila_precio_publicacion'));
-        if (isNaN(precioToast)) precioToast = 2.99;
-        showToast('\u00a1Negocio publicado! Suscripci\u00f3n activa a ' + precioToast.toFixed(2).replace('.', ',') + '\u20ac/mes.', 'success');
+        showToast('¡Negocio publicado!', 'success');
 
         if (pendingForm) {
           pendingForm.reset();
@@ -1875,17 +1856,11 @@
           charCounter.classList.remove('over');
           sociosSectionEl.style.display = 'none';
         }
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Publicar negocio'; }
         pendingBiz = null; pendingForm = null;
       } catch (err) { console.error(err); }
     });
 
-    /* Cancelar pago */
-    document.getElementById('btn-cancelar-pago').addEventListener('click', function () {
-      try { document.getElementById('modal-pago').classList.remove('open'); } catch (e) { console.error(e); }
-    });
-    document.getElementById('modal-pago').addEventListener('click', function (e) {
-      try { if (e.target === this) this.classList.remove('open'); } catch (err) { console.error(err); }
-    });
 
   } catch (e) { console.error(e); }
 
