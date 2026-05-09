@@ -980,9 +980,9 @@
         <div class="metric-card">
           <p class="metric-label">Usuarios activos</p>
           <p class="metric-value" id="metric-activos">—</p>
-          <p class="metric-change up">
+          <p class="metric-change up" id="metric-activos-sub">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"/></svg>
-            3 esta semana
+            —
           </p>
         </div>
         <div class="metric-card">
@@ -996,17 +996,17 @@
         <div class="metric-card">
           <p class="metric-label">Eventos este mes</p>
           <p class="metric-value" id="metric-eventos">—</p>
-          <p class="metric-change">
+          <p class="metric-change" id="metric-eventos-sub">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5"/></svg>
-            Abril 2024
+            —
           </p>
         </div>
         <div class="metric-card">
           <p class="metric-label">Donativos recibidos</p>
           <p class="metric-value success" id="metric-donativos">—</p>
-          <p class="metric-change up">
+          <p class="metric-change up" id="metric-donativos-sub">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"/></svg>
-            3 campañas activas
+            —
           </p>
         </div>
       </div>
@@ -2257,18 +2257,36 @@
 
     // Métricas reales
     if (sbA) {
-      const [rProfiles, rEventos, rCampanas] = await Promise.all([
+      const ahora = new Date();
+      const inicioSemana = new Date(ahora); inicioSemana.setDate(ahora.getDate() - 7);
+      const inicioMes    = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+      const mesNombre    = ahora.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+
+      const [rProfiles, rEventosMes, rCampanas, rNuevosW] = await Promise.all([
         sbA.from('profiles').select('status'),
-        sbA.from('eventos').select('id'),
-        sbA.from('campanas').select('id'),
+        sbA.from('eventos').select('id').gte('fecha', inicioMes.toISOString().split('T')[0]),
+        sbA.from('campanas').select('id,activo'),
+        sbA.from('profiles').select('id').gte('created_at', inicioSemana.toISOString()),
       ]);
-      const perfiles = rProfiles.data || [];
+      const perfiles   = rProfiles.data || [];
       const activos    = perfiles.filter(u => u.status === 'active').length;
       const pendientes = perfiles.filter(u => u.status === 'pending').length;
+      const campanas   = rCampanas.data || [];
+      const campActivas = campanas.length;
+      const nuevosW    = (rNuevosW.data || []).length;
+
       document.getElementById('metric-activos').textContent    = activos;
       document.getElementById('metric-pendientes').textContent = pendientes;
-      document.getElementById('metric-eventos').textContent    = (rEventos.data || []).length;
-      document.getElementById('metric-donativos').textContent  = (rCampanas.data || []).length + ' campañas';
+      document.getElementById('metric-eventos').textContent    = (rEventosMes.data || []).length;
+      document.getElementById('metric-donativos').textContent  = campActivas;
+
+      const subActivos = document.getElementById('metric-activos-sub');
+      if (subActivos) subActivos.lastChild.textContent = nuevosW + ' esta semana';
+      const subEventos = document.getElementById('metric-eventos-sub');
+      if (subEventos) subEventos.lastChild.textContent = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1);
+      const subDonativos = document.getElementById('metric-donativos-sub');
+      if (subDonativos) subDonativos.lastChild.textContent = campActivas === 1 ? '1 campaña activa' : campActivas + ' campañas activas';
+
       if (pendientes > 0) {
         const badge = document.getElementById('pending-count-badge');
         badge.textContent = pendientes;
