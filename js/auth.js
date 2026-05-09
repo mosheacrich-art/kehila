@@ -72,7 +72,11 @@ async function login(email, password) {
 
     if (profile && profile.status === 'banned') {
       await sb.auth.signOut();
-      return { ok: false, error: 'Tu cuenta ha sido suspendida. Contacta al administrador.' };
+      return { ok: false, error: 'Tu cuenta ha sido baneada. Contacta al administrador.' };
+    }
+    if (profile && profile.status === 'suspended') {
+      await sb.auth.signOut();
+      return { ok: false, error: 'Tu cuenta está suspendida temporalmente. Contacta al administrador.' };
     }
 
     const sessionData = {
@@ -267,7 +271,7 @@ async function verifyAdminRealtime() {
       .single();
 
     if (error || !profile)           { window.location.href = 'home.html'; return null; }
-    if (profile.status === 'banned') { await logout(); return null; }
+    if (profile.status === 'banned' || profile.status === 'suspended') { await logout(); return null; }
     if (profile.role !== 'admin')    { window.location.href = 'home.html'; return null; }
 
     // Sincronizar rol en localStorage por si cambio en BD

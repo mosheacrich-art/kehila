@@ -1077,6 +1077,7 @@
           <option value="">Todos los estados</option>
           <option value="active">Activos</option>
           <option value="pending">Pendientes</option>
+          <option value="suspended">Suspendidos</option>
           <option value="banned">Baneados</option>
         </select>
         <select class="filter-select" id="filter-role" onchange="filterUsers()">
@@ -2216,9 +2217,10 @@
    */
   function badgeStatus(status) {
     const map = {
-      active:  `<span style="${TAG}color:#15803d;background:#f0fdf4;border-color:#bbf7d0;"><span style="width:5px;height:5px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>Activo</span>`,
-      pending: `<span style="${TAG}color:#92400e;background:#fffbeb;border-color:#fde68a;"><span style="width:5px;height:5px;border-radius:50%;background:#d97706;flex-shrink:0;display:inline-block;"></span>Pendiente</span>`,
-      banned:  `<span style="${TAG}color:#991b1b;background:#fef2f2;border-color:#fecaca;"><span style="width:5px;height:5px;border-radius:50%;background:#ef4444;flex-shrink:0;display:inline-block;"></span>Baneado</span>`,
+      active:    `<span style="${TAG}color:#15803d;background:#f0fdf4;border-color:#bbf7d0;"><span style="width:5px;height:5px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>Activo</span>`,
+      pending:   `<span style="${TAG}color:#92400e;background:#fffbeb;border-color:#fde68a;"><span style="width:5px;height:5px;border-radius:50%;background:#d97706;flex-shrink:0;display:inline-block;"></span>Pendiente</span>`,
+      banned:    `<span style="${TAG}color:#991b1b;background:#fef2f2;border-color:#fecaca;"><span style="width:5px;height:5px;border-radius:50%;background:#ef4444;flex-shrink:0;display:inline-block;"></span>Baneado</span>`,
+      suspended: `<span style="${TAG}color:#6b21a8;background:#faf5ff;border-color:#e9d5ff;"><span style="width:5px;height:5px;border-radius:50%;background:#9333ea;flex-shrink:0;display:inline-block;"></span>Suspendido</span>`,
     };
     return map[status] || `<span style="${TAG}color:var(--color-text-muted);background:var(--color-bg);border-color:var(--color-border);">${status}</span>`;
   }
@@ -2365,12 +2367,19 @@
         actions = `
           <div class="action-btns">
             <button class="tbl-action tbl-action-approve" onclick="promptAprobar('${u.userId}')">Aprobar</button>
+            <button class="tbl-action tbl-action-warn" onclick="solicitarInfoUsuario('${u.userId}')">Info</button>
             <button class="tbl-action tbl-action-danger" onclick="promptBanear('${u.userId}')">Rechazar</button>
           </div>`;
       } else if (u.status === 'active') {
         actions = `
           <div class="action-btns">
             <button class="tbl-action tbl-action-warn" onclick="suspenderUser('${u.userId}')">Suspender</button>
+            <button class="tbl-action tbl-action-danger" onclick="promptBanear('${u.userId}')">Banear</button>
+          </div>`;
+      } else if (u.status === 'suspended') {
+        actions = `
+          <div class="action-btns">
+            <button class="tbl-action tbl-action-approve" onclick="reactivarUser('${u.userId}')">Reactivar</button>
             <button class="tbl-action tbl-action-danger" onclick="promptBanear('${u.userId}')">Banear</button>
           </div>`;
       } else {
@@ -2568,23 +2577,61 @@
    * Suspende temporalmente un usuario (status: suspended) en Supabase.
    * @param {string} userId
    */
-  function suspenderUser(userId) {
+  async function suspenderUser(userId) {
     const user = usersState.find(u => u.userId === userId);
-    user.status = 'banned';
+    if (!user) return;
+    user.status = 'suspended';
     filterUsers();
     showToast(`${escHtml(user.name)} ha sido suspendido.`, 'warning');
+    if (user.source === 'real') await suspenderEnSupabase(userId);
   }
 
   /**
    * Reactiva un usuario suspendido o baneado (status: active).
    * @param {string} userId
    */
-  function reactivarUser(userId) {
+  async function reactivarUser(userId) {
     const user = usersState.find(u => u.userId === userId);
+    if (!user) return;
     user.status = 'active';
     filterUsers();
     initPendingBanner();
     showToast(`${escHtml(user.name)} ha sido reactivado.`, 'success');
+    if (user.source === 'real') await reactivarEnSupabase(userId);
+  }
+
+  /**
+   * Pide información adicional a un usuario pendiente (envía email placeholder).
+   * @param {string} userId
+   */
+  function solicitarInfoUsuario(userId) {
+    const user = usersState.find(u => u.userId === userId);
+    if (!user) return;
+    showToast(`Solicitud de información enviada a ${escHtml(user.name)}.`, 'info');
+  }
+
+  /**
+   * Escribe status='suspended' en Supabase para un usuario.
+   * @param {string} userId
+   */
+  async function suspenderEnSupabase(userId) {
+    if (!await verifyAdminRealtime()) return;
+    const sb = getSupabase();
+    if (!sb) return;
+    const { error } = await sb.from('profiles').update({ status: 'suspended' }).eq('id', userId);
+    if (error) showToast('Error al suspender en Supabase: ' + error.message, 'error');
+  }
+
+  /**
+   * Escribe status='active' en Supabase para un usuario.
+   * @param {string} userId
+   */
+  async function reactivarEnSupabase(userId) {
+    if (!await verifyAdminRealtime()) return;
+    const sb = getSupabase();
+    if (!sb) return;
+    const { error } = await sb.from('profiles').update({ status: 'active' }).eq('id', userId);
+    if (error) showToast('Error al reactivar en Supabase: ' + error.message, 'error');
   }
 
   // ── Cargar usuarios reales de Supabase ──────────────────────────
