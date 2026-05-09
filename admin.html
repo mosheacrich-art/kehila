@@ -2252,27 +2252,33 @@
   /* ══════════════════════════════
      TAB RESUMEN
   ══════════════════════════════ */
-  (function initResumen() {
-    const activos   = MOCK_USERS.filter(u => u.status === 'active').length;
-    const pendientes = MOCK_USERS.filter(u => u.status === 'pending').length;
-    const totalDonativos = MOCK_DONATIVOS.reduce((s, d) => s + d.actual, 0);
+  (async function initResumen() {
+    const sbA = typeof getSupabase === 'function' ? getSupabase() : null;
 
-    document.getElementById('metric-activos').textContent    = activos;
-    document.getElementById('metric-pendientes').textContent = pendientes;
-    document.getElementById('metric-eventos').textContent    = MOCK_EVENTOS.length;
-    document.getElementById('metric-donativos').textContent  = formatEuros(totalDonativos);
-
-    // Badge tab pendientes
-    if (pendientes > 0) {
-      const badge = document.getElementById('pending-count-badge');
-      badge.textContent = pendientes;
-      badge.style.display = '';
+    // Métricas reales
+    if (sbA) {
+      const [rProfiles, rEventos, rCampanas] = await Promise.all([
+        sbA.from('profiles').select('status'),
+        sbA.from('eventos').select('id'),
+        sbA.from('campanas').select('id'),
+      ]);
+      const perfiles = rProfiles.data || [];
+      const activos    = perfiles.filter(u => u.status === 'active').length;
+      const pendientes = perfiles.filter(u => u.status === 'pending').length;
+      document.getElementById('metric-activos').textContent    = activos;
+      document.getElementById('metric-pendientes').textContent = pendientes;
+      document.getElementById('metric-eventos').textContent    = (rEventos.data || []).length;
+      document.getElementById('metric-donativos').textContent  = (rCampanas.data || []).length + ' campañas';
+      if (pendientes > 0) {
+        const badge = document.getElementById('pending-count-badge');
+        badge.textContent = pendientes;
+        badge.style.display = '';
+      }
     }
 
-    // Actividad real desde Supabase
+    // Actividad reciente
     const tbody = document.getElementById('activity-body');
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--color-text-muted);padding:16px 0;">Cargando…</td></tr>';
-    const sbA = typeof getSupabase === 'function' ? getSupabase() : null;
     if (sbA) {
       const [resProfiles, resEventos, resNoticias] = await Promise.all([
         sbA.from('profiles').select('name,status,created_at').order('created_at', { ascending: false }).limit(5),
@@ -2280,22 +2286,19 @@
         sbA.from('noticias').select('titulo,created_at').order('created_at', { ascending: false }).limit(5),
       ]);
       const rows = [];
-      (resProfiles.data || []).forEach(r => rows.push({ accion: 'Nuevo registro', usuario: r.name || '—', fecha: r.created_at, estado: r.status || 'pending' }));
-      (resEventos.data  || []).forEach(r => rows.push({ accion: 'Evento publicado', usuario: r.titulo || '—', fecha: r.created_at, estado: 'active' }));
+      (resProfiles.data || []).forEach(r => rows.push({ accion: 'Nuevo registro',    usuario: r.name   || '—', fecha: r.created_at, estado: r.status || 'pending' }));
+      (resEventos.data  || []).forEach(r => rows.push({ accion: 'Evento publicado',  usuario: r.titulo || '—', fecha: r.created_at, estado: 'active' }));
       (resNoticias.data || []).forEach(r => rows.push({ accion: 'Noticia publicada', usuario: r.titulo || '—', fecha: r.created_at, estado: 'active' }));
       rows.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
       const top = rows.slice(0, 10);
-      if (!top.length) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--color-text-muted);padding:16px 0;">Sin actividad reciente.</td></tr>';
-      } else {
-        tbody.innerHTML = top.map(a => `
-          <tr>
-            <td style="font-weight:500;">${escHtml(a.accion)}</td>
-            <td>${escHtml(a.usuario)}</td>
-            <td class="hide-sm" style="color:var(--color-text-muted);font-size:.8rem;">${formatDate(a.fecha)}</td>
-            <td>${badgeStatus(a.estado)}</td>
-          </tr>`).join('');
-      }
+      tbody.innerHTML = top.length ? top.map(a => `
+        <tr>
+          <td style="font-weight:500;">${escHtml(a.accion)}</td>
+          <td>${escHtml(a.usuario)}</td>
+          <td class="hide-sm" style="color:var(--color-text-muted);font-size:.8rem;">${formatDate(a.fecha)}</td>
+          <td>${badgeStatus(a.estado)}</td>
+        </tr>`).join('')
+        : '<tr><td colspan="4" style="text-align:center;color:var(--color-text-muted);padding:16px 0;">Sin actividad reciente.</td></tr>';
     } else {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--color-text-muted);padding:16px 0;">Sin conexión a Supabase.</td></tr>';
     }
