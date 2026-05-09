@@ -1844,10 +1844,11 @@
             if (_editingId && !String(_editingId).startsWith('ls_')) {
               const { error } = await sb.from('banner_slides').update(slideForDb).eq('id', _editingId);
               if (!error) { newSlide.id = _editingId; savedToSupabase = true; }
+              else { console.error('[Banner UPDATE error]', error.message, error); showToast('Error Supabase: ' + error.message, 'error'); }
             } else {
               const { data, error } = await sb.from('banner_slides').insert(slideForDb).select().single();
               if (!error && data) { newSlide.id = data.id; savedToSupabase = true; }
-              else if (error) { console.error('[Banner INSERT error]', error.message, error); }
+              else if (error) { console.error('[Banner INSERT error]', error.message, error); showToast('Error Supabase: ' + error.message, 'error'); }
             }
           } catch(e) { console.error('[Banner save exception]', e); }
         }
