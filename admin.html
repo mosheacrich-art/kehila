@@ -2269,26 +2269,36 @@
       badge.style.display = '';
     }
 
-    // Actividad mock
-    const activity = [
-      { accion: 'Nuevo registro',       usuario: 'Sara Mizrahi',       fecha: 'Hace 2h',   estado: 'pending' },
-      { accion: 'Evento publicado',      usuario: 'Rabino David Levi',  fecha: 'Hace 4h',   estado: 'active'  },
-      { accion: 'Noticia publicada',     usuario: 'Rabino David Levi',  fecha: 'Hace 5h',   estado: 'active'  },
-      { accion: 'Nuevo registro',        usuario: 'Carlos Nuevo',       fecha: 'Hace 1d',   estado: 'pending' },
-      { accion: 'Usuario aprobado',      usuario: 'Moshe Goldstein',    fecha: 'Hace 1d',   estado: 'active'  },
-      { accion: 'Listado Wallap creado', usuario: 'Miriam Toledano',    fecha: 'Hace 2d',   estado: 'active'  },
-      { accion: 'Donativo recibido',     usuario: 'Anónimo',            fecha: 'Hace 2d',   estado: 'active'  },
-      { accion: 'Usuario suspendido',    usuario: 'Avi Peretz',         fecha: 'Hace 3d',   estado: 'banned'  },
-    ];
-
+    // Actividad real desde Supabase
     const tbody = document.getElementById('activity-body');
-    tbody.innerHTML = activity.map(a => `
-      <tr>
-        <td style="font-weight:500;">${a.accion}</td>
-        <td>${a.usuario}</td>
-        <td class="hide-sm" style="color:var(--color-text-muted);font-size:.8rem;">${a.fecha}</td>
-        <td>${badgeStatus(a.estado)}</td>
-      </tr>`).join('');
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--color-text-muted);padding:16px 0;">Cargando…</td></tr>';
+    const sbA = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sbA) {
+      const [resProfiles, resEventos, resNoticias] = await Promise.all([
+        sbA.from('profiles').select('name,status,created_at').order('created_at', { ascending: false }).limit(5),
+        sbA.from('eventos').select('titulo,created_at').order('created_at', { ascending: false }).limit(5),
+        sbA.from('noticias').select('titulo,created_at').order('created_at', { ascending: false }).limit(5),
+      ]);
+      const rows = [];
+      (resProfiles.data || []).forEach(r => rows.push({ accion: 'Nuevo registro', usuario: r.name || '—', fecha: r.created_at, estado: r.status || 'pending' }));
+      (resEventos.data  || []).forEach(r => rows.push({ accion: 'Evento publicado', usuario: r.titulo || '—', fecha: r.created_at, estado: 'active' }));
+      (resNoticias.data || []).forEach(r => rows.push({ accion: 'Noticia publicada', usuario: r.titulo || '—', fecha: r.created_at, estado: 'active' }));
+      rows.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      const top = rows.slice(0, 10);
+      if (!top.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--color-text-muted);padding:16px 0;">Sin actividad reciente.</td></tr>';
+      } else {
+        tbody.innerHTML = top.map(a => `
+          <tr>
+            <td style="font-weight:500;">${escHtml(a.accion)}</td>
+            <td>${escHtml(a.usuario)}</td>
+            <td class="hide-sm" style="color:var(--color-text-muted);font-size:.8rem;">${formatDate(a.fecha)}</td>
+            <td>${badgeStatus(a.estado)}</td>
+          </tr>`).join('');
+      }
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--color-text-muted);padding:16px 0;">Sin conexión a Supabase.</td></tr>';
+    }
   })();
 
   /* ══════════════════════════════
