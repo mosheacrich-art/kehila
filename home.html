@@ -1827,7 +1827,7 @@
         const imagen_url = slots[0]?.url || '';
 
         const newSlide = { tipo, titulo, subtitulo, imagen_url, color, href, hasta, activo: true,
-          orden: Date.now(), layout: _activeLayout, slots };
+          layout: _activeLayout, slots };
 
         const sb = typeof getSupabase === 'function' ? getSupabase() : null;
         let savedToSupabase = false;

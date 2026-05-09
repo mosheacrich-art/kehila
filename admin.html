@@ -3362,7 +3362,7 @@
     }));
     const imagen_url = slots[0]?.url || '';
 
-    const slide = { titulo, subtitulo, tipo, href, hasta, color, imagen_url, activo:true, orden:Date.now(), layout:_bnLayout, slots };
+    const slide = { titulo, subtitulo, tipo, href, hasta, color, imagen_url, activo:true, layout:_bnLayout, slots };
     const { error } = await sb.from('banner_slides').insert(slide);
     if (error) {
       showToast('Error: '+error.message,'error');
