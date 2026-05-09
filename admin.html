@@ -3338,7 +3338,7 @@
     btn.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicando…';
 
     const sb = typeof getSupabase==='function' ? getSupabase() : null;
-    if (!sb) { showAdminToast('Sin conexión a Supabase','error'); btn.disabled=false; btn.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicar anuncio'; return; }
+    if (!sb) { showToast('Sin conexión a Supabase','error'); btn.disabled=false; btn.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicar anuncio'; return; }
 
     const subtitulo = document.getElementById('bn-subtitulo').value.trim();
     const tipo      = document.getElementById('bn-tipo').value;
@@ -3355,12 +3355,12 @@
     const slide = { titulo, subtitulo, tipo, href, hasta, color, imagen_url, activo:true, orden:Date.now(), layout:_bnLayout, slots };
     const { error } = await sb.from('banner_slides').insert(slide);
     if (error) {
-      showAdminToast('Error: '+error.message,'error');
+      showToast('Error: '+error.message,'error');
       btn.disabled=false; btn.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicar anuncio';
       return;
     }
 
-    showAdminToast('Banner publicado','success');
+    showToast('Banner publicado','success');
     document.getElementById('bn-titulo').value='';
     document.getElementById('bn-subtitulo').value='';
     document.getElementById('bn-hasta').value='';
@@ -3376,13 +3376,13 @@
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) { container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Sin conexión a Supabase.</p>'; return; }
 
-    const { data, error } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
+    const { data, error } = await sb.from('banner_slides').select('*').order('orden');
     if (error) {
       container.innerHTML = `<p style="text-align:center;color:#dc2626;padding:40px 0;">Error al cargar banners: ${escHtml(error.message)}</p>`;
       return;
     }
     if (!data || !data.length) {
-      container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">No hay banners activos.</p>';
+      container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">No hay banners. Crea uno con el botón de arriba.</p>';
       return;
     }
 
@@ -3392,19 +3392,30 @@
       const thumb  = s.imagen_url
         ? `<img src="${escHtml(s.imagen_url)}" style="width:80px;height:50px;object-fit:cover;border-radius:8px;flex-shrink:0;">`
         : `<div style="width:80px;height:50px;border-radius:8px;background:#1b2e5e;flex-shrink:0;"></div>`;
+      const activoBadge = s.activo
+        ? `<span style="font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:20px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;">Activo</span>`
+        : `<span style="font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:20px;background:#f9fafb;color:#94a3b8;border:1px solid #e2e8f0;">Inactivo</span>`;
+      const toggleLabel = s.activo ? 'Desactivar' : 'Activar';
+      const toggleStyle = s.activo
+        ? 'background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;padding:5px 10px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;'
+        : 'background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:5px 10px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;';
       return `
-        <div id="banner-row-${escHtml(String(s.id))}" style="background:#fff;border:1px solid var(--color-border);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow-sm);">
+        <div id="banner-row-${escHtml(String(s.id))}" style="background:#fff;border:1px solid var(--color-border);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow-sm);${s.activo ? '' : 'opacity:0.65;'}">
           <div style="display:flex;align-items:center;gap:12px;">
             ${thumb}
             <div style="flex:1;min-width:0;">
-              <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#c9a84c;margin-bottom:2px;">${escHtml(tipo)}</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#c9a84c;">${escHtml(tipo)}</span>
+                ${activoBadge}
+              </div>
               <div style="font-size:0.9rem;font-weight:600;color:#1a202c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(s.titulo || '(sin título)')}</div>
               ${s.subtitulo ? `<div style="font-size:0.75rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(s.subtitulo)}</div>` : ''}
               ${hasta ? `<div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">${escHtml(hasta)}</div>` : ''}
             </div>
-            <div style="display:flex;gap:6px;flex-shrink:0;">
-              <button data-banner-edit="${escHtml(String(s.id))}" style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:5px 12px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;">Editar</button>
-              <button data-banner-del="${escHtml(String(s.id))}" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:5px 12px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;">Eliminar</button>
+            <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+              <button data-banner-toggle="${escHtml(String(s.id))}" data-activo="${s.activo}" style="${toggleStyle}">${toggleLabel}</button>
+              <button data-banner-edit="${escHtml(String(s.id))}" style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:5px 10px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;">Editar</button>
+              <button data-banner-del="${escHtml(String(s.id))}" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:5px 10px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;">Eliminar</button>
             </div>
           </div>
           <div id="banner-edit-form-${escHtml(String(s.id))}" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid #f1f5f9;">
@@ -3437,6 +3448,20 @@
     }).join('');
 
     // Listeners
+    container.querySelectorAll('[data-banner-toggle]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.bannerToggle;
+        const nuevoActivo = btn.dataset.activo !== 'true';
+        btn.disabled = true; btn.textContent = '…';
+        const sb2 = typeof getSupabase === 'function' ? getSupabase() : null;
+        if (sb2) {
+          const { error } = await sb2.from('banner_slides').update({ activo: nuevoActivo }).eq('id', id);
+          if (error) { showToast('Error: ' + error.message, 'error'); loadBannersAdmin(); return; }
+        }
+        showToast(nuevoActivo ? 'Banner activado — visible para todos' : 'Banner desactivado', nuevoActivo ? 'success' : 'warning');
+        loadBannersAdmin();
+      });
+    });
     container.querySelectorAll('[data-banner-edit]').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.dataset.bannerEdit;
@@ -3460,20 +3485,20 @@
         const sb2 = typeof getSupabase === 'function' ? getSupabase() : null;
         if (sb2) {
           const { error } = await sb2.from('banner_slides').update({ titulo, subtitulo, tipo, hasta }).eq('id', id);
-          if (error) { showAdminToast('Error: ' + error.message, 'error'); btn.textContent = 'Guardar cambios'; btn.disabled = false; return; }
+          if (error) { showToast('Error: ' + error.message, 'error'); btn.textContent = 'Guardar cambios'; btn.disabled = false; return; }
         }
-        showAdminToast('Banner actualizado', 'success');
+        showToast('Banner actualizado', 'success');
         loadBannersAdmin();
       });
     });
     container.querySelectorAll('[data-banner-del]').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('¿Eliminar este banner?')) return;
+        if (!confirm('¿Eliminar este banner permanentemente?')) return;
         const id = btn.dataset.bannerDel;
         btn.disabled = true; btn.textContent = '…';
         const sb2 = typeof getSupabase === 'function' ? getSupabase() : null;
         if (sb2) await sb2.from('banner_slides').delete().eq('id', id);
-        showAdminToast('Banner eliminado', 'success');
+        showToast('Banner eliminado', 'success');
         loadBannersAdmin();
       });
     });
