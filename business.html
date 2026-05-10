@@ -1139,15 +1139,12 @@
             </div>
 
             <!-- Secci&#243;n 5: Logo -->
-            <div class="biz-np-section">
-              <div class="biz-np-masthead">
-                <span class="biz-np-num">V.</span>
-                <span class="biz-np-title">Identidad Visual</span>
-              </div>
-              <div class="biz-np-body">
+            <div class="form-section">
+              <div class="form-section-title">Identidad Visual</div>
 
-                <!-- Upload -->
-                <label class="biz-np-label">Logotipo <span>(opcional &mdash; JPG o PNG cuadrado)</span></label>
+              <!-- Upload -->
+              <div class="form-group">
+                <label class="form-label" for="upload-area-biz">Logotipo <span style="color:#a0aec0;font-weight:400;">(opcional &mdash; JPG o PNG cuadrado)</span></label>
                 <div class="biz-np-upload-zone" id="upload-area-biz">
                   <input type="file" id="file-biz" accept="image/*" hidden>
                   <div class="biz-np-upload-ph" id="upload-ph-biz" style="display:flex;">
@@ -1157,36 +1154,33 @@
                   </div>
                   <div id="upload-filled-biz" style="display:none;position:relative;">
                     <img id="upload-img-biz" style="width:100%;max-height:200px;object-fit:contain;padding:12px;background:#fafaf8;">
-                    <button type="button" onclick="clearBizLogo()" style="position:absolute;top:8px;right:8px;background:#1a202c;color:#fff;border:none;border-radius:0;width:24px;height:24px;cursor:pointer;font-size:14px;line-height:24px;text-align:center;padding:0;">&times;</button>
+                    <button type="button" onclick="clearBizLogo()" style="position:absolute;top:8px;right:8px;background:#1a202c;color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;line-height:24px;text-align:center;padding:0;">&times;</button>
                   </div>
                 </div>
+              </div>
 
-                <hr class="biz-np-rule">
-
-                <!-- Color -->
-                <label class="biz-np-label">Color de fondo <span>(si no se sube logo)</span></label>
-                <div class="biz-np-palette-row">
-                  <span class="biz-np-palette-label">Paleta:</span>
-                  <div class="color-picker" id="color-picker" style="margin:0;">
-                    <div class="color-circle selected" data-color-val="#1B5E20" style="background:#1B5E20"></div>
-                    <div class="color-circle" data-color-val="#1B2E5E" style="background:#1B2E5E"></div>
-                    <div class="color-circle" data-color-val="#880E4F" style="background:#880E4F"></div>
-                    <div class="color-circle" data-color-val="#E65100" style="background:#E65100"></div>
-                    <div class="color-circle" data-color-val="#4A148C" style="background:#4A148C"></div>
-                    <div class="color-circle" data-color-val="#37474F" style="background:#37474F"></div>
-                  </div>
+              <!-- Color -->
+              <div class="form-group">
+                <label class="form-label">Color de fondo <span style="color:#a0aec0;font-weight:400;">(si no se sube logo)</span></label>
+                <div class="color-picker" id="color-picker">
+                  <div class="color-circle selected" data-color-val="#1B5E20" style="background:#1B5E20"></div>
+                  <div class="color-circle" data-color-val="#1B2E5E" style="background:#1B2E5E"></div>
+                  <div class="color-circle" data-color-val="#880E4F" style="background:#880E4F"></div>
+                  <div class="color-circle" data-color-val="#E65100" style="background:#E65100"></div>
+                  <div class="color-circle" data-color-val="#4A148C" style="background:#4A148C"></div>
+                  <div class="color-circle" data-color-val="#37474F" style="background:#37474F"></div>
                 </div>
+              </div>
 
-                <hr class="biz-np-rule">
-
-                <!-- Preview -->
-                <label class="biz-np-label">Previsualizaci&#243;n</label>
+              <!-- Preview -->
+              <div class="form-group">
+                <label class="form-label">Previsualización</label>
                 <div class="biz-np-preview-frame">
-                  <div class="logo-preview-box" id="logo-preview" style="background:#1B5E20;border-radius:2px;flex-shrink:0;">AB</div>
+                  <div class="logo-preview-box" id="logo-preview" style="background:#1B5E20;border-radius:8px;flex-shrink:0;">AB</div>
                   <div class="biz-np-preview-hint">Si subes un logotipo, aparecer&#225; en la ficha de tu negocio.<br>Si no, se mostrar&#225;n tus iniciales sobre el color elegido.</div>
                 </div>
-
               </div>
+
             </div>
 
             <button type="submit" class="btn-publish" style="background:#1a202c;border-radius:2px;letter-spacing:.04em;font-family:'Frank Ruhl Libre',Georgia,serif;font-size:1rem;">Publicar negocio</button>
