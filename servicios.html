@@ -84,9 +84,10 @@
 
     /* ── Service banner ── */
     .svc-banner {
-      height: 200px; border-radius: var(--radius-md) var(--radius-md) 0 0;
+      height: 340px; border-radius: var(--radius-md) var(--radius-md) 0 0;
       background-size: cover; background-position: center; position: relative; overflow: hidden;
     }
+    @media (max-width: 700px) { .svc-banner { height: 240px; } }
     .svc-banner::after {
       content: ''; position: absolute; inset: 0;
       background: linear-gradient(to bottom, rgba(0,0,0,0.08), rgba(0,0,0,0.62));
