@@ -1269,6 +1269,21 @@
   </div>
 </div>
 
+<!-- Modal: Crop Logo -->
+<div class="modal-overlay" id="modal-crop" role="dialog" aria-modal="true" aria-label="Encuadrar logo">
+  <div class="modal-box" style="max-width:340px;padding:24px;">
+    <div style="font-weight:700;font-size:1.05rem;color:var(--color-primary);margin-bottom:6px;">Encuadrar logotipo</div>
+    <p style="font-size:.8125rem;color:#64748b;margin-bottom:14px;">Arrastra para reposicionar &middot; Rueda del rat&oacute;n o pellizca para hacer zoom</p>
+    <div id="crop-viewport" style="width:280px;height:280px;overflow:hidden;position:relative;margin:0 auto 16px;border-radius:10px;border:2.5px solid var(--color-primary);cursor:grab;touch-action:none;user-select:none;background:#f1f5f9;">
+      <img id="crop-img" alt="" style="position:absolute;transform-origin:0 0;pointer-events:none;max-width:none;">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button id="crop-cancel" type="button" style="flex:1;padding:10px;border:1.5px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer;font-size:.875rem;font-weight:500;">Cancelar</button>
+      <button id="crop-confirm" type="button" style="flex:2;padding:10px;background:var(--color-primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.875rem;font-weight:600;">Confirmar recorte</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
@@ -1276,6 +1291,139 @@
 <script>
 (function () {
   'use strict';
+
+  /* ── Crop state ── */
+  var _croppedBizLogo = null;
+  var _cropRawDataUrl  = null;
+  var _cropNW = 0, _cropNH = 0;
+  var _cropX = 0, _cropY = 0, _cropScale = 1;
+  var _cropDragging = false, _cropLX = 0, _cropLY = 0;
+  var _cropLastDist = 0;
+  var CROP_VP = 280;
+
+  function _cropInit(dataUrl) {
+    _cropRawDataUrl = dataUrl;
+    var img = new Image();
+    img.onload = function () {
+      _cropNW = img.naturalWidth; _cropNH = img.naturalHeight;
+      _cropScale = Math.max(CROP_VP / _cropNW, CROP_VP / _cropNH);
+      _cropX = (CROP_VP - _cropNW * _cropScale) / 2;
+      _cropY = (CROP_VP - _cropNH * _cropScale) / 2;
+      document.getElementById('crop-img').src = dataUrl;
+      _cropRender();
+      document.getElementById('modal-crop').classList.add('open');
+    };
+    img.src = dataUrl;
+  }
+
+  function _cropRender() {
+    document.getElementById('crop-img').style.transform =
+      'translate(' + _cropX + 'px,' + _cropY + 'px) scale(' + _cropScale + ')';
+  }
+
+  function _cropClose() {
+    document.getElementById('modal-crop').classList.remove('open');
+  }
+
+  function _cropConfirm() {
+    var canvas = document.createElement('canvas');
+    canvas.width = 400; canvas.height = 400;
+    var ctx = canvas.getContext('2d');
+    var img = new Image();
+    img.onload = function () {
+      var srcX = -_cropX / _cropScale;
+      var srcY = -_cropY / _cropScale;
+      var srcW = CROP_VP / _cropScale;
+      var srcH = CROP_VP / _cropScale;
+      ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, 400, 400);
+      _croppedBizLogo = canvas.toDataURL('image/jpeg', 0.92);
+      document.getElementById('upload-img-biz').src = _croppedBizLogo;
+      document.getElementById('upload-ph-biz').style.display = 'none';
+      document.getElementById('upload-filled-biz').style.display = 'block';
+      _cropClose();
+    };
+    img.src = _cropRawDataUrl;
+  }
+
+  /* Crop viewport events */
+  (function () {
+    var vp = document.getElementById('crop-viewport');
+    if (!vp) return;
+
+    /* Mouse */
+    vp.addEventListener('mousedown', function (e) {
+      _cropDragging = true; _cropLX = e.clientX; _cropLY = e.clientY;
+      vp.style.cursor = 'grabbing'; e.preventDefault();
+    });
+    document.addEventListener('mousemove', function (e) {
+      if (!_cropDragging) return;
+      _cropX += e.clientX - _cropLX; _cropY += e.clientY - _cropLY;
+      _cropLX = e.clientX; _cropLY = e.clientY;
+      _cropRender();
+    });
+    document.addEventListener('mouseup', function () {
+      _cropDragging = false; vp.style.cursor = 'grab';
+    });
+
+    /* Wheel zoom (centered on cursor) */
+    vp.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      var rect = vp.getBoundingClientRect();
+      var px = e.clientX - rect.left;
+      var py = e.clientY - rect.top;
+      var delta = e.deltaY > 0 ? 0.9 : 1.1;
+      var newScale = Math.max(0.2, Math.min(10, _cropScale * delta));
+      _cropX = px - (px - _cropX) * (newScale / _cropScale);
+      _cropY = py - (py - _cropY) * (newScale / _cropScale);
+      _cropScale = newScale;
+      _cropRender();
+    }, { passive: false });
+
+    /* Touch drag + pinch */
+    vp.addEventListener('touchstart', function (e) {
+      if (e.touches.length === 1) {
+        _cropDragging = true;
+        _cropLX = e.touches[0].clientX; _cropLY = e.touches[0].clientY;
+      } else if (e.touches.length === 2) {
+        _cropDragging = false;
+        _cropLastDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY);
+      }
+      e.preventDefault();
+    }, { passive: false });
+    vp.addEventListener('touchmove', function (e) {
+      if (e.touches.length === 1 && _cropDragging) {
+        _cropX += e.touches[0].clientX - _cropLX;
+        _cropY += e.touches[0].clientY - _cropLY;
+        _cropLX = e.touches[0].clientX; _cropLY = e.touches[0].clientY;
+        _cropRender();
+      } else if (e.touches.length === 2) {
+        var dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY);
+        var rect = vp.getBoundingClientRect();
+        var cx = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+        var cy = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+        var ratio = dist / (_cropLastDist || dist);
+        var newScale = Math.max(0.2, Math.min(10, _cropScale * ratio));
+        _cropX = cx - (cx - _cropX) * (newScale / _cropScale);
+        _cropY = cy - (cy - _cropY) * (newScale / _cropScale);
+        _cropScale = newScale;
+        _cropLastDist = dist;
+        _cropRender();
+      }
+      e.preventDefault();
+    }, { passive: false });
+    vp.addEventListener('touchend', function () { _cropDragging = false; });
+
+    /* Buttons */
+    document.getElementById('crop-confirm').addEventListener('click', _cropConfirm);
+    document.getElementById('crop-cancel').addEventListener('click', function () {
+      _cropClose();
+      var input = document.getElementById('file-biz'); if (input) input.value = '';
+    });
+  })();
 
   /* ── Upload helpers ── */
   function uploadAreaSetup(id) {
@@ -1286,24 +1434,20 @@
     input.addEventListener('change', function() {
       var file = input.files[0]; if (!file) return;
       var reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('upload-img-' + id).src = e.target.result;
-        document.getElementById('upload-ph-' + id).style.display = 'none';
-        document.getElementById('upload-filled-' + id).style.display = 'block';
-      };
+      reader.onload = function(e) { _cropInit(e.target.result); };
       reader.readAsDataURL(file);
     });
   }
+
   function clearBizLogo() {
     var input = document.getElementById('file-biz'); if (input) input.value = '';
     var img = document.getElementById('upload-img-biz'); if (img) img.src = '';
+    _croppedBizLogo = null;
     document.getElementById('upload-ph-biz').style.display = 'flex';
     document.getElementById('upload-filled-biz').style.display = 'none';
   }
-  function getBizLogo() {
-    var img = document.getElementById('upload-img-biz');
-    return (img && img.src && img.src.startsWith('data:')) ? img.src : null;
-  }
+
+  function getBizLogo() { return _croppedBizLogo || null; }
 
   requireAuth();
   initNav('business');
