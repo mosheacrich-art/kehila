@@ -84,14 +84,24 @@
 
     /* ── Service banner ── */
     .svc-banner {
-      height: 340px; border-radius: var(--radius-md) var(--radius-md) 0 0;
-      background-size: cover; background-position: center; position: relative; overflow: hidden;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+      position: relative; overflow: hidden;
+      /* gradient fallback when no image */
+      background-size: cover; background-position: center;
     }
-    @media (max-width: 700px) { .svc-banner { height: 240px; } }
-    .svc-banner::after {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.08), rgba(0,0,0,0.62));
+    /* When using a real <img> inside the banner */
+    .svc-banner img {
+      width: 100%; height: auto; display: block;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
     }
+    /* Gradient overlay for text on photos */
+    .svc-banner-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.04) 50%, rgba(0,0,0,0.65) 100%);
+      pointer-events: none;
+    }
+    /* Gradient-only banner (no photo) needs a fixed height */
+    .svc-banner.gradient-only { height: 200px; }
     .svc-banner-text { position: absolute; bottom: 22px; left: 28px; z-index: 1; }
     .svc-banner-name {
       font-family: var(--font-brand); font-size: 1.8rem; font-weight: 700;
@@ -501,6 +511,19 @@
     }
   }
 
+  function buildBanner(svc) {
+    if (svc.image) {
+      return '<div class="svc-banner">'
+        + '<img src="' + svc.image + '" alt="' + svc.name + '">'
+        + '<div class="svc-banner-overlay"></div>'
+        + '<div class="svc-banner-text"><div class="svc-banner-name">' + svc.name + '</div><div class="svc-banner-sub">' + svc.subtitle + '</div></div>'
+        + '</div>';
+    }
+    return '<div class="svc-banner gradient-only" style="background:' + svc.gradient + ';">'
+      + '<div class="svc-banner-text"><div class="svc-banner-name">' + svc.name + '</div><div class="svc-banner-sub">' + svc.subtitle + '</div></div>'
+      + '</div>';
+  }
+
   /* ══════════════════════════════════════
      RENDER: DETALLE INFORMATIVO (Teyad)
   ══════════════════════════════════════ */
@@ -508,13 +531,9 @@
     var svc = SERVICES.find(function(s) { return s.id === state.serviceId; });
     if (!svc) return showView('lista');
 
-    var bannerStyle = svc.image ? 'background-image:url(' + svc.image + ');' : 'background:' + svc.gradient + ';';
-
     document.getElementById('form-content').innerHTML =
       '<div class="form-wrap">'
-      + '<div class="svc-banner" style="' + bannerStyle + '">'
-      + '<div class="svc-banner-text"><div class="svc-banner-name">' + svc.name + '</div><div class="svc-banner-sub">' + svc.subtitle + '</div></div>'
-      + '</div>'
+      + buildBanner(svc)
       + '<div class="detail-body"><p class="detail-desc">' + svc.desc + '</p></div>'
       + '</div>';
   }
@@ -525,8 +544,6 @@
   function renderIntro() {
     var svc = SERVICES.find(function(s) { return s.id === state.serviceId; });
     if (!svc) return showView('lista');
-
-    var bannerStyle = svc.image ? 'background-image:url(' + svc.image + ');' : 'background:' + svc.gradient + ';';
 
     var processHTML = svc.steps.map(function(step, i) {
       var fieldNames = step.fields.slice(0, 3).map(function(f) { return f.label; }).join(' · ');
@@ -539,9 +556,7 @@
 
     document.getElementById('form-content').innerHTML =
       '<div class="form-wrap">'
-      + '<div class="svc-banner" style="' + bannerStyle + '">'
-      + '<div class="svc-banner-text"><div class="svc-banner-name">' + svc.name + '</div><div class="svc-banner-sub">' + svc.subtitle + '</div></div>'
-      + '</div>'
+      + buildBanner(svc)
       + '<div class="svc-form-section no-top-radius">'
       + '<p style="font-size:0.9375rem;color:var(--color-text);line-height:1.75;margin:0;">' + svc.desc + '</p>'
       + '</div>'
