@@ -102,87 +102,132 @@
     .form-back-btn {
       display: inline-flex; align-items: center; gap: 6px;
       background: none; border: none; cursor: pointer;
-      font-size: 0.88rem; font-weight: 600; color: #64748b;
-      padding: 0 0 20px; transition: color .15s;
+      font-size: 0.875rem; font-weight: 600; color: var(--color-text-muted);
+      padding: 0 0 24px; transition: color .15s; font-family: var(--font-ui);
     }
-    .form-back-btn:hover { color: #1B2E5E; }
+    .form-back-btn:hover { color: var(--color-primary); }
+    .form-wrap { max-width: 680px; }
 
-    .form-card {
-      background: #fff; border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(27,46,94,0.08);
-      padding: 28px 28px 24px; max-width: 560px;
+    /* Service banner */
+    .svc-banner {
+      height: 160px; border-radius: var(--radius-md) var(--radius-md) 0 0;
+      background-size: cover; background-position: center;
+      position: relative; overflow: hidden;
     }
-    @media (max-width: 600px) { .form-card { padding: 20px 16px; } }
-
-    /* Progress */
-    .progress-wrap { margin-bottom: 24px; }
-    .progress-steps { display: flex; gap: 6px; margin-bottom: 6px; }
-    .progress-step { flex: 1; height: 4px; border-radius: 2px; background: #e2e8f0; transition: background .3s; }
-    .progress-step.done { background: #1B2E5E; }
-    .progress-label { font-size: 0.72rem; color: #94a3b8; }
-
-    /* Fields */
-    .field-group { display: flex; flex-direction: column; gap: 14px; }
-    .field-wrap { display: flex; flex-direction: column; gap: 4px; }
-    .field-label { font-size: 0.78rem; font-weight: 700; color: #475569; }
-    .field-label .req { color: #ef4444; margin-left: 2px; }
-    .field-hint { font-size: 0.72rem; color: #94a3b8; }
-    .field-input, .field-select, .field-textarea {
-      padding: 10px 12px; font-size: 0.88rem;
-      border: 1.5px solid #e2e8f0; border-radius: 8px;
-      outline: none; background: #fff; color: #1a202c;
-      font-family: inherit; transition: border-color .15s;
-      box-sizing: border-box; width: 100%;
+    .svc-banner::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.60));
     }
-    .field-input:focus, .field-select:focus, .field-textarea:focus { border-color: #1B2E5E; }
-    .field-input.error, .field-select.error, .field-textarea.error { border-color: #ef4444; }
-    .field-textarea { resize: vertical; min-height: 80px; }
-
-    /* Step header */
-    .step-header { margin-bottom: 20px; }
-    .step-svc-name { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A84C; margin-bottom: 4px; }
-    .step-title { font-family: var(--font-brand); font-size: 1.2rem; font-weight: 700; color: #1B2E5E; }
-
-    /* Buttons */
-    .btn-primary {
-      padding: 11px 24px; background: #1B2E5E; color: #fff;
-      border: none; border-radius: 8px; font-size: 0.9rem;
-      font-weight: 600; cursor: pointer; transition: background .15s;
+    .svc-banner-text { position: absolute; bottom: 22px; left: 28px; z-index: 1; }
+    .svc-banner-name {
+      font-family: var(--font-brand); font-size: 1.7rem; font-weight: 700;
+      color: #fff; line-height: 1.1; text-shadow: 0 2px 10px rgba(0,0,0,0.35);
     }
-    .btn-primary:hover { background: #243d7c; }
-    .btn-secondary {
-      padding: 11px 20px; background: #f8fafc; color: #475569;
-      border: 1.5px solid #e2e8f0; border-radius: 8px;
-      font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background .15s;
+    .svc-banner-sub {
+      font-size: 0.82rem; color: rgba(255,255,255,0.88); margin-top: 4px;
+      font-weight: 500; letter-spacing: 0.03em;
     }
-    .btn-secondary:hover { background: #f1f5f9; }
-    .btn-row { display: flex; gap: 10px; margin-top: 24px; justify-content: space-between; align-items: center; }
 
-    /* Intro */
-    .intro-emoji { font-size: 3rem; margin-bottom: 12px; }
-    .intro-title { font-family: var(--font-brand); font-size: 1.5rem; font-weight: 700; color: #1B2E5E; margin-bottom: 4px; }
-    .intro-subtitle { font-size: 0.85rem; color: #C9A84C; font-weight: 600; margin-bottom: 14px; }
-    .intro-desc { font-size: 0.9rem; color: #475569; line-height: 1.6; margin-bottom: 20px; }
-    .intro-steps-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 10px; }
-    .intro-step { display: flex; align-items: flex-start; gap: 12px; font-size: 0.87rem; color: #475569; }
-    .intro-step-num { width: 22px; height: 22px; border-radius: 50%; background: #1B2E5E; color: #fff; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    /* Form sections — same as business.html */
+    .svc-form-section {
+      background: var(--color-white);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 26px 28px;
+      margin-bottom: 18px;
+    }
+    .svc-form-section.no-top-radius { border-radius: 0 0 var(--radius-md) var(--radius-md); border-top: none; }
+    .svc-form-section-title {
+      font-size: 1rem; font-weight: 700; color: var(--color-primary);
+      margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+    }
+    .svc-form-section-title::before {
+      content: ''; display: block; width: 4px; height: 18px;
+      background: var(--color-gold); border-radius: 2px;
+    }
+    .svc-form-row { display: flex; gap: 16px; }
+    @media (max-width: 600px) { .svc-form-row { flex-direction: column; } }
+    .svc-form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; margin-bottom: 16px; }
+    .svc-form-group:last-child { margin-bottom: 0; }
+    .svc-form-label { font-size: 0.8125rem; font-weight: 600; color: var(--color-text); }
+    .svc-form-label .req { color: var(--color-danger); margin-left: 2px; }
+    .svc-form-hint { font-size: 0.72rem; color: var(--color-text-muted); margin-top: 1px; }
+    .svc-form-input, .svc-form-select, .svc-form-textarea {
+      padding: 10px 13px; border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm); font-size: 0.875rem;
+      color: var(--color-text); background: var(--color-white);
+      font-family: var(--font-ui); outline: none;
+      transition: border-color var(--transition-fast); width: 100%; box-sizing: border-box;
+    }
+    .svc-form-input:focus, .svc-form-select:focus, .svc-form-textarea:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(27,46,94,0.07); }
+    .svc-form-input.error, .svc-form-select.error, .svc-form-textarea.error { border-color: var(--color-danger); }
+    .svc-form-textarea { resize: vertical; min-height: 90px; }
 
-    /* Review */
-    .review-title { font-family: var(--font-brand); font-size: 1.2rem; font-weight: 700; color: #1B2E5E; margin-bottom: 4px; }
-    .review-subtitle { font-size: 0.82rem; color: #94a3b8; margin-bottom: 20px; }
-    .review-section { margin-bottom: 16px; }
-    .review-section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #f1f5f9; }
-    .review-rows { display: flex; flex-direction: column; gap: 6px; }
-    .review-row { display: flex; gap: 8px; font-size: 0.85rem; }
-    .review-key { color: #64748b; min-width: 140px; flex-shrink: 0; }
-    .review-val { color: #1a202c; font-weight: 500; word-break: break-word; }
+    /* Stepper */
+    .svc-stepper { display: flex; align-items: flex-start; gap: 0; margin-bottom: 32px; }
+    .svc-step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+    .svc-step-item:not(:last-child)::after {
+      content: ''; position: absolute; top: 14px; left: calc(50% + 16px);
+      width: calc(100% - 32px); height: 2px;
+      background: var(--color-border); z-index: 0; transition: background .3s;
+    }
+    .svc-step-item.done:not(:last-child)::after { background: var(--color-primary); }
+    .svc-step-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid var(--color-border); background: var(--color-bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: var(--color-text-muted);
+      position: relative; z-index: 1; transition: all .2s;
+    }
+    .svc-step-item.done .svc-step-dot { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+    .svc-step-item.active .svc-step-dot { background: #fff; border-color: var(--color-primary); border-width: 2.5px; color: var(--color-primary); font-weight: 800; box-shadow: 0 0 0 4px rgba(27,46,94,0.1); }
+    .svc-step-label {
+      font-size: 0.63rem; font-weight: 600; color: var(--color-text-muted);
+      margin-top: 6px; text-align: center; max-width: 72px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .svc-step-item.active .svc-step-label { color: var(--color-primary); }
+    .svc-step-item.done .svc-step-label { color: var(--color-primary); }
+    @media (max-width: 480px) { .svc-step-label { display: none; } .svc-stepper { margin-bottom: 20px; } }
+
+    /* Intro process steps */
+    .intro-process { display: flex; flex-direction: column; gap: 10px; }
+    .intro-process-step {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 16px; background: var(--color-bg);
+      border-radius: var(--radius-sm); border: 1px solid var(--color-border-light);
+      transition: border-color .15s;
+    }
+    .intro-process-step:hover { border-color: var(--color-primary); }
+    .intro-process-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--color-primary); color: #fff;
+      font-size: 0.78rem; font-weight: 700; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .intro-process-title { font-weight: 600; font-size: 0.9rem; color: var(--color-text); line-height: 1.3; }
+    .intro-process-fields { font-size: 0.77rem; color: var(--color-text-muted); margin-top: 3px; }
+
+    /* Review KV */
+    .review-kv-row { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--color-border-light); font-size: 0.875rem; align-items: baseline; }
+    .review-kv-row:last-child { border-bottom: none; }
+    .review-kv-key { color: var(--color-text-muted); min-width: 160px; flex-shrink: 0; font-size: 0.8125rem; }
+    .review-kv-val { color: var(--color-text); font-weight: 500; word-break: break-word; }
+
+    /* Nav row */
+    .svc-btn-row { display: flex; gap: 12px; justify-content: space-between; align-items: center; margin-top: 6px; }
 
     /* Confirm */
-    .confirm-wrap { text-align: center; }
-    .confirm-icon { font-size: 3.5rem; margin-bottom: 14px; }
-    .confirm-title { font-family: var(--font-brand); font-size: 1.4rem; font-weight: 700; color: #1B2E5E; margin-bottom: 10px; }
-    .confirm-msg { font-size: 0.9rem; color: #475569; line-height: 1.7; margin-bottom: 24px; }
-    .confirm-ref { font-size: 0.75rem; color: #94a3b8; margin-bottom: 20px; }
+    .confirm-center { text-align: center; padding: 16px 0; }
+    .confirm-icon-circle {
+      width: 76px; height: 76px; border-radius: 50%;
+      background: linear-gradient(135deg,#d1fae5,#6ee7b7);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 22px; font-size: 2.2rem;
+    }
+    .confirm-h { font-family: var(--font-brand); font-size: 1.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: 10px; }
+    .confirm-p { font-size: 0.9rem; color: var(--color-text-muted); line-height: 1.75; margin-bottom: 6px; }
+    .confirm-ref-txt { font-size: 0.72rem; color: #94a3b8; margin-bottom: 26px; }
   </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b2e5e">
@@ -209,8 +254,8 @@
       <!-- VISTA: Formulario -->
       <div id="view-form" style="display:none;">
         <button class="form-back-btn" id="btn-back">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
-          Volver a servicios
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
+          Servicios Beit Jabad
         </button>
         <div id="form-content"></div>
       </div>
@@ -554,17 +599,39 @@
     var svc = SERVICES.find(function(s) { return s.id === state.serviceId; });
     if (!svc) return showView('lista');
 
-    var stepsHTML = svc.steps.map(function(step, i) {
-      return '<div class="intro-step"><div class="intro-step-num">' + (i + 1) + '</div><span>' + step.title + '</span></div>';
+    var bannerStyle = svc.image
+      ? 'background-image:url(' + svc.image + ');'
+      : 'background:' + svc.gradient + ';';
+
+    var processHTML = svc.steps.map(function(step, i) {
+      var fieldNames = step.fields.slice(0, 3).map(function(f) { return f.label; }).join(' · ');
+      if (step.fields.length > 3) fieldNames += ' · …';
+      return '<div class="intro-process-step">'
+        + '<div class="intro-process-num">' + (i + 1) + '</div>'
+        + '<div><div class="intro-process-title">' + step.title + '</div>'
+        + '<div class="intro-process-fields">' + fieldNames + '</div></div>'
+        + '</div>';
     }).join('');
 
     document.getElementById('form-content').innerHTML =
-      '<div class="form-card">'
-      + '<div class="intro-title">' + svc.name + '</div>'
-      + '<div class="intro-subtitle">' + svc.subtitle + '</div>'
-      + '<div class="intro-desc">' + svc.desc + '</div>'
-      + '<div class="intro-steps-list">' + stepsHTML + '</div>'
-      + '<button class="btn-primary" id="btn-comenzar" style="width:100%;">Comenzar solicitud</button>'
+      '<div class="form-wrap">'
+      // Banner
+      + '<div class="svc-banner" style="' + bannerStyle + '">'
+      + '<div class="svc-banner-text">'
+      + '<div class="svc-banner-name">' + svc.name + '</div>'
+      + '<div class="svc-banner-sub">' + svc.subtitle + '</div>'
+      + '</div></div>'
+      // Description
+      + '<div class="svc-form-section no-top-radius">'
+      + '<p style="font-size:0.9375rem;color:var(--color-text);line-height:1.75;margin:0;">' + svc.desc + '</p>'
+      + '</div>'
+      // Process
+      + '<div class="svc-form-section">'
+      + '<div class="svc-form-section-title">Proceso de solicitud</div>'
+      + '<div class="intro-process">' + processHTML + '</div>'
+      + '</div>'
+      // CTA
+      + '<button class="btn btn-primary btn-lg" id="btn-comenzar" style="width:100%;">Comenzar solicitud →</button>'
       + '</div>';
 
     document.getElementById('btn-comenzar').addEventListener('click', function() {
@@ -576,21 +643,21 @@
      RENDER: STEP
   ════════════════════════════════ */
   function renderField(f) {
-    var labelHTML = '<label class="field-label" for="field_' + f.id + '">' + f.label + (f.required ? '<span class="req">*</span>' : '') + '</label>';
-    var hintHTML  = f.hint ? '<span class="field-hint">' + f.hint + '</span>' : '';
+    var labelHTML = '<label class="svc-form-label" for="field_' + f.id + '">' + f.label + (f.required ? '<span class="req">*</span>' : '') + '</label>';
+    var hintHTML  = f.hint ? '<div class="svc-form-hint">' + f.hint + '</div>' : '';
     var inputHTML = '';
 
     if (f.type === 'select') {
-      inputHTML = '<select class="field-select" id="field_' + f.id + '"><option value="">Seleccionar...</option>'
+      inputHTML = '<select class="svc-form-select" id="field_' + f.id + '"><option value="">Seleccionar...</option>'
         + f.options.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('')
         + '</select>';
     } else if (f.type === 'textarea') {
-      inputHTML = '<textarea class="field-textarea" id="field_' + f.id + '" placeholder="' + (f.placeholder || '') + '" rows="3"></textarea>';
+      inputHTML = '<textarea class="svc-form-textarea" id="field_' + f.id + '" placeholder="' + (f.placeholder || '') + '" rows="4"></textarea>';
     } else {
-      inputHTML = '<input type="' + f.type + '" class="field-input" id="field_' + f.id + '" placeholder="' + (f.placeholder || '') + '">';
+      inputHTML = '<input type="' + f.type + '" class="svc-form-input" id="field_' + f.id + '" placeholder="' + (f.placeholder || '') + '">';
     }
 
-    return '<div class="field-wrap">' + labelHTML + hintHTML + inputHTML + '</div>';
+    return '<div class="svc-form-group">' + labelHTML + hintHTML + inputHTML + '</div>';
   }
 
   function validateStep(svc, stepIndex) {
@@ -619,30 +686,49 @@
     state.data['step_' + stepIndex] = stepData;
   }
 
+  function buildStepper(svc, currentStep) {
+    return '<div class="svc-stepper">'
+      + svc.steps.map(function(s, i) {
+          var cls = i < currentStep ? 'done' : (i === currentStep ? 'active' : '');
+          var dotContent = i < currentStep
+            ? '<svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>'
+            : (i + 1);
+          return '<div class="svc-step-item ' + cls + '">'
+            + '<div class="svc-step-dot">' + dotContent + '</div>'
+            + '<div class="svc-step-label">' + s.title + '</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+  }
+
   function renderStep() {
     var svc = SERVICES.find(function(s) { return s.id === state.serviceId; });
     if (!svc) return showView('lista');
 
     var stepDef    = svc.steps[state.step];
     var totalSteps = svc.steps.length;
-
-    var progressBars = '';
-    for (var i = 0; i < totalSteps; i++) {
-      progressBars += '<div class="progress-step' + (i <= state.step ? ' done' : '') + '"></div>';
-    }
-
-    var fieldsHTML = stepDef.fields.map(renderField).join('');
     var isLast     = state.step === totalSteps - 1;
 
+    var fieldsHTML = stepDef.fields.map(renderField).join('');
+
     document.getElementById('form-content').innerHTML =
-      '<div class="form-card">'
-      + '<div class="progress-wrap"><div class="progress-steps">' + progressBars + '</div><div class="progress-label">Paso ' + (state.step + 1) + ' de ' + totalSteps + '</div></div>'
-      + '<div class="step-header"><div class="step-svc-name">' + svc.name + '</div><div class="step-title">' + stepDef.title + '</div></div>'
-      + '<div class="field-group">' + fieldsHTML + '</div>'
-      + '<div class="btn-row">'
-      + '<button class="btn-secondary" id="btn-anterior">' + (state.step === 0 ? '← Intro' : '← Anterior') + '</button>'
-      + '<button class="btn-primary" id="btn-continuar">' + (isLast ? 'Revisar solicitud →' : 'Continuar →') + '</button>'
-      + '</div></div>';
+      '<div class="form-wrap">'
+      + buildStepper(svc, state.step)
+      + '<div class="svc-form-section">'
+      + '<div class="svc-form-section-title">' + stepDef.title + '</div>'
+      + fieldsHTML
+      + '</div>'
+      + '<div class="svc-btn-row">'
+      + '<button class="btn btn-secondary" id="btn-anterior">'
+      + '<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>'
+      + (state.step === 0 ? 'Volver a la intro' : 'Anterior')
+      + '</button>'
+      + '<button class="btn btn-primary" id="btn-continuar">'
+      + (isLast ? 'Revisar solicitud' : 'Continuar')
+      + '<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>'
+      + '</button>'
+      + '</div>'
+      + '</div>';
 
     // Restore saved values
     var stepData = state.data['step_' + state.step] || {};
@@ -678,21 +764,33 @@
       var rowsHTML = stepDef.fields.map(function(f) {
         var val = stepData[f.id];
         if (!val) return '';
-        return '<div class="review-row"><span class="review-key">' + f.label + '</span><span class="review-val">' + val + '</span></div>';
+        return '<div class="review-kv-row"><span class="review-kv-key">' + f.label + '</span><span class="review-kv-val">' + val + '</span></div>';
       }).join('');
       if (!rowsHTML) return '';
-      return '<div class="review-section"><div class="review-section-title">' + stepDef.title + '</div><div class="review-rows">' + rowsHTML + '</div></div>';
+      return '<div class="svc-form-section">'
+        + '<div class="svc-form-section-title">' + stepDef.title + '</div>'
+        + rowsHTML
+        + '</div>';
     }).join('');
 
     document.getElementById('form-content').innerHTML =
-      '<div class="form-card">'
-      + '<div class="review-title">Revisa tu solicitud</div>'
-      + '<div class="review-subtitle">' + svc.name + ' · ' + svc.subtitle + '</div>'
+      '<div class="form-wrap">'
+      + '<div class="svc-form-section" style="margin-bottom:4px;">'
+      + '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-gold-dark);margin-bottom:4px;">' + svc.name + '</div>'
+      + '<div style="font-family:var(--font-brand);font-size:1.4rem;font-weight:700;color:var(--color-primary);">Revisa tu solicitud</div>'
+      + '<div style="font-size:0.875rem;color:var(--color-text-muted);margin-top:4px);">Comprueba que todos los datos son correctos antes de enviar.</div>'
+      + '</div>'
       + sectionsHTML
-      + '<div class="btn-row">'
-      + '<button class="btn-secondary" id="btn-edit">← Editar</button>'
-      + '<button class="btn-primary" id="btn-enviar">Enviar solicitud →</button>'
-      + '</div></div>';
+      + '<div class="svc-btn-row">'
+      + '<button class="btn btn-secondary" id="btn-edit">'
+      + '<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>'
+      + 'Editar'
+      + '</button>'
+      + '<button class="btn btn-primary" id="btn-enviar">Enviar solicitud'
+      + '<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"/></svg>'
+      + '</button>'
+      + '</div>'
+      + '</div>';
 
     var totalSteps = svc.steps.length;
     document.getElementById('btn-edit').addEventListener('click', function() {
@@ -713,7 +811,6 @@
 
       saveRequest(state.serviceId, allData);
 
-      // Intentar guardar en Supabase
       var sb   = typeof getSupabase === 'function' ? getSupabase() : null;
       var user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
       if (sb) {
@@ -736,14 +833,16 @@
     var svc = SERVICES.find(function(s) { return s.id === state.serviceId; });
 
     document.getElementById('form-content').innerHTML =
-      '<div class="form-card confirm-wrap">'
-      + '<div class="confirm-icon">✅</div>'
-      + '<div class="confirm-title">¡Solicitud enviada!</div>'
-      + '<div class="confirm-msg">Hemos recibido tu solicitud para <strong>' + (svc ? svc.name : 'el servicio') + '</strong>.<br><br>'
-      + 'El equipo de Jabad Barcelona la revisará y se pondrá en contacto contigo en menos de 48 horas.<br><br>'
-      + '<em>Jazak uvaruj — que seas bendecido/a.</em></div>'
-      + '<div class="confirm-ref">Puedes ver el estado de tu solicitud en la parte superior de esta página.</div>'
-      + '<button class="btn-primary" id="btn-volver-lista" style="width:100%;margin-top:20px;">Volver a servicios</button>'
+      '<div class="form-wrap">'
+      + '<div class="svc-form-section">'
+      + '<div class="confirm-center">'
+      + '<div class="confirm-icon-circle">✓</div>'
+      + '<div class="confirm-h">¡Solicitud enviada!</div>'
+      + '<div class="confirm-p">Hemos recibido tu solicitud para <strong>' + (svc ? svc.name : 'el servicio') + '</strong>.<br>El equipo de Jabad Barcelona la revisará y se pondrá en contacto contigo en menos de 48 horas.<br><br><em>Jazak uvaruj — que seas bendecido/a.</em></div>'
+      + '<div class="confirm-ref-txt">Puedes ver el estado de tu solicitud en la parte superior de esta página.</div>'
+      + '<button class="btn btn-primary btn-lg" id="btn-volver-lista" style="width:100%;">Volver a servicios</button>'
+      + '</div>'
+      + '</div>'
       + '</div>';
 
     document.getElementById('btn-volver-lista').addEventListener('click', function() {
