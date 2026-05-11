@@ -1594,6 +1594,12 @@
           <div style="font-size:1.25rem;font-weight:800;color:var(--color-primary);margin-top:2px;" id="ajuste-precio-display">—</div>
         </div>
       </div>
+      <!-- Imágenes de servicios -->
+      <div style="margin-top:28px;background:var(--color-white);border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:24px;max-width:720px;">
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-muted);margin-bottom:6px;padding-bottom:8px;border-bottom:1px solid var(--color-border);">Imágenes de los servicios</div>
+        <p style="font-size:.8rem;color:var(--color-text-muted);margin:0 0 18px;">Sube una foto para cada servicio. Aparecerá en la tarjeta de la sección Servicios Beit Jabad.</p>
+        <div id="servicios-img-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;"></div>
+      </div>
     </div><!-- /panel-ajustes -->
 
     <!-- ════ TAB: COMUNIDAD ════ -->
@@ -4706,10 +4712,76 @@
   /* Inicializar al cargar el tab de ajustes */
   document.querySelectorAll('.admin-tab').forEach(function(t) {
     t.addEventListener('click', function() {
-      if (t.dataset.tab === 'ajustes') initAjustes();
+      if (t.dataset.tab === 'ajustes') { initAjustes(); loadServiciosImages(); }
     });
   });
   initAjustes();
+
+  /* ══════════════════════════════════════
+     IMÁGENES DE SERVICIOS
+  ══════════════════════════════════════ */
+  var SVC_LIST = [
+    { id: 'teyad',      name: 'Teyad',            gradient: 'linear-gradient(140deg,#1a2a4a,#2d4a82)' },
+    { id: 'barmitzvah', name: 'Bar / Bat Mitzvah', gradient: 'linear-gradient(140deg,#2a1a4a,#5a2d8a)' },
+    { id: 'britmila',   name: 'Brit Milá',         gradient: 'linear-gradient(140deg,#0e3558,#1a6096)' },
+    { id: 'bodas',      name: 'Bodas',             gradient: 'linear-gradient(140deg,#3a0e1a,#8b2040)' },
+    { id: 'najalah',    name: 'Najalah',           gradient: 'linear-gradient(140deg,#141420,#2d2d4a)' }
+  ];
+
+  async function loadServiciosImages() {
+    var grid = document.getElementById('servicios-img-grid');
+    if (!grid) return;
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    var imgMap = {};
+    if (sb) {
+      try {
+        var { data } = await sb.from('servicios_config').select('id, image_url');
+        (data || []).forEach(function(r) { if (r.image_url) imgMap[r.id] = r.image_url; });
+      } catch(_) {}
+    }
+    grid.innerHTML = SVC_LIST.map(function(svc) {
+      var img = imgMap[svc.id] || '';
+      return '<div style="border:1.5px solid var(--color-border);border-radius:10px;overflow:hidden;">'
+        + '<div style="height:110px;background:' + (img ? 'url(' + escHtml(img) + ') center/cover' : svc.gradient) + ';position:relative;">'
+        + (img ? '<button onclick="removeServiceImg(\'' + svc.id + '\')" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:22px;text-align:center;padding:0;" title="Eliminar">×</button>' : '')
+        + '</div>'
+        + '<div style="padding:10px 12px;">'
+        + '<div style="font-size:.8rem;font-weight:700;color:var(--color-text);margin-bottom:8px;">' + escHtml(svc.name) + '</div>'
+        + '<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--color-primary);color:#fff;border-radius:6px;cursor:pointer;font-size:.75rem;font-weight:600;">'
+        + '<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>'
+        + (img ? 'Cambiar' : 'Subir foto')
+        + '<input type="file" accept="image/jpeg,image/png,image/webp" hidden onchange="uploadServiceImg(\'' + svc.id + '\',this)">'
+        + '</label>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  async function uploadServiceImg(serviceId, input) {
+    var file = input.files[0]; if (!file) return;
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) { showToast('Sin conexión con Supabase.', 'error'); return; }
+    showToast('Subiendo imagen…', 'info');
+    try {
+      var path = 'servicios/' + serviceId + '_' + Date.now() + '.' + file.name.split('.').pop();
+      var { data: upData, error: upErr } = await sb.storage.from('negocios').upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) { showToast('Error al subir: ' + upErr.message, 'error'); return; }
+      var url = sb.storage.from('negocios').getPublicUrl(upData.path).data.publicUrl;
+      var { error: dbErr } = await sb.from('servicios_config').upsert({ id: serviceId, image_url: url, updated_at: new Date().toISOString() });
+      if (dbErr) { showToast('Error al guardar: ' + dbErr.message, 'error'); return; }
+      showToast('Foto actualizada.', 'success');
+      loadServiciosImages();
+    } catch(e) { showToast('Error inesperado.', 'error'); }
+    input.value = '';
+  }
+
+  async function removeServiceImg(serviceId) {
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return;
+    await sb.from('servicios_config').upsert({ id: serviceId, image_url: null, updated_at: new Date().toISOString() });
+    showToast('Imagen eliminada.', 'success');
+    loadServiciosImages();
+  }
   </script>
 </body>
 </html>

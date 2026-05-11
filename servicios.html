@@ -403,6 +403,21 @@
   /* ════════════════════════════════
      ESTADO
   ════════════════════════════════ */
+  /* Cargar imágenes desde Supabase y luego renderizar */
+  (async function initServiciosImages() {
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) {
+      try {
+        var { data } = await sb.from('servicios_config').select('id, image_url');
+        (data || []).forEach(function(row) {
+          var svc = SERVICES.find(function(s) { return s.id === row.id; });
+          if (svc && row.image_url) svc.image = row.image_url;
+        });
+      } catch(_) {}
+    }
+    showView('lista');
+  })();
+
   var state = { view: 'lista', serviceId: null, step: 0, data: {} };
 
   var STATUS_LABELS = {
@@ -710,8 +725,7 @@
     showView('lista');
   });
 
-  /* ── Init ── */
-  showView('lista');
+  /* ── Init: ver initServiciosImages() arriba ── */
 
 })();
 </script>
