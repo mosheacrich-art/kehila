@@ -4877,14 +4877,11 @@
     var role  = user.role;
     var areas = user.areas || [];
 
-    // super_admin ve todo, incluido Equipo
-    if (role === 'super_admin') {
+    // admin y super_admin ven todo, incluido Equipo
+    if (role === 'admin' || role === 'super_admin') {
       document.getElementById('tab-equipo').style.display = '';
       return;
     }
-
-    // admin ve todo menos Equipo (ya está hidden por defecto)
-    if (role === 'admin') return;
 
     // staff: mostrar solo resumen + sus áreas asignadas
     document.querySelectorAll('.admin-tab').forEach(function(tab) {
