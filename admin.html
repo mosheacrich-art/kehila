@@ -4822,8 +4822,9 @@
      SISTEMA DE ROLES — FILTRADO DE TABS Y GESTIÓN DE EQUIPO
   ══════════════════════════════════════════════════════════ */
 
-  // Qué área necesita cada tab (null = visible para todos los staff)
+  // Qué área necesita cada tab
   var TAB_AREA_MAP = {
+    'resumen':         'resumen',
     'usuarios':        'usuarios',
     'eventos':         'eventos',
     'noticias':        'noticias',
@@ -4833,11 +4834,11 @@
     'analytics':       'analytics',
     'svc-solicitudes': 'servicios',
     'ajustes':         'ajustes'
-    // 'resumen': siempre visible
     // 'equipo': solo admin+
   };
 
   var AREA_DEFS = [
+    { id: 'resumen',   label: 'Resumen'    },
     { id: 'eventos',   label: 'Eventos'    },
     { id: 'noticias',  label: 'Noticias'   },
     { id: 'rav',       label: 'Rav / Citas'},
@@ -4865,21 +4866,19 @@
       return;
     }
 
-    // staff: mostrar solo resumen + sus áreas asignadas
+    // staff: mostrar solo las áreas asignadas
     document.querySelectorAll('.admin-tab').forEach(function(tab) {
       var t = tab.dataset.tab;
-      if (!t || t === 'resumen' || t === 'equipo') return;
+      if (!t || t === 'equipo') return;
       var needed = TAB_AREA_MAP[t];
       if (needed && !areas.includes(needed)) {
         tab.style.display = 'none';
       }
     });
 
-    // Si el primer tab activo ya no es visible, activar resumen
-    var hasActive = !!document.querySelector('.admin-tab.active:not([style*="display: none"])');
-    if (!hasActive) {
-      document.querySelector('[data-tab="resumen"]').click();
-    }
+    // Activar el primer tab visible
+    var firstVisible = document.querySelector('.admin-tab:not([style*="display: none"])');
+    if (firstVisible) firstVisible.click();
   })();
 
   // ── Tab guard: evitar que staff acceda a panel sin permiso ──
@@ -4946,12 +4945,15 @@
       var isSA     = u.role === 'super_admin';
       var currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
       var isSelf   = currentUser && currentUser.userId === u.id;
+      var canEdit  = currentUser && ['admin','super_admin'].includes(currentUser.role);
 
       var areaChips = AREA_DEFS.map(function(a) {
         var active = u.areas.includes(a.id);
-        return '<span class="area-chip' + (active ? ' active' : '') + '" '
-          + 'onclick="toggleArea(\'' + u.id + '\',\'' + a.id + '\',this)">'
-          + escHtml(a.label) + '</span>';
+        var chip = '<span class="area-chip' + (active ? ' active' : '') + '"';
+        if (canEdit) chip += ' onclick="toggleArea(\'' + u.id + '\',\'' + a.id + '\',this)"';
+        else chip += ' style="cursor:default;opacity:.6;"';
+        chip += '>' + escHtml(a.label) + '</span>';
+        return chip;
       }).join('');
 
       var actions = '';
