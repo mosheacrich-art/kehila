@@ -316,7 +316,7 @@ async function verifyAdminRealtime() {
 
     if (error || !profile)           { window.location.href = 'home.html'; return null; }
     if (profile.status === 'banned' || profile.status === 'suspended') { await logout(); return null; }
-    if (!['admin', 'super_admin'].includes(profile.role)) { window.location.href = 'home.html'; return null; }
+    if (!['admin', 'super_admin', 'staff'].includes(profile.role)) { window.location.href = 'home.html'; return null; }
 
     // Sincronizar rol en localStorage por si cambio en BD
     if (profile.role !== localUser.role) {
@@ -325,7 +325,7 @@ async function verifyAdminRealtime() {
     return localUser;
   } catch (e) {
     console.error('[auth] verifyAdminRealtime error:', e);
-    return localUser.role === 'admin' ? localUser : null;
+    return ['admin', 'super_admin', 'staff'].includes(localUser.role) ? localUser : null;
   }
 }
 
