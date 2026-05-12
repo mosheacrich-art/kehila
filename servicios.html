@@ -724,20 +724,33 @@
       + '</div></div>';
 
     document.getElementById('btn-edit').addEventListener('click', function() { showView('step', undefined, svc.steps.length - 1); });
-    document.getElementById('btn-enviar').addEventListener('click', function() {
+    document.getElementById('btn-enviar').addEventListener('click', async function() {
       var btn = document.getElementById('btn-enviar');
       btn.disabled = true; btn.textContent = 'Enviando…';
+
       var allData = {};
       svc.steps.forEach(function(stepDef, i) {
         var sd = state.data['step_' + i] || {};
         stepDef.fields.forEach(function(f) { if (sd[f.id]) allData[f.label] = sd[f.id]; });
       });
-      saveRequest(state.serviceId, allData);
+
+      // localStorage: best-effort (puede fallar en iframe)
+      try { saveRequest(state.serviceId, allData); } catch(_) {}
+
+      // Guardar en Supabase (await para asegurar que se guarda)
       var sb = typeof getSupabase === 'function' ? getSupabase() : null;
       var user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
       if (sb) {
-        sb.from('servicios_solicitudes').insert({ tipo: state.serviceId, datos: allData, usuario_id: user ? user.userId : null, usuario_nombre: user ? user.name : 'Anónimo' }).catch(function() {});
+        try {
+          await sb.from('servicios_solicitudes').insert({
+            tipo: state.serviceId,
+            datos: allData,
+            usuario_id: user ? user.userId : null,
+            usuario_nombre: user ? user.name : 'Anónimo'
+          });
+        } catch(e) { console.error('Error al guardar solicitud:', e); }
       }
+
       showView('confirm');
     });
   }
