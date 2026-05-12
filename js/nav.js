@@ -174,7 +174,7 @@ function buildSidebar(activePage) {
 
   // Item admin (solo si es admin)
   let adminHTML = '';
-  if (user.role === 'admin') {
+  if (['admin', 'super_admin', 'staff'].includes(user.role)) {
     const adminActive = activePage === 'admin' ? 'active' : '';
     adminHTML = `
       <div class="nav-divider"></div>
@@ -337,7 +337,7 @@ function buildMoreDrawer(activePage) {
   });
 
   // Admin link
-  if (user?.role === 'admin') {
+  if (['admin', 'super_admin', 'staff'].includes(user?.role)) {
     sectionsHTML += `
       <div class="more-drawer-section">
         <div class="more-drawer-grid">
@@ -437,7 +437,7 @@ function buildHamburger(activePage) {
       navHTML += `<a href="${item.href}" class="hb-nav-item ${active}">${item.icon}<span>${item.label}</span></a>`;
     });
   });
-  if (user.role === 'admin') {
+  if (['admin', 'super_admin', 'staff'].includes(user.role)) {
     navHTML += `
       <div class="hb-divider"></div>
       <a href="admin.html" class="hb-nav-item${activePage === 'admin' ? ' active' : ''}">
