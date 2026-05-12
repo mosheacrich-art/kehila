@@ -4822,18 +4822,18 @@
      SISTEMA DE ROLES — FILTRADO DE TABS Y GESTIÓN DE EQUIPO
   ══════════════════════════════════════════════════════════ */
 
-  // Qué área necesita cada tab
+  // Qué área(s) necesita cada tab (array = basta con tener una)
   var TAB_AREA_MAP = {
-    'resumen':         'resumen',
-    'usuarios':        'usuarios',
-    'eventos':         'eventos',
-    'noticias':        'noticias',
-    'subgrupos':       'comunidad',
-    'tora-comunidad':  'rav',
-    'comunidad':       'comunidad',
-    'analytics':       'analytics',
-    'svc-solicitudes': 'servicios',
-    'ajustes':         'ajustes'
+    'resumen':         ['resumen'],
+    'usuarios':        ['usuarios'],
+    'eventos':         ['eventos'],
+    'noticias':        ['noticias'],
+    'subgrupos':       ['comunidad'],
+    'tora-comunidad':  ['rav', 'shiurim'],
+    'comunidad':       ['comunidad'],
+    'analytics':       ['analytics'],
+    'svc-solicitudes': ['servicios'],
+    'ajustes':         ['ajustes']
     // 'equipo': solo admin+
   };
 
@@ -4871,7 +4871,7 @@
       var t = tab.dataset.tab;
       if (!t || t === 'equipo') return;
       var needed = TAB_AREA_MAP[t];
-      if (needed && !areas.includes(needed)) {
+      if (needed && !needed.some(function(a) { return areas.includes(a); })) {
         tab.style.display = 'none';
       }
     });
@@ -4888,7 +4888,7 @@
       if (!user || ['admin','super_admin'].includes(user.role)) return;
       var t = tab.dataset.tab;
       var needed = TAB_AREA_MAP[t];
-      if (needed && !(user.areas||[]).includes(needed)) {
+      if (needed && !needed.some(function(a) { return (user.areas||[]).includes(a); })) {
         showToast('No tienes acceso a esta sección.', 'error');
         // Revertir tab activo
         document.querySelectorAll('.admin-tab').forEach(function(b) { b.classList.remove('active'); });
