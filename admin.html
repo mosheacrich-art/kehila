@@ -5007,9 +5007,13 @@
     if (!confirm('¿Hacer a ' + name + ' Super Admin? Tendrá acceso completo al panel.')) return;
     var sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
     try {
-      await sb.from('profiles').update({ role: 'super_admin' }).eq('id', userId);
+      var { error } = await sb.from('profiles').update({ role: 'super_admin' }).eq('id', userId);
+      if (error) { showToast('Error: ' + error.message, 'error'); return; }
+      // Actualizar lista local sin recargar
+      var member = _equipoStaff.find(function(u) { return u.id === userId; });
+      if (member) { member.role = 'super_admin'; member.areas = []; }
+      renderStaffList();
       showToast(name + ' ahora es Super Admin.', 'success');
-      loadEquipo();
     } catch(e) { showToast('Error al promover.', 'error'); }
   }
 
@@ -5017,10 +5021,13 @@
     if (!confirm('¿Revocar acceso al panel de ' + name + '?')) return;
     var sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
     try {
-      await sb.from('profiles').update({ role: 'miembro' }).eq('id', userId);
+      var { error } = await sb.from('profiles').update({ role: 'miembro' }).eq('id', userId);
+      if (error) { showToast('Error: ' + error.message, 'error'); return; }
       await sb.from('staff_permisos').delete().eq('user_id', userId);
+      // Actualizar lista local sin recargar de Supabase
+      _equipoStaff = _equipoStaff.filter(function(u) { return u.id !== userId; });
+      renderStaffList();
       showToast('Acceso revocado a ' + name + '.', 'success');
-      loadEquipo();
     } catch(e) { showToast('Error al revocar acceso.', 'error'); }
   }
 
@@ -5056,7 +5063,8 @@
   async function addToStaff(userId, name) {
     var sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
     try {
-      await sb.from('profiles').update({ role: 'staff' }).eq('id', userId);
+      var { error } = await sb.from('profiles').update({ role: 'staff' }).eq('id', userId);
+      if (error) { showToast('Error: ' + error.message, 'error'); return; }
       showToast(name + ' añadido al equipo.', 'success');
       document.getElementById('equipo-search-results').innerHTML = '';
       document.getElementById('equipo-search').value = '';
