@@ -316,7 +316,7 @@ async function verifyAdminRealtime() {
 
     if (error || !profile)           { window.location.href = 'home.html'; return null; }
     if (profile.status === 'banned' || profile.status === 'suspended') { await logout(); return null; }
-    if (profile.role !== 'admin')    { window.location.href = 'home.html'; return null; }
+    if (!['admin', 'super_admin'].includes(profile.role)) { window.location.href = 'home.html'; return null; }
 
     // Sincronizar rol en localStorage por si cambio en BD
     if (profile.role !== localUser.role) {
