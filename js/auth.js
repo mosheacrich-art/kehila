@@ -79,14 +79,28 @@ async function login(email, password) {
       return { ok: false, error: 'Tu cuenta está suspendida temporalmente. Contacta al administrador.' };
     }
 
+    // Para staff: cargar áreas asignadas
+    let areas = [];
+    const userRole = profile?.role || 'miembro';
+    if (userRole === 'staff') {
+      try {
+        const { data: permisos } = await sb
+          .from('staff_permisos')
+          .select('area')
+          .eq('user_id', data.user.id);
+        areas = (permisos || []).map(p => p.area);
+      } catch(_) {}
+    }
+
     const sessionData = {
       userId: data.user.id,
       name: profile?.name || normalizedEmail.split('@')[0],
       email: data.user.email,
-      role: profile?.role || 'miembro',
+      role: userRole,
       status: profile?.status || 'pending',
       comunidad: profile?.comunidad || 'Jabad Barcelona',
       initials: profile?.initials || normalizedEmail.slice(0, 2).toUpperCase(),
+      areas: areas,
       loginAt: new Date().toISOString(),
       source: 'supabase'
     };
@@ -177,7 +191,7 @@ function requireAuth() {
 function requireAdmin() {
   const user = requireAuth();
   if (!user) return null;
-  if (user.role !== 'admin') {
+  if (!['admin', 'super_admin', 'staff'].includes(user.role)) {
     window.location.href = 'home.html';
     return null;
   }
@@ -186,12 +200,42 @@ function requireAdmin() {
 
 /**
  * Comprueba si el usuario actual es admin sin redirigir.
- * Util para mostrar/ocultar elementos de UI.
  * @returns {boolean}
  */
 function isAdmin() {
   const user = getCurrentUser();
-  return user && user.role === 'admin';
+  return user && ['admin', 'super_admin'].includes(user.role);
+}
+
+/**
+ * Comprueba si el usuario actual es super_admin.
+ * @returns {boolean}
+ */
+function isSuperAdmin() {
+  const user = getCurrentUser();
+  return user && user.role === 'super_admin';
+}
+
+/**
+ * Devuelve las áreas del usuario actual.
+ * admin/super_admin tienen acceso a todo ['*'].
+ * @returns {string[]}
+ */
+function getUserAreas() {
+  const user = getCurrentUser();
+  if (!user) return [];
+  if (['admin', 'super_admin'].includes(user.role)) return ['*'];
+  return user.areas || [];
+}
+
+/**
+ * Comprueba si el usuario tiene acceso a un área concreta.
+ * @param {string} area
+ * @returns {boolean}
+ */
+function hasArea(area) {
+  const areas = getUserAreas();
+  return areas.includes('*') || areas.includes(area);
 }
 
 // ─── Helpers ──────────────────────────────────

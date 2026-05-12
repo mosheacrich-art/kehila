@@ -88,6 +88,43 @@
     .svc-sol-field-val { color: var(--color-text); font-weight: 500; word-break: break-word; }
     .svc-sol-ketuva { margin-top: 12px; }
     .svc-sol-ketuva img { max-width: 180px; border-radius: 6px; border: 1.5px solid var(--color-border); }
+    /* ── Equipo ── */
+    .staff-card {
+      background: var(--color-white); border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 12px;
+      display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+    }
+    .staff-avatar {
+      width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .95rem; color: #fff;
+    }
+    .staff-info { flex: 1; min-width: 0; }
+    .staff-name { font-weight: 700; font-size: .95rem; color: var(--color-text); }
+    .staff-email { font-size: .78rem; color: var(--color-text-muted); margin-top: 1px; }
+    .staff-role-badge {
+      display: inline-block; padding: 2px 9px; border-radius: 20px;
+      font-size: .7rem; font-weight: 700; margin-top: 4px;
+    }
+    .staff-role-badge.super_admin { background: #fef3c7; color: #92400e; }
+    .staff-role-badge.staff       { background: #dbeafe; color: #1e40af; }
+    .staff-areas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .area-chip {
+      padding: 4px 11px; border-radius: 20px; font-size: .75rem; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--color-border);
+      background: var(--color-bg); color: var(--color-text-muted);
+      transition: all .15s; user-select: none;
+    }
+    .area-chip.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+    .area-chip:hover { border-color: var(--color-primary); }
+    .staff-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .search-result-row {
+      display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+      border: 1.5px solid var(--color-border); border-radius: var(--radius-sm);
+      background: var(--color-bg); margin-bottom: 6px;
+    }
+    .search-result-row .sr-name { font-weight: 600; font-size: .88rem; flex: 1; }
+    .search-result-row .sr-email { font-size: .75rem; color: var(--color-text-muted); }
     .admin-tab.active {
       color: var(--color-primary);
       border-bottom-color: var(--color-primary);
@@ -994,6 +1031,10 @@
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
         Analíticas
       </button>
+      <button class="admin-tab" data-tab="equipo" id="tab-equipo" style="display:none;" onclick="loadEquipo()">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+        Equipo
+      </button>
       <button class="admin-tab" data-tab="svc-solicitudes" onclick="loadSvcSolicitudes()">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/></svg>
         Servicios
@@ -1650,6 +1691,32 @@
       </div>
       <div id="svc-sol-list"></div>
     </div><!-- /panel-svc-solicitudes -->
+
+    <!-- ════ TAB: EQUIPO ════ -->
+    <div class="tab-panel" id="panel-equipo">
+      <div style="margin-bottom:24px;">
+        <h2 style="font-size:1.1rem;font-weight:700;color:var(--color-text);margin:0 0 4px;">Equipo Jabad</h2>
+        <p style="font-size:0.82rem;color:var(--color-text-muted);margin:0;">Asigna roles y áreas de acceso al panel a miembros del equipo.</p>
+      </div>
+
+      <!-- Añadir al equipo -->
+      <div style="background:var(--color-white);border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:20px 22px;margin-bottom:22px;">
+        <div style="font-size:.9rem;font-weight:700;color:var(--color-primary);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+          <span style="display:block;width:4px;height:16px;background:var(--color-gold);border-radius:2px;"></span>
+          Añadir miembro al equipo
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <input id="equipo-search" type="text" placeholder="Nombre o email del miembro..."
+            style="flex:1;min-width:200px;padding:9px 13px;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);font-size:.875rem;font-family:var(--font-ui);outline:none;">
+          <button onclick="equipoSearch()" class="btn btn-primary btn-sm">Buscar</button>
+        </div>
+        <div id="equipo-search-results" style="margin-top:12px;"></div>
+      </div>
+
+      <!-- Staff activo -->
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted);margin-bottom:12px;">Staff activo</div>
+      <div id="equipo-staff-list"><div style="color:var(--color-text-muted);font-size:.875rem;">Cargando...</div></div>
+    </div><!-- /panel-equipo -->
 
     <!-- ════ TAB: COMUNIDAD ════ -->
     <div class="tab-panel" id="panel-comunidad">
@@ -4766,6 +4833,249 @@
   });
   initAjustes();
   loadServiciosImages();
+
+  /* ══════════════════════════════════════════════════════════
+     SISTEMA DE ROLES — FILTRADO DE TABS Y GESTIÓN DE EQUIPO
+  ══════════════════════════════════════════════════════════ */
+
+  // Qué área necesita cada tab (null = visible para todos los staff)
+  var TAB_AREA_MAP = {
+    'usuarios':        'usuarios',
+    'eventos':         'eventos',
+    'noticias':        'noticias',
+    'marketplace':     'comunidad',
+    'preguntas':       'rav',
+    'subgrupos':       'comunidad',
+    'shiurim':         'shiurim',
+    'comunidad':       'comunidad',
+    'analytics':       'analytics',
+    'svc-solicitudes': 'servicios',
+    'ajustes':         'ajustes'
+    // 'resumen': siempre visible
+    // 'equipo': solo super_admin
+  };
+
+  var AREA_DEFS = [
+    { id: 'eventos',   label: 'Eventos'    },
+    { id: 'noticias',  label: 'Noticias'   },
+    { id: 'rav',       label: 'Rav / Citas'},
+    { id: 'servicios', label: 'Servicios'  },
+    { id: 'shiurim',   label: 'Shiurim'    },
+    { id: 'comunidad', label: 'Comunidad'  },
+    { id: 'usuarios',  label: 'Usuarios'   },
+    { id: 'analytics', label: 'Analíticas' },
+    { id: 'ajustes',   label: 'Ajustes'    }
+  ];
+
+  var AVATAR_COLORS = ['#1B2E5E','#5a2d8a','#0e6494','#8b2040','#065f46','#92400e'];
+  function avatarColor(name) { var h = 0; for (var i = 0; i < (name||'').length; i++) h += name.charCodeAt(i); return AVATAR_COLORS[h % AVATAR_COLORS.length]; }
+
+  // ── Filtrar tabs según rol del usuario ──────────────────
+  (function filterAdminTabs() {
+    var user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    if (!user) return;
+    var role  = user.role;
+    var areas = user.areas || [];
+
+    // super_admin ve todo, incluido Equipo
+    if (role === 'super_admin') {
+      document.getElementById('tab-equipo').style.display = '';
+      return;
+    }
+
+    // admin ve todo menos Equipo (ya está hidden por defecto)
+    if (role === 'admin') return;
+
+    // staff: mostrar solo resumen + sus áreas asignadas
+    document.querySelectorAll('.admin-tab').forEach(function(tab) {
+      var t = tab.dataset.tab;
+      if (!t || t === 'resumen' || t === 'equipo') return;
+      var needed = TAB_AREA_MAP[t];
+      if (needed && !areas.includes(needed)) {
+        tab.style.display = 'none';
+      }
+    });
+
+    // Si el primer tab activo ya no es visible, activar resumen
+    var hasActive = !!document.querySelector('.admin-tab.active:not([style*="display: none"])');
+    if (!hasActive) {
+      document.querySelector('[data-tab="resumen"]').click();
+    }
+  })();
+
+  // ── Tab guard: evitar que staff acceda a panel sin permiso ──
+  document.querySelectorAll('.admin-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      var user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (!user || ['admin','super_admin'].includes(user.role)) return;
+      var t = tab.dataset.tab;
+      var needed = TAB_AREA_MAP[t];
+      if (needed && !(user.areas||[]).includes(needed)) {
+        showToast('No tienes acceso a esta sección.', 'error');
+        // Revertir tab activo
+        document.querySelectorAll('.admin-tab').forEach(function(b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+        document.querySelector('[data-tab="resumen"]').classList.add('active');
+        document.getElementById('panel-resumen').classList.add('active');
+        return false;
+      }
+    }, true); // capture phase
+  });
+
+  // ────────────────────────────────────────────────────────
+  //  EQUIPO — gestión de staff y super_admin
+  // ────────────────────────────────────────────────────────
+  var _equipoStaff = [];
+
+  async function loadEquipo() {
+    var list = document.getElementById('equipo-staff-list');
+    if (!list) return;
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) { list.innerHTML = '<div style="color:var(--color-danger);">Sin conexión.</div>'; return; }
+
+    // Cargar staff y super_admin con sus permisos
+    var { data: staffProfiles } = await sb.from('profiles')
+      .select('id, name, email, role, initials')
+      .in('role', ['staff', 'super_admin'])
+      .order('name');
+
+    var { data: permisos } = await sb.from('staff_permisos').select('user_id, area');
+
+    // Agrupar permisos por user_id
+    var permisoMap = {};
+    (permisos || []).forEach(function(p) {
+      if (!permisoMap[p.user_id]) permisoMap[p.user_id] = [];
+      permisoMap[p.user_id].push(p.area);
+    });
+
+    _equipoStaff = (staffProfiles || []).map(function(u) {
+      return Object.assign({}, u, { areas: permisoMap[u.id] || [] });
+    });
+
+    renderStaffList();
+  }
+
+  function renderStaffList() {
+    var list = document.getElementById('equipo-staff-list');
+    if (!_equipoStaff.length) {
+      list.innerHTML = '<div style="color:var(--color-text-muted);font-size:.875rem;padding:16px 0;">No hay miembros de equipo aún.</div>';
+      return;
+    }
+    list.innerHTML = _equipoStaff.map(function(u) {
+      var initials = (u.initials || u.name || '?').slice(0,2).toUpperCase();
+      var color    = avatarColor(u.name);
+      var isSA     = u.role === 'super_admin';
+      var currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      var isSelf   = currentUser && currentUser.userId === u.id;
+
+      var areaChips = AREA_DEFS.map(function(a) {
+        var active = u.areas.includes(a.id);
+        return '<span class="area-chip' + (active ? ' active' : '') + '" '
+          + 'onclick="toggleArea(\'' + u.id + '\',\'' + a.id + '\',this)">'
+          + escHtml(a.label) + '</span>';
+      }).join('');
+
+      var actions = '';
+      if (!isSelf) {
+        if (!isSA) {
+          actions += '<button class="btn btn-sm" style="border:1.5px solid var(--color-gold-dark);color:var(--color-gold-dark);" '
+            + 'onclick="promoteToSuperAdmin(\'' + u.id + '\',\'' + escHtml(u.name) + '\')">⭐ Hacer Super Admin</button>';
+        }
+        actions += '<button class="btn btn-sm btn-secondary" onclick="revokeStaff(\'' + u.id + '\',\'' + escHtml(u.name) + '\')">Revocar acceso</button>';
+      }
+
+      return '<div class="staff-card">'
+        + '<div class="staff-avatar" style="background:' + color + ';">' + escHtml(initials) + '</div>'
+        + '<div style="flex:1;min-width:0;">'
+        + '<div class="staff-name">' + escHtml(u.name || '—') + (isSelf ? ' <span style="font-size:.7rem;color:var(--color-text-muted);">(tú)</span>' : '') + '</div>'
+        + '<div class="staff-email">' + escHtml(u.email || '') + '</div>'
+        + '<span class="staff-role-badge ' + u.role + '">' + (isSA ? '⭐ Super Admin' : 'Staff') + '</span>'
+        + (isSA ? '' : '<div class="staff-areas">' + areaChips + '</div>')
+        + '<div class="staff-actions">' + actions + '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  async function toggleArea(userId, area, chip) {
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
+    var member = _equipoStaff.find(function(u) { return u.id === userId; });
+    if (!member) return;
+    var hasIt = member.areas.includes(area);
+    try {
+      if (hasIt) {
+        await sb.from('staff_permisos').delete().eq('user_id', userId).eq('area', area);
+        member.areas = member.areas.filter(function(a) { return a !== area; });
+        chip.classList.remove('active');
+      } else {
+        var currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+        await sb.from('staff_permisos').upsert({ user_id: userId, area: area, granted_by: currentUser ? currentUser.userId : null });
+        member.areas.push(area);
+        chip.classList.add('active');
+      }
+    } catch(e) { showToast('Error al actualizar permisos.', 'error'); }
+  }
+
+  async function promoteToSuperAdmin(userId, name) {
+    if (!confirm('¿Hacer a ' + name + ' Super Admin? Tendrá acceso completo al panel.')) return;
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
+    try {
+      await sb.from('profiles').update({ role: 'super_admin' }).eq('id', userId);
+      showToast(name + ' ahora es Super Admin.', 'success');
+      loadEquipo();
+    } catch(e) { showToast('Error al promover.', 'error'); }
+  }
+
+  async function revokeStaff(userId, name) {
+    if (!confirm('¿Revocar acceso al panel de ' + name + '?')) return;
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
+    try {
+      await sb.from('profiles').update({ role: 'miembro' }).eq('id', userId);
+      await sb.from('staff_permisos').delete().eq('user_id', userId);
+      showToast('Acceso revocado a ' + name + '.', 'success');
+      loadEquipo();
+    } catch(e) { showToast('Error al revocar acceso.', 'error'); }
+  }
+
+  async function equipoSearch() {
+    var q = (document.getElementById('equipo-search').value || '').trim();
+    if (!q) return;
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
+    var resultsDiv = document.getElementById('equipo-search-results');
+    resultsDiv.innerHTML = '<div style="font-size:.8rem;color:var(--color-text-muted);">Buscando...</div>';
+
+    var { data } = await sb.from('profiles')
+      .select('id, name, email, role, initials')
+      .not('role', 'in', '("staff","super_admin")')
+      .or('name.ilike.%' + q + '%,email.ilike.%' + q + '%')
+      .limit(8);
+
+    if (!data || !data.length) {
+      resultsDiv.innerHTML = '<div style="font-size:.8rem;color:var(--color-text-muted);">Sin resultados.</div>';
+      return;
+    }
+
+    resultsDiv.innerHTML = data.map(function(u) {
+      return '<div class="search-result-row">'
+        + '<div><div class="sr-name">' + escHtml(u.name || '—') + '</div><div class="sr-email">' + escHtml(u.email || '') + '</div></div>'
+        + '<button class="btn btn-primary btn-sm" onclick="addToStaff(\'' + u.id + '\',\'' + escHtml(u.name) + '\')">Añadir al equipo</button>'
+        + '</div>';
+    }).join('');
+  }
+
+  // Enter key en search
+  document.getElementById('equipo-search').addEventListener('keydown', function(e) { if (e.key === 'Enter') equipoSearch(); });
+
+  async function addToStaff(userId, name) {
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
+    try {
+      await sb.from('profiles').update({ role: 'staff' }).eq('id', userId);
+      showToast(name + ' añadido al equipo.', 'success');
+      document.getElementById('equipo-search-results').innerHTML = '';
+      document.getElementById('equipo-search').value = '';
+      loadEquipo();
+    } catch(e) { showToast('Error al añadir.', 'error'); }
+  }
 
   /* ══════════════════════════════════════
      IMÁGENES DE SERVICIOS
