@@ -312,8 +312,9 @@
         {
           title: 'Datos del bebé',
           fields: [
-            { id: 'nombre_bebe',      label: 'Nombre hebreo (si está decidido)',  type: 'text', required: false, placeholder: 'Nombre hebreo', hint: 'Puede decidirse antes o durante la ceremonia' },
-            { id: 'fecha_nacimiento', label: 'Fecha de nacimiento',               type: 'date', required: true },
+            { id: 'nombre_bebe',      label: 'Nombre hebreo (si está decidido)',  type: 'text',   required: false, placeholder: 'Nombre hebreo', hint: 'Puede decidirse antes o durante la ceremonia' },
+            { id: 'fecha_nacimiento', label: 'Fecha de nacimiento',               type: 'date',   required: true },
+            { id: 'mohel',            label: '¿Necesitáis que la comunidad provea mohel?', type: 'select', required: true, options: ['Sí, necesitamos mohel', 'No, ya tenemos mohel'] }
           ]
         },
         {
@@ -356,10 +357,10 @@
         {
           title: 'La ceremonia',
           fields: [
-            { id: 'fecha_boda',     label: 'Fecha prevista de la boda',  type: 'date',   required: false, hint: 'Aproximada — podemos ayudaros a elegir una fecha' },
-            { id: 'lugar_boda',     label: 'Lugar de la ceremonia',      type: 'text',   required: false, placeholder: 'Ej. Sinagoga, salón de eventos...' },
-            { id: 'tipo_ceremonia', label: 'Tipo de ceremonia',          type: 'select', required: true,  options: ['Ortodoxa completa', 'Tradicional', 'Solo jupá simbólica'] },
-            { id: 'num_invitados',  label: 'Número de invitados',        type: 'number', required: false, placeholder: 'Ej. 120' }
+            { id: 'fecha_boda',    label: 'Fecha prevista de la boda',  type: 'date',        required: false, hint: 'Aproximada — podemos ayudaros a elegir una fecha' },
+            { id: 'lugar_boda',    label: 'Lugar de la ceremonia',      type: 'text',        required: false, placeholder: 'Ej. Sinagoga, salón de eventos...' },
+            { id: 'num_invitados', label: 'Número de invitados',        type: 'number',      required: false, placeholder: 'Ej. 120' },
+            { id: 'ketuva_foto',   label: 'Foto de la ketuva de los padres', type: 'file-upload', required: true, hint: 'Sube una foto de la ketuva de los padres del novio o de la novia' }
           ]
         },
         {
@@ -428,7 +429,7 @@
   /* ══════════════════════════════════════
      ESTADO
   ══════════════════════════════════════ */
-  var state = { view: 'lista', serviceId: null, step: 0, data: {} };
+  var state = { view: 'lista', serviceId: null, step: 0, data: {}, fileUploads: {} };
 
   var LS_KEY = 'kehila_servicios_requests';
   function getRequests() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch(e) { return []; } }
@@ -497,7 +498,7 @@
       card.addEventListener('click', function() {
         var svc = SERVICES.find(function(s) { return s.id === card.dataset.service; });
         if (!svc) return;
-        state.data = {};
+        state.data = {}; state.fileUploads = {};
         if (svc.steps) showView('intro', svc.id);
         else showView('detalle', svc.id);
       });
@@ -581,6 +582,19 @@
         + f.options.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') + '</select>';
     } else if (f.type === 'textarea') {
       inputHTML = '<textarea class="svc-form-textarea" id="field_' + f.id + '" placeholder="' + (f.placeholder || '') + '" rows="4"></textarea>';
+    } else if (f.type === 'file-upload') {
+      var existingUrl = state.fileUploads && state.fileUploads[f.id];
+      var previewHTML = existingUrl
+        ? '<img src="' + existingUrl + '" style="max-width:100%;max-height:140px;border-radius:6px;margin-top:10px;border:1.5px solid var(--color-border);">'
+        : '';
+      inputHTML = '<div id="upload_wrap_' + f.id + '" style="border:1.5px solid var(--color-border);border-radius:var(--radius-sm);padding:14px;background:var(--color-bg);">'
+        + '<label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:.875rem;font-weight:600;color:var(--color-primary);">'
+        + '<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>'
+        + (existingUrl ? 'Cambiar foto' : 'Seleccionar foto')
+        + '<input type="file" id="field_' + f.id + '" accept="image/*" style="display:none;"></label>'
+        + '<div id="preview_' + f.id + '">' + previewHTML + '</div>'
+        + '<div id="status_' + f.id + '" style="font-size:.75rem;color:var(--color-text-muted);margin-top:6px;">' + (existingUrl ? '✓ Foto subida' : '') + '</div>'
+        + '</div>';
     } else {
       inputHTML = '<input type="' + f.type + '" class="svc-form-input" id="field_' + f.id + '" placeholder="' + (f.placeholder || '') + '">';
     }
@@ -591,20 +605,33 @@
     var stepDef = svc.steps[stepIndex];
     var valid = true;
     stepDef.fields.forEach(function(f) {
+      if (f.type === 'file-upload') {
+        var wrap = document.getElementById('upload_wrap_' + f.id);
+        if (wrap) wrap.style.borderColor = '';
+        if (f.required && !(state.fileUploads && state.fileUploads[f.id])) {
+          if (wrap) wrap.style.borderColor = 'var(--color-danger)';
+          valid = false;
+        }
+        return;
+      }
       var el = document.getElementById('field_' + f.id);
       if (!el) return;
       el.classList.remove('error');
       if (f.required && !el.value.trim()) { el.classList.add('error'); valid = false; }
     });
-    if (!valid) { var fe = document.querySelector('.error'); if (fe) fe.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    if (!valid) { var fe = document.querySelector('.error, [style*="border-color: var(--color-danger)"]'); if (fe) fe.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     return valid;
   }
 
   function saveStepData(svc, stepIndex) {
     var stepData = {};
     svc.steps[stepIndex].fields.forEach(function(f) {
-      var el = document.getElementById('field_' + f.id);
-      if (el) stepData[f.id] = el.value;
+      if (f.type === 'file-upload') {
+        stepData[f.id] = (state.fileUploads && state.fileUploads[f.id]) || '';
+      } else {
+        var el = document.getElementById('field_' + f.id);
+        if (el) stepData[f.id] = el.value;
+      }
     });
     state.data['step_' + stepIndex] = stepData;
   }
@@ -643,7 +670,16 @@
       + '</div></div>';
 
     var saved = state.data['step_' + state.step] || {};
-    stepDef.fields.forEach(function(f) { var el = document.getElementById('field_' + f.id); if (el && saved[f.id] !== undefined) el.value = saved[f.id]; });
+    stepDef.fields.forEach(function(f) {
+      if (f.type === 'file-upload') {
+        // wire upload handler
+        var inp = document.getElementById('field_' + f.id);
+        if (inp) inp.addEventListener('change', function() { uploadFormFile(f.id, inp); });
+      } else {
+        var el = document.getElementById('field_' + f.id);
+        if (el && saved[f.id] !== undefined) el.value = saved[f.id];
+      }
+    });
 
     var cur = state.step;
     document.getElementById('btn-anterior').addEventListener('click', function() {
@@ -722,7 +758,32 @@
   }
 
   /* ── Botón volver ── */
-  document.getElementById('btn-back').addEventListener('click', function() { state.data = {}; showView('lista'); });
+  document.getElementById('btn-back').addEventListener('click', function() { state.data = {}; state.fileUploads = {}; showView('lista'); });
+
+  /* ══════════════════════════════════════
+     UPLOAD: ARCHIVO EN FORMULARIO (ketuva, etc.)
+  ══════════════════════════════════════ */
+  async function uploadFormFile(fieldId, input) {
+    var file = input.files[0]; if (!file) return;
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
+    var wrap    = document.getElementById('upload_wrap_' + fieldId);
+    var preview = document.getElementById('preview_' + fieldId);
+    var status  = document.getElementById('status_' + fieldId);
+    if (wrap) wrap.style.opacity = '0.6';
+    if (status) status.textContent = 'Subiendo…';
+    try {
+      var path = 'ketuvas/' + fieldId + '_' + Date.now() + '.' + file.name.split('.').pop();
+      var { data: upData, error: upErr } = await sb.storage.from('negocios').upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) { if (status) status.textContent = 'Error: ' + upErr.message; return; }
+      var url = sb.storage.from('negocios').getPublicUrl(upData.path).data.publicUrl;
+      state.fileUploads[fieldId] = url;
+      if (preview) preview.innerHTML = '<img src="' + url + '" style="max-width:100%;max-height:140px;border-radius:6px;margin-top:10px;border:1.5px solid var(--color-border);">';
+      if (status) status.textContent = '✓ Foto subida correctamente';
+      if (wrap) wrap.style.borderColor = 'var(--color-success)';
+    } catch(e) { if (status) status.textContent = 'Error inesperado.'; }
+    if (wrap) wrap.style.opacity = '';
+    input.value = '';
+  }
 
   /* ══════════════════════════════════════
      ADMIN: SUBIR FOTO
