@@ -981,9 +981,9 @@
           <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
           Volver al inicio
         </a>
-        <p class="page-header-label" style="margin-top:6px;">Administración</p>
-        <h1 class="page-title">Panel de Control</h1>
-        <p class="page-subtitle">Gestiona tu comunidad desde aquí</p>
+        <p class="page-header-label" style="margin-top:6px;" id="admin-panel-label">Administración</p>
+        <h1 class="page-title" id="admin-panel-title">Panel de Control</h1>
+        <p class="page-subtitle" id="admin-panel-subtitle">Gestiona tu comunidad desde aquí</p>
       </div>
     </div>
 
@@ -4828,7 +4828,7 @@
     'usuarios':        ['usuarios'],
     'eventos':         ['eventos'],
     'noticias':        ['noticias'],
-    'subgrupos':       ['comunidad'],
+    'subgrupos':       ['subgrupos'],
     'tora-comunidad':  ['rav', 'shiurim'],
     'comunidad':       ['comunidad'],
     'analytics':       ['analytics'],
@@ -4838,16 +4838,17 @@
   };
 
   var AREA_DEFS = [
-    { id: 'resumen',   label: 'Resumen'    },
-    { id: 'eventos',   label: 'Eventos'    },
-    { id: 'noticias',  label: 'Noticias'   },
-    { id: 'rav',       label: 'Rav / Citas'},
-    { id: 'servicios', label: 'Servicios'  },
-    { id: 'shiurim',   label: 'Shiurim'    },
-    { id: 'comunidad', label: 'Comunidad'  },
-    { id: 'usuarios',  label: 'Usuarios'   },
-    { id: 'analytics', label: 'Analíticas' },
-    { id: 'ajustes',   label: 'Ajustes'    }
+    { id: 'resumen',   label: 'Resumen'           },
+    { id: 'eventos',   label: 'Eventos'           },
+    { id: 'noticias',  label: 'Noticias'          },
+    { id: 'rav',       label: 'Rav / Citas'       },
+    { id: 'servicios', label: 'Servicios'         },
+    { id: 'shiurim',   label: 'Shiurim'           },
+    { id: 'subgrupos', label: 'Subgrupos'         },
+    { id: 'comunidad', label: 'Comunidad'         },
+    { id: 'usuarios',  label: 'Usuarios'          },
+    { id: 'analytics', label: 'Analíticas'        },
+    { id: 'ajustes',   label: 'Ajustes'           }
   ];
 
   var AVATAR_COLORS2 = ['#1B2E5E','#5a2d8a','#0e6494','#8b2040','#065f46','#92400e'];
@@ -4865,6 +4866,14 @@
       document.getElementById('tab-equipo').style.display = '';
       return;
     }
+
+    // staff: cambiar título del panel
+    var titleEl = document.getElementById('admin-panel-title');
+    var subtitleEl = document.getElementById('admin-panel-subtitle');
+    var labelEl = document.getElementById('admin-panel-label');
+    if (titleEl) titleEl.textContent = 'Panel de Staff';
+    if (subtitleEl) subtitleEl.textContent = 'Gestiona las áreas asignadas';
+    if (labelEl) labelEl.textContent = 'Staff';
 
     // staff: mostrar solo las áreas asignadas
     document.querySelectorAll('.admin-tab').forEach(function(tab) {
@@ -4963,7 +4972,7 @@
       }).join('');
 
       var actions = '';
-      if (!isSelf) {
+      if (!isSelf && canEdit) {
         if (!isSA) {
           actions += '<button class="btn btn-sm" style="border:1.5px solid var(--color-gold-dark);color:var(--color-gold-dark);" '
             + 'onclick="promoteToSuperAdmin(\'' + u.id + '\',\'' + escHtml(u.name) + '\')">⭐ Hacer Super Admin</button>';

@@ -316,11 +316,19 @@ async function verifyAdminRealtime() {
 
     if (error || !profile)           { window.location.href = 'home.html'; return null; }
     if (profile.status === 'banned' || profile.status === 'suspended') { await logout(); return null; }
-    if (!['admin', 'super_admin', 'staff'].includes(profile.role)) { window.location.href = 'home.html'; return null; }
+    if (!['admin', 'super_admin', 'staff'].includes(profile.role)) {
+      // Rol revocado: limpiar sesión y redirigir
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ ...localUser, role: profile.role, status: profile.status }));
+      window.location.href = 'home.html';
+      return null;
+    }
 
     // Sincronizar rol en localStorage por si cambio en BD
     if (profile.role !== localUser.role) {
       localStorage.setItem(SESSION_KEY, JSON.stringify({ ...localUser, role: profile.role, status: profile.status }));
+      // Forzar recarga para aplicar cambios de rol
+      window.location.reload();
+      return null;
     }
     return localUser;
   } catch (e) {
