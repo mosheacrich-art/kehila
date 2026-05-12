@@ -1667,8 +1667,8 @@
         <p style="font-size:0.82rem;color:var(--color-text-muted);margin:0;">Asigna roles y áreas de acceso al panel a miembros del equipo.</p>
       </div>
 
-      <!-- Añadir al equipo -->
-      <div style="background:var(--color-white);border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:20px 22px;margin-bottom:22px;">
+      <!-- Añadir al equipo — solo admin/super_admin -->
+      <div id="equipo-add-section" style="background:var(--color-white);border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:20px 22px;margin-bottom:22px;">
         <div style="font-size:.9rem;font-weight:700;color:var(--color-primary);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
           <span style="display:block;width:4px;height:16px;background:var(--color-gold);border-radius:2px;"></span>
           Añadir miembro al equipo
@@ -4908,6 +4908,12 @@
   async function loadEquipo() {
     var list = document.getElementById('equipo-staff-list');
     if (!list) return;
+
+    // Ocultar sección añadir si no es admin/super_admin
+    var _cu = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    var addSection = document.getElementById('equipo-add-section');
+    if (addSection) addSection.style.display = (_cu && ['admin','super_admin'].includes(_cu.role)) ? '' : 'none';
+
     var sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) { list.innerHTML = '<div style="color:var(--color-danger);">Sin conexión.</div>'; return; }
 
