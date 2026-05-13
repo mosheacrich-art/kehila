@@ -1408,10 +1408,24 @@
             <p id="sg-detail-title" class="sg-detail-title">—</p>
             <p id="sg-detail-desc" class="sg-detail-sub">—</p>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="openAddMemberModal()" style="margin-left:auto;">
-            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-            Añadir miembro
-          </button>
+          <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" id="sg-auto-assign-btn" onclick="autoAsignarPorEdad()" style="display:none;">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+              Auto-asignar
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="openNotifModal()">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+              Notificacion
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="openEditarSubgrupoModal()">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
+              Editar
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="openAddMemberModal()">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              Anadir miembro
+            </button>
+          </div>
         </div>
         <div class="sg-member-table-wrap">
           <table class="sg-member-table">
@@ -1430,36 +1444,95 @@
       </div>
     </div>
 
-    <!-- Modal: crear subgrupo -->
+    <!-- Modal: crear/editar subgrupo -->
     <div class="modal-overlay hidden" id="modal-crear-sg">
-      <div class="modal-box" style="max-width:440px;">
+      <div class="modal-box" style="max-width:480px;">
         <div class="modal-header">
-          <h3 class="modal-title">Nuevo subgrupo</h3>
+          <h3 class="modal-title" id="sg-modal-title">Nuevo subgrupo</h3>
           <button class="modal-close" onclick="closeModal('modal-crear-sg')">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
           </button>
         </div>
         <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;padding:20px 24px;">
-          <div>
-            <label class="form-label">Icono (emoji)</label>
-            <input type="text" id="sg-form-icon" class="form-input" value="👥" maxlength="4" style="width:80px;">
+          <div style="display:flex;gap:12px;align-items:flex-end;">
+            <div>
+              <label class="form-label">Icono</label>
+              <input type="text" id="sg-form-icon" class="form-input" value="👥" maxlength="4" style="width:72px;text-align:center;font-size:1.3rem;">
+            </div>
+            <div style="flex:1;">
+              <label class="form-label">Nombre <span style="color:var(--color-danger)">*</span></label>
+              <input type="text" id="sg-form-nombre" class="form-input" placeholder="Ej: Mujeres, Flow Nino...">
+            </div>
           </div>
           <div>
-            <label class="form-label">Nombre del subgrupo <span style="color:var(--color-danger)">*</span></label>
-            <input type="text" id="sg-form-nombre" class="form-input" placeholder="Ej: Mujeres, Flow Niño…">
+            <label class="form-label">Descripcion (opcional)</label>
+            <input type="text" id="sg-form-desc" class="form-input" placeholder="Ej: Jovenes de 9 a 13 anos">
           </div>
           <div>
-            <label class="form-label">Tipo (opcional)</label>
-            <input type="text" id="sg-form-tipo" class="form-input" placeholder="Ej: Edad, Género, Función…">
+            <label class="form-label">Genero</label>
+            <select id="sg-form-genero" class="form-input">
+              <option value="todos">Todos</option>
+              <option value="hombre">Hombres</option>
+              <option value="mujer">Mujeres</option>
+            </select>
           </div>
           <div>
-            <label class="form-label">Descripción (opcional)</label>
-            <input type="text" id="sg-form-desc" class="form-input" placeholder="Ej: Jóvenes de 9 a 13 años">
+            <label class="form-label">Subgrupo padre (opcional)</label>
+            <select id="sg-form-parent" class="form-input">
+              <option value="">— Ninguno (grupo raiz) —</option>
+            </select>
+          </div>
+          <div style="border:1px solid var(--color-border);border-radius:8px;padding:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <label class="form-label" style="margin:0;font-weight:600;">Auto-asignar por edad</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="sg-form-auto" onchange="toggleAgeFields(this.checked)" style="width:16px;height:16px;">
+                <span style="font-size:0.85rem;color:var(--color-text-muted);">Activar</span>
+              </label>
+            </div>
+            <div id="sg-age-fields" style="display:none;display:flex;gap:12px;">
+              <div style="flex:1;">
+                <label class="form-label">Edad minima</label>
+                <input type="number" id="sg-form-edad-min" class="form-input" placeholder="Ej: 9" min="0" max="120">
+              </div>
+              <div style="flex:1;">
+                <label class="form-label">Edad maxima</label>
+                <input type="number" id="sg-form-edad-max" class="form-input" placeholder="Ej: 13" min="0" max="120">
+              </div>
+            </div>
+            <p style="font-size:0.8rem;color:var(--color-text-muted);margin-top:6px;">Los miembros con fecha de nacimiento en este rango se asignaran automaticamente al guardar.</p>
           </div>
         </div>
         <div class="modal-footer" style="padding:16px 24px;display:flex;justify-content:flex-end;gap:10px;">
           <button class="btn btn-ghost" onclick="closeModal('modal-crear-sg')">Cancelar</button>
-          <button class="btn btn-primary" onclick="crearSubgrupo()">Crear subgrupo</button>
+          <button class="btn btn-primary" id="sg-modal-save-btn" onclick="guardarSubgrupo()">Crear subgrupo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: notificacion masiva -->
+    <div class="modal-overlay hidden" id="modal-notif-sg">
+      <div class="modal-box" style="max-width:460px;">
+        <div class="modal-header">
+          <h3 class="modal-title">Enviar notificacion</h3>
+          <button class="modal-close" onclick="closeModal('modal-notif-sg')">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;padding:20px 24px;">
+          <p style="font-size:0.85rem;color:var(--color-text-muted);">Se enviara a todos los miembros de: <strong id="notif-sg-name">—</strong></p>
+          <div>
+            <label class="form-label">Titulo <span style="color:var(--color-danger)">*</span></label>
+            <input type="text" id="notif-titulo" class="form-input" placeholder="Ej: Evento especial este shabat">
+          </div>
+          <div>
+            <label class="form-label">Mensaje <span style="color:var(--color-danger)">*</span></label>
+            <textarea id="notif-mensaje" class="form-input" rows="4" placeholder="Escribe el mensaje para los miembros del grupo..." style="resize:vertical;"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:16px 24px;display:flex;justify-content:flex-end;gap:10px;">
+          <button class="btn btn-ghost" onclick="closeModal('modal-notif-sg')">Cancelar</button>
+          <button class="btn btn-primary" onclick="enviarNotificacion()">Enviar</button>
         </div>
       </div>
     </div>
@@ -4069,9 +4142,11 @@
      TAB SUBGRUPOS
   ══════════════════════════════ */
   let sgState = [];           // [{id, nombre, descripcion, icono, count}]
-  let sgCurrentId = null;     // subgrupo abierto en detail view
-  let sgCurrentMembers = [];  // [{user_id, name, email, initials}]
+  let sgCurrentId = null;      // subgrupo abierto en detail view
+  let sgCurrentGroup = null;   // objeto completo del subgrupo abierto
+  let sgCurrentMembers = [];   // [{user_id, name, email, initials}]
   let sgAddSelected = new Set();
+  let sgEditMode = false;      // true = editar, false = crear
 
   const AVATAR_COLORS = ['#1b2e5e','#065F46','#92400E','#7c3aed','#b91c1c','#0369a1','#15803d','#9a3412'];
   /**
@@ -4185,13 +4260,23 @@
     sgCurrentId = id;
     const group = sgState.find(g => g.id === id);
     if (!group) return;
+    sgCurrentGroup = group;
 
     document.getElementById('sg-list-view').classList.add('hidden');
     document.getElementById('sg-detail-view').classList.add('active');
     document.getElementById('sg-detail-icon').textContent  = group.icono || '👥';
     document.getElementById('sg-detail-title').textContent = group.nombre;
-    document.getElementById('sg-detail-desc').textContent  = [group.tipo, group.descripcion].filter(Boolean).join(' · ');
-    document.getElementById('sg-members-list').innerHTML   = '<tr><td colspan="3" style="text-align:center;color:var(--color-text-muted);font-size:0.875rem;padding:24px;">Cargando…</td></tr>';
+    const descParts = [];
+    if (group.tipo) descParts.push(group.tipo);
+    if (group.descripcion) descParts.push(group.descripcion);
+    if (group.genero && group.genero !== 'todos') descParts.push(group.genero === 'hombre' ? 'Hombres' : 'Mujeres');
+    if (group.edad_min != null && group.edad_max != null) descParts.push(`${group.edad_min}-${group.edad_max} anos`);
+    document.getElementById('sg-detail-desc').textContent = descParts.join(' · ') || '—';
+    document.getElementById('sg-members-list').innerHTML  = '<tr><td colspan="3" style="text-align:center;color:var(--color-text-muted);font-size:0.875rem;padding:24px;">Cargando…</td></tr>';
+
+    // Mostrar boton auto-asignar si tiene reglas de edad
+    const autoBtn = document.getElementById('sg-auto-assign-btn');
+    if (autoBtn) autoBtn.style.display = (group.auto_asignar && group.edad_min != null) ? 'flex' : 'none';
 
     await loadSgMembers(id);
   }
@@ -4279,37 +4364,212 @@
     await loadSgMembers(sgCurrentId);
   }
 
-  /**
-   * Limpia y abre el modal de creacion de nuevo subgrupo.
-   */
-  function openCrearSubgrupoModal() {
-    document.getElementById('sg-form-icon').value   = '👥';
-    document.getElementById('sg-form-nombre').value = '';
-    document.getElementById('sg-form-tipo').value   = '';
-    document.getElementById('sg-form-desc').value   = '';
+  /** Rellena el select de grupos padre en el modal */
+  async function populateParentSelect(excludeId) {
+    const sel = document.getElementById('sg-form-parent');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Ninguno (grupo raiz) —</option>';
+    (sgState || []).forEach(g => {
+      if (g.id === excludeId) return; // no puede ser su propio padre
+      const opt = document.createElement('option');
+      opt.value = g.id;
+      opt.textContent = (g.icono || '👥') + ' ' + g.nombre;
+      sel.appendChild(opt);
+    });
+  }
+
+  /** Muestra/oculta los campos de edad segun el checkbox */
+  function toggleAgeFields(checked) {
+    const el = document.getElementById('sg-age-fields');
+    if (el) el.style.display = checked ? 'flex' : 'none';
+  }
+
+  /** Abre el modal en modo CREAR */
+  async function openCrearSubgrupoModal() {
+    sgEditMode = false;
+    document.getElementById('sg-modal-title').textContent    = 'Nuevo subgrupo';
+    document.getElementById('sg-modal-save-btn').textContent = 'Crear subgrupo';
+    document.getElementById('sg-form-icon').value    = '👥';
+    document.getElementById('sg-form-nombre').value  = '';
+    document.getElementById('sg-form-desc').value    = '';
+    document.getElementById('sg-form-genero').value  = 'todos';
+    document.getElementById('sg-form-auto').checked  = false;
+    document.getElementById('sg-form-edad-min').value = '';
+    document.getElementById('sg-form-edad-max').value = '';
+    toggleAgeFields(false);
+    await populateParentSelect(null);
     openModal('modal-crear-sg');
     setTimeout(() => document.getElementById('sg-form-nombre').focus(), 100);
   }
 
-  /**
-   * Crea un nuevo subgrupo en Supabase leyendo el modal #modal-crear-sg.
-   */
-  async function crearSubgrupo() {
-    const nombre = document.getElementById('sg-form-nombre').value.trim();
-    const tipo   = document.getElementById('sg-form-tipo').value.trim();
-    const desc   = document.getElementById('sg-form-desc').value.trim();
-    const icono  = document.getElementById('sg-form-icon').value.trim() || '👥';
+  /** Abre el modal en modo EDITAR con los datos del subgrupo actual */
+  async function openEditarSubgrupoModal() {
+    if (!sgCurrentGroup) return;
+    sgEditMode = true;
+    const g = sgCurrentGroup;
+    document.getElementById('sg-modal-title').textContent    = 'Editar subgrupo';
+    document.getElementById('sg-modal-save-btn').textContent = 'Guardar cambios';
+    document.getElementById('sg-form-icon').value    = g.icono || '👥';
+    document.getElementById('sg-form-nombre').value  = g.nombre || '';
+    document.getElementById('sg-form-desc').value    = g.descripcion || '';
+    document.getElementById('sg-form-genero').value  = g.genero || 'todos';
+    const hasAuto = !!(g.auto_asignar && g.edad_min != null);
+    document.getElementById('sg-form-auto').checked  = hasAuto;
+    document.getElementById('sg-form-edad-min').value = g.edad_min != null ? g.edad_min : '';
+    document.getElementById('sg-form-edad-max').value = g.edad_max != null ? g.edad_max : '';
+    toggleAgeFields(hasAuto);
+    await populateParentSelect(g.id);
+    document.getElementById('sg-form-parent').value = g.parent_id || '';
+    openModal('modal-crear-sg');
+  }
+
+  /** Guarda (crea o actualiza) un subgrupo */
+  async function guardarSubgrupo() {
+    const nombre   = document.getElementById('sg-form-nombre').value.trim();
+    const desc     = document.getElementById('sg-form-desc').value.trim();
+    const icono    = document.getElementById('sg-form-icon').value.trim() || '👥';
+    const genero   = document.getElementById('sg-form-genero').value;
+    const parentId = document.getElementById('sg-form-parent').value || null;
+    const autoAsig = document.getElementById('sg-form-auto').checked;
+    const edadMin  = autoAsig ? parseInt(document.getElementById('sg-form-edad-min').value) || null : null;
+    const edadMax  = autoAsig ? parseInt(document.getElementById('sg-form-edad-max').value) || null : null;
+
     if (!nombre) { showToast('El nombre es obligatorio', 'warning'); return; }
+    if (autoAsig && (edadMin == null || edadMax == null)) { showToast('Indica edad minima y maxima', 'warning'); return; }
 
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) { showToast('Supabase no disponible', 'error'); return; }
 
-    const { error } = await sb.from('subgrupos').insert({ nombre, tipo: tipo || null, descripcion: desc || null, icono });
+    const payload = { nombre, descripcion: desc || null, icono, genero, parent_id: parentId, auto_asignar: autoAsig, edad_min: edadMin, edad_max: edadMax };
+
+    let error;
+    if (sgEditMode && sgCurrentId) {
+      ({ error } = await sb.from('subgrupos').update(payload).eq('id', sgCurrentId));
+    } else {
+      ({ error } = await sb.from('subgrupos').insert(payload));
+    }
     if (error) { showToast('Error: ' + error.message, 'error'); return; }
 
-    showToast(`Subgrupo "${nombre}" creado`, 'success');
+    showToast(sgEditMode ? 'Subgrupo actualizado' : `Subgrupo "${nombre}" creado`, 'success');
     closeModal('modal-crear-sg');
     await loadSubgrupos();
+
+    // Si estabamos editando, actualizar la vista detalle
+    if (sgEditMode && sgCurrentId) {
+      sgCurrentGroup = sgState.find(g => g.id === sgCurrentId) || sgCurrentGroup;
+      if (sgCurrentGroup) {
+        document.getElementById('sg-detail-icon').textContent  = sgCurrentGroup.icono || '👥';
+        document.getElementById('sg-detail-title').textContent = sgCurrentGroup.nombre;
+      }
+    }
+
+    // Auto-asignar si se activo la regla
+    if (autoAsig && edadMin != null && edadMax != null) {
+      await _runAutoAsignar(sgEditMode ? sgCurrentId : null);
+    }
+  }
+
+  // Alias para compatibilidad (boton "Crear subgrupo" antiguo)
+  function crearSubgrupo() { guardarSubgrupo(); }
+
+  /**
+   * Auto-asigna miembros al subgrupo actual segun su rango de edad.
+   * Lee fecha_nacimiento de profiles y hace upsert en subgrupo_miembros.
+   */
+  async function autoAsignarPorEdad() {
+    if (!sgCurrentId) return;
+    const group = sgState.find(g => g.id === sgCurrentId);
+    if (!group || group.edad_min == null || group.edad_max == null) {
+      showToast('Este subgrupo no tiene reglas de edad configuradas', 'warning');
+      return;
+    }
+    await _runAutoAsignar(sgCurrentId);
+    await loadSgMembers(sgCurrentId);
+    await loadSubgrupos();
+  }
+
+  async function _runAutoAsignar(groupId) {
+    const id = groupId || sgCurrentId;
+    if (!id) return;
+    const group = sgState.find(g => g.id === id);
+    if (!group) return;
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return;
+
+    try {
+      // Obtener todos los miembros con fecha de nacimiento
+      const { data: profiles, error } = await sb
+        .from('profiles')
+        .select('id, fecha_nacimiento, genero')
+        .not('fecha_nacimiento', 'is', null);
+      if (error) throw error;
+
+      const hoy = new Date();
+      const edadMin = group.edad_min;
+      const edadMax = group.edad_max;
+      const generoFiltro = group.genero || 'todos';
+
+      const elegibles = (profiles || []).filter(p => {
+        const nacimiento = new Date(p.fecha_nacimiento);
+        let edad = hoy.getFullYear() - nacimiento.getFullYear();
+        const m = hoy.getMonth() - nacimiento.getMonth();
+        if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
+        const edadOk = edad >= edadMin && edad <= edadMax;
+        const generoOk = generoFiltro === 'todos' || p.genero === generoFiltro;
+        return edadOk && generoOk;
+      });
+
+      if (!elegibles.length) {
+        showToast('No hay miembros con esos criterios de edad', 'info');
+        return;
+      }
+
+      const rows = elegibles.map(p => ({ subgrupo_id: id, user_id: p.id }));
+      const { error: insError } = await sb
+        .from('subgrupo_miembros')
+        .upsert(rows, { onConflict: 'subgrupo_id,user_id', ignoreDuplicates: true });
+      if (insError) throw insError;
+
+      showToast(`${elegibles.length} miembro${elegibles.length > 1 ? 's' : ''} asignado${elegibles.length > 1 ? 's' : ''} automaticamente`, 'success');
+    } catch(e) {
+      showToast('Error en auto-asignacion: ' + e.message, 'error');
+    }
+  }
+
+  /** Abre el modal de notificacion para el subgrupo actual */
+  function openNotifModal() {
+    if (!sgCurrentId) return;
+    const group = sgCurrentGroup || sgState.find(g => g.id === sgCurrentId);
+    const nombre = group ? group.nombre : '—';
+    document.getElementById('notif-sg-name').textContent = nombre;
+    document.getElementById('notif-titulo').value  = '';
+    document.getElementById('notif-mensaje').value = '';
+    openModal('modal-notif-sg');
+    setTimeout(() => document.getElementById('notif-titulo').focus(), 100);
+  }
+
+  /** Envia notificacion masiva a todos los miembros del subgrupo */
+  async function enviarNotificacion() {
+    const titulo  = document.getElementById('notif-titulo').value.trim();
+    const mensaje = document.getElementById('notif-mensaje').value.trim();
+    if (!titulo)  { showToast('El titulo es obligatorio', 'warning'); return; }
+    if (!mensaje) { showToast('El mensaje es obligatorio', 'warning'); return; }
+    if (!sgCurrentId) return;
+
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) { showToast('Supabase no disponible', 'error'); return; }
+
+    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    const { error } = await sb.from('notificaciones').insert({
+      titulo,
+      mensaje,
+      subgrupo_id: sgCurrentId,
+      creado_por: user?.userId || null
+    });
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+
+    showToast(`Notificacion enviada a los miembros del grupo`, 'success');
+    closeModal('modal-notif-sg');
   }
 
   /**

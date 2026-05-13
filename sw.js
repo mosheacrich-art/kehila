@@ -3,7 +3,7 @@
    Estrategia: network-first (siempre versión más reciente)
    ============================================= */
 
-const CACHE = 'kehila-v6';
+const CACHE = 'kehila-v7';
 
 // Instalar: activar inmediatamente sin esperar
 self.addEventListener('install', e => {
