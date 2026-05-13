@@ -476,14 +476,11 @@
 
   /* ── Cargar datos de Supabase ── */
   async function loadData() {
-    if (!sb) { render(); return; }
+    if (!sb) return;
     try {
-      const [areasRes, heroRes] = await Promise.all([
-        sb.from('don_areas').select('*'),
-        sb.from('app_config').select('value').eq('key','don_hero_img').single()
-      ]);
-      if (areasRes.data) {
-        areasRes.data.forEach(row => {
+      const { data: areasRows } = await sb.from('don_areas').select('*');
+      if (areasRows) {
+        areasRows.forEach(row => {
           const a = areas.find(x => x.id === row.id);
           if (!a) return;
           if (row.titulo)      a.title    = row.titulo;
@@ -492,10 +489,14 @@
           if (row.imagen_url)  a.img       = row.imagen_url;
           if (row.meta)        a.meta      = row.meta;
         });
+        render();
       }
-      if (heroRes.data?.value) setHeroBg(heroRes.data.value);
     } catch(_) {}
-    render();
+
+    try {
+      const { data: cfgRow } = await sb.from('app_config').select('value').eq('key','don_hero_img').maybeSingle();
+      if (cfgRow?.value) setHeroBg(cfgRow.value);
+    } catch(_) {}
   }
 
   function setHeroBg(url) {
@@ -756,7 +757,8 @@
     if (e.key === 'Escape') { closeModal(); closeEdit(); }
   });
 
-  /* ── Init ── */
+  /* ── Init: render inmediato + actualizar con Supabase ── */
+  render();
   loadData();
 </script>
 <script>
