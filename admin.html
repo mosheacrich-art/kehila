@@ -834,6 +834,14 @@
     .sg-card-desc { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 2px; }
     .sg-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--color-border-light); }
 
+    /* Toggle switch */
+    .sg-toggle-wrap { position:relative;width:40px;height:22px; }
+    .sg-toggle-track { width:40px;height:22px;border-radius:11px;background:#cbd5e1;transition:background .2s;cursor:pointer; }
+    #sg-form-auto:checked ~ .sg-toggle-track,
+    .sg-toggle-wrap:has(input:checked) .sg-toggle-track { background:var(--color-primary); }
+    .sg-toggle-track::after { content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2); }
+    .sg-toggle-wrap:has(input:checked) .sg-toggle-track::after { transform:translateX(18px); }
+
     /* Members grid */
     .sg-members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
     .sg-member-card {
@@ -1474,66 +1482,83 @@
 
     <!-- Modal: crear/editar subgrupo -->
     <div class="modal-overlay hidden" id="modal-crear-sg">
-      <div class="modal-box" style="max-width:480px;">
-        <div class="modal-header">
-          <h3 class="modal-title" id="sg-modal-title">Nuevo subgrupo</h3>
-          <button class="modal-close" onclick="closeModal('modal-crear-sg')">
+      <div class="modal-box" style="max-width:520px;border-radius:20px;overflow:hidden;padding:0;">
+        <!-- Cabecera con preview -->
+        <div style="background:linear-gradient(135deg,#1b2e5e 0%,#2d4a8a 100%);padding:28px 28px 20px;position:relative;">
+          <button class="modal-close" onclick="closeModal('modal-crear-sg')" style="position:absolute;top:16px;right:16px;color:#fff;opacity:0.7;">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
           </button>
-        </div>
-        <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;padding:20px 24px;">
-          <div style="display:flex;gap:12px;align-items:flex-end;">
-            <div>
-              <label class="form-label">Icono</label>
-              <input type="text" id="sg-form-icon" class="form-input" value="👥" maxlength="4" style="width:72px;text-align:center;font-size:1.3rem;">
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div style="position:relative;">
+              <div id="sg-icon-preview" style="width:64px;height:64px;border-radius:16px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;border:2px dashed rgba(255,255,255,0.3);" onclick="document.getElementById('sg-form-icon').focus()">👥</div>
+              <input type="text" id="sg-form-icon" maxlength="4" oninput="document.getElementById('sg-icon-preview').textContent=this.value||'👥'" style="position:absolute;opacity:0;width:1px;height:1px;top:0;left:0;">
             </div>
             <div style="flex:1;">
-              <label class="form-label">Nombre <span style="color:var(--color-danger)">*</span></label>
-              <input type="text" id="sg-form-nombre" class="form-input" placeholder="Ej: Mujeres, Flow Nino...">
+              <p id="sg-modal-title" style="color:rgba(255,255,255,0.7);font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px;">Nuevo subgrupo</p>
+              <input type="text" id="sg-form-nombre" placeholder="Nombre del grupo..." style="background:none;border:none;outline:none;color:#fff;font-size:1.3rem;font-weight:700;width:100%;placeholder-color:rgba(255,255,255,0.4);" oninput="document.getElementById('sg-nombre-preview').textContent=this.value||'Nombre del grupo'">
             </div>
           </div>
+          <p id="sg-nombre-preview" style="display:none;"></p>
+        </div>
+
+        <!-- Cuerpo del formulario -->
+        <div style="padding:24px 28px;display:flex;flex-direction:column;gap:18px;max-height:60vh;overflow-y:auto;">
+
           <div>
-            <label class="form-label">Descripcion (opcional)</label>
-            <input type="text" id="sg-form-desc" class="form-input" placeholder="Ej: Jovenes de 9 a 13 anos">
+            <label class="form-label">Descripcion <span style="color:var(--color-text-muted);font-weight:400;">(opcional)</span></label>
+            <input type="text" id="sg-form-desc" class="form-input" placeholder="Ej: Jovenes de 9 a 13 anos, grupo de mujeres...">
           </div>
-          <div>
-            <label class="form-label">Genero</label>
-            <select id="sg-form-genero" class="form-input">
-              <option value="todos">Todos</option>
-              <option value="hombre">Hombres</option>
-              <option value="mujer">Mujeres</option>
-            </select>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div>
+              <label class="form-label">Genero</label>
+              <select id="sg-form-genero" class="form-input">
+                <option value="todos">Todos</option>
+                <option value="hombre">Solo hombres</option>
+                <option value="mujer">Solo mujeres</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Grupo padre <span style="color:var(--color-text-muted);font-weight:400;">(opcional)</span></label>
+              <select id="sg-form-parent" class="form-input">
+                <option value="">Sin grupo padre</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <label class="form-label">Subgrupo padre (opcional)</label>
-            <select id="sg-form-parent" class="form-input">
-              <option value="">— Ninguno (grupo raiz) —</option>
-            </select>
-          </div>
-          <div style="border:1px solid var(--color-border);border-radius:8px;padding:14px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-              <label class="form-label" style="margin:0;font-weight:600;">Auto-asignar por edad</label>
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-                <input type="checkbox" id="sg-form-auto" onchange="toggleAgeFields(this.checked)" style="width:16px;height:16px;">
-                <span style="font-size:0.85rem;color:var(--color-text-muted);">Activar</span>
+
+          <!-- Auto-asignar por edad -->
+          <div style="background:var(--color-bg,#f8fafc);border-radius:12px;padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <p style="font-weight:600;font-size:0.9rem;color:var(--color-text);margin:0;">Auto-asignar por edad</p>
+                <p style="font-size:0.78rem;color:var(--color-text-muted);margin:3px 0 0;">Asigna miembros automaticamente segun su edad</p>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <div class="sg-toggle-wrap">
+                  <input type="checkbox" id="sg-form-auto" onchange="toggleAgeFields(this.checked)" style="position:absolute;opacity:0;width:0;height:0;">
+                  <div class="sg-toggle-track" id="sg-toggle-track"></div>
+                </div>
               </label>
             </div>
-            <div id="sg-age-fields" style="display:none;display:flex;gap:12px;">
-              <div style="flex:1;">
-                <label class="form-label">Edad minima</label>
-                <input type="number" id="sg-form-edad-min" class="form-input" placeholder="Ej: 9" min="0" max="120">
-              </div>
-              <div style="flex:1;">
-                <label class="form-label">Edad maxima</label>
-                <input type="number" id="sg-form-edad-max" class="form-input" placeholder="Ej: 13" min="0" max="120">
+            <div id="sg-age-fields" style="display:none;margin-top:14px;display:none;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                  <label class="form-label">Edad minima</label>
+                  <input type="number" id="sg-form-edad-min" class="form-input" placeholder="0" min="0" max="120">
+                </div>
+                <div>
+                  <label class="form-label">Edad maxima</label>
+                  <input type="number" id="sg-form-edad-max" class="form-input" placeholder="120" min="0" max="120">
+                </div>
               </div>
             </div>
-            <p style="font-size:0.8rem;color:var(--color-text-muted);margin-top:6px;">Los miembros con fecha de nacimiento en este rango se asignaran automaticamente al guardar.</p>
           </div>
         </div>
-        <div class="modal-footer" style="padding:16px 24px;display:flex;justify-content:flex-end;gap:10px;">
+
+        <!-- Footer -->
+        <div style="padding:16px 28px;border-top:1px solid var(--color-border-light);display:flex;justify-content:flex-end;gap:10px;background:var(--color-white);">
           <button class="btn btn-ghost" onclick="closeModal('modal-crear-sg')">Cancelar</button>
-          <button class="btn btn-primary" id="sg-modal-save-btn" onclick="guardarSubgrupo()">Crear subgrupo</button>
+          <button class="btn btn-primary" id="sg-modal-save-btn" onclick="guardarSubgrupo()" style="min-width:140px;">Crear subgrupo</button>
         </div>
       </div>
     </div>
@@ -4422,6 +4447,7 @@
     document.getElementById('sg-modal-title').textContent    = parentId ? 'Nuevo sub-grupo' : 'Nuevo subgrupo';
     document.getElementById('sg-modal-save-btn').textContent = 'Crear subgrupo';
     document.getElementById('sg-form-icon').value    = '👥';
+    document.getElementById('sg-icon-preview').textContent = '👥';
     document.getElementById('sg-form-nombre').value  = '';
     document.getElementById('sg-form-desc').value    = '';
     document.getElementById('sg-form-genero').value  = 'todos';
@@ -4443,6 +4469,7 @@
     document.getElementById('sg-modal-title').textContent    = 'Editar subgrupo';
     document.getElementById('sg-modal-save-btn').textContent = 'Guardar cambios';
     document.getElementById('sg-form-icon').value    = g.icono || '👥';
+    document.getElementById('sg-icon-preview').textContent = g.icono || '👥';
     document.getElementById('sg-form-nombre').value  = g.nombre || '';
     document.getElementById('sg-form-desc').value    = g.descripcion || '';
     document.getElementById('sg-form-genero').value  = g.genero || 'todos';
