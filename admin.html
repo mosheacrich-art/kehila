@@ -813,26 +813,46 @@
     /* Cards grid */
     .sg-cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
       margin-top: 4px;
     }
     .sg-card {
       background: var(--color-white);
       border: 1px solid var(--color-border-light);
-      border-radius: 14px;
-      padding: 20px;
+      border-radius: 16px;
+      overflow: hidden;
       cursor: pointer;
-      transition: box-shadow 0.18s, border-color 0.18s, transform 0.12s;
+      transition: box-shadow 0.18s, transform 0.12s;
       display: flex;
       flex-direction: column;
-      gap: 10px;
     }
-    .sg-card:hover { box-shadow: 0 4px 18px rgba(27,46,94,.10); border-color: var(--color-primary); transform: translateY(-2px); }
-    .sg-card-icon { font-size: 2rem; line-height: 1; }
-    .sg-card-name { font-size: 1rem; font-weight: 700; color: var(--color-text); }
-    .sg-card-desc { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 2px; }
-    .sg-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--color-border-light); }
+    .sg-card:hover { box-shadow: 0 6px 24px rgba(27,46,94,.13); transform: translateY(-3px); }
+    .sg-card-photo {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: linear-gradient(135deg, #1b2e5e, #2d4a8a);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem;
+      overflow: hidden;
+    }
+    .sg-card-photo img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
+    .sg-card-cam-btn {
+      position: absolute; top: 8px; right: 8px;
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .15s;
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+    .sg-card:hover .sg-card-cam-btn { opacity: 1; }
+    .sg-card-body { padding: 12px 14px 14px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .sg-card-name { font-size: 0.92rem; font-weight: 700; color: var(--color-text); }
+    .sg-card-desc { font-size: 0.78rem; color: var(--color-text-muted); }
+    .sg-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+    .sg-card-icon { display: none; }
 
     /* Toggle switch */
     .sg-toggle-wrap { position:relative;width:40px;height:22px; }
@@ -4280,20 +4300,24 @@
       const generoLabel = g.genero === 'hombre' ? 'Hombres' : g.genero === 'mujer' ? 'Mujeres' : '';
       const edadLabel = (g.edad_min != null && g.edad_max != null) ? `${g.edad_min}-${g.edad_max} anos` : '';
       const tags = [generoLabel, edadLabel].filter(Boolean);
+      const photoContent = g.imagen_url
+        ? `<img src="${escHtml(g.imagen_url)}" alt="">`
+        : `<span style="font-size:2.4rem;opacity:.9;">${escHtml(g.icono || '👥')}</span>`;
       return `
       <div class="sg-card" onclick="openSgDetail('${g.id}')">
-        <div class="sg-card-icon">${g.imagen_url ? `<img src="${escHtml(g.imagen_url)}" alt="" style="width:52px;height:52px;border-radius:12px;object-fit:cover;">` : escHtml(g.icono || '👥')}</div>
+        <div class="sg-card-photo">
+          ${photoContent}
+          <button class="sg-card-cam-btn" title="Cambiar foto" onclick="event.stopPropagation();sgQuickPhoto('${g.id}')">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;color:#1b2e5e;"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"/></svg>
+          </button>
+        </div>
         <div class="sg-card-body">
           <div class="sg-card-name">${escHtml(g.nombre)}</div>
           ${g.descripcion ? `<div class="sg-card-desc">${escHtml(g.descripcion)}</div>` : ''}
-          ${tags.length ? `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">${tags.map(t => `<span style="font-size:0.72rem;background:var(--color-primary-light,#e8eef8);color:var(--color-primary);padding:2px 8px;border-radius:20px;">${t}</span>`).join('')}</div>` : ''}
-        </div>
-        <div class="sg-card-footer">
-          <span style="font-size:0.8rem;color:var(--color-text-muted);">
-            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:13px;height:13px;vertical-align:-2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
-            ${g.count || 0} miembro${g.count !== 1 ? 's' : ''}
-          </span>
-          <button class="btn btn-ghost btn-sm" style="font-size:0.78rem;padding:4px 10px;" onclick="event.stopPropagation();openSgDetail('${g.id}')">Ver grupo →</button>
+          <div class="sg-card-footer">
+            <span style="font-size:0.75rem;color:var(--color-text-muted);">${g.count || 0} miembro${g.count !== 1 ? 's' : ''}</span>
+            ${tags.length ? `<span style="font-size:0.7rem;background:#e8eef8;color:var(--color-primary);padding:2px 7px;border-radius:20px;">${tags[0]}</span>` : ''}
+          </div>
         </div>
       </div>`;
     }).join('');
@@ -4453,6 +4477,31 @@
     if (error) { showToast('Error: ' + error.message, 'error'); return; }
     showToast('Miembro eliminado del subgrupo', 'success');
     await loadSgMembers(sgCurrentId);
+  }
+
+  /** Sube foto directamente desde la card sin abrir el modal de edicion */
+  function sgQuickPhoto(groupId) {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*';
+    input.onchange = async function() {
+      const file = input.files[0];
+      if (!file) return;
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (!sb) return;
+      showToast('Subiendo imagen...', 'info');
+      const url = typeof uploadMedia === 'function' ? await uploadMedia(file, 'subgrupos') : null;
+      if (!url) { showToast('Error al subir la imagen', 'error'); return; }
+      const { error } = await sb.from('subgrupos').update({ imagen_url: url }).eq('id', groupId);
+      if (error) { showToast('Error: ' + error.message, 'error'); return; }
+      showToast('Foto actualizada', 'success');
+      await loadSubgrupos();
+      // Si estamos dentro del detalle de este grupo, actualizar el icono
+      if (sgCurrentId === groupId) {
+        const iconEl = document.getElementById('sg-detail-icon');
+        if (iconEl) iconEl.innerHTML = `<img src="${url}" alt="" style="width:52px;height:52px;border-radius:14px;object-fit:cover;">`;
+      }
+    };
+    input.click();
   }
 
   /** Preview local de la imagen seleccionada */
