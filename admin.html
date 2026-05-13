@@ -4578,10 +4578,13 @@
    * @param {string} nombre - Para el confirm dialog
    */
   async function eliminarSubgrupo(id, nombre) {
-    if (!await verifyAdminRealtime()) return;
-    if (!confirm(`¿Eliminar el subgrupo "${nombre}"? Se quitarán también todos sus miembros.`)) return;
+    if (!confirm(`¿Eliminar el subgrupo "${nombre}"? Se quitaran tambien todos sus miembros.`)) return;
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) return;
+    // Borrar miembros primero para evitar FK constraint
+    await sb.from('subgrupo_miembros').delete().eq('subgrupo_id', id);
+    // Borrar notificaciones del grupo
+    await sb.from('notificaciones').delete().eq('subgrupo_id', id);
     const { error } = await sb.from('subgrupos').delete().eq('id', id);
     if (error) { showToast('Error: ' + error.message, 'error'); return; }
     showToast(`Subgrupo "${nombre}" eliminado`, 'success');
