@@ -377,32 +377,49 @@
       id: 'najalah',
       gradient: 'linear-gradient(140deg,#141420 0%,#2d2d4a 60%,#141420 100%)',
       image: null,
-      name: 'Najalah',
-      subtitle: 'Acompañamiento en el duelo',
-      desc: 'Estamos con vosotros en los momentos más difíciles. Organizamos el shivá, el servicio de kaddish y ofrecemos acompañamiento emocional y espiritual en los tiempos de pérdida.',
+      name: 'Registro de Najalá / Azcará',
+      subtitle: 'Honra la memoria de tu ser querido',
+      desc: 'Acompáñanos a honrar la memoria de tu ser querido. Completa este formulario para organizar la najalá según las costumbres y necesidades de la familia.',
       steps: [
         {
-          title: 'Información del difunto/a',
+          title: 'Información del fallecido',
           fields: [
-            { id: 'nombre_difunto',      label: 'Nombre del difunto/a',         type: 'text',   required: true,  placeholder: 'Nombre completo' },
-            { id: 'fecha_fallecimiento', label: 'Fecha de fallecimiento',        type: 'date',   required: true },
-            { id: 'relacion',            label: 'Tu relación con el difunto/a',  type: 'select', required: true,  options: ['Padre / Madre', 'Cónyuge', 'Hijo / Hija', 'Hermano / Hermana', 'Otro familiar', 'Amigo/a cercano/a'] }
+            { id: 'nombre_fallecido',    label: 'Nombre completo del fallecido/a', type: 'text', required: true,  placeholder: 'Nombre y apellidos' },
+            { id: 'nombre_hebreo',       label: 'Nombre hebreo',                   type: 'text', required: false, placeholder: 'Opcional' },
+            { id: 'fecha_fallecimiento', label: 'Fecha de fallecimiento',           type: 'date', required: true }
           ]
         },
         {
-          title: 'Familia en duelo',
+          title: 'Tipo de aniversario y relación',
           fields: [
-            { id: 'nombre_contacto', label: 'Tu nombre completo',   type: 'text',  required: true,  placeholder: 'Nombre y apellidos' },
-            { id: 'telefono',        label: 'Teléfono',             type: 'tel',   required: true,  placeholder: '+34 600 000 000' },
-            { id: 'email',           label: 'Correo electrónico',   type: 'email', required: true,  placeholder: 'correo@ejemplo.com' }
+            { id: 'tipo_aniversario', label: 'Tipo de aniversario', type: 'select', required: true,
+              options: ['Corte del mes de duelo (Shloshim)', 'Corte del año', 'Azcará anual'] },
+            { id: 'relacion', label: 'Relación familiar', type: 'select', required: true,
+              options: ['Padre / Madre', 'Abuelo / Abuela', 'Esposo / Esposa', 'Hermano / Hermana', 'Hijo / Hija', 'Otro'] }
           ]
         },
         {
-          title: 'Tipo de acompañamiento',
+          title: '¿Qué te gustaría organizar?',
           fields: [
-            { id: 'tipo_apoyo', label: '¿Qué necesitáis?',          type: 'select',   required: true,  options: ['Organización del shivá', 'Servicio de kaddish', 'Visitas de consuelo', 'Asesoramiento halájico', 'Acompañamiento emocional', 'Todo lo anterior'] },
-            { id: 'idioma',     label: 'Idioma preferido',          type: 'select',   required: false, options: ['Español', 'Inglés', 'Hebreo', 'Francés'] },
-            { id: 'notas',      label: 'Cuéntanos lo que necesitas', type: 'textarea', required: false, placeholder: 'Cualquier información que nos ayude a acompañaros mejor...' }
+            { id: 'organizacion', label: 'Tipo de acto', type: 'select', required: true,
+              options: ['Solo Minián', 'Minián + subida al cementerio', 'Minián + subida al cementerio + Seudá'] }
+          ]
+        },
+        {
+          title: 'Información del evento',
+          fields: [
+            { id: 'fecha_evento',   label: 'Fecha deseada',              type: 'date',     required: true },
+            { id: 'hora_evento',    label: 'Hora deseada',               type: 'time',     required: true },
+            { id: 'direccion',      label: 'Dirección',                  type: 'text',     required: true,  placeholder: 'Calle, número, ciudad' },
+            { id: 'cementerio',     label: 'Cementerio (si aplica)',      type: 'text',     required: false, placeholder: 'Nombre y ubicación del cementerio' }
+          ]
+        },
+        {
+          title: 'Participación y recordatorios',
+          fields: [
+            { id: 'num_asistentes',   label: 'Número aproximado de asistentes', type: 'number',   required: false, placeholder: 'Ej: 20' },
+            { id: 'recordatorio',     label: '¿Deseas recordatorio anual automático?', type: 'select', required: true,
+              options: ['Sí', 'No'] }
           ]
         }
       ]
