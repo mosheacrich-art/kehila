@@ -4236,7 +4236,7 @@
       // Load groups + member counts via a join
       const { data: groups, error } = await sb
         .from('subgrupos')
-        .select('id, nombre, tipo, descripcion, icono, creado_en')
+        .select('id, nombre, tipo, descripcion, icono, creado_en, imagen_url, genero, edad_min, edad_max, auto_asignar, parent_id')
         .order('creado_en', { ascending: true });
       if (error) throw error;
 
