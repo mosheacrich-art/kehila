@@ -4592,9 +4592,9 @@
       }
     }
 
-    // Auto-asignar si se activo la regla
-    if (autoAsig && edadMin != null && edadMax != null) {
-      await _runAutoAsignar(sgEditMode ? sgCurrentId : null);
+    // Auto-asignar solo al CREAR (no al editar) para evitar reasignaciones inesperadas
+    if (!sgEditMode && autoAsig && edadMin != null && edadMax != null) {
+      await _runAutoAsignar(null);
     }
   }
 
@@ -4629,23 +4629,20 @@
       // Obtener todos los miembros con fecha de nacimiento
       const { data: profiles, error } = await sb
         .from('profiles')
-        .select('id, fecha_nacimiento, genero')
+        .select('id, fecha_nacimiento')
         .not('fecha_nacimiento', 'is', null);
       if (error) throw error;
 
       const hoy = new Date();
       const edadMin = group.edad_min;
       const edadMax = group.edad_max;
-      const generoFiltro = group.genero || 'todos';
 
       const elegibles = (profiles || []).filter(p => {
         const nacimiento = new Date(p.fecha_nacimiento);
         let edad = hoy.getFullYear() - nacimiento.getFullYear();
         const m = hoy.getMonth() - nacimiento.getMonth();
         if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
-        const edadOk = edad >= edadMin && edad <= edadMax;
-        const generoOk = generoFiltro === 'todos' || p.genero === generoFiltro;
-        return edadOk && generoOk;
+        return edad >= edadMin && edad <= edadMax;
       });
 
       if (!elegibles.length) {
