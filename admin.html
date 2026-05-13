@@ -1489,9 +1489,17 @@
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
           </button>
           <div style="display:flex;align-items:center;gap:16px;">
-            <div style="position:relative;">
-              <div id="sg-icon-preview" style="width:64px;height:64px;border-radius:16px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;border:2px dashed rgba(255,255,255,0.3);" onclick="document.getElementById('sg-form-icon').focus()">👥</div>
-              <input type="text" id="sg-form-icon" maxlength="4" oninput="document.getElementById('sg-icon-preview').textContent=this.value||'👥'" style="position:absolute;opacity:0;width:1px;height:1px;top:0;left:0;">
+            <div style="position:relative;flex-shrink:0;">
+              <!-- Previsualizacion: imagen o emoji -->
+              <div id="sg-icon-preview" onclick="document.getElementById('sg-img-input').click()"
+                style="width:72px;height:72px;border-radius:18px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:2.2rem;cursor:pointer;border:2px dashed rgba(255,255,255,0.4);overflow:hidden;position:relative;">
+                <span id="sg-icon-emoji">👥</span>
+                <img id="sg-icon-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+                <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.45);text-align:center;font-size:0.55rem;color:#fff;padding:3px;letter-spacing:.03em;">FOTO</div>
+              </div>
+              <input type="file" id="sg-img-input" accept="image/*" style="display:none;" onchange="previewSgImg(this)">
+              <input type="text" id="sg-form-icon" maxlength="4" style="position:absolute;opacity:0;width:1px;height:1px;top:0;left:0;">
+              <input type="hidden" id="sg-form-imagen-url">
             </div>
             <div style="flex:1;">
               <p id="sg-modal-title" style="color:rgba(255,255,255,0.7);font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px;">Nuevo subgrupo</p>
@@ -4274,7 +4282,7 @@
       const tags = [generoLabel, edadLabel].filter(Boolean);
       return `
       <div class="sg-card" onclick="openSgDetail('${g.id}')">
-        <div class="sg-card-icon">${escHtml(g.icono || '👥')}</div>
+        <div class="sg-card-icon">${g.imagen_url ? `<img src="${escHtml(g.imagen_url)}" alt="" style="width:52px;height:52px;border-radius:12px;object-fit:cover;">` : escHtml(g.icono || '👥')}</div>
         <div class="sg-card-body">
           <div class="sg-card-name">${escHtml(g.nombre)}</div>
           ${g.descripcion ? `<div class="sg-card-desc">${escHtml(g.descripcion)}</div>` : ''}
@@ -4312,7 +4320,12 @@
 
     document.getElementById('sg-list-view').style.display  = 'none';
     document.getElementById('sg-detail-view').style.display = 'block';
-    document.getElementById('sg-detail-icon').textContent  = group.icono || '👥';
+    const iconEl = document.getElementById('sg-detail-icon');
+    if (group.imagen_url) {
+      iconEl.innerHTML = `<img src="${group.imagen_url}" alt="" style="width:52px;height:52px;border-radius:14px;object-fit:cover;">`;
+    } else {
+      iconEl.textContent = group.icono || '👥';
+    }
     document.getElementById('sg-detail-title').textContent = group.nombre;
 
     const descParts = [];
@@ -4421,6 +4434,18 @@
     await loadSgMembers(sgCurrentId);
   }
 
+  /** Preview local de la imagen seleccionada */
+  function previewSgImg(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const img = document.getElementById('sg-icon-img');
+    const emoji = document.getElementById('sg-icon-emoji');
+    img.src = url;
+    img.style.display = 'block';
+    if (emoji) emoji.style.display = 'none';
+  }
+
   /** Rellena el select de grupos padre en el modal */
   async function populateParentSelect(excludeId) {
     const sel = document.getElementById('sg-form-parent');
@@ -4447,7 +4472,12 @@
     document.getElementById('sg-modal-title').textContent    = parentId ? 'Nuevo sub-grupo' : 'Nuevo subgrupo';
     document.getElementById('sg-modal-save-btn').textContent = 'Crear subgrupo';
     document.getElementById('sg-form-icon').value    = '👥';
-    document.getElementById('sg-icon-preview').textContent = '👥';
+    document.getElementById('sg-form-imagen-url').value = '';
+    document.getElementById('sg-img-input').value = '';
+    const cImg = document.getElementById('sg-icon-img');
+    const cEmoji = document.getElementById('sg-icon-emoji');
+    if (cImg) { cImg.style.display = 'none'; cImg.src = ''; }
+    if (cEmoji) { cEmoji.style.display = ''; cEmoji.textContent = '👥'; }
     document.getElementById('sg-form-nombre').value  = '';
     document.getElementById('sg-form-desc').value    = '';
     document.getElementById('sg-form-genero').value  = 'todos';
@@ -4469,7 +4499,17 @@
     document.getElementById('sg-modal-title').textContent    = 'Editar subgrupo';
     document.getElementById('sg-modal-save-btn').textContent = 'Guardar cambios';
     document.getElementById('sg-form-icon').value    = g.icono || '👥';
-    document.getElementById('sg-icon-preview').textContent = g.icono || '👥';
+    document.getElementById('sg-form-imagen-url').value = g.imagen_url || '';
+    document.getElementById('sg-img-input').value = '';
+    const editImg = document.getElementById('sg-icon-img');
+    const editEmoji = document.getElementById('sg-icon-emoji');
+    if (g.imagen_url) {
+      editImg.src = g.imagen_url; editImg.style.display = 'block';
+      if (editEmoji) editEmoji.style.display = 'none';
+    } else {
+      editImg.style.display = 'none'; editImg.src = '';
+      if (editEmoji) { editEmoji.style.display = ''; editEmoji.textContent = g.icono || '👥'; }
+    }
     document.getElementById('sg-form-nombre').value  = g.nombre || '';
     document.getElementById('sg-form-desc').value    = g.descripcion || '';
     document.getElementById('sg-form-genero').value  = g.genero || 'todos';
@@ -4500,7 +4540,15 @@
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) { showToast('Supabase no disponible', 'error'); return; }
 
-    const payload = { nombre, descripcion: desc || null, icono, genero, parent_id: parentId, auto_asignar: autoAsig, edad_min: edadMin, edad_max: edadMax };
+    // Subir imagen si hay una nueva seleccionada
+    let imagenUrl = document.getElementById('sg-form-imagen-url').value || null;
+    const imgFile = document.getElementById('sg-img-input').files[0];
+    if (imgFile) {
+      const uploaded = typeof uploadMedia === 'function' ? await uploadMedia(imgFile, 'subgrupos') : null;
+      if (uploaded) imagenUrl = uploaded;
+    }
+
+    const payload = { nombre, descripcion: desc || null, icono, genero, parent_id: parentId, auto_asignar: autoAsig, edad_min: edadMin, edad_max: edadMax, imagen_url: imagenUrl };
 
     let error;
     if (sgEditMode && sgCurrentId) {
