@@ -2395,7 +2395,10 @@
    * @returns {string}
    */
   function formatDate(str) {
-    const d = new Date(str + 'T00:00:00');
+    if (!str) return '—';
+    // Si ya tiene T (timestamp ISO completo), no añadir sufijo
+    const d = new Date(str.includes('T') ? str : str + 'T00:00:00');
+    if (isNaN(d.getTime())) return '—';
     return `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;
   }
 
