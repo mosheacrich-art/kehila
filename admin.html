@@ -4369,18 +4369,39 @@
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) return;
     try {
-      const { data, error } = await sb
+      // Paso 1: obtener user_ids del subgrupo
+      const { data: membRows, error: e1 } = await sb
         .from('subgrupo_miembros')
-        .select('user_id, profiles(id, name, email, initials)')
+        .select('user_id')
         .eq('subgrupo_id', sgId);
-      if (error) throw error;
+      if (e1) throw e1;
 
-      sgCurrentMembers = (data || []).map(r => ({
-        user_id:  r.user_id,
-        name:     r.profiles?.name || r.user_id.slice(0,8),
-        email:    r.profiles?.email || '—',
-        initials: r.profiles?.initials || '??'
-      }));
+      if (!membRows || !membRows.length) {
+        sgCurrentMembers = [];
+        renderSgMembers();
+        return;
+      }
+
+      // Paso 2: obtener perfiles de esos usuarios
+      const ids = membRows.map(r => r.user_id);
+      const { data: profiles, error: e2 } = await sb
+        .from('profiles')
+        .select('id, name, email, initials')
+        .in('id', ids);
+      if (e2) throw e2;
+
+      const profileMap = {};
+      (profiles || []).forEach(p => { profileMap[p.id] = p; });
+
+      sgCurrentMembers = ids.map(uid => {
+        const p = profileMap[uid] || {};
+        return {
+          user_id:  uid,
+          name:     p.name || uid.slice(0,8),
+          email:    p.email || '—',
+          initials: p.initials || '??'
+        };
+      });
       renderSgMembers();
     } catch(e) {
       console.warn('Error cargando miembros:', e);
@@ -4714,16 +4735,13 @@
     // Load existing members silently so renderAddList can exclude them
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (sb) {
-      const { data } = await sb
-        .from('subgrupo_miembros')
-        .select('user_id, profiles(id, name, email, initials)')
-        .eq('subgrupo_id', id);
-      sgCurrentMembers = (data || []).map(r => ({
-        user_id:  r.user_id,
-        name:     r.profiles?.name || r.user_id.slice(0,8),
-        email:    r.profiles?.email || '—',
-        initials: r.profiles?.initials || '??'
-      }));
+      const { data } = await sb.from('subgrupo_miembros').select('user_id').eq('subgrupo_id', id);
+      const ids = (data || []).map(r => r.user_id);
+      if (ids.length) {
+        const { data: profiles } = await sb.from('profiles').select('id, name, email, initials').in('id', ids);
+        const pm = {}; (profiles || []).forEach(p => { pm[p.id] = p; });
+        sgCurrentMembers = ids.map(uid => ({ user_id: uid, name: pm[uid]?.name || uid.slice(0,8), email: pm[uid]?.email || '—', initials: pm[uid]?.initials || '??' }));
+      } else { sgCurrentMembers = []; }
     }
     openAddMemberModal();
   }
