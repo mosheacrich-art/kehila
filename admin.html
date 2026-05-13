@@ -1519,9 +1519,9 @@
               </select>
             </div>
             <div>
-              <label class="form-label">Grupo padre <span style="color:var(--color-text-muted);font-weight:400;">(opcional)</span></label>
+              <label class="form-label">Grupo superior <span style="color:var(--color-text-muted);font-weight:400;">(opcional)</span></label>
               <select id="sg-form-parent" class="form-input">
-                <option value="">Sin grupo padre</option>
+                <option value="">Sin grupo superior</option>
               </select>
             </div>
           </div>
@@ -4425,7 +4425,7 @@
   async function populateParentSelect(excludeId) {
     const sel = document.getElementById('sg-form-parent');
     if (!sel) return;
-    sel.innerHTML = '<option value="">— Ninguno (grupo raiz) —</option>';
+    sel.innerHTML = '<option value="">Sin grupo superior</option>';
     (sgState || []).forEach(g => {
       if (g.id === excludeId) return; // no puede ser su propio padre
       const opt = document.createElement('option');
