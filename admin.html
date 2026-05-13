@@ -842,8 +842,8 @@
     .sg-toggle-track::after { content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2); }
     .sg-toggle-wrap:has(input:checked) .sg-toggle-track::after { transform:translateX(18px); }
 
-    /* Members grid */
-    .sg-members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    /* Members list */
+    .sg-members-grid { display: flex; flex-direction: column; gap: 6px; }
     .sg-member-card {
       background: var(--color-white);
       border: 1px solid var(--color-border-light);
