@@ -810,19 +810,42 @@
     }
     .sg-del-btn:hover { color: var(--color-danger); }
 
-    /* Detail view */
-    .sg-detail { display: none; }
-    .sg-detail.active { display: block; }
-    .sg-list-view { display: block; }
-    .sg-list-view.hidden { display: none; }
-
-    .sg-detail-header {
-      display: flex; align-items: center; gap: 14px;
-      margin-bottom: 20px; flex-wrap: wrap;
+    /* Cards grid */
+    .sg-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 4px;
     }
-    .sg-detail-icon { font-size: 2rem; }
-    .sg-detail-title { font-size: 1.25rem; font-weight: 700; color: var(--color-text); flex: 1; }
-    .sg-detail-sub { font-size: 0.875rem; color: var(--color-text-muted); }
+    .sg-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-border-light);
+      border-radius: 14px;
+      padding: 20px;
+      cursor: pointer;
+      transition: box-shadow 0.18s, border-color 0.18s, transform 0.12s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sg-card:hover { box-shadow: 0 4px 18px rgba(27,46,94,.10); border-color: var(--color-primary); transform: translateY(-2px); }
+    .sg-card-icon { font-size: 2rem; line-height: 1; }
+    .sg-card-name { font-size: 1rem; font-weight: 700; color: var(--color-text); }
+    .sg-card-desc { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 2px; }
+    .sg-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--color-border-light); }
+
+    /* Members grid */
+    .sg-members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    .sg-member-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-border-light);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sg-member-card:hover { border-color: var(--color-primary-light, #c7d7f0); }
 
     /* Member list inside detail */
     .sg-member-table-wrap { border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border-light); margin-top: 4px; }
@@ -1371,75 +1394,80 @@
 
       <!-- ── List view ── -->
       <div id="sg-list-view" class="sg-list-view">
-        <div class="table-header-row" style="padding:0 0 16px;background:none;border:none;">
-          <p class="table-title">Subgrupos de la comunidad</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <div>
+            <h2 style="font-size:1.15rem;font-weight:700;color:var(--color-text);margin:0;">Subgrupos de la comunidad</h2>
+            <p style="font-size:0.85rem;color:var(--color-text-muted);margin:4px 0 0;">Organiza a tus miembros en grupos por edad, genero o funcion</p>
+          </div>
           <button class="btn btn-primary btn-sm" onclick="openCrearSubgrupoModal()">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
             Nuevo subgrupo
           </button>
         </div>
-        <div class="sg-table-wrap">
-          <table class="sg-table">
-            <thead>
-              <tr>
-                <th>Subgrupo</th>
-                <th>Descripción</th>
-                <th style="width:110px;text-align:center;">Miembros</th>
-                <th style="width:100px;text-align:center;">Eventos</th>
-                <th style="width:130px;text-align:center;">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="sg-grid">
-              <tr><td colspan="5" style="text-align:center;color:var(--color-text-muted);font-size:0.875rem;padding:24px;">Cargando subgrupos…</td></tr>
-            </tbody>
-          </table>
+        <div id="sg-grid" class="sg-cards-grid">
+          <div style="grid-column:1/-1;text-align:center;color:var(--color-text-muted);padding:48px 0;">Cargando subgrupos...</div>
         </div>
       </div>
 
       <!-- ── Detail view ── -->
-      <div id="sg-detail-view" class="sg-detail">
-        <div class="sg-detail-header">
+      <div id="sg-detail-view" class="sg-detail" style="display:none;">
+        <!-- Header del grupo -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap;">
           <button class="btn btn-ghost btn-sm" onclick="closeSgDetail()" style="display:flex;align-items:center;gap:6px;">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
             Volver
           </button>
-          <span id="sg-detail-icon" class="sg-detail-icon">👥</span>
-          <div>
-            <p id="sg-detail-title" class="sg-detail-title">—</p>
-            <p id="sg-detail-desc" class="sg-detail-sub">—</p>
+          <div style="width:52px;height:52px;border-radius:14px;background:var(--color-primary-light,#e8eef8);display:flex;align-items:center;justify-content:center;font-size:1.6rem;" id="sg-detail-icon">👥</div>
+          <div style="flex:1;">
+            <h2 id="sg-detail-title" style="font-size:1.2rem;font-weight:700;margin:0;color:var(--color-text);">—</h2>
+            <p id="sg-detail-desc" style="font-size:0.85rem;color:var(--color-text-muted);margin:3px 0 0;">—</p>
           </div>
-          <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-ghost btn-sm" id="sg-auto-assign-btn" onclick="autoAsignarPorEdad()" style="display:none;">
-              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
               Auto-asignar
             </button>
             <button class="btn btn-ghost btn-sm" onclick="openNotifModal()">
-              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
               Notificacion
             </button>
             <button class="btn btn-ghost btn-sm" onclick="openEditarSubgrupoModal()">
-              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
               Editar
             </button>
-            <button class="btn btn-primary btn-sm" onclick="openAddMemberModal()">
-              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              Anadir miembro
+            <button class="btn btn-danger btn-sm" onclick="eliminarSubgrupo(sgCurrentId, sgCurrentGroup?.nombre || '')">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+              Eliminar
             </button>
           </div>
         </div>
-        <div class="sg-member-table-wrap">
-          <table class="sg-member-table">
-            <thead>
-              <tr>
-                <th>Usuario</th>
-                <th>Email</th>
-                <th style="width:100px;text-align:center;">Acción</th>
-              </tr>
-            </thead>
-            <tbody id="sg-members-list">
-              <tr><td colspan="3" style="text-align:center;color:var(--color-text-muted);font-size:0.875rem;padding:24px;">Cargando miembros…</td></tr>
-            </tbody>
-          </table>
+
+        <!-- Sub-grupos dentro del grupo -->
+        <div style="margin-bottom:32px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <h3 style="font-size:1rem;font-weight:600;color:var(--color-text);margin:0;">Sub-grupos</h3>
+            <button class="btn btn-ghost btn-sm" onclick="openCrearSubgrupoModal()" id="sg-add-sub-btn">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              Nuevo sub-grupo
+            </button>
+          </div>
+          <div id="sg-subgroups-grid" class="sg-cards-grid" style="margin:0;">
+            <p style="color:var(--color-text-muted);font-size:0.875rem;padding:12px 0;">Sin sub-grupos todavia.</p>
+          </div>
+        </div>
+
+        <!-- Miembros del grupo -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <h3 style="font-size:1rem;font-weight:600;color:var(--color-text);margin:0;">Miembros <span id="sg-members-count" style="font-size:0.85rem;font-weight:400;color:var(--color-text-muted);"></span></h3>
+            <button class="btn btn-primary btn-sm" onclick="openAddMemberModal()">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              Anadir miembro
+            </button>
+          </div>
+          <div id="sg-members-grid" class="sg-members-grid">
+            <p style="color:var(--color-text-muted);font-size:0.875rem;padding:12px 0;">Cargando miembros...</p>
+          </div>
         </div>
       </div>
     </div>
@@ -4191,10 +4219,10 @@
       }
 
       sgState = (groups || []).map(g => ({ ...g, count: counts[g.id] || 0 }));
-      renderSgGrid(sgState);
+      renderSgGrid(sgState, 'sg-grid', null);
     } catch(e) {
       console.warn('Error cargando subgrupos:', e);
-      renderSgGrid([]);
+      renderSgGrid([], 'sg-grid', null);
     }
   }
 
@@ -4203,46 +4231,38 @@
    * Columnas: Subgrupo | Descripcion | Miembros | Eventos | Acciones
    * @param {Array} groups
    */
-  function renderSgGrid(groups) {
-    const el = document.getElementById('sg-grid');
+  function renderSgGrid(groups, containerId, parentId) {
+    const el = document.getElementById(containerId || 'sg-grid');
     if (!el) return;
-    if (!groups.length) {
-      el.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--color-text-muted);font-size:0.875rem;padding:28px;">No hay subgrupos todavía. Crea el primero.</td></tr>';
+    // Filtrar por parent si se especifica
+    const filtered = parentId !== undefined
+      ? groups.filter(g => g.parent_id === parentId)
+      : groups.filter(g => !g.parent_id); // raiz: sin padre
+
+    if (!filtered.length) {
+      el.innerHTML = `<p style="color:var(--color-text-muted);font-size:0.875rem;padding:12px 0;">${containerId === 'sg-grid' ? 'No hay subgrupos todavia. Crea el primero.' : 'Sin sub-grupos todavia.'}</p>`;
       return;
     }
-    el.innerHTML = groups.map(g => {
-      const membBadge = g.count > 0
-        ? `<span class="sg-badge sg-badge-members">${g.count}</span>`
-        : `<span class="sg-badge sg-badge-zero">0</span>`;
+    el.innerHTML = filtered.map(g => {
+      const generoLabel = g.genero === 'hombre' ? 'Hombres' : g.genero === 'mujer' ? 'Mujeres' : '';
+      const edadLabel = (g.edad_min != null && g.edad_max != null) ? `${g.edad_min}-${g.edad_max} anos` : '';
+      const tags = [generoLabel, edadLabel].filter(Boolean);
       return `
-      <tr onclick="openSgDetail('${g.id}')">
-        <td>
-          <div class="sg-row-name">
-            <span class="sg-row-icon">${g.icono || '👥'}</span>
-            <div>
-              <div class="sg-row-title">${escHtml(g.nombre)}</div>
-              ${g.tipo ? `<div class="sg-row-tipo">${escHtml(g.tipo)}</div>` : ''}
-            </div>
-          </div>
-        </td>
-        <td><span class="sg-row-desc">${escHtml(g.descripcion || '—')}</span></td>
-        <td style="text-align:center;">${membBadge}</td>
-        <td style="text-align:center;"><span class="sg-badge sg-badge-zero">—</span></td>
-        <td>
-          <div class="sg-actions">
-            <button class="sg-add-inline-btn" onclick="event.stopPropagation();quickAddMember('${g.id}')">
-              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              Añadir
-            </button>
-            <button class="sg-details-btn" onclick="event.stopPropagation();openSgDetail('${g.id}')">
-              Ver detalles
-            </button>
-            <button class="sg-del-btn" title="Eliminar subgrupo" onclick="event.stopPropagation();eliminarSubgrupo('${g.id}','${escHtml(g.nombre)}')">
-              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
-            </button>
-          </div>
-        </td>
-      </tr>`;
+      <div class="sg-card" onclick="openSgDetail('${g.id}')">
+        <div class="sg-card-icon">${escHtml(g.icono || '👥')}</div>
+        <div class="sg-card-body">
+          <div class="sg-card-name">${escHtml(g.nombre)}</div>
+          ${g.descripcion ? `<div class="sg-card-desc">${escHtml(g.descripcion)}</div>` : ''}
+          ${tags.length ? `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">${tags.map(t => `<span style="font-size:0.72rem;background:var(--color-primary-light,#e8eef8);color:var(--color-primary);padding:2px 8px;border-radius:20px;">${t}</span>`).join('')}</div>` : ''}
+        </div>
+        <div class="sg-card-footer">
+          <span style="font-size:0.8rem;color:var(--color-text-muted);">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:13px;height:13px;vertical-align:-2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+            ${g.count || 0} miembro${g.count !== 1 ? 's' : ''}
+          </span>
+          <button class="btn btn-ghost btn-sm" style="font-size:0.78rem;padding:4px 10px;" onclick="event.stopPropagation();openSgDetail('${g.id}')">Ver grupo →</button>
+        </div>
+      </div>`;
     }).join('');
   }
 
@@ -4265,22 +4285,30 @@
     if (!group) return;
     sgCurrentGroup = group;
 
-    document.getElementById('sg-list-view').classList.add('hidden');
-    document.getElementById('sg-detail-view').classList.add('active');
+    document.getElementById('sg-list-view').style.display  = 'none';
+    document.getElementById('sg-detail-view').style.display = 'block';
     document.getElementById('sg-detail-icon').textContent  = group.icono || '👥';
     document.getElementById('sg-detail-title').textContent = group.nombre;
-    const descParts = [];
-    if (group.tipo) descParts.push(group.tipo);
-    if (group.descripcion) descParts.push(group.descripcion);
-    if (group.genero && group.genero !== 'todos') descParts.push(group.genero === 'hombre' ? 'Hombres' : 'Mujeres');
-    if (group.edad_min != null && group.edad_max != null) descParts.push(`${group.edad_min}-${group.edad_max} anos`);
-    document.getElementById('sg-detail-desc').textContent = descParts.join(' · ') || '—';
-    document.getElementById('sg-members-list').innerHTML  = '<tr><td colspan="3" style="text-align:center;color:var(--color-text-muted);font-size:0.875rem;padding:24px;">Cargando…</td></tr>';
 
-    // Mostrar boton auto-asignar si tiene reglas de edad
+    const descParts = [];
+    if (group.descripcion) descParts.push(group.descripcion);
+    if (group.genero && group.genero !== 'todos') descParts.push(group.genero === 'hombre' ? 'Solo hombres' : 'Solo mujeres');
+    if (group.edad_min != null && group.edad_max != null) descParts.push(`${group.edad_min}-${group.edad_max} anos`);
+    document.getElementById('sg-detail-desc').textContent = descParts.join(' · ') || 'Sin descripcion';
+
+    // Boton auto-asignar
     const autoBtn = document.getElementById('sg-auto-assign-btn');
     if (autoBtn) autoBtn.style.display = (group.auto_asignar && group.edad_min != null) ? 'flex' : 'none';
 
+    // Pre-seleccionar padre en modal "nuevo sub-grupo"
+    const addSubBtn = document.getElementById('sg-add-sub-btn');
+    if (addSubBtn) addSubBtn.onclick = () => openCrearSubgrupoModal(id);
+
+    // Sub-grupos hijos
+    renderSgGrid(sgState, 'sg-subgroups-grid', id);
+
+    // Miembros
+    document.getElementById('sg-members-grid').innerHTML = '<p style="color:var(--color-text-muted);font-size:0.875rem;padding:12px 0;">Cargando...</p>';
     await loadSgMembers(id);
   }
 
@@ -4289,9 +4317,10 @@
    */
   function closeSgDetail() {
     sgCurrentId = null;
-    document.getElementById('sg-detail-view').classList.remove('active');
-    document.getElementById('sg-list-view').classList.remove('hidden');
-    loadSubgrupos(); // refresh counts
+    sgCurrentGroup = null;
+    document.getElementById('sg-detail-view').style.display = 'none';
+    document.getElementById('sg-list-view').style.display   = 'block';
+    loadSubgrupos();
   }
 
   /**
@@ -4317,7 +4346,8 @@
       renderSgMembers();
     } catch(e) {
       console.warn('Error cargando miembros:', e);
-      document.getElementById('sg-members-list').innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--color-danger);font-size:0.875rem;padding:24px;">Error al cargar miembros.</td></tr>';
+      const el = document.getElementById('sg-members-grid');
+      if (el) el.innerHTML = '<p style="color:var(--color-danger);font-size:0.875rem;">Error al cargar miembros.</p>';
     }
   }
 
@@ -4325,26 +4355,25 @@
    * Renderiza tabla de miembros del subgrupo activo en #sg-members-list.
    */
   function renderSgMembers() {
-    const el = document.getElementById('sg-members-list');
+    const el = document.getElementById('sg-members-grid');
+    const countEl = document.getElementById('sg-members-count');
+    if (countEl) countEl.textContent = sgCurrentMembers.length ? `(${sgCurrentMembers.length})` : '';
+    if (!el) return;
     if (!sgCurrentMembers.length) {
-      el.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--color-text-muted);font-size:0.875rem;padding:28px;">Este subgrupo no tiene miembros todavía.</td></tr>';
+      el.innerHTML = '<p style="color:var(--color-text-muted);font-size:0.875rem;padding:12px 0;">Este subgrupo no tiene miembros todavia. Pulsa "Anadir miembro" para agregar.</p>';
       return;
     }
     el.innerHTML = sgCurrentMembers.map(m => `
-      <tr>
-        <td>
-          <div class="sg-member-row">
-            <div class="sg-member-avatar" style="background:${sgAvatarColor(m.name)}">${escHtml(m.initials)}</div>
-            <div class="sg-member-info">
-              <div class="sg-member-name">${escHtml(m.name)}</div>
-            </div>
-          </div>
-        </td>
-        <td><span class="sg-member-email" style="font-size:0.85rem;">${escHtml(m.email)}</span></td>
-        <td style="text-align:center;">
-          <button class="sg-remove-btn" onclick="quitarMiembro('${m.user_id}')">Quitar</button>
-        </td>
-      </tr>
+      <div class="sg-member-card">
+        <div class="sg-member-avatar" style="background:${sgAvatarColor(m.name)};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:600;color:#fff;flex-shrink:0;">${escHtml(m.initials)}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:0.9rem;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(m.name)}</div>
+          <div style="font-size:0.78rem;color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(m.email)}</div>
+        </div>
+        <button onclick="quitarMiembro('${m.user_id}')" style="background:none;border:none;cursor:pointer;color:var(--color-text-muted);padding:4px;border-radius:4px;" title="Quitar del grupo">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
     `).join('');
   }
 
@@ -4387,10 +4416,10 @@
     if (el) el.style.display = checked ? 'flex' : 'none';
   }
 
-  /** Abre el modal en modo CREAR */
-  async function openCrearSubgrupoModal() {
+  /** Abre el modal en modo CREAR. parentId opcional para pre-seleccionar padre */
+  async function openCrearSubgrupoModal(parentId) {
     sgEditMode = false;
-    document.getElementById('sg-modal-title').textContent    = 'Nuevo subgrupo';
+    document.getElementById('sg-modal-title').textContent    = parentId ? 'Nuevo sub-grupo' : 'Nuevo subgrupo';
     document.getElementById('sg-modal-save-btn').textContent = 'Crear subgrupo';
     document.getElementById('sg-form-icon').value    = '👥';
     document.getElementById('sg-form-nombre').value  = '';
@@ -4401,6 +4430,7 @@
     document.getElementById('sg-form-edad-max').value = '';
     toggleAgeFields(false);
     await populateParentSelect(null);
+    if (parentId) document.getElementById('sg-form-parent').value = parentId;
     openModal('modal-crear-sg');
     setTimeout(() => document.getElementById('sg-form-nombre').focus(), 100);
   }
