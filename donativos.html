@@ -161,36 +161,47 @@
 
     /* Chai Club banner */
     .chai-banner {
-      background: #1B2E5E; border-radius: 16px; padding: 40px 44px;
-      display: grid; grid-template-columns: 1fr 130px; gap: 32px; align-items: center;
+      background: linear-gradient(135deg, #FFFDF5 0%, #FFF8E7 50%, #FEF0CC 100%);
+      border: 1.5px solid #E8D298; border-radius: 16px; padding: 40px 44px;
+      display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: center;
+      box-shadow: 0 4px 24px rgba(180,120,0,.08);
     }
-    .chai-banner-sup { font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #E8971F; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .chai-banner-sup::before { content: ''; width: 12px; height: 2px; background: #E8971F; border-radius: 1px; }
-    .chai-banner-title { font-family: var(--font-brand); font-size: 1.6rem; font-weight: 900; color: #fff; margin-bottom: 10px; }
-    .chai-banner-title span { color: #E8971F; }
-    .chai-banner-desc { font-size: .875rem; color: rgba(255,255,255,.7); line-height: 1.65; margin-bottom: 20px; }
-    .chai-banner-desc strong { color: rgba(255,255,255,.9); }
-    .chai-amounts { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+    .chai-banner-sup { font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #B07010; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .chai-banner-sup::before { content: ''; width: 12px; height: 2px; background: #C8791A; border-radius: 1px; }
+    .chai-banner-title { font-family: var(--font-brand); font-size: 1.6rem; font-weight: 900; color: #8B5500; margin-bottom: 10px; }
+    .chai-banner-title span { color: #C8791A; }
+    .chai-banner-desc { font-size: .875rem; color: #6B4A10; line-height: 1.65; margin-bottom: 20px; }
+    .chai-banner-desc strong { color: #8B5500; }
+    .chai-amounts { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
     .chai-btn-amt {
       padding: 6px 14px; border-radius: 999px;
-      border: 1.5px solid rgba(232,151,31,.35); background: rgba(232,151,31,.08);
-      font-size: .8rem; font-weight: 700; color: #E8971F;
+      border: 1.5px solid #D4A020; background: #FFF8E7;
+      font-size: .8rem; font-weight: 700; color: #8B5500;
       cursor: pointer; transition: all .15s; font-family: inherit;
     }
     .chai-btn-amt:hover, .chai-btn-amt.sel { background: #C8791A; border-color: #C8791A; color: #fff; }
+    .chai-otro-input {
+      width: 100%; max-width: 200px; padding: 7px 14px; border-radius: 999px;
+      border: 1.5px solid #D4A020; background: #FFF8E7;
+      font-size: .85rem; font-weight: 700; color: #8B5500; font-family: inherit;
+      outline: none; margin-bottom: 16px; display: block;
+    }
+    .chai-otro-input:focus { border-color: #C8791A; }
+    .chai-otro-input::placeholder { color: #C4A060; font-weight: 400; }
     .btn-join-chai {
       display: inline-flex; align-items: center; gap: 8px;
-      background: #C8791A; color: #fff; border: none; border-radius: 999px;
+      background: linear-gradient(135deg, #D4920E, #A86010); color: #fff; border: none; border-radius: 999px;
       padding: 11px 26px; font-size: .875rem; font-weight: 800;
-      cursor: pointer; font-family: inherit; transition: background .15s;
+      cursor: pointer; font-family: inherit; transition: all .15s;
+      box-shadow: 0 3px 12px rgba(180,100,0,.3);
     }
-    .btn-join-chai:hover { background: #A8650F; }
+    .btn-join-chai:hover { background: linear-gradient(135deg, #E8A020, #B87020); box-shadow: 0 4px 16px rgba(180,100,0,.4); }
     .btn-join-chai svg { width: 15px; height: 15px; }
-    .chai-num { font-family: var(--font-brand); font-size: 5rem; font-weight: 900; color: #C8791A; text-align: center; line-height: 1; }
-    .chai-num-sub { font-size: .7rem; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .1em; text-align: center; margin-top: 4px; }
+    .chai-pendant-wrap { display: flex; justify-content: center; align-items: center; }
+    .chai-pendant-svg { width: 100%; max-width: 160px; height: auto; filter: drop-shadow(0 6px 18px rgba(140,80,0,.35)); }
     @media (max-width: 600px) {
       .chai-banner { grid-template-columns: 1fr; padding: 28px 22px; }
-      .chai-num, .chai-num-sub { display: none; }
+      .chai-pendant-wrap { display: none; }
     }
 
     /* Modal hero foto */
@@ -478,26 +489,56 @@
         <h2 class="chai-banner-title">Chai Club — <span>חי</span></h2>
         <p class="chai-banner-desc">
           Unete a la red de socios que apoyan mensualmente a Jabad Barcelona con aportaciones en
-          <strong>multiples de 18</strong> — el valor numerico de <strong style="color:#E8971F;">חי</strong>
+          <strong>multiples de 18</strong> — el valor numerico de <strong style="color:#C8791A;">חי</strong>
           (vida en hebreo). Tu compromiso mensual hace posible la continuidad de todos los proyectos.
         </p>
         <div class="chai-amounts">
           <button class="chai-btn-amt" onclick="pickChaiAmt(this,18)">18 €/mes</button>
           <button class="chai-btn-amt" onclick="pickChaiAmt(this,36)">36 €/mes</button>
-          <button class="chai-btn-amt" onclick="pickChaiAmt(this,54)">54 €/mes</button>
           <button class="chai-btn-amt" onclick="pickChaiAmt(this,72)">72 €/mes</button>
-          <button class="chai-btn-amt" onclick="pickChaiAmt(this,108)">108 €/mes</button>
           <button class="chai-btn-amt" onclick="pickChaiAmt(this,180)">180 €/mes</button>
-          <button class="chai-btn-amt" onclick="pickChaiAmt(this,360)">360 €/mes</button>
+          <button class="chai-btn-amt" id="chai-otro-btn" onclick="pickChaiOtro(this)">Otro</button>
+        </div>
+        <div id="chai-otro-wrap" style="display:none;">
+          <input type="number" id="chai-otro-input" class="chai-otro-input" placeholder="€/mes" min="1" oninput="chaiAmt=parseInt(this.value)||0">
         </div>
         <button class="btn-join-chai" onclick="openModal('chai')">
           <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
           Unirme al Chai Club
         </button>
       </div>
-      <div>
-        <div class="chai-num">חי</div>
-        <div class="chai-num-sub">18 = Vida</div>
+      <div class="chai-pendant-wrap">
+        <svg class="chai-pendant-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="pg" cx="37%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#FFE9A0"/>
+              <stop offset="25%" stop-color="#D4A020"/>
+              <stop offset="60%" stop-color="#B8720C"/>
+              <stop offset="100%" stop-color="#6B3C00"/>
+            </radialGradient>
+            <radialGradient id="shine" cx="32%" cy="28%" r="45%">
+              <stop offset="0%" stop-color="rgba(255,255,255,.45)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+            </radialGradient>
+            <filter id="tg">
+              <feGaussianBlur stdDeviation="1.5" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <circle cx="100" cy="100" r="92" fill="url(#pg)"/>
+          <circle cx="100" cy="100" r="92" fill="url(#shine)"/>
+          <circle cx="100" cy="100" r="86" fill="none" stroke="#FFE080" stroke-width="1.2" opacity=".55"/>
+          <circle cx="100" cy="100" r="82" fill="none" stroke="#7A4500" stroke-width=".8" opacity=".35"/>
+          <circle cx="100" cy="8" r="2.8" fill="#FFD770"/>
+          <circle cx="165" cy="35" r="2.8" fill="#FFD770"/>
+          <circle cx="192" cy="100" r="2.8" fill="#FFD770"/>
+          <circle cx="165" cy="165" r="2.8" fill="#FFD770"/>
+          <circle cx="100" cy="192" r="2.8" fill="#FFD770"/>
+          <circle cx="35" cy="165" r="2.8" fill="#FFD770"/>
+          <circle cx="8" cy="100" r="2.8" fill="#FFD770"/>
+          <circle cx="35" cy="35" r="2.8" fill="#FFD770"/>
+          <text x="100" y="122" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="82" font-weight="bold" fill="#FFF5CC" filter="url(#tg)">חי</text>
+        </svg>
       </div>
     </div>
 
@@ -691,7 +732,7 @@
     educativo: { amounts:[18,36,72,180], longDesc:'Nuestros programas educativos abarcan desde el Talmud Tora para los mas pequenos hasta clases de hebreo e historia judia para adultos. Con tu donativo garantizamos que ningun nino se quede sin educacion judia por motivos economicos.' },
     religioso:  { amounts:[18,54,108,360], longDesc:'El area religiosa sostiene los servicios diarios y de Shabat, las festividades del ciclo judio, la adquisicion de sefarim y materiales religiosos, y el mantenimiento del espacio sagrado de la comunidad.' },
     social:    { amounts:[18,36,54,180], longDesc:'Jabad Barcelona acompana a las familias mas necesitadas con Tzedaka, distribucion de comida kosher para Shabat y festividades, asistencia economica y acompanamiento personal en momentos dificiles.' },
-    chai:      { amounts:[18,36,54,72,108,180,360], isChai:true, longDesc:'El Chai Club es la red de socios que garantizan la continuidad de Jabad Barcelona con aportaciones mensuales en multiples de 18 — el valor numerico de vida (חי) en hebreo. Cada socio es un pilar de la comunidad.' }
+    chai:      { amounts:[18,36,72,180], isChai:true, longDesc:'El Chai Club es la red de socios que garantizan la continuidad de Jabad Barcelona con aportaciones mensuales en multiples de 18 — el valor numerico de vida (חי) en hebreo. Cada socio es un pilar de la comunidad.' }
   };
 
   const TAG_CSS = {
@@ -937,8 +978,10 @@
     document.getElementById('btn-mensual').classList.toggle('active', rec==='mensual');
     const btn = document.getElementById('btn-confirm');
     cfg.isChai ? btn.classList.add('chai-s') : btn.classList.remove('chai-s');
-    document.getElementById('don-custom').value = '';
-    document.getElementById('ded-group').classList.add('hidden');
+    if (cfg.isChai && chaiAmt && !chips.querySelector('[data-n="' + chaiAmt + '"]')) {
+      document.getElementById('don-custom').value = chaiAmt; selAmt = chaiAmt;
+      document.getElementById('ded-group').classList.remove('hidden');
+    } else { document.getElementById('don-custom').value = ''; document.getElementById('ded-group').classList.add('hidden'); }
     updBtn();
     document.getElementById('modal-don').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -998,6 +1041,16 @@
   function pickChaiAmt(btn, n) {
     document.querySelectorAll('.chai-btn-amt').forEach(b => b.classList.remove('sel'));
     btn.classList.add('sel'); chaiAmt = n;
+    document.getElementById('chai-otro-wrap').style.display = 'none';
+  }
+  function pickChaiOtro(btn) {
+    document.querySelectorAll('.chai-btn-amt').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    const wrap = document.getElementById('chai-otro-wrap');
+    wrap.style.display = 'block';
+    const inp = document.getElementById('chai-otro-input');
+    inp.focus();
+    chaiAmt = parseInt(inp.value) || 0;
   }
 
   document.getElementById('modal-don').addEventListener('click', e => { if(e.target.id==='modal-don') closeModal(); });
