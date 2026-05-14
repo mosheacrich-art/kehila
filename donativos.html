@@ -58,9 +58,30 @@
     .don-sh-title { font-family: var(--font-brand); font-size: 1.35rem; font-weight: 800; color: #1B2E5E; }
     .don-sh-sub { font-size: .85rem; color: var(--color-text-muted); margin-top: 3px; }
 
-    /* Areas grid - identico a eventos */
-    .areas-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 18px; margin-bottom: 40px; }
-    @media (max-width: 600px) { .areas-grid { grid-template-columns: 1fr; } }
+    /* Areas grid - 3 columnas */
+    .areas-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-bottom: 40px; }
+    @media (max-width: 860px) { .areas-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 540px) { .areas-grid { grid-template-columns: 1fr; } }
+
+    /* Historial Tzedaka */
+    .tzedaka-block {
+      background: #fff; border-radius: 14px;
+      border-left: 4px solid #C8791A;
+      padding: 20px 22px; margin-bottom: 36px;
+      box-shadow: 0 1px 10px rgba(27,46,94,.07);
+    }
+    .tzedaka-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .tzedaka-title { font-size: .8rem; font-weight: 700; color: #1B2E5E; display: flex; align-items: center; gap: 7px; }
+    .tzedaka-title svg { width: 15px; height: 15px; color: #C8791A; }
+    .tzedaka-total { font-family: var(--font-brand); font-size: 1.1rem; font-weight: 900; color: #C8791A; }
+    .tzedaka-list { display: flex; flex-direction: column; gap: 7px; }
+    .tzedaka-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #F1F5F9; font-size: .8rem; }
+    .tzedaka-row:last-child { border-bottom: none; }
+    .tzedaka-area { color: var(--color-text-muted); }
+    .tzedaka-fecha { font-size: .72rem; color: var(--color-text-light); }
+    .tzedaka-amt { font-weight: 700; color: #1B2E5E; }
+    .tzedaka-rec { font-size: .65rem; background: #FEF7E8; color: #B8620E; padding: 1px 6px; border-radius: 999px; font-weight: 600; }
+    .tzedaka-empty { font-size: .82rem; color: var(--color-text-muted); text-align: center; padding: 8px 0; }
 
     .area-card {
       background: #fff; border-radius: 14px;
@@ -351,40 +372,21 @@
         </div>
       </div>
 
-      <!-- Chai Club -->
-      <div class="area-card chai" id="card-chai">
-        <div class="area-photo">
-          <img id="img-chai" src="" alt="Chai Club" style="display:none;" class="area-photo-img">
-          <div class="area-photo-ph chai" id="ph-chai" style="font-family:var(--font-brand);font-size:2.5rem;font-weight:900;color:#C8791A;">חי</div>
-          <button class="btn-edit-area hidden admin-btn" onclick="openEdit('chai')">
-            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"/></svg>
-            Editar
-          </button>
-        </div>
-        <div class="area-card-header">
-          <span style="font-family:var(--font-brand);font-size:1.2rem;font-weight:900;color:#C8791A;">חי</span>
-          <span class="area-badge chai">Socios</span>
-        </div>
-        <div class="area-card-body">
-          <p class="area-title" id="title-chai">Chai Club</p>
-          <p class="area-desc" id="desc-chai">Red de socios que apoyan mensualmente a Jabad Barcelona en multiples de 18, haciendo posible la continuidad de todos los proyectos.</p>
-          <div class="chai-pills">
-            <span class="chai-pill">18€/mes</span>
-            <span class="chai-pill">36€/mes</span>
-            <span class="chai-pill">54€/mes</span>
-            <span class="chai-pill">...</span>
-          </div>
-        </div>
-        <div class="area-card-footer">
-          <span class="area-meta">Jabad Barcelona</span>
-          <button class="btn-donar chai" onclick="openModal('chai')">
-            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
-            Unirme
-          </button>
-        </div>
-      </div>
-
     </div><!-- /areas-grid -->
+
+    <!-- HISTORIAL TZEDAKA -->
+    <div class="tzedaka-block">
+      <div class="tzedaka-header">
+        <div class="tzedaka-title">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+          Mi historial de Tzedaka
+        </div>
+        <div class="tzedaka-total" id="tzedaka-total">—</div>
+      </div>
+      <div class="tzedaka-list" id="tzedaka-list">
+        <p class="tzedaka-empty">Cargando...</p>
+      </div>
+    </div>
 
     <!-- CHAI CLUB BANNER -->
     <div class="chai-banner">
@@ -564,6 +566,45 @@
 
   loadPhotos();
 
+  /* Historial Tzedaka */
+  async function loadTzedaka() {
+    if (!sb || !user) return;
+    try {
+      const { data } = await sb.from('donaciones')
+        .select('campana_nombre, cantidad, recurrente, created_at')
+        .eq('usuario_id', user.userId)
+        .order('created_at', { ascending: false })
+        .limit(8);
+      const list = document.getElementById('tzedaka-list');
+      const totEl = document.getElementById('tzedaka-total');
+      if (!data || data.length === 0) {
+        list.innerHTML = '<p class="tzedaka-empty">Todavia no hay donativos registrados.</p>';
+        totEl.textContent = '0 €';
+        return;
+      }
+      const total = data.reduce((s, d) => s + (parseFloat(d.cantidad) || 0), 0);
+      totEl.textContent = total.toLocaleString('es-ES', { style:'currency', currency:'EUR', minimumFractionDigits:0 });
+      list.innerHTML = data.map(d => {
+        const fecha = d.created_at ? new Date(d.created_at).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' }) : '';
+        const rec = d.recurrente ? '<span class="tzedaka-rec">Mensual</span>' : '';
+        return `<div class="tzedaka-row">
+          <div>
+            <div class="tzedaka-area">${d.campana_nombre || 'Donativo'}</div>
+            <div class="tzedaka-fecha">${fecha}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;">
+            ${rec}
+            <span class="tzedaka-amt">${parseFloat(d.cantidad).toLocaleString('es-ES', { style:'currency', currency:'EUR', minimumFractionDigits:0 })}</span>
+          </div>
+        </div>`;
+      }).join('');
+    } catch(_) {
+      document.getElementById('tzedaka-list').innerHTML = '<p class="tzedaka-empty">No se pudo cargar el historial.</p>';
+    }
+  }
+
+  loadTzedaka();
+
   /* Hero photo upload */
   document.getElementById('hero-file').addEventListener('change', async function() {
     const file = this.files[0]; if (!file) return;
@@ -587,13 +628,17 @@
     curId = id;
     const cfg = AREA_CFG[id];
     const tagEl = document.getElementById('don-tag');
-    tagEl.textContent = document.querySelector('#card-' + id + ' .area-badge').textContent;
+    const badgeEl = document.querySelector('#card-' + id + ' .area-badge');
+    const badgeLabels = { educativo:'Educacion', religioso:'Religioso', social:'Social', chai:'Socios' };
+    tagEl.textContent = badgeEl ? badgeEl.textContent : (badgeLabels[id] || id);
     tagEl.style.cssText = TAG_CSS[id] || '';
-    document.getElementById('don-title').textContent = document.getElementById('title-' + id).textContent;
+    const titleEl = document.getElementById('title-' + id);
+    const defaultTitles = { educativo:'Area Educativo', religioso:'Area Religioso', social:'Area Ayuda Social', chai:'Chai Club' };
+    document.getElementById('don-title').textContent = titleEl ? titleEl.textContent : (defaultTitles[id] || id);
     document.getElementById('don-desc').textContent  = cfg.longDesc;
     const img = document.getElementById('don-img');
-    const src = document.getElementById('img-' + id).src;
-    if (document.getElementById('img-' + id).style.display !== 'none' && src) { img.src = src; img.style.display = 'block'; } else { img.style.display = 'none'; }
+    const imgEl = document.getElementById('img-' + id);
+    if (imgEl && imgEl.style.display !== 'none' && imgEl.src) { img.src = imgEl.src; img.style.display = 'block'; } else { img.style.display = 'none'; }
     const chips = document.getElementById('don-chips');
     chips.innerHTML = cfg.amounts.map(n => '<button class="amnt-chip" data-n="' + n + '" onclick="pickAmt(this,' + n + ')">' + n + '€' + (cfg.isChai ? '/mes' : '') + '</button>').join('');
     if (cfg.isChai && chaiAmt) { const pre = chips.querySelector('[data-n="' + chaiAmt + '"]'); if(pre){pre.classList.add('sel'); selAmt=chaiAmt;} } else { selAmt=0; }
@@ -650,7 +695,8 @@
     btn.disabled = true;
     document.getElementById('confirm-lbl').textContent = 'Procesando...';
     const ded = document.getElementById('don-ded').value.trim();
-    const nombre = document.getElementById('title-' + curId).textContent;
+    const nombreEl = document.getElementById('title-' + curId);
+    const nombre = nombreEl ? nombreEl.textContent : (curId === 'chai' ? 'Chai Club' : curId);
     if (sb && user) {
       await sb.from('donaciones').insert({ usuario_id:user.userId, usuario_nombre:user.name||'Anonimo', campana_nombre:nombre, campana_id:null, cantidad:selAmt, recurrente:rec==='mensual', dedicatoria:ded||null });
     }
@@ -718,7 +764,9 @@
       if (imgUrl) setAreaPhoto(editId, imgUrl);
     }
     if (sb) {
-      await sb.from('don_areas').upsert({ id:editId, titulo:newTitle||null, descripcion:newDesc||null, desc_larga:newLongDesc||null, imagen_url:imgUrl||null, updated_at:new Date().toISOString() });
+      const payload = { id:editId, titulo:newTitle||null, descripcion:newDesc||null, desc_larga:newLongDesc||null, updated_at:new Date().toISOString() };
+      if (imgUrl) payload.imagen_url = imgUrl;
+      await sb.from('don_areas').upsert(payload, { onConflict:'id' });
     }
     closeEdit();
     btn.textContent = 'Guardar'; btn.disabled = false;
