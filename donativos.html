@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
   <style>
     .main-content { margin-left: var(--sidebar-width); min-height: 100vh; background: #FBF5E6; }
     @media (max-width: 768px) { .main-content { margin-left: 0; } }
@@ -285,10 +286,35 @@
     .fg label { font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted); }
     .fg input,.fg textarea { border:1.5px solid #E2E8F0;border-radius:8px;padding:8px 11px;font-size:.875rem;font-family:inherit;outline:none;transition:border-color .15s; }
     .fg input:focus,.fg textarea:focus { border-color:#C8791A; }
-    .img-zone { border:2px dashed #E2E8F0;border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:border-color .15s; }
+    .img-zone { border:2px dashed #E2E8F0;border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .15s;position:relative;min-height:60px;display:flex;align-items:center;justify-content:center; }
     .img-zone:hover { border-color:#C8791A; }
-    .img-zone-preview { max-height:110px;border-radius:8px;margin-bottom:6px;max-width:100%;display:none; }
-    .img-zone-ph { color:var(--color-text-muted);font-size:.82rem; }
+    .img-zone-preview { width:100%;height:auto;max-height:200px;object-fit:contain;border-radius:8px;display:none; }
+    .img-zone-ph { color:var(--color-text-muted);font-size:.82rem;padding:18px; }
+    .img-zone-recrop { position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:600;cursor:pointer;font-family:inherit; }
+
+    /* Crop modal */
+    .modal-overlay-crop { position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px; }
+    .modal-overlay-crop.hidden { display:none; }
+    .modal-crop { background:#111827;border-radius:16px;width:100%;max-width:620px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5); }
+    .crop-hdr { padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08); }
+    .crop-hdr h3 { color:#fff;font-size:.95rem;font-weight:700;margin:0; }
+    .crop-close { background:rgba(255,255,255,.08);border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.6); }
+    .crop-close:hover { background:rgba(255,255,255,.15);color:#fff; }
+    .crop-canvas { height:320px;background:#000;overflow:hidden; }
+    .crop-canvas img { max-width:100%;display:block; }
+    .crop-toolbar { padding:10px 14px;background:#1f2937;display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+    .crop-lbl { font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4);flex-shrink:0; }
+    .crop-ratio { display:flex;gap:5px;flex-wrap:wrap; }
+    .crat { padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:transparent;color:rgba(255,255,255,.55);font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s; }
+    .crat.on { background:#C8791A;border-color:#C8791A;color:#fff; }
+    .crop-sep { width:1px;height:20px;background:rgba(255,255,255,.1);flex-shrink:0; }
+    .crop-act-btn { width:30px;height:30px;border-radius:7px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.6);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s; }
+    .crop-act-btn:hover { background:rgba(255,255,255,.1);color:#fff; }
+    .crop-ftr { padding:12px 16px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid rgba(255,255,255,.08); }
+    .btn-crop-ok { background:#C8791A;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:.875rem;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s; }
+    .btn-crop-ok:hover { background:#A8650F; }
+    .btn-crop-cancel { background:transparent;color:rgba(255,255,255,.55);border:1.5px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 16px;font-size:.875rem;cursor:pointer;font-family:inherit;transition:all .15s; }
+    .btn-crop-cancel:hover { color:#fff;border-color:rgba(255,255,255,.35); }
 
     .hidden { display: none !important; }
   </style>
@@ -588,9 +614,10 @@
       </div>
       <div class="fg">
         <label>Foto del area</label>
-        <div class="img-zone" onclick="document.getElementById('e-img-file').click()">
+        <div class="img-zone" id="img-zone-edit" onclick="document.getElementById('e-img-file').click()">
           <img class="img-zone-preview" id="e-preview" alt="">
           <div class="img-zone-ph" id="e-ph">Toca para subir foto</div>
+          <button class="img-zone-recrop hidden" id="btn-recrop" onclick="event.stopPropagation();reCrop()">✂ Recortar de nuevo</button>
         </div>
         <input type="file" id="e-img-file" accept="image/*" style="display:none;">
       </div>
@@ -602,8 +629,49 @@
   </div>
 </div>
 
+<!-- MODAL RECORTE DE FOTO -->
+<div class="modal-overlay-crop hidden" id="modal-crop">
+  <div class="modal-crop">
+    <div class="crop-hdr">
+      <h3>Encuadrar y ajustar foto</h3>
+      <button class="crop-close" onclick="closeCrop()">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="crop-canvas" id="crop-canvas">
+      <img id="crop-img" src="" alt="">
+    </div>
+    <div class="crop-toolbar">
+      <span class="crop-lbl">Proporcion</span>
+      <div class="crop-ratio">
+        <button class="crat on"  onclick="setCropRatio(this,NaN)">Libre</button>
+        <button class="crat"     onclick="setCropRatio(this,1)">1:1</button>
+        <button class="crat"     onclick="setCropRatio(this,4/3)">4:3</button>
+        <button class="crat"     onclick="setCropRatio(this,3/4)">3:4</button>
+        <button class="crat"     onclick="setCropRatio(this,16/9)">16:9</button>
+      </div>
+      <div class="crop-sep"></div>
+      <span class="crop-lbl">Zoom</span>
+      <button class="crop-act-btn" onclick="_cropInst&&_cropInst.zoom(0.15)" title="Acercar">+</button>
+      <button class="crop-act-btn" onclick="_cropInst&&_cropInst.zoom(-0.15)" title="Alejar">−</button>
+      <div class="crop-sep"></div>
+      <button class="crop-act-btn" onclick="_cropInst&&_cropInst.rotate(-90)" title="Girar izq">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+      </button>
+      <button class="crop-act-btn" onclick="_cropInst&&_cropInst.rotate(90)" title="Girar der">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;transform:scaleX(-1)"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+      </button>
+    </div>
+    <div class="crop-ftr">
+      <button class="btn-crop-cancel" onclick="closeCrop()">Cancelar</button>
+      <button class="btn-crop-ok" onclick="applyCrop()">Aplicar recorte</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/i18n.js"></script>
@@ -934,21 +1002,74 @@
 
   document.getElementById('modal-don').addEventListener('click', e => { if(e.target.id==='modal-don') closeModal(); });
 
+  /* ── Cropper ──────────────────────────────────── */
+  let _cropInst    = null;   // instancia Cropper.js
+  let _cropBlob    = null;   // blob resultante del recorte
+  let _cropSrcData = null;   // data-URL original para re-recortar
+
+  function openCrop(dataUrl) {
+    _cropSrcData = dataUrl;
+    const img = document.getElementById('crop-img');
+    if (_cropInst) { _cropInst.destroy(); _cropInst = null; }
+    img.src = dataUrl;
+    document.getElementById('modal-crop').classList.remove('hidden');
+    img.onload = () => {
+      _cropInst = new Cropper(img, {
+        viewMode: 1, dragMode: 'move', autoCropArea: 0.95,
+        responsive: true, restore: false, guides: true,
+        center: true, highlight: true,
+        cropBoxMovable: true, cropBoxResizable: true,
+        toggleDragModeOnDblclick: false,
+      });
+      // activar "Libre" por defecto
+      document.querySelectorAll('.crat').forEach(b => b.classList.remove('on'));
+      document.querySelector('.crat').classList.add('on');
+    };
+  }
+
+  function reCrop() { if (_cropSrcData) openCrop(_cropSrcData); }
+
+  function closeCrop() {
+    document.getElementById('modal-crop').classList.add('hidden');
+    if (_cropInst) { _cropInst.destroy(); _cropInst = null; }
+  }
+
+  function setCropRatio(btn, ratio) {
+    document.querySelectorAll('.crat').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    if (_cropInst) _cropInst.setAspectRatio(isNaN(ratio) ? NaN : ratio);
+  }
+
+  function applyCrop() {
+    if (!_cropInst) return;
+    const canvas = _cropInst.getCroppedCanvas({ maxWidth:1400, maxHeight:1400, imageSmoothingQuality:'high' });
+    canvas.toBlob(blob => {
+      _cropBlob = blob;
+      const url = URL.createObjectURL(blob);
+      const prev = document.getElementById('e-preview');
+      const ph   = document.getElementById('e-ph');
+      prev.src = url; prev.style.display = 'block'; ph.style.display = 'none';
+      document.getElementById('btn-recrop').classList.remove('hidden');
+      closeCrop();
+    }, 'image/jpeg', 0.92);
+  }
+
   /* Admin edit */
   let editId = null;
 
   function openEdit(id) {
-    editId = id;
+    editId = id; _cropBlob = null; _cropSrcData = null;
     document.getElementById('edit-title-hdr').textContent = 'Editar — ' + document.getElementById('title-' + id).textContent;
     document.getElementById('e-title').value    = document.getElementById('title-' + id).textContent;
     document.getElementById('e-desc').value     = document.getElementById('desc-'  + id).textContent;
     document.getElementById('e-longdesc').value = AREA_CFG[id].longDesc;
     document.getElementById('e-img-file').value = '';
+    document.getElementById('btn-recrop').classList.add('hidden');
     const prev = document.getElementById('e-preview');
     const ph   = document.getElementById('e-ph');
-    const src  = document.getElementById('img-' + id).src;
-    const showing = document.getElementById('img-' + id).style.display !== 'none';
-    if (showing && src) { prev.src = src; prev.style.display='block'; ph.style.display='none'; }
+    const imgEl = document.getElementById('img-' + id);
+    const showing = imgEl.style.display !== 'none' && imgEl.src && !imgEl.src.endsWith('/');
+    if (showing) { prev.src = imgEl.src; prev.style.display='block'; ph.style.display='none'; }
     else { prev.src=''; prev.style.display='none'; ph.style.display='block'; }
     document.getElementById('modal-edit').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -957,7 +1078,7 @@
   function closeEdit() {
     document.getElementById('modal-edit').classList.add('hidden');
     document.body.style.overflow = '';
-    editId = null;
+    editId = null; _cropBlob = null;
   }
 
   document.getElementById('modal-edit').addEventListener('click', e => { if(e.target.id==='modal-edit') closeEdit(); });
@@ -965,8 +1086,9 @@
   document.getElementById('e-img-file').addEventListener('change', function() {
     const file = this.files[0]; if (!file) return;
     const reader = new FileReader();
-    reader.onload = e => { document.getElementById('e-preview').src=e.target.result; document.getElementById('e-preview').style.display='block'; document.getElementById('e-ph').style.display='none'; };
+    reader.onload = ev => openCrop(ev.target.result);
     reader.readAsDataURL(file);
+    this.value = '';
   });
 
   async function saveArea() {
@@ -980,9 +1102,9 @@
     if (newDesc)  { document.getElementById('desc-'  + editId).textContent = newDesc; }
     if (newLongDesc) AREA_CFG[editId].longDesc = newLongDesc;
     let imgUrl = null;
-    const imgFile = document.getElementById('e-img-file').files[0];
-    if (imgFile && typeof uploadMedia === 'function') {
-      imgUrl = await uploadMedia(imgFile, 'donativos');
+    if (_cropBlob && typeof uploadMedia === 'function') {
+      const file = new File([_cropBlob], 'area-photo.jpg', { type:'image/jpeg' });
+      imgUrl = await uploadMedia(file, 'donativos');
       if (imgUrl) setAreaPhoto(editId, imgUrl);
     }
     if (sb) {
@@ -995,7 +1117,7 @@
     showToast('Area actualizada para todos los usuarios', 'success');
   }
 
-  document.addEventListener('keydown', e => { if(e.key==='Escape'){closeModal();closeEdit();closeHeroModal();} });
+  document.addEventListener('keydown', e => { if(e.key==='Escape'){closeModal();closeEdit();closeHeroModal();closeCrop();} });
 </script>
 <script>
   if ("serviceWorker" in navigator) {
