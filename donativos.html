@@ -32,9 +32,9 @@
     .don-hero-photos[data-layout="4"] { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
     .don-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(27,46,94,.88) 0%, rgba(27,46,94,.25) 65%, transparent 100%); }
     .don-hero-body { position: relative; z-index: 2; padding: 32px 36px 30px; width: 100%; }
-    .don-hero-sup { font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #E8971F; margin-bottom: 8px; display: block; }
-    .don-hero-title { font-family: var(--font-brand); font-size: 1.7rem; font-weight: 900; color: #fff; line-height: 1.2; margin-bottom: 10px; }
-    .don-hero-text { font-size: .875rem; color: rgba(255,255,255,.78); line-height: 1.7; max-width: 600px; }
+    .don-hero-sup { font-family: var(--font-brand); font-size: 2.6rem; font-weight: 900; color: #fff; letter-spacing: normal; text-transform: none; margin-bottom: 14px; display: block; line-height: 1.15; }
+    .don-hero-title { display: none; }
+    .don-hero-text { font-size: 1.05rem; color: rgba(255,255,255,.82); line-height: 1.75; max-width: 620px; }
     .btn-change-photo {
       position: absolute; top: 12px; right: 12px; z-index: 3;
       background: rgba(255,255,255,.18); backdrop-filter: blur(4px);
@@ -99,6 +99,7 @@
       overflow: hidden; display: flex; flex-direction: column;
       border-left: 4px solid #C8791A;
       transition: box-shadow .2s, transform .2s; position: relative;
+      cursor: pointer;
     }
     .area-card:hover { box-shadow: 0 6px 24px rgba(27,46,94,.13); transform: translateY(-2px); }
     .area-card.educativo { border-left-color: #16A34A; }
@@ -107,7 +108,7 @@
     .area-card.chai      { border-left-color: #C8791A; }
 
     .area-photo { position: relative; }
-    .area-photo img { width: 100%; height: 170px; object-fit: cover; display: block; }
+    .area-photo img { width: 100%; height: 170px; object-fit: contain; background: #f8fafc; display: block; }
     .area-photo-ph {
       width: 100%; height: 170px;
       display: flex; align-items: center; justify-content: center; font-size: 3.2rem;
@@ -317,8 +318,7 @@
       </div>
       <div class="don-hero-overlay"></div>
       <div class="don-hero-body">
-        <span class="don-hero-sup">Quienes somos</span>
-        <h2 class="don-hero-title">Jabad Barcelona — junto a ti en cada etapa de la vida</h2>
+        <span class="don-hero-sup">Sobre Nosotros</span>
         <p class="don-hero-text">
           Acompanamos a la kehila desde los 0 hasta los 120 anos, con educacion, social y actividades para todas las edades.
           Trabajamos para crear un hogar calido y unido para todos. Cada paso tuyo puede convertirse en un gran paso para toda la kehila.
@@ -349,11 +349,11 @@
     <div class="areas-grid">
 
       <!-- Educativo -->
-      <div class="area-card educativo" id="card-educativo">
+      <div class="area-card educativo" id="card-educativo" onclick="openModal('educativo')">
         <div class="area-photo">
           <img id="img-educativo" src="" alt="Area Educativo" style="display:none;" class="area-photo-img">
           <div class="area-photo-ph educativo" id="ph-educativo">📚</div>
-          <button class="btn-edit-area hidden admin-btn" onclick="openEdit('educativo')">
+          <button class="btn-edit-area hidden admin-btn" onclick="event.stopPropagation();openEdit('educativo')">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"/></svg>
             Editar
           </button>
@@ -368,7 +368,7 @@
         </div>
         <div class="area-card-footer">
           <span class="area-meta">Jabad Barcelona</span>
-          <button class="btn-donar" onclick="openModal('educativo')">
+          <button class="btn-donar" onclick="event.stopPropagation();openModal('educativo')">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
             Donar
           </button>
@@ -376,11 +376,11 @@
       </div>
 
       <!-- Religioso -->
-      <div class="area-card religioso" id="card-religioso">
+      <div class="area-card religioso" id="card-religioso" onclick="openModal('religioso')">
         <div class="area-photo">
           <img id="img-religioso" src="" alt="Area Religioso" style="display:none;" class="area-photo-img">
           <div class="area-photo-ph religioso" id="ph-religioso">✡</div>
-          <button class="btn-edit-area hidden admin-btn" onclick="openEdit('religioso')">
+          <button class="btn-edit-area hidden admin-btn" onclick="event.stopPropagation();openEdit('religioso')">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"/></svg>
             Editar
           </button>
@@ -395,7 +395,7 @@
         </div>
         <div class="area-card-footer">
           <span class="area-meta">Jabad Barcelona</span>
-          <button class="btn-donar" onclick="openModal('religioso')">
+          <button class="btn-donar" onclick="event.stopPropagation();openModal('religioso')">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
             Donar
           </button>
@@ -403,11 +403,11 @@
       </div>
 
       <!-- Ayuda Social -->
-      <div class="area-card social" id="card-social">
+      <div class="area-card social" id="card-social" onclick="openModal('social')">
         <div class="area-photo">
           <img id="img-social" src="" alt="Ayuda Social" style="display:none;" class="area-photo-img">
           <div class="area-photo-ph social" id="ph-social">🤝</div>
-          <button class="btn-edit-area hidden admin-btn" onclick="openEdit('social')">
+          <button class="btn-edit-area hidden admin-btn" onclick="event.stopPropagation();openEdit('social')">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"/></svg>
             Editar
           </button>
@@ -422,7 +422,7 @@
         </div>
         <div class="area-card-footer">
           <span class="area-meta">Jabad Barcelona</span>
-          <button class="btn-donar" onclick="openModal('social')">
+          <button class="btn-donar" onclick="event.stopPropagation();openModal('social')">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
             Donar
           </button>
