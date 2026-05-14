@@ -19,7 +19,17 @@
       position: relative; min-height: 240px; display: flex; align-items: flex-end;
       background: linear-gradient(135deg, #C8791A 0%, #1B2E5E 55%, #0d1a38 100%);
     }
-    .don-hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    /* Hero photo grid */
+    .don-hero-photos { position: absolute; inset: 0; display: grid; gap: 2px; }
+    .hero-ph-slot { position: relative; overflow: hidden; }
+    .hero-ph-slot img { width:100%; height:100%; object-fit:cover; display:block; }
+    .hero-ph-bg { width:100%; height:100%; background: linear-gradient(135deg,#C8791A 0%,#1B2E5E 60%,#0d1a38 100%); }
+    /* Layouts */
+    .don-hero-photos[data-layout="1"] { grid-template-columns: 1fr; }
+    .don-hero-photos[data-layout="2"] { grid-template-columns: 1fr 1fr; }
+    .don-hero-photos[data-layout="3"] { grid-template-columns: 3fr 2fr; grid-template-rows: 1fr 1fr; }
+    .don-hero-photos[data-layout="3"] .hero-ph-slot:first-child { grid-row: 1 / 3; }
+    .don-hero-photos[data-layout="4"] { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
     .don-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(27,46,94,.88) 0%, rgba(27,46,94,.25) 65%, transparent 100%); }
     .don-hero-body { position: relative; z-index: 2; padding: 32px 36px 30px; width: 100%; }
     .don-hero-sup { font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #E8971F; margin-bottom: 8px; display: block; }
@@ -182,47 +192,49 @@
     }
 
     /* Modal hero foto */
-    .modal-overlay-hero { position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:350;display:flex;align-items:center;justify-content:center;padding:16px; }
+    .modal-overlay-hero { position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:350;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto; }
     .modal-overlay-hero.hidden { display:none; }
-    .modal-hero { background:#1B2E5E;border-radius:20px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35); }
-    .modal-hero-top { padding:28px 28px 0; }
-    .modal-hero-sup { font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E8971F;display:flex;align-items:center;gap:6px;margin-bottom:8px; }
-    .modal-hero-sup::before { content:'';width:12px;height:2px;background:#E8971F;border-radius:1px; }
-    .modal-hero-title { font-family:var(--font-brand);font-size:1.3rem;font-weight:900;color:#fff;margin-bottom:4px; }
-    .modal-hero-sub { font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:20px; }
-    .modal-hero-body { padding:0 28px 26px;display:flex;flex-direction:column;gap:14px; }
-    .hero-photo-preview {
-      border-radius:12px;overflow:hidden;position:relative;
-      height:140px;background:linear-gradient(135deg,#C8791A 0%,#1B2E5E 100%);
-    }
-    .hero-photo-preview img { width:100%;height:100%;object-fit:cover;display:block; }
-    .hero-photo-preview-ph { width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:rgba(255,255,255,.4);font-size:.78rem; }
-    .hero-photo-preview-ph svg { width:26px;height:26px; }
-    .hero-photo-preview-label { position:absolute;top:8px;left:8px;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(0,0,0,.38);color:rgba(255,255,255,.8);padding:3px 8px;border-radius:6px; }
-    .hero-upload-zone {
-      border:2px dashed rgba(255,255,255,.18);border-radius:12px;padding:18px;text-align:center;
-      cursor:pointer;transition:border-color .15s,background .15s;
-    }
-    .hero-upload-zone:hover { border-color:rgba(232,151,31,.55);background:rgba(232,151,31,.04); }
-    .hero-upload-zone p { font-size:.8rem;color:rgba(255,255,255,.45);margin-top:5px; }
-    .hero-upload-zone svg { width:24px;height:24px;color:#E8971F; }
-    .hero-actions { display:flex;gap:8px; }
-    .btn-remove-hero {
-      flex:1;padding:10px;border-radius:10px;border:1.5px solid rgba(255,255,255,.14);
-      background:transparent;color:rgba(255,255,255,.5);font-size:.8rem;font-weight:600;
-      cursor:pointer;font-family:inherit;transition:all .15s;
-    }
-    .btn-remove-hero:hover { border-color:rgba(255,255,255,.3);color:#fff; }
-    .btn-save-hero {
-      flex:2;padding:10px;border-radius:10px;border:none;
-      background:#C8791A;color:#fff;font-size:.85rem;font-weight:700;
-      cursor:pointer;font-family:inherit;transition:background .15s;
-    }
-    .btn-save-hero:hover:not(:disabled) { background:#A8650F; }
-    .btn-save-hero:disabled { opacity:.4;cursor:not-allowed; }
-    .modal-hero-hdr { display:flex;justify-content:flex-end;padding:16px 20px 0; }
-    .modal-hero-close { background:rgba(255,255,255,.08);border:none;border-radius:8px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.55); }
+    .modal-hero { background:#1B2E5E;border-radius:20px;width:100%;max-width:500px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);margin:auto; }
+    .modal-hero-hdr { display:flex;justify-content:flex-end;padding:14px 18px 0; }
+    .modal-hero-close { background:rgba(255,255,255,.08);border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.55); }
     .modal-hero-close:hover { background:rgba(255,255,255,.14);color:#fff; }
+    .modal-hero-top { padding:4px 26px 16px; }
+    .modal-hero-sup { font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E8971F;display:flex;align-items:center;gap:6px;margin-bottom:7px; }
+    .modal-hero-sup::before { content:'';width:12px;height:2px;background:#E8971F;border-radius:1px; }
+    .modal-hero-title { font-family:var(--font-brand);font-size:1.25rem;font-weight:900;color:#fff;margin-bottom:3px; }
+    .modal-hero-sub { font-size:.78rem;color:rgba(255,255,255,.45); }
+    .modal-hero-body { padding:0 26px 24px;display:flex;flex-direction:column;gap:16px; }
+    /* Layout selector */
+    .hero-layout-bar { display:grid;grid-template-columns:repeat(4,1fr);gap:7px; }
+    .hero-lo-btn { border:1.5px solid rgba(255,255,255,.13);background:transparent;border-radius:10px;padding:10px 5px 8px;cursor:pointer;color:rgba(255,255,255,.45);font-size:.6rem;font-weight:700;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:7px;transition:all .15s;text-transform:uppercase;letter-spacing:.04em; }
+    .hero-lo-btn.sel { border-color:#E8971F;background:rgba(232,151,31,.1);color:#E8971F; }
+    .hero-lo-icon { width:40px;height:26px;border-radius:3px;overflow:hidden;display:grid;gap:1px;background:rgba(0,0,0,.25); }
+    .hero-lo-icon span { background:rgba(255,255,255,.2);border-radius:1px;display:block; }
+    .hero-lo-btn.sel .hero-lo-icon span { background:rgba(232,151,31,.5); }
+    .lo2 { grid-template-columns:1fr 1fr; }
+    .lo3 { grid-template-columns:3fr 2fr;grid-template-rows:1fr 1fr; }
+    .lo3 span:first-child { grid-row:1/3; }
+    .lo4 { grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr; }
+    /* Slots */
+    .hero-slots-grid { display:grid;gap:7px; }
+    .hero-slots-grid[data-layout="1"] { grid-template-columns:1fr; }
+    .hero-slots-grid[data-layout="2"] { grid-template-columns:1fr 1fr; }
+    .hero-slots-grid[data-layout="3"] { grid-template-columns:3fr 2fr;grid-template-rows:auto auto; }
+    .hero-slots-grid[data-layout="3"] .hero-slot:first-child { grid-row:1/3; }
+    .hero-slots-grid[data-layout="4"] { grid-template-columns:1fr 1fr; }
+    .hero-slot { border:1.5px dashed rgba(255,255,255,.16);border-radius:10px;overflow:hidden;cursor:pointer;position:relative;min-height:80px;display:flex;align-items:center;justify-content:center;transition:border-color .15s;background:rgba(0,0,0,.2); }
+    .hero-slot:hover { border-color:rgba(232,151,31,.5); }
+    .hero-slot img { width:100%;height:100%;object-fit:cover;position:absolute;inset:0; }
+    .hero-slot-ph { display:flex;flex-direction:column;align-items:center;gap:4px;color:rgba(255,255,255,.35);font-size:.67rem;z-index:1; }
+    .hero-slot-ph svg { width:20px;height:20px; }
+    .hero-slot-del { position:absolute;top:5px;right:5px;z-index:5;background:rgba(0,0,0,.55);border:none;border-radius:6px;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px; }
+    /* Actions */
+    .hero-actions { display:flex;gap:8px; }
+    .btn-remove-hero { flex:1;padding:10px;border-radius:10px;border:1.5px solid rgba(255,255,255,.14);background:transparent;color:rgba(255,255,255,.5);font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s; }
+    .btn-remove-hero:hover { border-color:rgba(255,255,255,.3);color:#fff; }
+    .btn-save-hero { flex:2;padding:10px;border-radius:10px;border:none;background:#C8791A;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s; }
+    .btn-save-hero:hover { background:#A8650F; }
+    .btn-save-hero:disabled { opacity:.4;cursor:not-allowed; }
 
     /* Modal donativo */
     .modal-overlay-don { position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px; }
@@ -300,7 +312,9 @@
 
     <!-- HERO -->
     <div class="don-hero" id="don-hero">
-      <div class="don-hero-bg" id="don-hero-bg"></div>
+      <div class="don-hero-photos" id="don-hero-photos" data-layout="1">
+        <div class="hero-ph-slot"><div class="hero-ph-bg"></div></div>
+      </div>
       <div class="don-hero-overlay"></div>
       <div class="don-hero-body">
         <span class="don-hero-sup">Quienes somos</span>
@@ -469,33 +483,42 @@
   <div class="modal-hero">
     <div class="modal-hero-hdr">
       <button class="modal-hero-close" onclick="closeHeroModal()">
-        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
       </button>
     </div>
     <div class="modal-hero-top">
-      <p class="modal-hero-sup">Imagen de fondo</p>
-      <h3 class="modal-hero-title">Foto del banner principal</h3>
-      <p class="modal-hero-sub">Si no subes ninguna foto, el banner muestra un fondo degradado.</p>
+      <p class="modal-hero-sup">Personalizar banner</p>
+      <h3 class="modal-hero-title">Banner "Sobre Nosotros"</h3>
+      <p class="modal-hero-sub">Elige la disposicion y sube hasta 4 fotos para crear tu collage.</p>
     </div>
     <div class="modal-hero-body">
-      <!-- Preview actual -->
-      <div class="hero-photo-preview" id="hero-modal-preview">
-        <div class="hero-photo-preview-ph" id="hero-modal-ph">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Z"/></svg>
-          Fondo degradado (sin foto)
-        </div>
-        <img id="hero-modal-img" src="" alt="" style="display:none;">
-        <span class="hero-photo-preview-label">Vista previa</span>
+      <!-- Layout selector -->
+      <div class="hero-layout-bar">
+        <button class="hero-lo-btn sel" data-layout="1" onclick="selectHeroLayout(this,'1')">
+          <div class="hero-lo-icon lo1"><span></span></div>
+          Una foto
+        </button>
+        <button class="hero-lo-btn" data-layout="2" onclick="selectHeroLayout(this,'2')">
+          <div class="hero-lo-icon lo2"><span></span><span></span></div>
+          Duo
+        </button>
+        <button class="hero-lo-btn" data-layout="3" onclick="selectHeroLayout(this,'3')">
+          <div class="hero-lo-icon lo3"><span></span><span></span><span></span></div>
+          Mosaico
+        </button>
+        <button class="hero-lo-btn" data-layout="4" onclick="selectHeroLayout(this,'4')">
+          <div class="hero-lo-icon lo4"><span></span><span></span><span></span><span></span></div>
+          Cuadricula
+        </button>
       </div>
-      <!-- Zona de subida -->
-      <div class="hero-upload-zone" onclick="document.getElementById('hero-file').click()">
-        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
-        <p>Toca para seleccionar una foto</p>
-      </div>
+      <!-- Slots de fotos (se renderizan dinámicamente) -->
+      <div class="hero-slots-grid" id="hero-slots" data-layout="1"></div>
+      <!-- Hidden file input compartido -->
+      <input type="file" id="hero-file" accept="image/*" style="display:none;">
       <!-- Acciones -->
       <div class="hero-actions">
-        <button class="btn-remove-hero" id="btn-remove-hero" onclick="removeHeroPhoto()">Quitar foto</button>
-        <button class="btn-save-hero" id="btn-save-hero" onclick="saveHeroPhoto()" disabled>Guardar foto</button>
+        <button class="btn-remove-hero" onclick="removeHeroPhoto()">Quitar todo</button>
+        <button class="btn-save-hero" id="btn-save-hero" onclick="saveHeroPhoto()">Guardar banner</button>
       </div>
     </div>
   </div>
@@ -629,8 +652,14 @@
       });
     } catch(_) {}
     try {
-      const { data } = await sb.from('app_config').select('value').eq('key','don_hero_img').maybeSingle();
-      if (data?.value) setHeroBg(data.value);
+      const heroKeys = ['don_hero_layout','don_hero_img','don_hero_img2','don_hero_img3','don_hero_img4'];
+      const { data: cfgRows } = await sb.from('app_config').select('key,value').in('key', heroKeys);
+      if (cfgRows) {
+        const cfg = Object.fromEntries(cfgRows.map(r => [r.key, r.value]));
+        _hLayout = cfg.don_hero_layout || '1';
+        _hUrls = [cfg.don_hero_img||null, cfg.don_hero_img2||null, cfg.don_hero_img3||null, cfg.don_hero_img4||null];
+        renderHeroOnPage(_hLayout, _hUrls);
+      }
     } catch(_) {}
   }
 
@@ -638,10 +667,6 @@
     const img = document.getElementById('img-' + id);
     const ph  = document.getElementById('ph-'  + id);
     if (img && ph && url) { img.src = url; img.style.display = 'block'; ph.style.display = 'none'; }
-  }
-
-  function setHeroBg(url) {
-    document.getElementById('don-hero-bg').style.backgroundImage = "url('" + url + "')";
   }
 
   loadPhotos();
@@ -685,23 +710,24 @@
 
   loadTzedaka();
 
-  /* Hero photo modal */
-  let _heroNewFile = null;
+  /* ── Hero collage modal ─────────────────────────── */
+  let _hLayout  = '1';                      // layout activo
+  let _hUrls    = [null,null,null,null];    // URLs guardadas en Supabase
+  let _hFiles   = [null,null,null,null];    // archivos nuevos pendientes
+  let _hPrev    = [null,null,null,null];    // data-URLs para preview
+  let _hSlotIdx = 0;                        // slot que activó el file-input
+
+  const SLOT_COUNTS = {'1':1,'2':2,'3':3,'4':4};
 
   function openHeroModal() {
-    _heroNewFile = null;
-    const currentSrc = document.getElementById('don-hero-bg').style.backgroundImage;
-    const hasPhoto = currentSrc && currentSrc !== 'none' && currentSrc !== '';
-    const img = document.getElementById('hero-modal-img');
-    const ph  = document.getElementById('hero-modal-ph');
-    if (hasPhoto) {
-      img.src = currentSrc.replace(/^url\(['"]?/, '').replace(/['"]?\)$/, '');
-      img.style.display = 'block'; ph.style.display = 'none';
-    } else {
-      img.style.display = 'none'; ph.style.display = 'flex';
-    }
-    document.getElementById('btn-save-hero').disabled = true;
+    // Activar el botón del layout actual en el modal
+    document.querySelectorAll('.hero-lo-btn').forEach(b => {
+      b.classList.toggle('sel', b.dataset.layout === _hLayout);
+    });
+    _hFiles = [null,null,null,null];
+    _hPrev  = _hUrls.map(u => u); // copia de URLs actuales
     document.getElementById('hero-file').value = '';
+    renderHeroSlots();
     document.getElementById('modal-hero').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
@@ -709,44 +735,109 @@
   function closeHeroModal() {
     document.getElementById('modal-hero').classList.add('hidden');
     document.body.style.overflow = '';
-    _heroNewFile = null;
+  }
+
+  function selectHeroLayout(btn, layout) {
+    document.querySelectorAll('.hero-lo-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    _hLayout = layout;
+    renderHeroSlots();
+  }
+
+  function renderHeroSlots() {
+    const count = SLOT_COUNTS[_hLayout];
+    const grid  = document.getElementById('hero-slots');
+    grid.setAttribute('data-layout', _hLayout);
+    let html = '';
+    for (let i = 0; i < count; i++) {
+      const src = _hPrev[i] || _hUrls[i];
+      const imgHtml = src
+        ? `<img src="${src}" alt="Foto ${i+1}">
+           <button class="hero-slot-del" onclick="clearHeroSlot(event,${i})">✕</button>`
+        : `<div class="hero-slot-ph">
+             <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+             Foto ${i+1}
+           </div>`;
+      html += `<div class="hero-slot" onclick="pickHeroSlot(${i})">${imgHtml}</div>`;
+    }
+    grid.innerHTML = html;
+  }
+
+  function pickHeroSlot(idx) {
+    _hSlotIdx = idx;
+    document.getElementById('hero-file').click();
+  }
+
+  function clearHeroSlot(e, idx) {
+    e.stopPropagation();
+    _hFiles[idx] = null; _hPrev[idx] = null; _hUrls[idx] = null;
+    renderHeroSlots();
   }
 
   document.getElementById('hero-file').addEventListener('change', function() {
     const file = this.files[0]; if (!file) return;
-    _heroNewFile = file;
+    _hFiles[_hSlotIdx] = file;
     const reader = new FileReader();
-    reader.onload = e => {
-      const img = document.getElementById('hero-modal-img');
-      const ph  = document.getElementById('hero-modal-ph');
-      img.src = e.target.result; img.style.display = 'block'; ph.style.display = 'none';
-    };
+    reader.onload = ev => { _hPrev[_hSlotIdx] = ev.target.result; renderHeroSlots(); };
     reader.readAsDataURL(file);
-    document.getElementById('btn-save-hero').disabled = false;
+    this.value = '';
   });
 
+  function renderHeroOnPage(layout, urls) {
+    const container = document.getElementById('don-hero-photos');
+    container.setAttribute('data-layout', layout);
+    const count = SLOT_COUNTS[layout] || 1;
+    let html = '';
+    for (let i = 0; i < count; i++) {
+      html += `<div class="hero-ph-slot">${
+        urls[i]
+          ? `<img src="${urls[i]}" alt="">`
+          : `<div class="hero-ph-bg"></div>`
+      }</div>`;
+    }
+    container.innerHTML = html;
+  }
+
   async function saveHeroPhoto() {
-    if (!_heroNewFile) return;
     const btn = document.getElementById('btn-save-hero');
-    btn.textContent = 'Subiendo...'; btn.disabled = true;
-    if (typeof uploadMedia === 'function') {
-      const url = await uploadMedia(_heroNewFile, 'donativos');
-      if (url) {
-        setHeroBg(url);
-        if (sb) await sb.from('app_config').upsert({ key:'don_hero_img', value:url, updated_at:new Date().toISOString() });
-        showToast('Foto de fondo actualizada', 'success');
-        closeHeroModal();
-      } else {
-        showToast('Error al subir la foto', 'error');
+    btn.textContent = 'Guardando...'; btn.disabled = true;
+    const count = SLOT_COUNTS[_hLayout];
+    const finalUrls = [..._hUrls];
+    // Subir archivos nuevos
+    for (let i = 0; i < count; i++) {
+      if (_hFiles[i] && typeof uploadMedia === 'function') {
+        const url = await uploadMedia(_hFiles[i], 'donativos');
+        if (url) finalUrls[i] = url;
       }
     }
-    btn.textContent = 'Guardar foto'; btn.disabled = false;
+    // Limpiar slots que sobraron si el layout nuevo tiene menos fotos
+    for (let i = count; i < 4; i++) finalUrls[i] = null;
+    // Guardar en Supabase
+    if (sb) {
+      const keys = ['don_hero_img','don_hero_img2','don_hero_img3','don_hero_img4'];
+      const rows = [
+        { key:'don_hero_layout', value:_hLayout, updated_at:new Date().toISOString() },
+        ...keys.map((k,i) => ({ key:k, value:finalUrls[i]||null, updated_at:new Date().toISOString() }))
+      ];
+      await sb.from('app_config').upsert(rows, { onConflict:'key' });
+    }
+    _hUrls = finalUrls;
+    _hLayout = _hLayout; // ya actualizado
+    renderHeroOnPage(_hLayout, _hUrls);
+    showToast('Banner actualizado', 'success');
+    closeHeroModal();
+    btn.textContent = 'Guardar banner'; btn.disabled = false;
   }
 
   async function removeHeroPhoto() {
-    document.getElementById('don-hero-bg').style.backgroundImage = '';
-    if (sb) await sb.from('app_config').upsert({ key:'don_hero_img', value:null, updated_at:new Date().toISOString() });
-    showToast('Foto eliminada — se muestra el fondo degradado', 'success');
+    _hUrls = [null,null,null,null]; _hLayout = '1';
+    if (sb) {
+      const rows = ['don_hero_layout','don_hero_img','don_hero_img2','don_hero_img3','don_hero_img4']
+        .map(k => ({ key:k, value:null, updated_at:new Date().toISOString() }));
+      await sb.from('app_config').upsert(rows, { onConflict:'key' });
+    }
+    renderHeroOnPage('1', [null,null,null,null]);
+    showToast('Banner restaurado al fondo degradado', 'success');
     closeHeroModal();
   }
 
