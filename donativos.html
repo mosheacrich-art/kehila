@@ -593,7 +593,7 @@
 
   const sb   = getSupabase();
   const user = getCurrentUser();
-  const esAdmin = user?.role === 'admin';
+  const esAdmin = ['admin', 'super_admin', 'staff'].includes(user?.role);
 
   /* Config de areas */
   const AREA_CFG = {
