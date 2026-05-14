@@ -513,7 +513,7 @@
 
   const sb   = getSupabase();
   const user = getCurrentUser();
-  const isAdmin = user?.role === 'admin';
+  const esAdmin = user?.role === 'admin';
 
   /* Config de areas */
   const AREA_CFG = {
@@ -531,7 +531,7 @@
   };
 
   /* Mostrar controles admin */
-  if (isAdmin) {
+  if (esAdmin) {
     document.getElementById('btn-hero-photo').classList.remove('hidden');
     document.querySelectorAll('.admin-btn').forEach(b => b.classList.remove('hidden'));
   }
