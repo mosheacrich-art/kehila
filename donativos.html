@@ -435,6 +435,7 @@
 <div class="toast-container"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/media.js"></script>
 <script>
@@ -471,7 +472,7 @@
       img:null, amounts:[18,36,54,72,108,180,360], meta:null, recaudado:0 }
   ];
 
-  let areas = AREAS.map(a => ({...a}));
+  let donAreas = AREAS.map(a => ({...a}));
   let chaiAmt = 0;
 
   /* ── Cargar datos de Supabase ── */
@@ -481,7 +482,7 @@
       const { data: areasRows } = await sb.from('don_areas').select('*');
       if (areasRows) {
         areasRows.forEach(row => {
-          const a = areas.find(x => x.id === row.id);
+          const a = donAreas.find(x => x.id === row.id);
           if (!a) return;
           if (row.titulo)      a.title    = row.titulo;
           if (row.descripcion) a.desc      = row.descripcion;
@@ -508,7 +509,9 @@
   /* ── Render tarjetas ── */
   function render() {
     const grid = document.getElementById('areas-grid');
-    grid.innerHTML = areas.map(a => {
+    if (!grid) return;
+    try {
+    grid.innerHTML = donAreas.map(a => {
       const pct = a.meta ? Math.min(100, Math.round(a.recaudado/a.meta*100)) : null;
       return `
         <div class="area-card ${a.clase}">
@@ -546,6 +549,7 @@
           </div>
         </div>`;
     }).join('');
+    } catch(e) { console.error('render error:', e); }
   }
 
   function esc(s) {
@@ -562,7 +566,7 @@
   };
 
   function openModal(id) {
-    curArea = areas.find(a => a.id === id);
+    curArea = donAreas.find(a => a.id === id);
     if (!curArea) return;
     document.getElementById('don-tag').textContent  = curArea.badge;
     document.getElementById('don-tag').style.cssText = TAG_CSS[curArea.clase]||'';
@@ -649,7 +653,7 @@
         document.getElementById('confirm-label').textContent = `Donar ${selAmt}€`;
         return;
       }
-      const a = areas.find(x => x.id === curArea.id);
+      const a = donAreas.find(x => x.id === curArea.id);
       if (a) a.recaudado = (a.recaudado||0) + selAmt;
       render();
     }
@@ -688,7 +692,7 @@
 
   function openEdit(id) {
     editId = id;
-    const a = areas.find(x => x.id === id);
+    const a = donAreas.find(x => x.id === id);
     document.getElementById('edit-modal-title').textContent = 'Editar — ' + a.title;
     document.getElementById('e-title').value    = a.title;
     document.getElementById('e-desc').value     = a.desc;
@@ -724,7 +728,7 @@
 
   async function saveArea() {
     if (!editId) return;
-    const a   = areas.find(x => x.id === editId);
+    const a   = donAreas.find(x => x.id === editId);
     const btn = document.getElementById('btn-save');
     btn.textContent = 'Guardando...'; btn.disabled = true;
 
