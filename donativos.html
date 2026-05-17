@@ -201,7 +201,7 @@
     .btn-join-chai:hover { background: linear-gradient(135deg, #E8A020, #B87020); box-shadow: 0 4px 16px rgba(180,100,0,.4); }
     .btn-join-chai svg { width: 15px; height: 15px; }
     .chai-pendant-wrap { display: flex; justify-content: center; align-items: center; }
-    .chai-pendant-svg { width: 100%; max-width: 160px; height: auto; filter: drop-shadow(0 6px 18px rgba(140,80,0,.35)); }
+    .chai-pendant-svg { width: 100%; max-width: 140px; height: auto; }
     @media (max-width: 600px) {
       .chai-banner { grid-template-columns: 1fr; padding: 28px 22px; }
       .chai-pendant-wrap { display: none; }
@@ -502,36 +502,51 @@
         </button>
       </div>
       <div class="chai-pendant-wrap">
-        <svg class="chai-pendant-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <svg class="chai-pendant-svg" viewBox="0 0 160 220" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <radialGradient id="pg" cx="37%" cy="30%" r="70%">
-              <stop offset="0%" stop-color="#FFE9A0"/>
-              <stop offset="25%" stop-color="#D4A020"/>
-              <stop offset="60%" stop-color="#B8720C"/>
-              <stop offset="100%" stop-color="#6B3C00"/>
+            <radialGradient id="pg" cx="35%" cy="28%" r="72%">
+              <stop offset="0%"   stop-color="#FFF0A8"/>
+              <stop offset="18%"  stop-color="#E8B820"/>
+              <stop offset="45%"  stop-color="#C88010"/>
+              <stop offset="75%"  stop-color="#A06008"/>
+              <stop offset="100%" stop-color="#5A3200"/>
             </radialGradient>
-            <radialGradient id="shine" cx="32%" cy="28%" r="45%">
-              <stop offset="0%" stop-color="rgba(255,255,255,.45)"/>
+            <linearGradient id="bailGold" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stop-color="#FFE070"/>
+              <stop offset="40%"  stop-color="#C88010"/>
+              <stop offset="100%" stop-color="#7A4800"/>
+            </linearGradient>
+            <radialGradient id="shine" cx="28%" cy="22%" r="42%">
+              <stop offset="0%"   stop-color="rgba(255,255,255,.55)"/>
               <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
             </radialGradient>
-            <filter id="tg">
-              <feGaussianBlur stdDeviation="1.5" result="b"/>
+            <radialGradient id="shine2" cx="72%" cy="75%" r="30%">
+              <stop offset="0%"   stop-color="rgba(255,220,80,.18)"/>
+              <stop offset="100%" stop-color="rgba(255,220,80,0)"/>
+            </radialGradient>
+            <filter id="pshadow" x="-25%" y="-15%" width="150%" height="140%">
+              <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#7A4000" flood-opacity=".4"/>
+            </filter>
+            <filter id="tglow">
+              <feGaussianBlur stdDeviation="1.2" result="b"/>
               <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
-          <circle cx="100" cy="100" r="92" fill="url(#pg)"/>
-          <circle cx="100" cy="100" r="92" fill="url(#shine)"/>
-          <circle cx="100" cy="100" r="86" fill="none" stroke="#FFE080" stroke-width="1.2" opacity=".55"/>
-          <circle cx="100" cy="100" r="82" fill="none" stroke="#7A4500" stroke-width=".8" opacity=".35"/>
-          <circle cx="100" cy="8" r="2.8" fill="#FFD770"/>
-          <circle cx="165" cy="35" r="2.8" fill="#FFD770"/>
-          <circle cx="192" cy="100" r="2.8" fill="#FFD770"/>
-          <circle cx="165" cy="165" r="2.8" fill="#FFD770"/>
-          <circle cx="100" cy="192" r="2.8" fill="#FFD770"/>
-          <circle cx="35" cy="165" r="2.8" fill="#FFD770"/>
-          <circle cx="8" cy="100" r="2.8" fill="#FFD770"/>
-          <circle cx="35" cy="35" r="2.8" fill="#FFD770"/>
-          <text x="100" y="122" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="82" font-weight="bold" fill="#FFF5CC" filter="url(#tg)">חי</text>
+          <!-- Bail (anilla superior) -->
+          <ellipse cx="80" cy="18" rx="13" ry="9" fill="none" stroke="url(#bailGold)" stroke-width="5" stroke-linecap="round"/>
+          <!-- Sombra pendant -->
+          <ellipse cx="80" cy="135" rx="68" ry="82" fill="url(#pg)" filter="url(#pshadow)"/>
+          <!-- Cuerpo pendant -->
+          <ellipse cx="80" cy="135" rx="68" ry="82" fill="url(#pg)"/>
+          <!-- Shine principal -->
+          <ellipse cx="80" cy="135" rx="68" ry="82" fill="url(#shine)"/>
+          <!-- Shine secundario -->
+          <ellipse cx="80" cy="135" rx="68" ry="82" fill="url(#shine2)"/>
+          <!-- Bisel interior -->
+          <ellipse cx="80" cy="135" rx="61" ry="74" fill="none" stroke="rgba(255,230,100,.45)" stroke-width="1.5"/>
+          <ellipse cx="80" cy="135" rx="57" ry="70" fill="none" stroke="rgba(80,40,0,.25)" stroke-width=".8"/>
+          <!-- Letras חי -->
+          <text x="80" y="158" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="78" font-weight="bold" fill="#FFF8D0" filter="url(#tglow)" opacity=".96">חי</text>
         </svg>
       </div>
     </div>
