@@ -98,15 +98,16 @@
     .area-card.chai      { border-left-color: #C8791A; }
 
     .area-photo { position: relative; }
-    .area-photo img { width: 100%; height: 170px; object-fit: contain; background: #f8fafc; display: block; }
+    .area-photo img { width: 100%; height: 170px; object-fit: cover; display: block; }
     .area-photo-ph {
       width: 100%; height: 170px;
-      display: flex; align-items: center; justify-content: center; font-size: 3.2rem;
+      display: flex; align-items: center; justify-content: center; font-size: 2rem;
+      opacity: .55;
     }
-    .area-photo-ph.educativo { background: #F0FDF4; }
-    .area-photo-ph.religioso { background: #F5F3FF; }
-    .area-photo-ph.social    { background: #F0F9FF; }
-    .area-photo-ph.chai      { background: #FEF7E8; }
+    .area-photo-ph.educativo { background: linear-gradient(135deg, #D1FAE5, #A7F3D0); }
+    .area-photo-ph.religioso { background: linear-gradient(135deg, #EDE9FE, #C4B5FD); }
+    .area-photo-ph.social    { background: linear-gradient(135deg, #E0F2FE, #BAE6FD); }
+    .area-photo-ph.chai      { background: linear-gradient(135deg, #FEF9C3, #FDE68A); }
 
     /* Boton editar foto — solo admin */
     .btn-edit-area {
