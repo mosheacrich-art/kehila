@@ -105,15 +105,10 @@
       background: #fff; border-radius: 14px;
       box-shadow: 0 1px 12px rgba(27,46,94,.08);
       overflow: hidden; display: flex; flex-direction: column;
-      border-left: 4px solid #C8791A;
       transition: box-shadow .2s, transform .2s; position: relative;
       cursor: pointer;
     }
     .area-card:hover { box-shadow: 0 6px 24px rgba(27,46,94,.13); transform: translateY(-2px); }
-    .area-card.educativo { border-left-color: #16A34A; }
-    .area-card.religioso { border-left-color: #7C3AED; }
-    .area-card.social    { border-left-color: #0EA5E9; }
-    .area-card.chai      { border-left-color: #C8791A; }
 
     .area-photo { position: relative; }
     .area-photo img { width: 100%; height: 170px; object-fit: cover; display: block; }
@@ -147,8 +142,8 @@
     .area-badge.chai      { background: #FEF7E8; color: #B8620E; }
 
     .area-card-body { padding: 4px 14px 12px; flex: 1; }
-    .area-title { font-size: .9375rem; font-weight: 800; color: #1B2E5E; margin-bottom: 5px; }
-    .area-desc { font-size: .8rem; color: var(--color-text-muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .area-title { font-size: 1.1rem; font-weight: 800; color: #B8820A; margin-bottom: 6px; }
+    .area-desc { font-size: .9rem; color: var(--color-text-muted); line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
     .chai-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
     .chai-pill { padding: 2px 9px; border-radius: 999px; border: 1.5px solid rgba(200,121,26,.25); background: #FEF7E8; font-size: .7rem; font-weight: 700; color: #B8620E; }
@@ -743,7 +738,6 @@
 
   /* Mostrar controles admin */
   if (esAdmin) {
-    document.getElementById('btn-hero-photo').classList.remove('hidden');
     document.querySelectorAll('.admin-btn').forEach(b => b.classList.remove('hidden'));
   }
 
