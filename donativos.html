@@ -16,38 +16,56 @@
 
     /* Hero */
     .don-hero {
-      border-radius: 16px; overflow: hidden; margin-bottom: 32px;
-      position: relative; min-height: 240px; display: flex; align-items: flex-end;
-      background: linear-gradient(135deg, #C8791A 0%, #1B2E5E 55%, #0d1a38 100%);
+      border-radius: 0; overflow: hidden; margin-bottom: 36px;
+      position: relative; display: flex; align-items: flex-end;
     }
+    .don-hero.has-photo { border-radius: 16px; min-height: 300px; }
     /* Hero photo grid */
     .don-hero-photos { position: absolute; inset: 0; display: grid; gap: 2px; }
     .hero-ph-slot { position: relative; overflow: hidden; }
     .hero-ph-slot img { width:100%; height:100%; object-fit:cover; display:block; }
-    .hero-ph-bg { width:100%; height:100%; background: linear-gradient(135deg,#C8791A 0%,#1B2E5E 60%,#0d1a38 100%); }
+    .hero-ph-bg { display: none; }
     /* Layouts */
     .don-hero-photos[data-layout="1"] { grid-template-columns: 1fr; }
     .don-hero-photos[data-layout="2"] { grid-template-columns: 1fr 1fr; }
     .don-hero-photos[data-layout="3"] { grid-template-columns: 3fr 2fr; grid-template-rows: 1fr 1fr; }
     .don-hero-photos[data-layout="3"] .hero-ph-slot:first-child { grid-row: 1 / 3; }
     .don-hero-photos[data-layout="4"] { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-    .don-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(27,46,94,.88) 0%, rgba(27,46,94,.25) 65%, transparent 100%); }
-    .don-hero-body { position: relative; z-index: 2; padding: 32px 36px 30px; width: 100%; }
-    .don-hero-sup { font-family: var(--font-brand); font-size: 2.6rem; font-weight: 900; color: #fff; letter-spacing: normal; text-transform: none; margin-bottom: 14px; display: block; line-height: 1.15; }
+    .don-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,25,60,.88) 0%, rgba(10,25,60,.2) 60%, transparent 100%); display: none; }
+    .don-hero.has-photo .don-hero-overlay { display: block; }
+    /* Body */
+    .don-hero-body { position: relative; z-index: 2; padding: 0; width: 100%; }
+    .don-hero.has-photo .don-hero-body { padding: 32px 36px 30px; }
+    /* Title — sin foto: editorial oscuro */
+    .don-hero-sup {
+      font-family: var(--font-brand); font-size: 2.6rem; font-weight: 900;
+      color: #1B2E5E; letter-spacing: normal; text-transform: none;
+      margin-bottom: 12px; display: block; line-height: 1.1;
+    }
+    .don-hero-sup::before {
+      content: ''; display: block; width: 32px; height: 3px;
+      background: #C8791A; border-radius: 2px; margin-bottom: 16px;
+    }
+    .don-hero.has-photo .don-hero-sup { color: #fff; }
+    .don-hero.has-photo .don-hero-sup::before { display: none; }
     .don-hero-title { display: none; }
-    .don-hero-text { font-size: 1.05rem; color: rgba(255,255,255,.82); line-height: 1.75; max-width: 620px; }
+    .don-hero-text { font-size: .97rem; color: #5A6270; line-height: 1.8; max-width: 600px; }
+    .don-hero.has-photo .don-hero-text { color: rgba(255,255,255,.85); font-size: 1.05rem; }
+    /* Cambiar foto btn */
     .btn-change-photo {
       position: absolute; top: 12px; right: 12px; z-index: 3;
       background: rgba(255,255,255,.18); backdrop-filter: blur(4px);
       border: 1px solid rgba(255,255,255,.3); color: #fff; border-radius: 999px;
       padding: 6px 14px; font-size: .72rem; font-weight: 600;
-      cursor: pointer; display: flex; align-items: center; gap: 5px; transition: background .15s;
+      cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all .15s;
+    }
+    .don-hero:not(.has-photo) .btn-change-photo {
+      background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.12); color: #4A5568;
     }
     .btn-change-photo:hover { background: rgba(255,255,255,.28); }
     .btn-change-photo svg { width: 13px; height: 13px; }
     @media (max-width: 600px) {
-      .don-hero-body { padding: 24px 20px 22px; }
-      .don-hero-title { font-size: 1.3rem; }
+      .don-hero.has-photo .don-hero-body { padding: 24px 20px 22px; }
     }
 
 
@@ -889,6 +907,8 @@
       }</div>`;
     }
     container.innerHTML = html;
+    const hasPhoto = urls.slice(0, count).some(u => !!u);
+    document.getElementById('don-hero').classList.toggle('has-photo', hasPhoto);
   }
 
   async function saveHeroPhoto() {
