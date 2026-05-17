@@ -1142,12 +1142,15 @@
     if (_cropBlob && typeof uploadMedia === 'function') {
       const file = new File([_cropBlob], 'area-photo.jpg', { type:'image/jpeg' });
       imgUrl = await uploadMedia(file, 'donativos');
+      console.log('[saveArea] upload result:', imgUrl);
       if (imgUrl) setAreaPhoto(editId, imgUrl);
+      else { showToast('Error subiendo foto al Storage — ver consola', 'error'); btn.textContent = 'Guardar'; btn.disabled = false; return; }
     }
     if (sb) {
       const payload = { id:editId, titulo:newTitle||null, descripcion:newDesc||null, desc_larga:newLongDesc||null, updated_at:new Date().toISOString() };
       if (imgUrl) payload.imagen_url = imgUrl;
-      await sb.from('don_areas').upsert(payload, { onConflict:'id' });
+      const { error: dbErr } = await sb.from('don_areas').upsert(payload, { onConflict:'id' });
+      if (dbErr) { console.error('[saveArea] DB error:', dbErr); showToast('Error guardando en BD: ' + dbErr.message, 'error'); btn.textContent = 'Guardar'; btn.disabled = false; return; }
     }
     closeEdit();
     btn.textContent = 'Guardar'; btn.disabled = false;
