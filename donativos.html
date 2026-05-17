@@ -34,7 +34,7 @@
     .don-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,25,60,.88) 0%, rgba(10,25,60,.2) 60%, transparent 100%); display: none; }
     .don-hero.has-photo .don-hero-overlay { display: block; }
     /* Body */
-    .don-hero-body { position: relative; z-index: 2; padding: 0; width: 100%; }
+    .don-hero-body { position: relative; z-index: 2; padding: 0; width: 100%; display: flex; flex-direction: column; align-items: center; }
     .don-hero.has-photo .don-hero-body { padding: 32px 36px 30px; }
     /* Title — sin foto: editorial oscuro */
     .don-hero-sup {
@@ -49,7 +49,7 @@
     .don-hero.has-photo .don-hero-sup { color: #fff; text-align: left; }
     .don-hero.has-photo .don-hero-sup::before { margin-left: 0; }
     .don-hero-title { display: none; }
-    .don-hero-text { font-size: .97rem; color: #5A6270; line-height: 1.8; text-align: center; }
+    .don-hero-text { font-size: .97rem; color: #5A6270; line-height: 1.8; text-align: center; display: inline-block; border: 1.5px solid #D4A833; border-radius: 10px; padding: 16px 24px; margin: 0 auto; }
     .don-hero.has-photo .don-hero-text { color: rgba(255,255,255,.85); font-size: 1.05rem; text-align: left; }
     /* Cambiar foto btn */
     .btn-change-photo {
