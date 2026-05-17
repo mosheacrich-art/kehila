@@ -11,8 +11,10 @@
   <style>
     .main-content { margin-left: var(--sidebar-width); min-height: 100vh; background: #FBF5E6; }
     @media (max-width: 768px) { .main-content { margin-left: 0; } }
-    .don-inner { max-width: 920px; margin: 0 auto; padding: 32px 28px 80px; }
+    .don-inner { max-width: 920px; margin: 0 auto; padding: 32px 28px 80px; position: relative; z-index: 1; }
     @media (max-width: 768px) { .don-inner { padding: 20px 14px 96px; } }
+    .don-heb-bg { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .don-heb-bg span { position: absolute; font-family: var(--font-brand); color: #B8820A; user-select: none; white-space: nowrap; }
 
     /* Hero */
     .don-hero {
@@ -341,6 +343,23 @@
 <body>
 <div id="sidebar-placeholder"></div>
 <div class="main-content">
+  <div class="don-heb-bg" aria-hidden="true">
+    <span style="top:4%;  left:6%;   font-size:2.8rem; opacity:.07; transform:rotate(-18deg)">נְתִינָה</span>
+    <span style="top:9%;  right:11%; font-size:1.8rem; opacity:.06; transform:rotate(9deg)">צְדָקָה</span>
+    <span style="top:17%; left:38%; font-size:3.6rem; opacity:.055;transform:rotate(-6deg)">חֶסֶד</span>
+    <span style="top:22%; right:3%;  font-size:2.2rem; opacity:.08; transform:rotate(22deg)">עֶזְרָה</span>
+    <span style="top:31%; left:12%; font-size:1.5rem; opacity:.06; transform:rotate(-30deg)">תְּמִיכָה</span>
+    <span style="top:38%; right:28%;font-size:4rem;   opacity:.05; transform:rotate(14deg)">נְדָבָה</span>
+    <span style="top:45%; left:2%;  font-size:2.4rem; opacity:.07; transform:rotate(5deg)">צְדָקָה</span>
+    <span style="top:51%; right:6%; font-size:1.7rem; opacity:.065;transform:rotate(-12deg)">נְתִינָה</span>
+    <span style="top:58%; left:48%; font-size:3rem;   opacity:.055;transform:rotate(28deg)">חֶסֶד</span>
+    <span style="top:64%; left:18%; font-size:2rem;   opacity:.07; transform:rotate(-8deg)">עֶזְרָה</span>
+    <span style="top:71%; right:14%;font-size:2.6rem; opacity:.06; transform:rotate(17deg)">תְּמִיכָה</span>
+    <span style="top:78%; left:5%;  font-size:1.6rem; opacity:.08; transform:rotate(-24deg)">נְדָבָה</span>
+    <span style="top:84%; right:32%;font-size:3.2rem; opacity:.055;transform:rotate(-5deg)">נְתִינָה</span>
+    <span style="top:91%; left:32%; font-size:2.1rem; opacity:.07; transform:rotate(11deg)">צְדָקָה</span>
+    <span style="top:96%; right:8%; font-size:1.9rem; opacity:.06; transform:rotate(-20deg)">חֶסֶד</span>
+  </div>
   <div class="don-inner">
 
     <div class="page-header">
