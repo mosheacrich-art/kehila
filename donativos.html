@@ -203,8 +203,8 @@
     }
     .btn-join-chai:hover { background: linear-gradient(135deg, #E8A020, #B87020); box-shadow: 0 4px 16px rgba(180,100,0,.4); }
     .btn-join-chai svg { width: 15px; height: 15px; }
-    .chai-pendant-wrap { display: flex; justify-content: center; align-items: center; }
-    .chai-pendant-svg { width: 100%; max-width: 140px; height: auto; }
+    .chai-pendant-wrap { display: flex; justify-content: center; align-items: flex-start; }
+    .chai-pendant-svg { width: 100%; max-width: 185px; height: auto; }
     @media (max-width: 600px) {
       .chai-banner { grid-template-columns: 1fr; padding: 28px 22px; }
       .chai-pendant-wrap { display: none; }
@@ -608,51 +608,75 @@
         </button>
       </div>
       <div class="chai-pendant-wrap">
-        <svg class="chai-pendant-svg" viewBox="0 0 160 220" xmlns="http://www.w3.org/2000/svg">
+        <svg class="chai-pendant-svg" viewBox="0 0 200 295" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <radialGradient id="pg" cx="35%" cy="28%" r="72%">
-              <stop offset="0%"   stop-color="#FFF0A8"/>
-              <stop offset="18%"  stop-color="#E8B820"/>
-              <stop offset="45%"  stop-color="#C88010"/>
-              <stop offset="75%"  stop-color="#A06008"/>
-              <stop offset="100%" stop-color="#5A3200"/>
+            <!-- Gold gradient for star faces -->
+            <radialGradient id="cg-star" cx="33%" cy="24%" r="78%">
+              <stop offset="0%"   stop-color="#FFF9C0"/>
+              <stop offset="12%"  stop-color="#F5D040"/>
+              <stop offset="38%"  stop-color="#CA8018"/>
+              <stop offset="72%"  stop-color="#8C5200"/>
+              <stop offset="100%" stop-color="#4A2800"/>
             </radialGradient>
-            <linearGradient id="bailGold" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stop-color="#FFE070"/>
-              <stop offset="40%"  stop-color="#C88010"/>
-              <stop offset="100%" stop-color="#7A4800"/>
+            <!-- Edge highlight for star -->
+            <linearGradient id="cg-edge" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stop-color="#FFE878"/>
+              <stop offset="100%" stop-color="#9A6010"/>
             </linearGradient>
-            <radialGradient id="shine" cx="28%" cy="22%" r="42%">
-              <stop offset="0%"   stop-color="rgba(255,255,255,.55)"/>
-              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-            </radialGradient>
-            <radialGradient id="shine2" cx="72%" cy="75%" r="30%">
-              <stop offset="0%"   stop-color="rgba(255,220,80,.18)"/>
-              <stop offset="100%" stop-color="rgba(255,220,80,0)"/>
-            </radialGradient>
-            <filter id="pshadow" x="-25%" y="-15%" width="150%" height="140%">
-              <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#7A4000" flood-opacity=".4"/>
+            <!-- Drop shadow for entire pendant -->
+            <filter id="cg-shadow" x="-35%" y="-20%" width="170%" height="155%">
+              <feDropShadow dx="3" dy="7" stdDeviation="10" flood-color="#3A1800" flood-opacity=".48"/>
             </filter>
-            <filter id="tglow">
-              <feGaussianBlur stdDeviation="1.2" result="b"/>
+            <!-- Text inner glow -->
+            <filter id="cg-glow" x="-25%" y="-25%" width="150%" height="150%">
+              <feGaussianBlur stdDeviation="2.2" result="b"/>
               <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
-          <!-- Bail (anilla superior) -->
-          <ellipse cx="80" cy="18" rx="13" ry="9" fill="none" stroke="url(#bailGold)" stroke-width="5" stroke-linecap="round"/>
-          <!-- Sombra pendant -->
-          <ellipse cx="80" cy="135" rx="68" ry="82" fill="url(#pg)" filter="url(#pshadow)"/>
-          <!-- Cuerpo pendant -->
-          <ellipse cx="80" cy="135" rx="68" ry="82" fill="url(#pg)"/>
-          <!-- Shine principal -->
-          <ellipse cx="80" cy="135" rx="68" ry="82" fill="url(#shine)"/>
-          <!-- Shine secundario -->
-          <ellipse cx="80" cy="135" rx="68" ry="82" fill="url(#shine2)"/>
-          <!-- Bisel interior -->
-          <ellipse cx="80" cy="135" rx="61" ry="74" fill="none" stroke="rgba(255,230,100,.45)" stroke-width="1.5"/>
-          <ellipse cx="80" cy="135" rx="57" ry="70" fill="none" stroke="rgba(80,40,0,.25)" stroke-width=".8"/>
-          <!-- Letras חי -->
-          <text x="80" y="158" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="78" font-weight="bold" fill="#FFF8D0" filter="url(#tglow)" opacity=".96">חי</text>
+
+          <!-- ─── Left chain: 7 links from (30,5) to (93,107) ─── -->
+          <!-- even = elongated along chain (rx 4, ry 9), odd = perpendicular (rx 9, ry 4), rotate -35° -->
+          <ellipse cx="30"   cy="5"    rx="4" ry="9" fill="none" stroke="#C89012" stroke-width="2.4" transform="rotate(-35,30,5)"/>
+          <ellipse cx="40.5" cy="22"   rx="9" ry="4" fill="none" stroke="#A07010" stroke-width="2.4" transform="rotate(-35,40.5,22)"/>
+          <ellipse cx="51"   cy="39"   rx="4" ry="9" fill="none" stroke="#C89012" stroke-width="2.4" transform="rotate(-35,51,39)"/>
+          <ellipse cx="61.5" cy="56"   rx="9" ry="4" fill="none" stroke="#A07010" stroke-width="2.4" transform="rotate(-35,61.5,56)"/>
+          <ellipse cx="72"   cy="73"   rx="4" ry="9" fill="none" stroke="#C89012" stroke-width="2.4" transform="rotate(-35,72,73)"/>
+          <ellipse cx="82.5" cy="90"   rx="9" ry="4" fill="none" stroke="#A07010" stroke-width="2.4" transform="rotate(-35,82.5,90)"/>
+          <ellipse cx="93"   cy="107"  rx="4" ry="9" fill="none" stroke="#C89012" stroke-width="2.4" transform="rotate(-35,93,107)"/>
+
+          <!-- ─── Right chain: 7 links from (170,5) to (107,107) ─── -->
+          <!-- same but rotate 35° (mirror) -->
+          <ellipse cx="170"  cy="5"    rx="4" ry="9" fill="none" stroke="#C89012" stroke-width="2.4" transform="rotate(35,170,5)"/>
+          <ellipse cx="159.5" cy="22"  rx="9" ry="4" fill="none" stroke="#A07010" stroke-width="2.4" transform="rotate(35,159.5,22)"/>
+          <ellipse cx="149"  cy="39"   rx="4" ry="9" fill="none" stroke="#C89012" stroke-width="2.4" transform="rotate(35,149,39)"/>
+          <ellipse cx="138.5" cy="56"  rx="9" ry="4" fill="none" stroke="#A07010" stroke-width="2.4" transform="rotate(35,138.5,56)"/>
+          <ellipse cx="128"  cy="73"   rx="4" ry="9" fill="none" stroke="#C89012" stroke-width="2.4" transform="rotate(35,128,73)"/>
+          <ellipse cx="117.5" cy="90"  rx="9" ry="4" fill="none" stroke="#A07010" stroke-width="2.4" transform="rotate(35,117.5,90)"/>
+          <ellipse cx="107"  cy="107"  rx="4" ry="9" fill="none" stroke="#C89012" stroke-width="2.4" transform="rotate(35,107,107)"/>
+
+          <!-- ─── Bail ring ─── -->
+          <ellipse cx="100" cy="117" rx="14" ry="9" fill="none" stroke="#CA8F10" stroke-width="5.5"/>
+          <ellipse cx="100" cy="115" rx="11" ry="6.5" fill="none" stroke="rgba(255,240,100,.38)" stroke-width="1.5"/>
+
+          <!-- ─── Star of David (Magen David) — center (100, 200), R=68 ─── -->
+          <!-- Triangle ▲: top (100,132), BL (41,234), BR (159,234) -->
+          <!-- Triangle ▽: bottom (100,268), TL (41,166), TR (159,166) -->
+          <g filter="url(#cg-shadow)">
+            <polygon points="100,132 41,234 159,234" fill="url(#cg-star)"/>
+            <polygon points="100,268 41,166 159,166" fill="url(#cg-star)"/>
+          </g>
+
+          <!-- Star edge highlight lines -->
+          <polygon points="100,132 41,234 159,234" fill="none" stroke="#FFD448" stroke-width="1.8" opacity=".7"/>
+          <polygon points="100,268 41,166 159,166" fill="none" stroke="#FFD448" stroke-width="1.8" opacity=".7"/>
+
+          <!-- ─── חי text ─── -->
+          <text x="100" y="212"
+                text-anchor="middle"
+                font-family="Georgia,'Times New Roman',serif"
+                font-size="58" font-weight="bold"
+                fill="#FFF8C0"
+                filter="url(#cg-glow)">חי</text>
         </svg>
       </div>
     </div>
