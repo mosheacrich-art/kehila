@@ -18,6 +18,7 @@
     /* ── Grid principal ── */
     .cal-wrap { display: grid; grid-template-columns: 1fr 400px; gap: 28px; align-items: start; }
     @media (max-width: 900px) { .cal-wrap { grid-template-columns: 1fr; } }
+    .cal-wrap > div:first-child { background: #fff; border-radius: 14px; padding: 24px 28px; box-shadow: 0 1px 12px rgba(27,46,94,.08); }
 
     /* ── Fecha hebrea ── */
     .cal-side-hebrew { font-size: .8rem; color: var(--color-text-muted); margin-top: 2px; margin-bottom: 14px; font-style: italic; letter-spacing: .01em; }
