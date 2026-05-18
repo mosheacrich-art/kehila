@@ -47,28 +47,19 @@
     .sv-card:hover { box-shadow: 0 16px 48px rgba(27,46,94,0.18); transform: translateY(-5px); }
 
     .sv-card-img {
-      height: 300px; background-size: cover; background-position: center;
+      height: 230px; background-size: cover; background-position: center;
       flex-shrink: 0; position: relative;
     }
-    /* Gradient overlay for text readability */
-    .sv-card-img::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(to bottom, transparent 40%, rgba(10,20,50,0.72) 100%);
-      pointer-events: none; z-index: 1;
-    }
-    /* Gold bottom bar */
     .sv-card-img::after {
       content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-      height: 3px; background: linear-gradient(90deg, #b8902e, #e8c96a, #b8902e); z-index: 2;
+      height: 3px; background: linear-gradient(90deg, #b8902e, #e8c96a, #b8902e);
     }
-    @media (max-width: 700px) { .sv-card-img { height: 240px; } }
-    /* Text overlay on the image */
-    .sv-card-text {
-      position: absolute; bottom: 10px; left: 20px; right: 20px; z-index: 2;
-    }
-    .sv-name { font-family: var(--font-brand, Georgia, serif); font-weight: 700; font-size: 1.15rem; color: #fff; line-height: 1.2; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
-    .sv-subtitle { font-size: 0.78rem; color: rgba(255,255,255,0.82); margin-top: 3px; }
-    .sv-cta { margin-top: 8px; font-size: 0.72rem; font-weight: 700; color: #F0C84A; display: inline-flex; align-items: center; gap: 5px; letter-spacing: 0.07em; text-transform: uppercase; }
+    @media (max-width: 700px) { .sv-card-img { height: 180px; } }
+
+    .sv-card-body { padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .sv-name { font-family: var(--font-brand, Georgia, serif); font-weight: 700; font-size: 1.2rem; color: #1B2E5E; line-height: 1.2; }
+    .sv-subtitle { font-size: 0.85rem; color: #64748b; line-height: 1.5; flex: 1; margin-top: 3px; }
+    .sv-cta { margin-top: 16px; font-size: 0.78rem; font-weight: 700; color: #b8902e; display: flex; align-items: center; gap: 5px; letter-spacing: 0.05em; text-transform: uppercase; }
 
     /* Admin edit overlay */
     .sv-admin-edit {
@@ -531,7 +522,6 @@
     SERVICES.forEach(function(svc) {
       var imgStyle = svc.image ? 'background-image:url(' + svc.image + ');' : 'background:' + svc.gradient + ';';
       var ctaLabel = svc.steps ? 'Solicitar' : 'Ver más';
-      var arrowSvg = '<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:11px;height:11px;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>';
       var adminBtn = isAdmin
         ? '<label class="sv-admin-edit" title="Cambiar foto" onclick="event.stopPropagation()">'
           + '<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316ZM16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"/></svg>'
@@ -540,13 +530,11 @@
         : '';
 
       html += '<div class="sv-card" data-service="' + svc.id + '">'
-        + '<div class="sv-card-img" style="' + imgStyle + '">'
-        + adminBtn
-        + '<div class="sv-card-text">'
+        + '<div class="sv-card-img" style="' + imgStyle + '">' + adminBtn + '</div>'
+        + '<div class="sv-card-body">'
         + '<div class="sv-name">' + svc.name + '</div>'
         + '<div class="sv-subtitle">' + svc.subtitle + '</div>'
-        + '<div class="sv-cta">' + ctaLabel + ' ' + arrowSvg + '</div>'
-        + '</div>'
+        + '<div class="sv-cta">' + ctaLabel + ' <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg></div>'
         + '</div></div>';
     });
 
