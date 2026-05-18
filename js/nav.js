@@ -779,8 +779,10 @@ function removeToast(toast) {
  */
 let _legalFooterBuilt = false;
 function buildLegalFooter() {
-  if (_legalFooterBuilt || document.getElementById('legal-footer')) return;
+  if (_legalFooterBuilt) return;
   _legalFooterBuilt = true;
+  // Eliminar cualquier footer previo (por si el SW sirve versión cacheada)
+  document.querySelectorAll('#legal-footer, footer.legal-footer').forEach(el => el.remove());
 
   // Inyectar estilos una sola vez
   if (!document.getElementById('legal-footer-styles')) {
