@@ -570,15 +570,17 @@
 
     .shabat-dove-img {
       position: absolute;
-      right: 0; top: 0;
-      width: 52%; height: 100%;
-      object-fit: cover;
-      object-position: center center;
-      opacity: 0.72;
+      right: -20px; top: 50%;
+      transform: translateY(-50%);
+      width: 50%;
+      height: auto;
+      object-fit: contain;
+      opacity: 0.82;
       pointer-events: none;
       user-select: none;
     }
-    @media (max-width: 600px) { .shabat-dove-img { width: 65%; opacity: 0.45; } }
+    @media (max-width: 768px) { .shabat-dove-img { width: 55%; opacity: 0.35; } }
+    @media (max-width: 500px) { .shabat-dove-img { display: none; } }
 
     .shabat-card-top {
       display: flex;
