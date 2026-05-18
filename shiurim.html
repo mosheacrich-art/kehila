@@ -319,16 +319,6 @@
     try { var u = getCurrentUser ? getCurrentUser() : null; isAdmin = u && u.role === 'admin'; } catch(e) {}
     if (isAdmin) document.getElementById('fab-add').classList.add('visible');
 
-    // ── Tabs ──
-    document.getElementById('sh-tabs').addEventListener('click', function(e) {
-      var btn = e.target.closest('.sh-tab');
-      if (!btn) return;
-      document.querySelectorAll('.sh-tab').forEach(function(t) { t.classList.remove('active'); });
-      document.querySelectorAll('.sh-panel').forEach(function(p) { p.classList.remove('active'); });
-      btn.classList.add('active');
-      document.getElementById('panel-' + btn.dataset.panel).classList.add('active');
-    });
-
     // ── Helpers ──
     function fmt(d) {
       if (!d) return '';
