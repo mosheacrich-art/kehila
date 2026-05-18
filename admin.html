@@ -3930,9 +3930,14 @@
         </tr>`).join('');
     }
 
-    // Profesionales — localStorage
+    // Profesionales — Supabase
     let profesionales = [];
-    try { profesionales = JSON.parse(localStorage.getItem('kehila_professionals') || '[]'); } catch(_) {}
+    if (sb) {
+      try {
+        const { data } = await sb.from('profesionales').select('id,nombre,especialidad,ciudad,modalidad').order('created_at', { ascending: false });
+        if (data) profesionales = data;
+      } catch(_) {}
+    }
     const profTbody = document.getElementById('profesionales-admin-body');
     document.getElementById('profesionales-count').textContent = `(${profesionales.length})`;
     if (profesionales.length === 0) {
@@ -3967,10 +3972,6 @@
 
   async function deleteProfesional(id) {
     if (!await verifyAdminRealtime()) return;
-    let profesionales = [];
-    try { profesionales = JSON.parse(localStorage.getItem('kehila_professionals') || '[]'); } catch(_) {}
-    profesionales = profesionales.filter(p => p.id !== id);
-    localStorage.setItem('kehila_professionals', JSON.stringify(profesionales));
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (sb) { try { await sb.from('profesionales').delete().eq('id', id); } catch(_) {} }
     const row = document.getElementById('prof-row-' + id);
