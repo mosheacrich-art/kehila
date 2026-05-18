@@ -214,8 +214,10 @@
     .chai-pendant-wrap { margin: -40px -44px -40px 0; align-self: stretch; overflow: hidden; }
     .chai-pendant-img { width: 100%; height: 100%; object-fit: cover; display: block; }
     @media (max-width: 600px) {
-      .chai-banner { grid-template-columns: 1fr; padding: 28px 22px; }
-      .chai-pendant-wrap { display: none; }
+      .chai-banner { grid-template-columns: 1fr; padding: 0 0 28px; gap: 0; }
+      .chai-pendant-wrap { order: -1; margin: 0; height: 200px; width: 100%; border-radius: 14px 14px 0 0; }
+      .chai-pendant-img { object-position: center 20%; }
+      .chai-banner > div:first-child { padding: 22px 22px 0; }
     }
 
     /* Modal hero foto */
@@ -604,6 +606,7 @@
     </div>
 
     <!-- HISTORIAL TZEDAKA -->
+    <div style="height:20px;"></div>
     <div class="tzedaka-block">
       <div class="tzedaka-header">
         <div class="tzedaka-title">
