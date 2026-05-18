@@ -557,29 +557,28 @@
       border: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* Warm candlelight glow from the right */
+    /* Fade gradient over dove image */
     .shabat-card::before {
       content: '';
       position: absolute;
       right: 0; top: 0;
-      width: 55%; height: 100%;
-      background: radial-gradient(ellipse at 88% 40%, rgba(210,155,55,0.13) 0%, transparent 65%);
+      width: 60%; height: 100%;
+      background: linear-gradient(to right, #252245 0%, rgba(37,34,69,0.7) 30%, transparent 70%);
       pointer-events: none;
+      z-index: 1;
     }
 
-    /* Subtle Hebrew watermark */
-    .shabat-card::after {
-      content: 'שבת';
+    .shabat-dove-img {
       position: absolute;
-      right: 18px; bottom: -8px;
-      font-size: 6.5rem;
-      font-weight: 700;
-      color: rgba(255,255,255,0.035);
+      right: 0; top: 0;
+      width: 52%; height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      opacity: 0.72;
       pointer-events: none;
       user-select: none;
-      line-height: 1;
-      letter-spacing: -2px;
     }
+    @media (max-width: 600px) { .shabat-dove-img { width: 65%; opacity: 0.45; } }
 
     .shabat-card-top {
       display: flex;
@@ -878,7 +877,8 @@
           Horarios Shabbat
         </h2>
         <div class="shabat-card">
-          <div class="shabat-card-top">
+          <img class="shabat-dove-img" src="img/shabat-dove.png" alt="">
+          <div class="shabat-card-top" style="position:relative;z-index:2;">
             <div>
               <p class="shabat-label">Shabat esta semana</p>
               <p class="shabat-parasha" id="shabat-parasha">
@@ -892,7 +892,7 @@
             </button>
           </div>
 
-          <div class="shabat-horarios">
+          <div class="shabat-horarios" style="position:relative;z-index:2;">
             <div class="shabat-horario-item">
               <span class="shabat-horario-label">Encendido de velas</span>
               <span class="shabat-horario-time" id="shabat-velas-time">—</span>
