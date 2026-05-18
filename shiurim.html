@@ -10,7 +10,8 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
   <style>
-    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; background: #f8fafc; }
+    html, body { background: var(--color-bg); margin: 0; }
+    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; background: var(--color-bg); }
     @media (max-width: 768px) { .main-content { margin-left: 0; } }
     .sh-inner { max-width: 1080px; margin: 0 auto; padding: 28px 28px 100px; }
     @media (max-width: 768px) { .sh-inner { padding: 16px 14px 100px; } }
@@ -85,7 +86,7 @@
     /* Podcasts inline */
     .pod-section-title { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color-gold-dark, #C9A84C); margin: 28px 0 12px; }
     .pod-list { display: flex; flex-direction: column; gap: 12px; }
-    .pod-card { background: var(--color-white, #fff); border-radius: 14px; border: 1px solid rgba(27,46,94,.09); padding: 16px 18px; box-shadow: 0 2px 10px rgba(27,46,94,.06); }
+    .pod-card { background: var(--color-bg); border-radius: 14px; border: 1px solid rgba(27,46,94,.09); padding: 16px 18px; box-shadow: 0 2px 10px rgba(27,46,94,.06); }
     .pod-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
     .pod-icon { width: 46px; height: 46px; border-radius: 10px; background: var(--color-primary, #1B2E5E); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .pod-icon svg { width: 22px; height: 22px; color: #E0B820; }
