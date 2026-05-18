@@ -887,12 +887,13 @@
   async function loadPhotos() {
     if (!sb) return;
     try {
-      const { data } = await sb.from('don_areas').select('id, imagen_url, titulo, descripcion');
+      const { data } = await sb.from('don_areas').select('id, imagen_url, titulo, descripcion, desc_larga');
       if (!data) return;
       data.forEach(row => {
         if (row.imagen_url) setAreaPhoto(row.id, row.imagen_url);
         if (row.titulo)     { const el = document.getElementById('title-' + row.id); if(el) el.textContent = row.titulo; }
         if (row.descripcion){ const el = document.getElementById('desc-'  + row.id); if(el) el.textContent = row.descripcion; }
+        if (row.desc_larga && AREA_CFG[row.id]) AREA_CFG[row.id].longDesc = row.desc_larga;
       });
     } catch(_) {}
     try {
@@ -1304,10 +1305,14 @@
       if (imgUrl) payload.imagen_url = imgUrl;
       const { error: dbErr } = await sb.from('don_areas').upsert(payload, { onConflict:'id' });
       if (dbErr) { console.error('[saveArea] DB error:', dbErr); showToast('Error guardando en BD: ' + dbErr.message, 'error'); btn.textContent = 'Guardar'; btn.disabled = false; return; }
+      closeEdit();
+      btn.textContent = 'Guardar'; btn.disabled = false;
+      showToast('Area actualizada para todos los usuarios', 'success');
+    } else {
+      closeEdit();
+      btn.textContent = 'Guardar'; btn.disabled = false;
+      showToast('Sin conexion a Supabase — cambios no guardados', 'error');
     }
-    closeEdit();
-    btn.textContent = 'Guardar'; btn.disabled = false;
-    showToast('Area actualizada para todos los usuarios', 'success');
   }
 
   document.addEventListener('keydown', e => { if(e.key==='Escape'){closeModal();closeEdit();closeHeroModal();closeCrop();} });
