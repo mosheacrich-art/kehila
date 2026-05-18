@@ -777,8 +777,10 @@ function removeToast(toast) {
  *
  * @returns {string} HTML string del footer
  */
+let _legalFooterBuilt = false;
 function buildLegalFooter() {
-  if (document.getElementById('legal-footer')) return;
+  if (_legalFooterBuilt || document.getElementById('legal-footer')) return;
+  _legalFooterBuilt = true;
 
   // Inyectar estilos una sola vez
   if (!document.getElementById('legal-footer-styles')) {
