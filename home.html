@@ -548,140 +548,144 @@
 
     /* ─── 6. Card Shabat ─── */
     .shabat-card {
-      background: linear-gradient(155deg, #252245 0%, #272553 55%, #253060 100%);
-      border-radius: var(--radius-md);
-      padding: 24px 28px 22px;
-      color: var(--color-white);
+      background: linear-gradient(150deg, #181c40 0%, #1e2252 45%, #1d2856 100%);
+      border-radius: 16px;
+      color: #fff;
       position: relative;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 280px;
     }
-
-    /* Warm candlelight glow from the right */
-    .shabat-card::before {
-      content: '';
-      position: absolute;
-      right: 0; top: 0;
-      width: 55%; height: 100%;
-      background: radial-gradient(ellipse at 88% 40%, rgba(210,155,55,0.13) 0%, transparent 65%);
-      pointer-events: none;
+    .shabat-content {
+      padding: 30px 34px 30px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
     }
-
-    /* Subtle Hebrew watermark */
-    .shabat-card::after {
-      content: 'שבת';
-      position: absolute;
-      right: 18px; bottom: -8px;
-      font-size: 6.5rem;
-      font-weight: 700;
-      color: rgba(255,255,255,0.035);
-      pointer-events: none;
-      user-select: none;
-      line-height: 1;
-      letter-spacing: -2px;
-    }
-
     .shabat-card-top {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 20px;
+      gap: 12px;
+      margin-bottom: 12px;
     }
-
     .shabat-label {
-      font-size: 0.82rem;
-      font-weight: 400;
-      letter-spacing: 0.01em;
+      font-size: 0.67rem;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
       color: var(--color-gold);
-      opacity: 0.8;
-      margin-bottom: 6px;
+      opacity: 0.9;
     }
-
     .shabat-parasha {
       font-family: var(--font-brand);
-      font-size: 1.75rem;
+      font-size: 2.4rem;
       font-weight: 700;
-      color: var(--color-white);
-      line-height: 1.15;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 5px;
     }
-
     .shabat-parasha-he {
       display: block;
-      font-size: 1.05rem;
-      color: rgba(255,255,255,0.38);
-      margin-top: 5px;
-      font-style: italic;
-      letter-spacing: 0.03em;
+      font-size: 1.08rem;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.04em;
+      margin-bottom: 14px;
     }
-
+    .shabat-gold-sep {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .shabat-gold-sep-line {
+      width: 52px;
+      height: 1px;
+      background: rgba(201,168,76,0.45);
+      flex-shrink: 0;
+    }
+    .shabat-gold-sep-gem {
+      color: var(--color-gold);
+      font-size: 0.75rem;
+      opacity: 0.75;
+      line-height: 1;
+    }
     .shabat-cal-link {
       display: flex;
       align-items: center;
       gap: 4px;
-      font-size: 0.78rem;
-      color: rgba(255,255,255,0.4);
+      font-size: 0.82rem;
+      color: var(--color-gold);
       text-decoration: none;
       white-space: nowrap;
-      transition: color 0.2s;
+      transition: opacity 0.2s;
       background: none;
       border: none;
       cursor: pointer;
       padding: 0;
       font-family: inherit;
-      margin-top: 4px;
+      opacity: 0.85;
       flex-shrink: 0;
     }
-    .shabat-cal-link:hover { color: rgba(255,255,255,0.8); }
+    .shabat-cal-link:hover { opacity: 1; }
     .shabat-cal-link svg { width: 13px; height: 13px; }
-
     .shabat-horarios {
       display: flex;
-      gap: 28px;
-      flex-wrap: wrap;
+      gap: 0;
       position: relative;
       z-index: 1;
-      padding-top: 4px;
+      margin-top: auto;
     }
-
     .shabat-horario-item {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
+      padding-right: 22px;
+      margin-right: 22px;
+      border-right: 1px solid rgba(255,255,255,0.1);
     }
-
+    .shabat-horario-item:last-child { border-right: none; padding-right: 0; margin-right: 0; }
+    .shabat-horario-icon { color: rgba(201,168,76,0.65); margin-bottom: 5px; }
+    .shabat-horario-icon svg { width: 18px; height: 18px; }
     .shabat-horario-label {
-      font-size: 0.82rem;
-      color: rgba(255,255,255,0.38);
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.42);
       font-weight: 400;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
-    .shabat-horario-label svg { width: 13px; height: 13px; opacity: 0.7; }
-
     .shabat-horario-time {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
       font-weight: 600;
       color: var(--color-gold);
       font-family: var(--font-brand);
       letter-spacing: -0.01em;
       line-height: 1;
     }
-
     .shabat-horario-day {
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.35);
+      font-size: 0.76rem;
+      color: rgba(255,255,255,0.32);
       font-weight: 400;
     }
-
+    .shabat-dove-wrap {
+      position: relative;
+      overflow: hidden;
+    }
     .shabat-divider { display: none; }
-
+    @media (max-width: 860px) {
+      .shabat-parasha { font-size: 1.9rem; }
+      .shabat-horario-time { font-size: 1.5rem; }
+      .shabat-content { padding: 24px 24px 24px; }
+      .shabat-horario-item { padding-right: 16px; margin-right: 16px; }
+    }
     @media (max-width: 600px) {
-      .shabat-card { padding: 20px 18px 18px; }
-      .shabat-card-top { flex-direction: column; gap: 10px; }
-      .shabat-horarios { gap: 20px; }
-      .shabat-horario-time { font-size: 1.3rem; }
+      .shabat-card { grid-template-columns: 1fr; }
+      .shabat-dove-wrap { height: 200px; order: -1; }
+      .shabat-content { padding: 22px 22px 24px; }
+      .shabat-parasha { font-size: 1.7rem; }
+      .shabat-horario-time { font-size: 1.35rem; }
+      .shabat-horario-item { padding-right: 14px; margin-right: 14px; }
     }
 
     /* ─── Dropdown perfil ─── */
@@ -878,36 +882,111 @@
           Horarios Shabbat
         </h2>
         <div class="shabat-card">
-          <div class="shabat-card-top">
-            <div>
+          <!-- LEFT: texto -->
+          <div class="shabat-content">
+            <div class="shabat-card-top">
               <p class="shabat-label">Shabat esta semana</p>
-              <p class="shabat-parasha" id="shabat-parasha">
-                &nbsp;
-                <span class="shabat-parasha-he" id="shabat-parasha-he"></span>
-              </p>
+              <button class="shabat-cal-link" onclick="window.location.href='calendario.html'">
+                Ver calendario
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+              </button>
             </div>
-            <button class="shabat-cal-link" onclick="window.location.href='calendario.html'">
-              Ver calendario
-              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-            </button>
+            <p class="shabat-parasha" id="shabat-parasha">&nbsp;</p>
+            <span class="shabat-parasha-he" id="shabat-parasha-he"></span>
+            <div class="shabat-gold-sep">
+              <span class="shabat-gold-sep-line"></span>
+              <span class="shabat-gold-sep-gem">✦</span>
+              <span class="shabat-gold-sep-line"></span>
+            </div>
+            <div class="shabat-horarios">
+              <div class="shabat-horario-item">
+                <div class="shabat-horario-icon">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2c0 0-1 2-1 4s1 3 1 3-1 1-1 3v7a1 1 0 002 0v-7c0-2-1-3-1-3s1-1 1-3-1-4-1-4z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6a1 1 0 100-2 1 1 0 000 2z" fill="currentColor"/></svg>
+                </div>
+                <span class="shabat-horario-label">Encendido de velas</span>
+                <span class="shabat-horario-time" id="shabat-velas-time">—</span>
+                <span class="shabat-horario-day" id="shabat-velas-day">cargando…</span>
+              </div>
+              <div class="shabat-horario-item">
+                <div class="shabat-horario-icon">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3h6l1 5H8L9 3zm-1 5v3a4 4 0 008 0V8M8 19h8m-4 0v2m-3 0h6"/></svg>
+                </div>
+                <span class="shabat-horario-label">Havdalá</span>
+                <span class="shabat-horario-time" id="shabat-havdala-time">—</span>
+                <span class="shabat-horario-day" id="shabat-havdala-day">cargando…</span>
+              </div>
+              <div class="shabat-horario-item">
+                <div class="shabat-horario-icon">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                </div>
+                <span class="shabat-horario-label">Ciudad</span>
+                <span class="shabat-horario-time" id="shabat-ciudad-name" style="font-size:1.2rem;letter-spacing:0;">—</span>
+                <span class="shabat-horario-day" id="shabat-ciudad-coords"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="shabat-horarios">
-            <div class="shabat-horario-item">
-              <span class="shabat-horario-label">Encendido de velas</span>
-              <span class="shabat-horario-time" id="shabat-velas-time">—</span>
-              <span class="shabat-horario-day" id="shabat-velas-day">cargando…</span>
-            </div>
-            <div class="shabat-horario-item">
-              <span class="shabat-horario-label">Havdalá</span>
-              <span class="shabat-horario-time" id="shabat-havdala-time">—</span>
-              <span class="shabat-horario-day" id="shabat-havdala-day">cargando…</span>
-            </div>
-            <div class="shabat-horario-item">
-              <span class="shabat-horario-label">Ciudad</span>
-              <span class="shabat-horario-time" id="shabat-ciudad-name" style="font-size:1.2rem;letter-spacing:0;">—</span>
-              <span class="shabat-horario-day" id="shabat-ciudad-coords"></span>
-            </div>
+          <!-- RIGHT: ilustración paloma -->
+          <div class="shabat-dove-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 340" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;">
+              <defs>
+                <radialGradient id="dg" cx="55%" cy="48%" r="55%">
+                  <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.16"/>
+                  <stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <ellipse cx="270" cy="175" rx="190" ry="140" fill="url(#dg)"/>
+              <!-- Rama botánica superior -->
+              <path d="M 380,8 C 355,38 322,72 295,104 C 272,130 250,152 238,165" stroke="#C9A84C" stroke-width="1.3" fill="none" opacity="0.38"/>
+              <ellipse cx="366" cy="26" rx="14" ry="5" fill="#C9A84C" fill-opacity="0.28" transform="rotate(-42 366 26)"/>
+              <ellipse cx="348" cy="18" rx="12" ry="4.5" fill="#C9A84C" fill-opacity="0.24" transform="rotate(-68 348 18)"/>
+              <ellipse cx="352" cy="44" rx="13" ry="4.5" fill="#C9A84C" fill-opacity="0.26" transform="rotate(-22 352 44)"/>
+              <ellipse cx="336" cy="62" rx="12" ry="4" fill="#C9A84C" fill-opacity="0.24" transform="rotate(-52 336 62)"/>
+              <ellipse cx="318" cy="56" rx="13" ry="4.5" fill="#C9A84C" fill-opacity="0.22" transform="rotate(-78 318 56)"/>
+              <ellipse cx="320" cy="80" rx="11" ry="4" fill="#C9A84C" fill-opacity="0.23" transform="rotate(-36 320 80)"/>
+              <ellipse cx="304" cy="90" rx="12" ry="4" fill="#C9A84C" fill-opacity="0.20" transform="rotate(-62 304 90)"/>
+              <ellipse cx="288" cy="106" rx="11" ry="4" fill="#C9A84C" fill-opacity="0.20" transform="rotate(-42 288 106)"/>
+              <ellipse cx="272" cy="120" rx="10" ry="3.5" fill="#C9A84C" fill-opacity="0.18" transform="rotate(-58 272 120)"/>
+              <ellipse cx="258" cy="135" rx="10" ry="3.5" fill="#C9A84C" fill-opacity="0.18" transform="rotate(-32 258 135)"/>
+              <!-- Cuerpo paloma -->
+              <path d="M 145,200 C 132,180 128,158 136,140 C 144,122 162,112 184,110 C 206,108 228,120 238,138 C 250,158 246,182 234,196 C 268,176 312,162 358,160 C 394,158 426,170 434,192 C 440,208 428,228 408,236 C 382,246 350,238 322,224 C 294,210 274,192 256,188 C 234,184 190,190 168,200 C 158,204 148,204 145,200 Z" fill="rgba(155,175,215,0.68)"/>
+              <!-- Ala superior izquierda -->
+              <path d="M 182,178 C 170,156 152,128 134,104 C 118,82 100,62 94,42 C 91,32 97,26 108,30 C 120,34 132,52 144,70 C 158,90 170,114 178,136 C 172,144 168,154 168,165 C 168,174 170,182 175,188 Z" fill="rgba(135,158,204,0.56)"/>
+              <!-- Cola -->
+              <path d="M 150,204 C 134,218 114,234 100,252 C 88,268 82,286 87,300 C 90,310 100,314 112,307 C 124,300 132,286 144,272 C 156,258 170,244 182,230 C 170,220 158,213 150,204 Z" fill="rgba(125,150,198,0.50)"/>
+              <!-- Ala derecha -->
+              <path d="M 238,190 C 268,168 310,153 354,146 C 390,140 424,142 446,156 C 453,163 449,176 434,182 C 415,192 388,194 358,196 C 324,200 285,205 258,210 C 244,213 236,216 234,214 Z" fill="rgba(128,152,200,0.50)"/>
+              <!-- Cabeza -->
+              <ellipse cx="184" cy="117" rx="26" ry="23" fill="rgba(168,188,228,0.78)"/>
+              <!-- Ojo -->
+              <circle cx="193" cy="111" r="4.5" fill="#141830"/>
+              <circle cx="194.5" cy="110" r="1.8" fill="rgba(255,255,255,0.55)"/>
+              <!-- Pico -->
+              <path d="M 208,120 C 220,117 232,113 238,109" stroke="rgba(190,165,100,0.9)" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Rama de olivo -->
+              <path d="M 222,112 C 240,107 256,102 270,100" stroke="#8BAA68" stroke-width="1.5" fill="none" opacity="0.7"/>
+              <ellipse cx="235" cy="107" rx="10" ry="4" fill="#7A9858" fill-opacity="0.72" transform="rotate(-40 235 107)"/>
+              <ellipse cx="248" cy="102" rx="9.5" ry="3.8" fill="#88A862" fill-opacity="0.70" transform="rotate(-55 248 102)"/>
+              <ellipse cx="260" cy="100" rx="9" ry="3.5" fill="#7A9858" fill-opacity="0.72" transform="rotate(-28 260 100)"/>
+              <ellipse cx="271" cy="97" rx="9" ry="3.5" fill="#8BAA68" fill-opacity="0.68" transform="rotate(-65 271 97)"/>
+              <!-- Patrones internos sutiles -->
+              <ellipse cx="210" cy="178" rx="20" ry="6" fill="#C9A84C" fill-opacity="0.07" transform="rotate(-18 210 178)"/>
+              <ellipse cx="242" cy="186" rx="18" ry="5.5" fill="#C9A84C" fill-opacity="0.06" transform="rotate(8 242 186)"/>
+              <ellipse cx="272" cy="176" rx="20" ry="6" fill="#C9A84C" fill-opacity="0.06" transform="rotate(-22 272 176)"/>
+              <ellipse cx="300" cy="185" rx="18" ry="5.5" fill="#C9A84C" fill-opacity="0.05" transform="rotate(12 300 185)"/>
+              <!-- Hojas doradas inferiores -->
+              <path d="M 340,250 C 355,242 372,238 390,240" stroke="#C9A84C" stroke-width="1" fill="none" opacity="0.28"/>
+              <ellipse cx="350" cy="244" rx="11" ry="4" fill="#C9A84C" fill-opacity="0.20" transform="rotate(-38 350 244)"/>
+              <ellipse cx="365" cy="238" rx="11" ry="4" fill="#C9A84C" fill-opacity="0.18" transform="rotate(-52 365 238)"/>
+              <ellipse cx="378" cy="240" rx="10" ry="3.8" fill="#C9A84C" fill-opacity="0.20" transform="rotate(-26 378 240)"/>
+              <ellipse cx="408" cy="260" rx="10" ry="3.5" fill="#C9A84C" fill-opacity="0.16" transform="rotate(-62 408 260)"/>
+              <ellipse cx="422" cy="272" rx="9" ry="3.5" fill="#C9A84C" fill-opacity="0.14" transform="rotate(-42 422 272)"/>
+              <ellipse cx="435" cy="250" rx="10" ry="3.5" fill="#C9A84C" fill-opacity="0.14" transform="rotate(-72 435 250)"/>
+              <!-- Detalles plumas -->
+              <path d="M 134,104 C 148,112 162,128 172,148" stroke="rgba(180,200,230,0.18)" stroke-width="1" fill="none"/>
+              <path d="M 120,78 C 136,90 152,108 164,130" stroke="rgba(180,200,230,0.14)" stroke-width="1" fill="none"/>
+              <path d="M 108,55 C 124,68 140,88 152,112" stroke="rgba(180,200,230,0.11)" stroke-width="1" fill="none"/>
+            </svg>
           </div>
         </div>
       </div>
