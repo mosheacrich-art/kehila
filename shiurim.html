@@ -312,11 +312,11 @@
   <script src="js/media.js"></script>
   <script>
   (async function () {
-    try { initNav('shiurim'); } catch(e) {}
+    try { requireAuth(); initNav('shiurim'); } catch(e) {}
 
     var sb = typeof getSupabase === 'function' ? getSupabase() : null;
     var isAdmin = false;
-    try { var u = getCurrentUser ? getCurrentUser() : null; isAdmin = u && u.role === 'admin'; } catch(e) {}
+    try { var u = getCurrentUser ? getCurrentUser() : null; isAdmin = u && (u.role === 'admin' || u.role === 'super_admin'); } catch(e) {}
     if (isAdmin) document.getElementById('fab-add').classList.add('visible');
 
     // ── Helpers ──
