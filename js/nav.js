@@ -777,12 +777,11 @@ function removeToast(toast) {
  *
  * @returns {string} HTML string del footer
  */
-let _legalFooterBuilt = false;
 function buildLegalFooter() {
-  if (_legalFooterBuilt) return;
-  _legalFooterBuilt = true;
-  // Eliminar cualquier footer previo (por si el SW sirve versión cacheada)
-  document.querySelectorAll('#legal-footer, footer.legal-footer').forEach(el => el.remove());
+  // No crear footer dentro de iframes
+  if (window.self !== window.top) return;
+  // Siempre eliminar todos los footers existentes antes de crear uno nuevo
+  document.querySelectorAll('#legal-footer').forEach(el => el.remove());
 
   // Inyectar estilos una sola vez
   if (!document.getElementById('legal-footer-styles')) {
