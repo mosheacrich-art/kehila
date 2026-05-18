@@ -178,7 +178,7 @@
       background: linear-gradient(135deg, #FFFDF5 0%, #FFF8E7 50%, #FEF0CC 100%);
       border: 1.5px solid #E8D298; border-radius: 16px; padding: 40px 44px;
       display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: center;
-      box-shadow: 0 4px 24px rgba(180,120,0,.08);
+      box-shadow: 0 4px 24px rgba(180,120,0,.08); overflow: hidden;
     }
     .chai-banner-sup { font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #B07010; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .chai-banner-sup::before { content: ''; width: 12px; height: 2px; background: #C8791A; border-radius: 1px; }
@@ -211,8 +211,8 @@
     }
     .btn-join-chai:hover { background: linear-gradient(135deg, #E8A020, #B87020); box-shadow: 0 4px 16px rgba(180,100,0,.4); }
     .btn-join-chai svg { width: 15px; height: 15px; }
-    .chai-pendant-wrap { display: flex; justify-content: center; align-items: center; border-radius: 12px; overflow: hidden; }
-    .chai-pendant-img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; mix-blend-mode: multiply; }
+    .chai-pendant-wrap { margin: -40px -44px -40px 0; align-self: stretch; overflow: hidden; }
+    .chai-pendant-img { width: 100%; height: 100%; object-fit: cover; display: block; }
     @media (max-width: 600px) {
       .chai-banner { grid-template-columns: 1fr; padding: 28px 22px; }
       .chai-pendant-wrap { display: none; }
