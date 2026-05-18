@@ -171,15 +171,11 @@
       <div class="sh-tabs" id="sh-tabs">
         <button class="sh-tab active" data-panel="videos">
           <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
-          Videos <span class="sh-count" id="cnt-videos">0</span>
+          Shiurim <span class="sh-count" id="cnt-videos">0</span>
         </button>
         <button class="sh-tab" data-panel="hoja">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
-          Hoja de la semana <span class="sh-count" id="cnt-hoja">0</span>
-        </button>
-        <button class="sh-tab" data-panel="otros">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
-          Otros <span class="sh-count" id="cnt-otros">0</span>
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"/></svg>
+          Podcasts <span class="sh-count" id="cnt-hoja">0</span>
         </button>
       </div>
 
@@ -190,10 +186,6 @@
       <div class="sh-panel" id="panel-hoja">
         <div class="sh-loading" id="load-hoja">Cargando...</div>
         <div class="hoja-list" id="list-hoja"></div>
-      </div>
-      <div class="sh-panel" id="panel-otros">
-        <div class="sh-loading" id="load-otros">Cargando...</div>
-        <div class="otros-grid" id="grid-otros"></div>
       </div>
     </div>
   </main>
@@ -226,9 +218,8 @@
           <div class="form-group">
             <label class="form-label required">Apartado</label>
             <select class="form-select" id="pub-apartado">
-              <option value="videos">&#127909; Videos</option>
-              <option value="hoja_semana">&#128196; Hoja de la semana</option>
-              <option value="otros">&#128218; Otros materiales</option>
+              <option value="videos">&#127909; Shiurim</option>
+              <option value="hoja_semana">&#127908; Podcasts</option>
             </select>
           </div>
 
@@ -402,11 +393,9 @@
     }
     var videos = allData.filter(function(s) { return s.apartado === 'videos'; });
     var hojas  = allData.filter(function(s) { return s.apartado === 'hoja_semana'; });
-    var otros  = allData.filter(function(s) { return s.apartado === 'otros'; });
 
     document.getElementById('cnt-videos').textContent = videos.length;
     document.getElementById('cnt-hoja').textContent   = hojas.length;
-    document.getElementById('cnt-otros').textContent  = otros.length;
 
     var HEART = '<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>';
     var HEART_F = '<svg fill="currentColor" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z"/></svg>';
@@ -458,26 +447,6 @@
           + '<div class="hoja-actions">'
           + '<button class="hoja-like-btn like-btn' + (liked ? ' liked' : '') + '" data-id="' + h.id + '" data-likes="' + (h.likes||0) + '">' + (liked ? HEART_F : HEART) + '<span>' + fmtN(h.likes) + '</span></button>'
           + (h.video_url ? '<a class="hoja-dl-btn" href="' + h.video_url + '" target="_blank" rel="noopener" onclick="incVistas(\'' + h.id + '\',' + (h.vistas||0) + ')">' + DL + ' Descargar</a>' : '')
-          + '</div></div>';
-      }).join('');
-    }
-
-    // ── Render Otros ──
-    document.getElementById('load-otros').style.display = 'none';
-    var go = document.getElementById('grid-otros');
-    if (!otros.length) {
-      go.innerHTML = '<div class="sh-empty" style="grid-column:1/-1"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg><p>No hay materiales todav&#237;a.</p></div>';
-    } else {
-      go.innerHTML = otros.map(function(o) {
-        var liked = isLiked(o.id);
-        return '<div class="otro-card"><span class="otro-badge">Recurso</span>'
-          + '<div class="otro-title">' + o.titulo + '</div>'
-          + (o.maestro ? '<div class="otro-autor">' + o.maestro + '</div>' : '')
-          + (o.descripcion ? '<div class="otro-desc">' + o.descripcion + '</div>' : '')
-          + '<div class="otro-stats"><span class="otro-stat">' + EYE + '<span class="vista-count">' + fmtN(o.vistas) + '</span></span><span class="otro-stat">' + HEART + '<span class="like-count">' + fmtN(o.likes) + '</span></span><span>' + fmt(o.fecha) + '</span></div>'
-          + '<div class="otro-foot">'
-          + '<button class="otro-like-btn like-btn' + (liked ? ' liked' : '') + '" data-id="' + o.id + '" data-likes="' + (o.likes||0) + '">' + (liked ? HEART_F : HEART) + '<span>' + fmtN(o.likes) + '</span></button>'
-          + (o.video_url ? '<a class="otro-open-btn" href="' + o.video_url + '" target="_blank" rel="noopener" onclick="incVistas(\'' + o.id + '\',' + (o.vistas||0) + ')">' + EXT + ' Abrir</a>' : '')
           + '</div></div>';
       }).join('');
     }
