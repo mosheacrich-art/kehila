@@ -214,9 +214,9 @@
     .chai-pendant-wrap { margin: -40px -44px -40px 0; align-self: stretch; overflow: hidden; }
     .chai-pendant-img { width: 100%; height: 100%; object-fit: cover; display: block; }
     @media (max-width: 600px) {
-      .chai-banner { grid-template-columns: 1fr; padding: 28px 22px 28px; position: relative; }
-      .chai-pendant-wrap { position: absolute; bottom: 0; right: 0; width: 150px; height: 170px; margin: 0; overflow: hidden; border-radius: 0 0 14px 0; }
-      .chai-pendant-img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+      .chai-banner { grid-template-columns: 1fr; padding: 28px 22px 0; position: static; }
+      .chai-pendant-wrap { position: static; width: calc(100% + 44px); height: 220px; margin: 24px -22px 0; border-radius: 0 0 14px 14px; overflow: hidden; }
+      .chai-pendant-img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
     }
 
     /* Modal hero foto */
