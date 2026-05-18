@@ -212,7 +212,7 @@
     .btn-join-chai:hover { background: linear-gradient(135deg, #E8A020, #B87020); box-shadow: 0 4px 16px rgba(180,100,0,.4); }
     .btn-join-chai svg { width: 15px; height: 15px; }
     .chai-pendant-wrap { display: flex; justify-content: center; align-items: center; }
-    .chai-pendant-svg { width: 100%; max-width: 300px; height: auto; }
+    .chai-pendant-svg { width: 100%; max-width: 340px; height: auto; }
     @media (max-width: 600px) {
       .chai-banner { grid-template-columns: 1fr; padding: 28px 22px; }
       .chai-pendant-wrap { display: none; }
@@ -599,70 +599,96 @@
         </button>
       </div>
       <div class="chai-pendant-wrap">
-        <svg class="chai-pendant-svg" viewBox="0 0 300 175" xmlns="http://www.w3.org/2000/svg">
+        <svg class="chai-pendant-svg" viewBox="0 0 380 325" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <!-- Malachite / eilat green inlay gradient -->
+            <!-- Malachite inlay gradient -->
             <radialGradient id="cg-grn" cx="40%" cy="28%" r="85%">
-              <stop offset="0%"   stop-color="#62A868"/>
+              <stop offset="0%"   stop-color="#6DB873"/>
               <stop offset="50%"  stop-color="#387A42"/>
               <stop offset="100%" stop-color="#1D4D24"/>
             </radialGradient>
+            <!-- Gold shimmer gradient for chain links -->
+            <linearGradient id="cg-gld" x1="0%" y1="0%" x2="80%" y2="100%">
+              <stop offset="0%"   stop-color="#F5E080"/>
+              <stop offset="45%"  stop-color="#C89012"/>
+              <stop offset="100%" stop-color="#7A5000"/>
+            </linearGradient>
             <!-- Pendant drop shadow -->
-            <filter id="cg-sf" x="-22%" y="-28%" width="144%" height="156%">
-              <feDropShadow dx="2" dy="5" stdDeviation="7" flood-color="#1E0D00" flood-opacity=".5"/>
+            <filter id="cg-sf" x="-28%" y="-28%" width="156%" height="165%">
+              <feDropShadow dx="3" dy="8" stdDeviation="10" flood-color="#1E0D00" flood-opacity=".45"/>
             </filter>
             <!-- חי letter depth -->
             <filter id="cg-tf" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#1A0800" flood-opacity=".65"/>
+              <feDropShadow dx="0" dy="1.5" stdDeviation="1.6" flood-color="#1A0800" flood-opacity=".65"/>
+            </filter>
+            <!-- Subtle chain shadow -->
+            <filter id="cg-cs" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="1" dy="2" stdDeviation="2.5" flood-color="#3A2000" flood-opacity=".38"/>
             </filter>
           </defs>
 
-          <!-- ═══ Left cable chain — 7 links, horizontal, y=88 ═══ -->
-          <!-- Alternating horizontal oval (rx 10 ry 6) and vertical oval (rx 6 ry 10) -->
-          <ellipse cx="98"  cy="88" rx="10" ry="6"  fill="rgba(215,162,14,.13)" stroke="#C09010" stroke-width="2.8"/>
-          <ellipse cx="78"  cy="88" rx="6"  ry="10" fill="rgba(215,162,14,.13)" stroke="#A67C0A" stroke-width="2.8"/>
-          <ellipse cx="58"  cy="88" rx="10" ry="6"  fill="rgba(215,162,14,.13)" stroke="#C09010" stroke-width="2.8"/>
-          <ellipse cx="38"  cy="88" rx="6"  ry="10" fill="rgba(215,162,14,.13)" stroke="#A67C0A" stroke-width="2.8"/>
-          <ellipse cx="18"  cy="88" rx="10" ry="6"  fill="rgba(215,162,14,.13)" stroke="#C09010" stroke-width="2.8"/>
-          <ellipse cx="-2"  cy="88" rx="6"  ry="10" fill="rgba(215,162,14,.13)" stroke="#A67C0A" stroke-width="2.8"/>
-
-          <!-- ═══ Right cable chain — 7 links ═══ -->
-          <ellipse cx="202" cy="88" rx="10" ry="6"  fill="rgba(215,162,14,.13)" stroke="#C09010" stroke-width="2.8"/>
-          <ellipse cx="222" cy="88" rx="6"  ry="10" fill="rgba(215,162,14,.13)" stroke="#A67C0A" stroke-width="2.8"/>
-          <ellipse cx="242" cy="88" rx="10" ry="6"  fill="rgba(215,162,14,.13)" stroke="#C09010" stroke-width="2.8"/>
-          <ellipse cx="262" cy="88" rx="6"  ry="10" fill="rgba(215,162,14,.13)" stroke="#A67C0A" stroke-width="2.8"/>
-          <ellipse cx="282" cy="88" rx="10" ry="6"  fill="rgba(215,162,14,.13)" stroke="#C09010" stroke-width="2.8"/>
-          <ellipse cx="302" cy="88" rx="6"  ry="10" fill="rgba(215,162,14,.13)" stroke="#A67C0A" stroke-width="2.8"/>
-
-          <!-- ═══ Star of David — center (150, 88), R=58 ═══
-               Triangle ▲: top(150,30) BL(99.8,117) BR(200.2,117)
-               Triangle ▽: bottom(150,146) TL(99.8,59) TR(200.2,59)
-               Inner hex:  L(130.1,88) UL(140.1,59) UR(159.9,59)
-                           R(169.9,88) LR(159.9,117) LL(140.1,117)      ═══ -->
-          <g filter="url(#cg-sf)">
-            <!-- Flat gold base — both full triangles painted gold first -->
-            <polygon points="150,30 99.8,117 200.2,117" fill="#C89012"/>
-            <polygon points="150,146 99.8,59 200.2,59"  fill="#C89012"/>
-
-            <!-- Green malachite inlay — 6 triangular tips only -->
-            <polygon points="150,30  140.1,59  159.9,59"   fill="url(#cg-grn)"/><!-- top    -->
-            <polygon points="150,146 159.9,117 140.1,117"  fill="url(#cg-grn)"/><!-- bottom -->
-            <polygon points="99.8,59  140.1,59  130.1,88"  fill="url(#cg-grn)"/><!-- TL     -->
-            <polygon points="200.2,59 159.9,59  169.9,88"  fill="url(#cg-grn)"/><!-- TR     -->
-            <polygon points="99.8,117 130.1,88  140.1,117" fill="url(#cg-grn)"/><!-- BL     -->
-            <polygon points="200.2,117 169.9,88 159.9,117" fill="url(#cg-grn)"/><!-- BR     -->
-
-            <!-- Gold frame — thick strokes on both triangles create the border grid -->
-            <polygon points="150,30 99.8,117 200.2,117"  fill="none" stroke="#D0A016" stroke-width="6" stroke-linejoin="miter"/>
-            <polygon points="150,146 99.8,59 200.2,59"   fill="none" stroke="#D0A016" stroke-width="6" stroke-linejoin="miter"/>
+          <!-- ═══ CHAIN FROM TOP — catenary curve, upper-left → bail ═══ -->
+          <!-- Guide path: M 90,0 C 55,72 125,105 190,138 -->
+          <path d="M 90,0 C 55,72 125,105 190,138" fill="none" stroke="#7A5500" stroke-width="2.8" opacity="0.28"/>
+          <g filter="url(#cg-cs)">
+            <!-- Links at t≈0.00, 0.13, 0.26, 0.40, 0.54, 0.68, 0.82, 0.94 -->
+            <ellipse cx="0" cy="0" rx="9" ry="4.5" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(90, 2) rotate(108)"/>
+            <ellipse cx="0" cy="0" rx="4.5" ry="9" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(86, 24) rotate(108)"/>
+            <ellipse cx="0" cy="0" rx="9" ry="4.5" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(88, 47) rotate(82)"/>
+            <ellipse cx="0" cy="0" rx="4.5" ry="9" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(99, 68) rotate(82)"/>
+            <ellipse cx="0" cy="0" rx="9" ry="4.5" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(116, 87) rotate(56)"/>
+            <ellipse cx="0" cy="0" rx="4.5" ry="9" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(137, 105) rotate(56)"/>
+            <ellipse cx="0" cy="0" rx="9" ry="4.5" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(160, 121) rotate(44)"/>
+            <ellipse cx="0" cy="0" rx="4.5" ry="9" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(178, 133) rotate(44)"/>
           </g>
 
-          <!-- ═══ חי letters — dark gold, raised look ═══ -->
-          <text x="150" y="88"
+          <!-- ═══ CHAIN FROM RIGHT — mostly horizontal, right edge → bail ═══ -->
+          <!-- Guide path: M 380,108 C 328,118 262,124 190,138 -->
+          <path d="M 380,108 C 328,118 262,124 190,138" fill="none" stroke="#7A5500" stroke-width="2.8" opacity="0.28"/>
+          <g filter="url(#cg-cs)">
+            <ellipse cx="0" cy="0" rx="9" ry="4.5" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(376, 109) rotate(10)"/>
+            <ellipse cx="0" cy="0" rx="4.5" ry="9" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(353, 113) rotate(100)"/>
+            <ellipse cx="0" cy="0" rx="9" ry="4.5" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(327, 117) rotate(11)"/>
+            <ellipse cx="0" cy="0" rx="4.5" ry="9" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(299, 122) rotate(101)"/>
+            <ellipse cx="0" cy="0" rx="9" ry="4.5" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(268, 127) rotate(12)"/>
+            <ellipse cx="0" cy="0" rx="4.5" ry="9" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(236, 132) rotate(102)"/>
+            <ellipse cx="0" cy="0" rx="9" ry="4.5" fill="url(#cg-gld)" stroke="#B08010" stroke-width="1.6" transform="translate(210, 136) rotate(14)"/>
+          </g>
+
+          <!-- ═══ BAIL — pendant hanger ring ═══ -->
+          <ellipse cx="190" cy="138" rx="15" ry="9.5" fill="none" stroke="#E0B820" stroke-width="4"/>
+          <ellipse cx="190" cy="138" rx="11" ry="6.5" fill="#C89012" opacity="0.65"/>
+          <ellipse cx="190" cy="135" rx="7" ry="3.5" fill="rgba(255,230,100,0.35)"/>
+
+          <!-- ═══ Star of David — center (190, 215), R=75 ═══
+               Triangle ▲: top(190,140) BL(125.1,252.5) BR(254.9,252.5)
+               Triangle ▽: bottom(190,290) TL(125.1,177.5) TR(254.9,177.5)
+               Inner hex:  L(164.3,215) UL(177.2,177.5) UR(202.8,177.5)
+                           R(215.7,215) LR(202.8,252.5) LL(177.2,252.5)   ═══ -->
+          <g filter="url(#cg-sf)">
+            <!-- Gold base triangles -->
+            <polygon points="190,140 125.1,252.5 254.9,252.5" fill="#C89012"/>
+            <polygon points="190,290 125.1,177.5 254.9,177.5" fill="#C89012"/>
+
+            <!-- Malachite tips -->
+            <polygon points="190,140  177.2,177.5 202.8,177.5" fill="url(#cg-grn)"/>
+            <polygon points="190,290  202.8,252.5 177.2,252.5" fill="url(#cg-grn)"/>
+            <polygon points="125.1,177.5 177.2,177.5 164.3,215" fill="url(#cg-grn)"/>
+            <polygon points="254.9,177.5 202.8,177.5 215.7,215" fill="url(#cg-grn)"/>
+            <polygon points="125.1,252.5 164.3,215 177.2,252.5" fill="url(#cg-grn)"/>
+            <polygon points="254.9,252.5 215.7,215 202.8,252.5" fill="url(#cg-grn)"/>
+
+            <!-- Gold frame — thick border strokes -->
+            <polygon points="190,140 125.1,252.5 254.9,252.5" fill="none" stroke="#E0B820" stroke-width="7" stroke-linejoin="miter"/>
+            <polygon points="190,290 125.1,177.5 254.9,177.5" fill="none" stroke="#E0B820" stroke-width="7" stroke-linejoin="miter"/>
+          </g>
+
+          <!-- ═══ חי letters — raised, dark gold ═══ -->
+          <text x="190" y="215"
                 text-anchor="middle"
                 dominant-baseline="middle"
                 font-family="Georgia,'Times New Roman',serif"
-                font-size="34" font-weight="bold"
+                font-size="46" font-weight="bold"
                 fill="#6B3800"
                 filter="url(#cg-tf)">חי</text>
         </svg>

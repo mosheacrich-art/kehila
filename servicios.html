@@ -24,8 +24,9 @@
     .sv-grid .sv-card:nth-child(1) { grid-column: 1 / 3; }
     .sv-grid .sv-card:nth-child(2) { grid-column: 3 / 5; }
     .sv-grid .sv-card:nth-child(3) { grid-column: 5 / 7; }
-    .sv-grid .sv-card:nth-child(4) { grid-column: 2 / 4; }
-    .sv-grid .sv-card:nth-child(5) { grid-column: 4 / 6; }
+    .sv-grid .sv-card:nth-child(4) { grid-column: 1 / 3; }
+    .sv-grid .sv-card:nth-child(5) { grid-column: 3 / 5; }
+    .sv-grid .sv-card:nth-child(6) { grid-column: 5 / 7; }
 
     @media (max-width: 700px) {
       .sv-grid {
@@ -256,6 +257,34 @@
      steps: [...] → formulario multi-paso
   ══════════════════════════════════════ */
   var SERVICES = [
+    {
+      id: 'tenyad',
+      gradient: 'linear-gradient(140deg,#0d3320 0%,#1a6640 60%,#0d3320 100%)',
+      image: null,
+      name: 'Ten Yad',
+      subtitle: 'Ayuda y voluntariado comunitario',
+      desc: 'Ten Yad conecta personas con oportunidades de ayudar, apoyar y fortalecer a la comunidad de forma simple y cercana. Cada gesto cuenta.',
+      steps: [
+        {
+          title: '¿Cómo te gustaría ayudar?',
+          fields: [
+            { id: 'forma_ayuda', label: '¿Cómo te gustaría ayudar?', type: 'select', required: true,
+              options: ['Ser voluntario/a', 'Donar alimentos al banco de alimentos', 'Donar una cesta familiar', 'Colaborar con el pago de un piso de protección', 'Otra forma de ayuda'] },
+            { id: 'area_ayuda', label: '¿En qué área podrías ayudar?', type: 'textarea', required: false,
+              placeholder: 'Cuéntanos cómo podrías colaborar...', hint: 'Rellena este campo si has seleccionado "Otra forma de ayuda" u quieres añadir más detalles' }
+          ]
+        },
+        {
+          title: 'Tus datos',
+          fields: [
+            { id: 'nombre',    label: 'Nombre',               type: 'text',  required: true,  placeholder: 'Tu nombre completo' },
+            { id: 'telefono',  label: 'Teléfono',             type: 'tel',   required: true,  placeholder: '+34 600 000 000' },
+            { id: 'email',     label: 'Correo electrónico',   type: 'email', required: true,  placeholder: 'correo@ejemplo.com' },
+            { id: 'notas',     label: 'Notas adicionales',    type: 'textarea', required: false, placeholder: 'Disponibilidad, días, cualquier detalle que quieras compartir...' }
+          ]
+        }
+      ]
+    },
     {
       id: 'teyad',
       gradient: 'linear-gradient(140deg,#1a2a4a 0%,#2d4a82 60%,#1a2a4a 100%)',

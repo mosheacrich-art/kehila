@@ -1,6 +1,6 @@
 # Kehila — Jabad Barcelona · Registro de Progreso
 
-> Ultima actualizacion: 21 abril 2026
+> Ultima actualizacion: 18 mayo 2026
 > Estado: **Backend Supabase conectado — Analytics real — Legal completo — Listo para stores**
 
 ---
