@@ -603,8 +603,16 @@
       width: 100%; height: 100%;
       display: flex; align-items: center; justify-content: center;
     }
-    @media (max-width: 600px) { .shabat-banner-right { width: 55%; opacity: 0.4; } }
-    @media (max-width: 480px) { .shabat-banner-right { display: none; } }
+    @media (max-width: 600px) {
+      .shabat-banner-right {
+        width: 100%; height: 100%;
+        top: 0; right: 0;
+        opacity: 0.18;
+        mix-blend-mode: screen;
+      }
+      .shabat-banner-right::before { display: none; }
+      .shabat-banner-photo { object-position: right center; }
+    }
 
     .shabat-card-top {
       display: flex;
