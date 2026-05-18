@@ -82,7 +82,15 @@
     /* Areas grid - 3 columnas */
     .areas-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-bottom: 40px; }
     @media (max-width: 860px) { .areas-grid { grid-template-columns: repeat(2,1fr); } }
-    @media (max-width: 540px) { .areas-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 540px) {
+      .areas-grid {
+        display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 14px;
+        padding: 4px 0 16px; scrollbar-width: none; scroll-snap-type: x mandatory;
+        margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px;
+      }
+      .areas-grid::-webkit-scrollbar { display: none; }
+      .areas-grid .area-card { flex: 0 0 78vw; scroll-snap-align: start; }
+    }
 
     /* Historial Tzedaka */
     .tzedaka-block {
@@ -565,20 +573,6 @@
 
     </div><!-- /areas-grid -->
 
-    <!-- HISTORIAL TZEDAKA -->
-    <div class="tzedaka-block">
-      <div class="tzedaka-header">
-        <div class="tzedaka-title">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
-          Mi historial de Tzedaka
-        </div>
-        <div class="tzedaka-total" id="tzedaka-total">—</div>
-      </div>
-      <div class="tzedaka-list" id="tzedaka-list">
-        <p class="tzedaka-empty">Cargando...</p>
-      </div>
-    </div>
-
     <!-- CHAI CLUB BANNER -->
     <div class="chai-banner">
       <div>
@@ -672,6 +666,20 @@
                 fill="#6B3800"
                 filter="url(#cg-tf)">חי</text>
         </svg>
+      </div>
+    </div>
+
+    <!-- HISTORIAL TZEDAKA -->
+    <div class="tzedaka-block">
+      <div class="tzedaka-header">
+        <div class="tzedaka-title">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+          Mi historial de Tzedaka
+        </div>
+        <div class="tzedaka-total" id="tzedaka-total">—</div>
+      </div>
+      <div class="tzedaka-list" id="tzedaka-list">
+        <p class="tzedaka-empty">Cargando...</p>
       </div>
     </div>
 
