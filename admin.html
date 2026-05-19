@@ -5977,6 +5977,7 @@
         + '<td style="font-weight:700;">€' + ((r.total || 0).toFixed ? (r.total||0).toFixed(0) : (r.total||0)) + '</td>'
         + '<td><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:.72rem;font-weight:700;background:' + bg + ';color:' + color + ';">' + escHtml(r.estado || '—') + '</span></td>'
         + '<td style="white-space:nowrap;">'
+        + '<button onclick="mikveEditarCita(\'' + r.id + '\')">Editar</button> '
         + (r.estado !== 'completada' ? '<button onclick="mikveSetEstado(\'' + r.id + '\',\'completada\')" class="btn btn-primary btn-sm" style="margin-right:6px;">✓ Completada</button>' : '')
         + (r.estado !== 'cancelada'  ? '<button onclick="mikveSetEstado(\'' + r.id + '\',\'cancelada\')"  style="padding:5px 10px;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);background:none;font-size:.75rem;cursor:pointer;font-family:var(--font-ui);">Cancelar</button>' : '')
         + (r.notas ? ' <button onclick="mikveVerNotas(\'' + escHtml(r.notas).replace(/'/g,'\\\'').replace(/\n/g,' ') + '\')" title="Ver notas" style="padding:5px 8px;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);background:none;cursor:pointer;font-size:.75rem;font-family:var(--font-ui);">Notas</button>' : '')
@@ -5999,6 +6000,38 @@
 
   function mikveVerNotas(notas) {
     alert('Notas:\n\n' + notas);
+  }
+
+  function mikveEditarCita(id) {
+    var r = _mkvReservas.find(function(x){ return x.id === id; });
+    if (!r) return;
+    document.getElementById('mkv-edit-id').value    = id;
+    document.getElementById('mkv-edit-fecha').value = r.fecha || '';
+    document.getElementById('mkv-edit-hora').value  = (r.hora || '').slice(0,5);
+    document.getElementById('mkv-edit-svc').value   = r.servicio || '';
+    document.getElementById('mkv-edit-notas').value = r.notas || '';
+    document.getElementById('modal-mkv-edit').classList.remove('hidden');
+  }
+
+  async function mikveGuardarEdicion() {
+    var id    = document.getElementById('mkv-edit-id').value;
+    var fecha = document.getElementById('mkv-edit-fecha').value;
+    var hora  = document.getElementById('mkv-edit-hora').value;
+    var svc   = document.getElementById('mkv-edit-svc').value.trim();
+    var notas = document.getElementById('mkv-edit-notas').value.trim();
+    if (!fecha || !hora || !svc) { showToast('Rellena fecha, hora y servicio', 'error'); return; }
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
+    try {
+      var { error } = await sb.from('mikve_reservas')
+        .update({ fecha: fecha, hora: hora + ':00', servicio: svc, notas: notas || null })
+        .eq('id', id);
+      if (error) throw error;
+      var r = _mkvReservas.find(function(x){ return x.id === id; });
+      if (r) { r.fecha = fecha; r.hora = hora + ':00'; r.servicio = svc; r.notas = notas || null; }
+      document.getElementById('modal-mkv-edit').classList.add('hidden');
+      mikveRenderCitas();
+      showToast('Cita actualizada', 'success');
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
   }
 
   function mikveRenderFinanzas() {
@@ -6031,5 +6064,40 @@
   }
 
   </script>
+
+  <!-- ── Modal editar cita mikve ── -->
+  <div class="modal-overlay hidden" id="modal-mkv-edit">
+    <div class="modal-box" style="max-width:440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Editar cita</h3>
+        <button class="modal-close" onclick="document.getElementById('modal-mkv-edit').classList.add('hidden')">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;padding:20px 24px;">
+        <input type="hidden" id="mkv-edit-id">
+        <div>
+          <label class="form-label">Fecha</label>
+          <input type="date" id="mkv-edit-fecha" class="form-input">
+        </div>
+        <div>
+          <label class="form-label">Hora</label>
+          <input type="time" id="mkv-edit-hora" class="form-input">
+        </div>
+        <div>
+          <label class="form-label">Servicio</label>
+          <input type="text" id="mkv-edit-svc" class="form-input" placeholder="Ej: Ducha">
+        </div>
+        <div>
+          <label class="form-label">Notas</label>
+          <textarea id="mkv-edit-notas" class="form-input" rows="3" style="resize:vertical;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:16px 24px;display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-ghost" onclick="document.getElementById('modal-mkv-edit').classList.add('hidden')">Cancelar</button>
+        <button class="btn btn-primary" onclick="mikveGuardarEdicion()">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
