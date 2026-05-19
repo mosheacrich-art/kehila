@@ -446,6 +446,14 @@
           ]
         }
       ]
+    },
+    {
+      id: 'mikve',
+      name: 'Mikve Barcelona',
+      subtitle: 'Reserva tu cita en el mikve de Jabad Barcelona',
+      gradient: 'linear-gradient(135deg,#0D2545 0%,#1a4a70 60%,#2a7a9e 100%)',
+      image: 'img/mikve-2.jpg',
+      link: 'mikve.html'
     }
   ];
 
@@ -515,7 +523,7 @@
 
     SERVICES.forEach(function(svc) {
       var imgStyle = svc.image ? 'background-image:url(' + svc.image + ');' : 'background:' + svc.gradient + ';';
-      var ctaLabel = svc.steps ? 'Solicitar' : 'Ver más';
+      var ctaLabel = svc.link ? 'Reservar' : (svc.steps ? 'Solicitar' : 'Ver más');
       var adminBtn = isAdmin
         ? '<label class="sv-admin-edit" title="Cambiar foto" onclick="event.stopPropagation()">'
           + '<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316ZM16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"/></svg>'
@@ -539,6 +547,7 @@
       card.addEventListener('click', function() {
         var svc = SERVICES.find(function(s) { return s.id === card.dataset.service; });
         if (!svc) return;
+        if (svc.link) { window.location.href = svc.link; return; }
         state.data = {}; state.fileUploads = {};
         if (svc.steps) showView('intro', svc.id);
         else showView('detalle', svc.id);
