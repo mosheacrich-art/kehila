@@ -188,9 +188,9 @@
     .mk-mode-btn.active { background: var(--mk-gold); color: #fff; font-weight: 700; }
 
     /* Gallery */
-    .mk-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 18px 0 0; border-radius: 14px; overflow: hidden; position: relative; z-index: 1; }
-    .mk-gallery img { width: 100%; height: 120px; object-fit: cover; display: block; }
-    @media (max-width: 480px) { .mk-gallery { grid-template-columns: 1fr 1fr; } .mk-gallery img:last-child { grid-column: 1 / -1; height: 100px; } }
+    .mk-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 20px -24px 0; border-radius: 14px; overflow: hidden; position: relative; z-index: 1; }
+    .mk-gallery img { width: 100%; height: 160px; object-fit: cover; display: block; }
+    @media (max-width: 480px) { .mk-gallery { grid-template-columns: 1fr 1fr; margin: 16px -24px 0; } .mk-gallery img { height: 110px; } .mk-gallery img:last-child { grid-column: 1 / -1; height: 100px; } }
 
     /* Reserva cards */
     .mk-reserva-empty { text-align: center; padding: 48px 24px; color: var(--mk-muted); }
