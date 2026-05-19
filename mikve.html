@@ -337,7 +337,7 @@
   const sb = (typeof getSupabase === 'function') ? getSupabase() : null;
   const booking = { step:1, date:null, service:null, time:null, notes:'', donation:0, donationLabel:'No', card:null, confirmed:false };
 
-  document.addEventListener('DOMContentLoaded', () => { requireAuth(); initNav('mikve'); renderStep(); });
+  document.addEventListener('DOMContentLoaded', () => { requireAuth(); initNav('mikve'); getMikveServices(); renderStep(); });
 
   const BCN_LAT = 41.3851 * Math.PI / 180;
   const BCN_LON = 2.1734;
@@ -417,8 +417,26 @@
     return ph + renderCalendar();
   }
 
+  // Services cache — populated from Supabase mikve_servicios, fallback to defaults
+  let _mkvCachedServices = null;
+  async function getMikveServices() {
+    if (_mkvCachedServices) return _mkvCachedServices;
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) {
+      try {
+        const { data } = await sb.from('mikve_servicios').select('*').eq('activo', true).order('orden');
+        if (data && data.length) {
+          _mkvCachedServices = data.map((s,i) => ({ id: 'svc-' + i, name: s.nombre, price: Number(s.precio) }));
+          return _mkvCachedServices;
+        }
+      } catch(e) {}
+    }
+    _mkvCachedServices = [{id:'ducha',name:'Ducha',price:30},{id:'bano',name:'Baño',price:30}];
+    return _mkvCachedServices;
+  }
+
   function renderStep2() {
-    const services = [{id:'ducha',name:'Ducha',price:30},{id:'bano',name:'Baño',price:30}];
+    const services = _mkvCachedServices || [{id:'ducha',name:'Ducha',price:30},{id:'bano',name:'Baño',price:30}];
     const cards = services.map(s => {
       const sel = booking.service?.id===s.id;
       return `<div class="mk-option-card ${sel?'selected':''}" onclick="selectService('${s.id}','${s.name}',${s.price})">
