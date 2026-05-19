@@ -11,562 +11,215 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
   <style>
-    /* ─── Layout ─────────────────────────────────────────────── */
     :root {
+      --mk-parchment: #EDE7DC;
+      --mk-surface:   #FDFAF5;
       --mk-navy:      #0D2545;
-      --mk-navy2:     #1a4a70;
-      --mk-gold:      #C8A84B;
-      --mk-gold-bg:   #F5E6C3;
-      --mk-gold-pale: #FDF7EC;
-      --mk-cream:     #FAF7F2;
-      --mk-border:    #E8E0D0;
+      --mk-gold:      #B8963E;
+      --mk-gold-bg:   #F0E3C0;
+      --mk-gold-pale: #FBF5E4;
+      --mk-border:    #DDD5C7;
       --mk-text:      #0D2545;
-      --mk-muted:     #6B7A8D;
+      --mk-muted:     #8A7E73;
     }
-    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; background: var(--mk-cream); }
+    .main-content { margin-left: var(--sidebar-width); min-height: 100vh; background: var(--mk-parchment); }
     @media (max-width: 768px) { .main-content { margin-left: 0; } }
 
-    /* ─── Hero ────────────────────────────────────────────────── */
-    .mk-hero {
-      position: relative;
-      height: 200px;
-      overflow: hidden;
-    }
-    @media (max-width: 768px) { .mk-hero { height: 160px; } }
-    .mk-hero-img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      object-position: center 40%;
-    }
-    .mk-hero-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to bottom, rgba(13,37,69,0.55) 0%, rgba(13,37,69,0.75) 100%);
-    }
-    .mk-hero-text {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 4px;
-    }
-    .mk-hero-title {
-      font-family: Georgia, 'Times New Roman', serif;
-      font-size: 2rem; font-weight: 700;
-      color: #fff; letter-spacing: 0.02em;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.3);
-    }
-    @media (max-width: 480px) { .mk-hero-title { font-size: 1.5rem; } }
-    /* Wave bottom */
-    .mk-hero::after {
-      content: '';
-      position: absolute; bottom: -1px; left: 0; right: 0;
-      height: 40px;
-      background: var(--mk-cream);
-      clip-path: ellipse(55% 100% at 50% 100%);
-    }
+    /* Page header */
+    .mk-page-header { background: var(--mk-navy); position: relative; padding: 44px 24px 0; text-align: center; }
+    .mk-page-header-inner { position: relative; z-index: 1; }
+    .mk-page-header h1 { font-family: var(--font-brand, Georgia, serif); font-size: 2rem; font-weight: 700; color: #fff; margin: 0 0 5px; letter-spacing: -0.01em; }
+    .mk-page-header p { color: rgba(255,255,255,0.5); font-size: 0.8125rem; margin: 0 0 28px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .mk-header-wave { width: 100%; height: 44px; display: block; position: relative; z-index: 1; }
+    @media (max-width: 768px) { .mk-page-header { padding: 56px 24px 0; } .mk-page-header h1 { font-size: 1.625rem; } }
 
-    /* ─── Container ───────────────────────────────────────────── */
-    .mk-container {
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 0 20px 100px;
-    }
-    @media (max-width: 480px) { .mk-container { padding: 0 12px 100px; } }
+    /* Reset button */
+    .mk-reset-btn { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; z-index: 2; }
+    .mk-reset-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+    .mk-reset-btn svg { width: 15px; height: 15px; }
 
-    /* ─── Title bar ───────────────────────────────────────────── */
-    .mk-titlebar {
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      margin-bottom: 20px;
-    }
-    .mk-titlebar h2 {
-      font-family: Georgia, serif;
-      font-size: 1.5rem; font-weight: 700;
-      color: var(--mk-navy); margin: 0;
-    }
-    .mk-reset-btn {
-      width: 34px; height: 34px; border-radius: 8px;
-      background: #f0f4f8; border: 1.5px solid var(--mk-border);
-      color: var(--mk-navy); cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s;
-    }
-    .mk-reset-btn:hover { background: var(--mk-gold-bg); }
-    .mk-reset-btn svg { width: 16px; height: 16px; }
+    /* Container */
+    .mk-container { max-width: 660px; margin: 0 auto; padding: 20px 20px 100px; }
+    @media (max-width: 480px) { .mk-container { padding: 16px 14px 100px; } }
 
-    /* ─── Step tabs ───────────────────────────────────────────── */
-    .mk-steps {
-      display: flex; background: #fff;
-      border: 1.5px solid var(--mk-border);
-      border-radius: 14px; padding: 4px;
-      margin-bottom: 20px; gap: 2px;
-      overflow-x: auto; scrollbar-width: none;
-    }
+    /* Step tabs */
+    .mk-steps { display: flex; background: var(--mk-surface); border: 1px solid var(--mk-border); border-radius: 100px; padding: 5px; margin-bottom: 20px; gap: 2px; overflow-x: auto; scrollbar-width: none; }
     .mk-steps::-webkit-scrollbar { display: none; }
-    .mk-step-btn {
-      flex: 1; min-width: 80px;
-      display: flex; align-items: center; justify-content: center; gap: 5px;
-      padding: 9px 8px; border-radius: 10px;
-      border: none; background: none; cursor: pointer;
-      font-size: 0.78rem; font-weight: 500;
-      color: var(--mk-muted); white-space: nowrap;
-      font-family: inherit; transition: all 0.15s;
-    }
-    .mk-step-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
-    .mk-step-btn.active {
-      background: var(--mk-gold-bg);
-      color: var(--mk-navy); font-weight: 700;
-    }
+    .mk-step-btn { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 8px 10px; border-radius: 100px; border: none; background: none; cursor: pointer; font-size: 0.78rem; font-weight: 500; color: var(--mk-muted); white-space: nowrap; font-family: inherit; transition: all 0.2s; }
+    .mk-step-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .mk-step-btn.active { background: var(--mk-gold); color: #fff; font-weight: 700; }
     .mk-step-btn.done { color: var(--mk-navy); }
-    .mk-step-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    @media (max-width: 480px) {
-      .mk-step-btn span { display: none; }
-      .mk-step-btn svg { width: 18px; height: 18px; }
-      .mk-step-btn { min-width: 40px; padding: 10px 6px; }
-    }
+    .mk-step-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    @media (max-width: 480px) { .mk-step-btn span { display: none; } .mk-step-btn svg { width: 16px; height: 16px; } .mk-step-btn { min-width: 36px; padding: 9px 8px; } }
 
-    /* ─── Summary bar ─────────────────────────────────────────── */
-    .mk-summary {
-      display: flex; align-items: flex-start; gap: 14px;
-      background: var(--mk-gold-pale);
-      border: 1.5px solid var(--mk-gold-bg);
-      border-radius: 14px; padding: 16px 18px;
-      margin-bottom: 14px;
-    }
-    .mk-summary-icon {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: var(--mk-gold-bg);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      color: var(--mk-navy);
-    }
-    .mk-summary-icon svg { width: 20px; height: 20px; }
-    .mk-summary-text { line-height: 1.5; }
-    .mk-summary-date { font-size: 1rem; font-weight: 700; color: var(--mk-navy); }
-    .mk-summary-detail { font-size: 0.8125rem; color: var(--mk-muted); }
+    /* Summary */
+    .mk-summary { display: flex; align-items: center; gap: 14px; background: var(--mk-gold-pale); border: 1px solid var(--mk-gold-bg); border-radius: 16px; padding: 14px 18px; margin-bottom: 12px; }
+    .mk-summary-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--mk-gold-bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--mk-navy); }
+    .mk-summary-icon svg { width: 17px; height: 17px; }
+    .mk-summary-text { line-height: 1.4; }
+    .mk-summary-date { font-size: 0.9375rem; font-weight: 700; color: var(--mk-navy); }
+    .mk-summary-detail { font-size: 0.8rem; color: var(--mk-muted); margin-top: 2px; }
 
-    /* ─── Placeholder bar ────────────────────────────────────── */
-    .mk-placeholder {
-      display: flex; align-items: center; gap: 12px;
-      background: #f5f5f5; border: 1.5px solid var(--mk-border);
-      border-radius: 14px; padding: 18px;
-      margin-bottom: 14px;
-      color: var(--mk-gold); font-weight: 600; font-size: 0.9375rem;
-    }
-    .mk-placeholder svg { width: 22px; height: 22px; flex-shrink: 0; }
+    /* Placeholder */
+    .mk-placeholder { display: flex; align-items: center; gap: 10px; background: var(--mk-surface); border: 1px dashed var(--mk-border); border-radius: 16px; padding: 16px 18px; margin-bottom: 12px; color: var(--mk-muted); font-size: 0.875rem; }
+    .mk-placeholder svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--mk-gold); }
 
-    /* ─── Calendar ────────────────────────────────────────────── */
-    .mk-cal {
-      background: #fff;
-      border: 1.5px solid var(--mk-border);
-      border-radius: 16px;
-      padding: 24px;
-    }
-    .mk-cal-nav {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .mk-cal-nav-btn {
-      width: 36px; height: 36px; border-radius: 50%;
-      border: 1.5px solid var(--mk-border);
-      background: #fff; color: var(--mk-navy);
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s, border-color 0.15s;
-    }
+    /* Calendar */
+    .mk-cal { background: var(--mk-surface); border: 1px solid var(--mk-border); border-radius: 20px; padding: 24px 18px 28px; }
+    .mk-cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+    .mk-cal-nav-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--mk-border); background: transparent; color: var(--mk-navy); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
     .mk-cal-nav-btn:hover { background: var(--mk-gold-bg); border-color: var(--mk-gold); }
     .mk-cal-nav-btn svg { width: 16px; height: 16px; }
-    .mk-cal-month {
-      font-family: Georgia, serif;
-      font-size: 1.25rem; font-weight: 700;
-      color: var(--mk-navy);
-    }
-    .mk-cal-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-    }
-    .mk-cal-dow {
-      text-align: center; font-size: 0.7rem; font-weight: 600;
-      color: var(--mk-muted); padding: 4px 0 8px;
-      text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    .mk-cal-dow.shabbos { color: #b08d57; }
-    .mk-cal-day {
-      aspect-ratio: 1;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 10px; font-size: 0.875rem; font-weight: 500;
-      color: var(--mk-navy); cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-      border: 1.5px solid transparent;
-    }
-    .mk-cal-day:hover:not(.disabled):not(.selected) { background: var(--mk-gold-pale); }
+    .mk-cal-month { font-family: var(--font-brand, Georgia, serif); font-size: 1.2rem; font-weight: 700; color: var(--mk-navy); }
+    .mk-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .mk-cal-dow { text-align: center; font-size: 0.67rem; font-weight: 600; color: var(--mk-muted); padding: 0 0 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .mk-cal-dow.shabbos { color: var(--mk-gold); }
+    .mk-cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.875rem; font-weight: 500; color: var(--mk-navy); cursor: pointer; transition: all 0.15s; border: 1.5px solid transparent; }
+    .mk-cal-day:hover:not(.disabled):not(.selected) { background: var(--mk-gold-bg); }
     .mk-cal-day.other-month { color: #ccc; pointer-events: none; }
     .mk-cal-day.today { border-color: var(--mk-gold); color: var(--mk-gold); font-weight: 700; }
-    .mk-cal-day.selected {
-      background: var(--mk-gold-bg); border-color: var(--mk-gold);
-      color: var(--mk-navy); font-weight: 700;
-    }
+    .mk-cal-day.selected { background: var(--mk-gold); border-color: var(--mk-gold); color: #fff; font-weight: 700; }
     .mk-cal-day.disabled { color: #ccc; cursor: not-allowed; }
 
-    /* ─── Service cards ───────────────────────────────────────── */
+    /* Service cards */
     .mk-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 480px) { .mk-options { grid-template-columns: 1fr; } }
-    .mk-option-card {
-      background: #fff; border: 1.5px solid var(--mk-border);
-      border-radius: 14px; padding: 18px;
-      display: flex; align-items: center; gap: 14px;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .mk-option-card.selected {
-      border-color: var(--mk-gold);
-      box-shadow: 0 0 0 3px rgba(200,168,75,0.15);
-    }
-    .mk-option-icon {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: #f0f4f8;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; color: var(--mk-navy);
-    }
+    .mk-option-card { background: var(--mk-surface); border: 1.5px solid var(--mk-border); border-radius: 18px; padding: 20px 16px; display: flex; align-items: center; gap: 13px; cursor: pointer; transition: all 0.2s; }
+    .mk-option-card:hover:not(.selected) { border-color: var(--mk-gold); }
+    .mk-option-card.selected { border-color: var(--mk-gold); background: var(--mk-gold-pale); box-shadow: 0 0 0 3px rgba(184,150,62,0.1); }
+    .mk-option-icon { width: 44px; height: 44px; border-radius: 14px; background: var(--mk-gold-bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--mk-navy); }
     .mk-option-icon svg { width: 22px; height: 22px; }
     .mk-option-info { flex: 1; }
     .mk-option-name { font-size: 1rem; font-weight: 700; color: var(--mk-navy); }
-    .mk-option-price { font-size: 0.8125rem; color: var(--mk-muted); margin-top: 2px; }
-    .mk-select-btn {
-      padding: 8px 16px; border-radius: 8px;
-      background: var(--mk-gold-bg); border: 1.5px solid var(--mk-gold);
-      color: var(--mk-navy); font-size: 0.875rem; font-weight: 600;
-      cursor: pointer; font-family: inherit;
-      transition: background 0.15s;
-      white-space: nowrap;
-    }
-    .mk-select-btn:hover { background: var(--mk-gold); }
-    .mk-select-btn.selected-btn { background: var(--mk-gold); }
+    .mk-option-price { font-size: 0.8rem; color: var(--mk-muted); margin-top: 3px; }
+    .mk-select-btn { padding: 7px 14px; border-radius: 10px; background: var(--mk-gold-bg); border: 1px solid var(--mk-gold); color: var(--mk-navy); font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+    .mk-select-btn:hover { background: var(--mk-gold); color: #fff; }
+    .mk-select-btn.selected-btn { background: var(--mk-gold); color: #fff; }
 
-    /* ─── Time info bar ───────────────────────────────────────── */
-    .mk-time-info {
-      background: #f5f5f5; border: 1.5px solid var(--mk-border);
-      border-radius: 14px; padding: 16px 18px;
-      margin-bottom: 14px; text-align: center;
-    }
-    .mk-time-info-title { font-weight: 700; color: var(--mk-navy); font-size: 0.9375rem; margin-bottom: 4px; }
-    .mk-time-info-sub { font-size: 0.8125rem; color: var(--mk-muted); line-height: 1.6; }
+    /* Time info */
+    .mk-time-info { background: var(--mk-gold-pale); border: 1px solid var(--mk-gold-bg); border-radius: 16px; padding: 14px 18px; margin-bottom: 14px; text-align: center; }
+    .mk-time-info-title { font-weight: 700; color: var(--mk-navy); font-size: 0.875rem; margin-bottom: 5px; }
+    .mk-time-info-sub { font-size: 0.8rem; color: var(--mk-muted); line-height: 1.7; }
 
-    /* ─── Time slots ──────────────────────────────────────────── */
-    .mk-slot {
-      background: #fff; border: 1.5px solid var(--mk-border);
-      border-radius: 14px; padding: 16px 18px;
-      display: flex; align-items: center; gap: 14px;
-      margin-bottom: 10px;
-      transition: border-color 0.15s;
-    }
-    .mk-slot.selected { border-color: var(--mk-gold); background: var(--mk-gold-pale); }
-    .mk-slot-icon {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: #f0f4f8; color: var(--mk-navy);
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .mk-slot.selected .mk-slot-icon { background: var(--mk-gold-bg); }
-    .mk-slot-icon svg { width: 20px; height: 20px; }
-    .mk-slot-time { font-size: 1.5rem; font-weight: 700; color: var(--mk-navy); line-height: 1; }
-    .mk-slot-time span { font-size: 1rem; font-weight: 500; color: var(--mk-muted); margin-left: 3px; }
-    .mk-slot-sub { font-size: 0.75rem; color: var(--mk-muted); font-style: italic; margin-top: 3px; }
+    /* Slots */
+    .mk-slot { background: var(--mk-surface); border: 1px solid var(--mk-border); border-radius: 16px; padding: 15px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }
+    .mk-slot:hover:not(.selected) { border-color: var(--mk-gold); }
+    .mk-slot.selected { border-color: var(--mk-gold); background: var(--mk-gold-pale); box-shadow: 0 0 0 3px rgba(184,150,62,0.1); }
+    .mk-slot-icon { width: 40px; height: 40px; border-radius: 12px; background: var(--mk-gold-bg); color: var(--mk-navy); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+    .mk-slot.selected .mk-slot-icon { background: var(--mk-gold); color: #fff; }
+    .mk-slot-icon svg { width: 19px; height: 19px; }
+    .mk-slot-time { font-size: 1.375rem; font-weight: 700; color: var(--mk-navy); line-height: 1; }
+    .mk-slot-time span { font-size: 0.875rem; font-weight: 400; color: var(--mk-muted); margin-left: 2px; }
+    .mk-slot-sub { font-size: 0.75rem; color: var(--mk-muted); margin-top: 3px; }
     .mk-slot-flex { flex: 1; }
 
-    /* ─── Notes ───────────────────────────────────────────────── */
-    .mk-notes-box {
-      background: #fff; border: 1.5px solid var(--mk-border);
-      border-radius: 14px; padding: 20px;
-    }
-    .mk-notes-label { font-size: 0.875rem; font-weight: 600; color: var(--mk-navy); margin-bottom: 10px; display: block; }
-    .mk-notes-ta {
-      width: 100%; box-sizing: border-box;
-      border: 1.5px solid var(--mk-border); border-radius: 10px;
-      padding: 12px; font-size: 0.9rem; font-family: inherit;
-      color: var(--mk-text); resize: vertical; min-height: 110px;
-      transition: border-color 0.15s;
-    }
+    /* Notes */
+    .mk-notes-box { background: var(--mk-surface); border: 1px solid var(--mk-border); border-radius: 18px; padding: 22px; }
+    .mk-notes-label { font-size: 0.875rem; font-weight: 600; color: var(--mk-navy); margin-bottom: 12px; display: block; }
+    .mk-notes-ta { width: 100%; box-sizing: border-box; border: 1.5px solid var(--mk-border); border-radius: 12px; padding: 13px; font-size: 0.9rem; font-family: inherit; color: var(--mk-text); resize: vertical; min-height: 110px; background: transparent; transition: border-color 0.15s; }
     .mk-notes-ta:focus { outline: none; border-color: var(--mk-gold); }
     .mk-notes-hint { font-size: 0.75rem; color: var(--mk-muted); margin-top: 8px; }
 
-    /* ─── Donation ────────────────────────────────────────────── */
-    .mk-donation-intro {
-      background: #f5f5f5; border: 1.5px solid var(--mk-border);
-      border-radius: 14px; padding: 18px;
-      text-align: center; margin-bottom: 14px;
-      display: flex; align-items: center; gap: 14px;
-    }
-    .mk-donation-intro svg { width: 26px; height: 26px; color: var(--mk-muted); flex-shrink: 0; }
-    .mk-donation-title { font-weight: 700; color: var(--mk-navy); margin-bottom: 3px; }
-    .mk-donation-sub { font-size: 0.8125rem; color: var(--mk-muted); }
+    /* Donation */
+    .mk-donation-intro { background: var(--mk-gold-pale); border: 1px solid var(--mk-gold-bg); border-radius: 16px; padding: 16px 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 14px; }
+    .mk-donation-intro svg { width: 24px; height: 24px; color: var(--mk-gold); flex-shrink: 0; }
+    .mk-donation-title { font-weight: 700; color: var(--mk-navy); font-size: 0.9375rem; margin-bottom: 2px; }
+    .mk-donation-sub { font-size: 0.8rem; color: var(--mk-muted); }
     .mk-donation-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .mk-donation-opt {
-      background: #fff; border: 1.5px solid var(--mk-border);
-      border-radius: 14px; padding: 14px 16px;
-      display: flex; align-items: center; gap: 12px;
-      transition: border-color 0.15s;
-    }
+    .mk-donation-opt { background: var(--mk-surface); border: 1.5px solid var(--mk-border); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.15s; }
+    .mk-donation-opt:hover:not(.selected) { border-color: var(--mk-gold); }
     .mk-donation-opt.selected { border-color: var(--mk-gold); background: var(--mk-gold-pale); }
-    .mk-donation-badge {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: var(--mk-navy); color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
-    }
-    .mk-donation-badge.no { background: #e2e8f0; color: var(--mk-muted); font-size: 1.1rem; }
-    .mk-donation-amount { font-size: 1rem; font-weight: 600; color: var(--mk-navy); }
-    .mk-donation-custom {
-      grid-column: 1 / -1;
-    }
+    .mk-donation-badge { width: 36px; height: 36px; border-radius: 10px; background: var(--mk-navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .mk-donation-badge.no { background: var(--mk-gold-bg); color: var(--mk-muted); font-size: 1.1rem; }
+    .mk-donation-amount { font-size: 0.9375rem; font-weight: 600; color: var(--mk-navy); }
+    .mk-donation-custom { grid-column: 1 / -1; }
 
-    /* ─── Payment ─────────────────────────────────────────────── */
-    .mk-payment-layout {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
-    }
+    /* Payment */
+    .mk-payment-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     @media (max-width: 560px) { .mk-payment-layout { grid-template-columns: 1fr; } }
-    .mk-payment-summary {
-      background: #fff; border: 1.5px solid var(--mk-border);
-      border-radius: 14px; overflow: hidden;
-    }
-    .mk-payment-summary-header {
-      background: var(--mk-gold-pale);
-      border-bottom: 1.5px solid var(--mk-gold-bg);
-      padding: 14px 18px;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .mk-payment-summary-header-icon {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: var(--mk-gold-bg); color: var(--mk-navy);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .mk-payment-summary-header-icon svg { width: 20px; height: 20px; }
-    .mk-pay-date { font-size: 1rem; font-weight: 700; color: var(--mk-navy); }
-    .mk-payment-row {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 14px 18px;
-      border-bottom: 1px solid #f0f0f0;
-    }
+    .mk-payment-summary { background: var(--mk-surface); border: 1px solid var(--mk-border); border-radius: 18px; overflow: hidden; }
+    .mk-payment-summary-header { background: var(--mk-gold-pale); border-bottom: 1px solid var(--mk-gold-bg); padding: 15px 18px; display: flex; align-items: center; gap: 12px; }
+    .mk-payment-summary-header-icon { width: 38px; height: 38px; border-radius: 11px; background: var(--mk-gold-bg); color: var(--mk-navy); display: flex; align-items: center; justify-content: center; }
+    .mk-payment-summary-header-icon svg { width: 18px; height: 18px; }
+    .mk-pay-date { font-size: 0.9375rem; font-weight: 700; color: var(--mk-navy); }
+    .mk-payment-row { display: flex; align-items: flex-start; gap: 12px; padding: 13px 18px; border-bottom: 1px solid #ede7dc; }
     .mk-payment-row:last-child { border-bottom: none; }
-    .mk-pay-row-icon {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: #f5f5f5; color: var(--mk-navy);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; margin-top: 2px;
-    }
-    .mk-pay-row-icon svg { width: 16px; height: 16px; }
-    .mk-pay-row-label { font-size: 0.75rem; font-weight: 600; color: var(--mk-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    .mk-pay-row-value { font-size: 0.9rem; font-weight: 600; color: var(--mk-navy); margin-top: 2px; }
+    .mk-pay-row-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--mk-gold-bg); color: var(--mk-navy); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .mk-pay-row-icon svg { width: 14px; height: 14px; }
+    .mk-pay-row-label { font-size: 0.7rem; font-weight: 600; color: var(--mk-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .mk-pay-row-value { font-size: 0.875rem; font-weight: 600; color: var(--mk-navy); margin-top: 2px; }
     .mk-pay-row-note { font-size: 0.75rem; color: var(--mk-muted); margin-top: 2px; line-height: 1.5; }
     .mk-pay-total { font-size: 1.1rem; font-weight: 700; color: var(--mk-navy); }
-    .mk-payment-method {
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .mk-payment-method-title {
-      background: var(--mk-gold-pale);
-      border: 1.5px solid var(--mk-gold-bg);
-      border-radius: 14px; padding: 14px 18px;
-      font-weight: 700; color: var(--mk-navy); text-align: center;
-      font-size: 0.9375rem;
-    }
-    .mk-add-card {
-      background: #fff; border: 1.5px solid var(--mk-border);
-      border-radius: 14px; padding: 16px 18px;
-      display: flex; align-items: center; gap: 12px;
-      cursor: pointer; transition: border-color 0.15s;
-    }
+    .mk-payment-method { display: flex; flex-direction: column; gap: 10px; }
+    .mk-payment-method-title { background: var(--mk-gold-pale); border: 1px solid var(--mk-gold-bg); border-radius: 14px; padding: 13px 18px; font-weight: 700; color: var(--mk-navy); text-align: center; font-size: 0.875rem; }
+    .mk-add-card { background: var(--mk-surface); border: 1.5px solid var(--mk-border); border-radius: 14px; padding: 16px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color 0.15s; }
     .mk-add-card:hover { border-color: var(--mk-gold); }
     .mk-add-card svg { width: 22px; height: 22px; color: var(--mk-navy); }
     .mk-add-card-label { flex: 1; font-size: 0.9375rem; font-weight: 600; color: var(--mk-navy); }
     .mk-add-card-arrow { color: var(--mk-muted); }
     .mk-add-card-arrow svg { width: 18px; height: 18px; }
 
-    /* ─── Bottom bar ──────────────────────────────────────────── */
-    .mk-bottom-bar {
-      background: transparent;
-      padding: 24px 0 0;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .mk-book-btn {
-      flex: 1;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 13px;
-      background: none; border: 2px solid rgba(255,255,255,0.25);
-      border-radius: 12px; color: rgba(255,255,255,0.6);
-      font-size: 1rem; font-weight: 700; font-family: inherit;
-      cursor: not-allowed; transition: all 0.2s; letter-spacing: 0.02em;
-    }
-    .mk-book-btn.ready {
-      background: var(--mk-gold); border-color: var(--mk-gold);
-      color: var(--mk-navy); cursor: pointer;
-    }
-    .mk-book-btn.ready:hover { background: #d4b55c; }
+    /* Bottom bar */
+    .mk-bottom-bar { padding: 20px 0 0; display: flex; align-items: center; gap: 12px; }
+    .mk-book-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 15px; background: none; border: 2px solid var(--mk-border); border-radius: 14px; color: var(--mk-muted); font-size: 1rem; font-weight: 700; font-family: inherit; cursor: not-allowed; transition: all 0.2s; }
+    .mk-book-btn.ready { background: var(--mk-gold); border-color: var(--mk-gold); color: #fff; cursor: pointer; }
+    .mk-book-btn.ready:hover { background: #a8863a; }
     .mk-book-btn svg { width: 18px; height: 18px; }
-    .mk-continue-btn {
-      flex: 1; padding: 13px;
-      background: var(--mk-gold); border: none; border-radius: 12px;
-      color: var(--mk-navy); font-size: 1rem; font-weight: 700;
-      cursor: pointer; font-family: inherit; transition: background 0.15s;
-    }
-    .mk-continue-btn:hover { background: #d4b55c; }
-    .mk-continue-btn:disabled { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.4); cursor: not-allowed; }
+    .mk-continue-btn { flex: 1; padding: 15px; background: var(--mk-gold); border: none; border-radius: 14px; color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; letter-spacing: 0.01em; }
+    .mk-continue-btn:hover { background: #a8863a; }
+    .mk-continue-btn:disabled { background: var(--mk-border); color: var(--mk-muted); cursor: not-allowed; }
 
-    /* ─── Confirmed screen ────────────────────────────────────── */
-    .mk-confirmed {
-      text-align: center; padding: 48px 24px 80px;
-    }
-    .mk-confirmed-icon {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: var(--mk-gold-bg); border: 3px solid var(--mk-gold);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
-    }
-    .mk-confirmed-icon svg { width: 40px; height: 40px; color: var(--mk-gold); }
-    .mk-confirmed h2 { font-family: Georgia, serif; font-size: 1.5rem; font-weight: 700; color: var(--mk-navy); margin-bottom: 8px; }
+    /* Confirmed */
+    .mk-confirmed { text-align: center; padding: 48px 24px 80px; }
+    .mk-confirmed-icon { width: 76px; height: 76px; border-radius: 50%; background: var(--mk-gold-pale); border: 2px solid var(--mk-gold-bg); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .mk-confirmed-icon svg { width: 38px; height: 38px; color: var(--mk-gold); }
+    .mk-confirmed h2 { font-family: var(--font-brand, Georgia, serif); font-size: 1.5rem; font-weight: 700; color: var(--mk-navy); margin-bottom: 8px; }
     .mk-confirmed p { color: var(--mk-muted); font-size: 0.9375rem; line-height: 1.6; margin-bottom: 24px; }
-    .mk-confirmed-card {
-      background: #fff; border: 1.5px solid var(--mk-border);
-      border-radius: 16px; padding: 20px 24px;
-      text-align: left; max-width: 400px; margin: 0 auto 24px;
-    }
+    .mk-confirmed-card { background: var(--mk-surface); border: 1px solid var(--mk-border); border-radius: 18px; padding: 20px 24px; text-align: left; max-width: 400px; margin: 0 auto 24px; }
     .mk-confirmed-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
     .mk-confirmed-row:last-child { margin-bottom: 0; }
     .mk-confirmed-row svg { width: 16px; height: 16px; color: var(--mk-gold); flex-shrink: 0; margin-top: 3px; }
     .mk-confirmed-row-val { font-size: 0.9rem; color: var(--mk-text); }
 
-    /* ─── Card modal ──────────────────────────────────────────── */
-    .mk-modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.45); z-index: 900;
-      align-items: flex-end; justify-content: center;
-    }
+    /* Modal */
+    .mk-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 900; align-items: flex-end; justify-content: center; }
     .mk-modal-overlay.open { display: flex; }
-    .mk-modal-box {
-      background: #fff; border-radius: 20px 20px 0 0;
-      padding: 28px 24px calc(28px + env(safe-area-inset-bottom));
-      width: 100%; max-width: 500px;
-    }
+    .mk-modal-box { background: var(--mk-surface); border-radius: 22px 22px 0 0; padding: 28px 24px calc(28px + env(safe-area-inset-bottom)); width: 100%; max-width: 500px; }
     .mk-modal-title { font-size: 1.1rem; font-weight: 700; color: var(--mk-navy); margin-bottom: 20px; }
     .mk-field { margin-bottom: 16px; }
     .mk-field label { display: block; font-size: 0.8125rem; font-weight: 600; color: var(--mk-navy); margin-bottom: 6px; }
-    .mk-field input {
-      width: 100%; box-sizing: border-box;
-      padding: 11px 13px; border: 1.5px solid var(--mk-border);
-      border-radius: 10px; font-size: 0.9rem; font-family: inherit;
-      color: var(--mk-text); transition: border-color 0.15s;
-    }
+    .mk-field input { width: 100%; box-sizing: border-box; padding: 11px 13px; border: 1.5px solid var(--mk-border); border-radius: 12px; font-size: 0.9rem; font-family: inherit; color: var(--mk-text); transition: border-color 0.15s; background: transparent; }
     .mk-field input:focus { outline: none; border-color: var(--mk-gold); }
     .mk-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .mk-modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-    .mk-modal-cancel {
-      flex: 1; padding: 12px; border: 1.5px solid var(--mk-border);
-      border-radius: 10px; background: none; color: var(--mk-muted);
-      font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit;
-    }
-    .mk-modal-confirm {
-      flex: 2; padding: 12px; border: none;
-      border-radius: 10px; background: var(--mk-gold);
-      color: var(--mk-navy); font-size: 0.9rem; font-weight: 700;
-      cursor: pointer; font-family: inherit;
-    }
-
-    /* ─── Mode toggle ─────────────────────────────────────────── */
-    .mk-mode-toggle {
-      display: flex; background: #fff;
-      border: 1.5px solid var(--mk-border);
-      border-radius: 14px; padding: 4px;
-      margin-bottom: 20px; gap: 2px;
-    }
-    .mk-mode-btn {
-      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 10px 12px; border-radius: 10px;
-      border: none; background: none; cursor: pointer;
-      font-size: 0.85rem; font-weight: 500;
-      color: var(--mk-muted); font-family: inherit; transition: all 0.15s;
-    }
-    .mk-mode-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
-    .mk-mode-btn.active { background: var(--mk-gold-bg); color: var(--mk-navy); font-weight: 700; }
-
-    /* ─── Reserva cards ───────────────────────────────────────── */
-    .mk-reserva-empty {
-      text-align: center; padding: 48px 24px;
-      color: var(--mk-muted);
-    }
-    .mk-reserva-empty svg { width: 48px; height: 48px; margin: 0 auto 12px; display: block; opacity: 0.35; }
-    .mk-reserva-empty p { font-size: 0.9375rem; }
-    .mk-reserva-card {
-      background: #fff; border: 1.5px solid var(--mk-border);
-      border-radius: 16px; overflow: hidden; margin-bottom: 14px;
-    }
-    .mk-reserva-card-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 18px; background: var(--mk-gold-pale);
-      border-bottom: 1.5px solid var(--mk-gold-bg);
-    }
-    .mk-reserva-date { font-size: 0.9375rem; font-weight: 700; color: var(--mk-navy); }
-    .mk-reserva-badge {
-      display: inline-block; padding: 3px 12px;
-      border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: capitalize;
-    }
-    .mk-reserva-badge.confirmada { background: #D1FAE5; color: #065F46; }
-    .mk-reserva-badge.completada { background: #DBEAFE; color: #1E40AF; }
-    .mk-reserva-badge.cancelada  { background: #FEE2E2; color: #991B1B; }
-    .mk-reserva-card-body { padding: 14px 18px; }
-    .mk-reserva-row {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 8px; font-size: 0.875rem; color: var(--mk-text);
-    }
-    .mk-reserva-row:last-child { margin-bottom: 0; }
-    .mk-reserva-row svg { width: 15px; height: 15px; color: var(--mk-gold); flex-shrink: 0; }
-    .mk-reserva-card-footer { padding: 0 18px 14px; display: flex; justify-content: flex-end; }
-    .mk-cancel-btn {
-      padding: 7px 16px; border-radius: 8px;
-      background: none; border: 1.5px solid #E5E7EB;
-      color: #EF4444; font-size: 0.8125rem; font-weight: 600;
-      cursor: pointer; font-family: inherit; transition: all 0.15s;
-    }
-    .mk-cancel-btn:hover { background: #FEE2E2; border-color: #EF4444; }
+    .mk-modal-cancel { flex: 1; padding: 12px; border: 1.5px solid var(--mk-border); border-radius: 12px; background: none; color: var(--mk-muted); font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .mk-modal-confirm { flex: 2; padding: 12px; border: none; border-radius: 12px; background: var(--mk-gold); color: #fff; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit; }
   </style>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0D2545">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jabad Barcelona">
 </head>
 <body>
 <div id="sidebar-placeholder"></div>
 
 <main class="main-content">
 
-  <!-- Hero -->
-  <div class="mk-hero">
-    <img class="mk-hero-img" src="img/mikve-1.jpg" alt="Mikve Barcelona"
-         onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#0D2545,#1a4a70)'">
-    <div class="mk-hero-overlay"></div>
-    <div class="mk-hero-text">
-      <div class="mk-hero-title">Book Appointment</div>
+  <div class="mk-page-header">
+    <button class="mk-reset-btn" onclick="resetBooking()" title="Reiniciar reserva">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+    </button>
+    <div class="mk-page-header-inner">
+      <h1>Mikve Barcelona</h1>
+      <p>Reserva tu visita</p>
     </div>
+    <svg class="mk-header-wave" viewBox="0 0 1200 44" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 0 Q300 44 600 22 Q900 0 1200 44 L1200 44 L0 44 Z" fill="#EDE7DC"/>
+    </svg>
   </div>
 
   <div class="mk-container">
-
-    <!-- Title -->
-    <div class="mk-titlebar">
-      <h2>Mikve</h2>
-      <button class="mk-reset-btn" onclick="resetBooking()" title="Reiniciar reserva">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Mode toggle -->
-    <div class="mk-mode-toggle">
-      <button class="mk-mode-btn active" id="mk-btn-booking" onclick="mkSwitchMode('booking')">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
-        Nueva reserva
-      </button>
-      <button class="mk-mode-btn" id="mk-btn-reservas" onclick="mkSwitchMode('reservas')">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
-        Mis reservas
-      </button>
-    </div>
-
-    <!-- Booking view -->
-    <div id="mk-booking-view">
-
-    <!-- Step tabs -->
     <div class="mk-steps" id="mk-steps">
       <button class="mk-step-btn active" data-step="1" onclick="goToStep(1)">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
@@ -594,47 +247,24 @@
       </button>
     </div>
 
-    <!-- Step content -->
     <div id="mk-content"></div>
 
-    <!-- Bottom bar -->
     <div class="mk-bottom-bar" id="mk-bottom-bar">
-      <button class="mk-continue-btn" id="mk-continue-btn" onclick="handleContinue()" disabled>
-        Continuar
-      </button>
+      <button class="mk-continue-btn" id="mk-continue-btn" onclick="handleContinue()" disabled>Continuar</button>
     </div>
-
-    </div><!-- /mk-booking-view -->
-
-    <!-- Reservas view -->
-    <div id="mk-reservas-view" style="display:none;"></div>
-
   </div>
 
 </main>
 
-<!-- Card modal -->
 <div class="mk-modal-overlay" id="card-modal">
   <div class="mk-modal-box" onclick="event.stopPropagation()">
     <div class="mk-modal-title">Añadir tarjeta</div>
-    <div class="mk-field">
-      <label>Número de tarjeta</label>
-      <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNumber(this)">
-    </div>
+    <div class="mk-field"><label>Número de tarjeta</label><input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNumber(this)"></div>
     <div class="mk-field-row">
-      <div class="mk-field">
-        <label>Caducidad</label>
-        <input type="text" id="card-exp" placeholder="MM/AA" maxlength="5" oninput="formatExp(this)">
-      </div>
-      <div class="mk-field">
-        <label>CVC</label>
-        <input type="text" id="card-cvc" placeholder="123" maxlength="4">
-      </div>
+      <div class="mk-field"><label>Caducidad</label><input type="text" id="card-exp" placeholder="MM/AA" maxlength="5" oninput="formatExp(this)"></div>
+      <div class="mk-field"><label>CVC</label><input type="text" id="card-cvc" placeholder="123" maxlength="4"></div>
     </div>
-    <div class="mk-field">
-      <label>Nombre en la tarjeta</label>
-      <input type="text" id="card-name" placeholder="Como aparece en la tarjeta">
-    </div>
+    <div class="mk-field"><label>Nombre en la tarjeta</label><input type="text" id="card-name" placeholder="Como aparece en la tarjeta"></div>
     <div class="mk-modal-actions">
       <button class="mk-modal-cancel" onclick="cerrarCardModal()">Cancelar</button>
       <button class="mk-modal-confirm" onclick="confirmarTarjeta()">Guardar tarjeta</button>
@@ -646,33 +276,13 @@
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
 <script>
-  // ─── Supabase client ──────────────────────────────────────────────────────
-  const sb = (typeof getSupabase === 'function') ? getSupabase() : null;
+  const booking = { step:1, date:null, service:null, time:null, notes:'', donation:0, donationLabel:'No', card:null, confirmed:false };
 
-  // ─── Estado de la reserva ──────────────────────────────────────────────────
-  const booking = {
-    step: 1,
-    date: null,       // Date object
-    service: null,    // { id, name, price }
-    time: null,       // "22:00"
-    notes: '',
-    donation: 0,
-    donationLabel: 'No',
-    card: null,       // { last4 }
-    confirmed: false
-  };
+  document.addEventListener('DOMContentLoaded', () => { requireAuth(); initNav('mikve'); renderStep(); });
 
-  // ─── Inicialización ────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    requireAuth();
-    initNav('mikve');
-    renderStep();
-  });
-
-  // ─── Tiempos halájicos (Barcelona: lat 41.3851°N, lon 2.1734°E) ──────────
   const BCN_LAT = 41.3851 * Math.PI / 180;
   const BCN_LON = 2.1734;
-  const TZEIT_DEG = 6.0; // Baal HaTanya (Jabad) — grados bajo el horizonte
+  const TZEIT_DEG = 6.0;
 
   function _solarData(date) {
     const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
@@ -680,653 +290,194 @@
     const solarNoon = 12 - BCN_LON / 15;
     const B = (360 / 365 * (dayOfYear - 81)) * Math.PI / 180;
     const EoT = (9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B)) / 60;
-    const month = date.getMonth() + 1;
-    const tz = (month >= 4 && month <= 10) ? 2 : 1;
+    const tz = (date.getMonth() + 1 >= 4 && date.getMonth() + 1 <= 10) ? 2 : 1;
     return { decl, solarNoon, EoT, tz };
   }
-
-  // Shkiah: puesta de sol (0° horizonte)
   function calcSunset(date) {
     const { decl, solarNoon, EoT, tz } = _solarData(date);
     const cosH = -Math.tan(BCN_LAT) * Math.tan(decl);
     const H = Math.acos(Math.max(-1, Math.min(1, cosH))) * 180 / Math.PI;
     return solarNoon + H / 15 - EoT + tz;
   }
-
-  // Tzeit: sol a X grados bajo el horizonte
   function calcTzeit(date, deg) {
     const { decl, solarNoon, EoT, tz } = _solarData(date);
-    const cosH = (-Math.sin(deg * Math.PI / 180) - Math.sin(BCN_LAT) * Math.sin(decl))
-                 / (Math.cos(BCN_LAT) * Math.cos(decl));
+    const cosH = (-Math.sin(deg * Math.PI / 180) - Math.sin(BCN_LAT) * Math.sin(decl)) / (Math.cos(BCN_LAT) * Math.cos(decl));
     const H = Math.acos(Math.max(-1, Math.min(1, cosH))) * 180 / Math.PI;
     return solarNoon + H / 15 - EoT + tz;
   }
+  function earliestTevilah(date) { return calcTzeit(date, TZEIT_DEG); }
+  function formatHour(d) { const h=Math.floor(d),m=Math.round((d-h)*60); return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; }
 
-  // Redondear hacia arriba al próximo intervalo de 15 min
-  function roundUp15(decHours) {
-    return Math.ceil(decHours * 4) / 4;
-  }
-
-  // Zman Tevilá = tzeit al minhag Baal HaTanya (6.0°)
-  // Shkiah se redondea hacia arriba a los próximos 15 min antes de calcular
-  function earliestTevilah(date) {
-    return calcTzeit(date, TZEIT_DEG);
-  }
-
-  function formatHour(decHours) {
-    const h = Math.floor(decHours);
-    const m = Math.round((decHours - h) * 60);
-    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-  }
-
-  // ─── Calendario ────────────────────────────────────────────────────────────
-  let calYear  = new Date().getFullYear();
-  let calMonth = new Date().getMonth(); // 0-indexed
-
-  const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
-                     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const DAYS_EN   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Shabbos'];
+  let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+  const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const DAYS_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Shabbos'];
 
   function renderCalendar() {
-    const today = new Date();
-    today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0,0,0,0);
     const firstDay = new Date(calYear, calMonth, 1).getDay();
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
-
+    const daysInPrev = new Date(calYear, calMonth, 0).getDate();
     let doW = DAYS_EN.map((d,i) => `<div class="mk-cal-dow${i===6?' shabbos':''}">${d.slice(0,3)}</div>`).join('');
-
     let cells = '';
-    // Prev month padding
-    for (let i = firstDay - 1; i >= 0; i--) {
-      cells += `<div class="mk-cal-day other-month">${daysInPrev - i}</div>`;
-    }
-    // Current month
+    for (let i = firstDay - 1; i >= 0; i--) cells += `<div class="mk-cal-day other-month">${daysInPrev - i}</div>`;
     for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(calYear, calMonth, d);
-      date.setHours(0,0,0,0);
+      const date = new Date(calYear, calMonth, d); date.setHours(0,0,0,0);
       const isPast = date < today;
-      const isSelected = booking.date &&
-        date.getFullYear() === booking.date.getFullYear() &&
-        date.getMonth()    === booking.date.getMonth() &&
-        date.getDate()     === booking.date.getDate();
+      const isSel = booking.date && date.getFullYear()===booking.date.getFullYear() && date.getMonth()===booking.date.getMonth() && date.getDate()===booking.date.getDate();
       const isToday = date.getTime() === today.getTime();
-
-      let cls = 'mk-cal-day';
-      if (isPast) cls += ' disabled';
-      else if (isSelected) cls += ' selected';
-      else if (isToday) cls += ' today';
-
-      const onclick = isPast ? '' : `onclick="selectDate(${calYear},${calMonth},${d})"`;
-      cells += `<div class="${cls}" ${onclick}>${d}</div>`;
+      let cls = 'mk-cal-day' + (isPast?' disabled':isSel?' selected':isToday?' today':'');
+      cells += `<div class="${cls}" ${isPast?'':` onclick="selectDate(${calYear},${calMonth},${d})"`}>${d}</div>`;
     }
-    // Next month padding
-    const total = firstDay + daysInMonth;
-    const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
-    for (let i = 1; i <= remaining; i++) {
-      cells += `<div class="mk-cal-day other-month">${i}</div>`;
-    }
-
-    return `
-      <div class="mk-cal">
-        <div class="mk-cal-nav">
-          <button class="mk-cal-nav-btn" onclick="changeMonth(-1)">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
-          </button>
-          <div class="mk-cal-month">${MONTHS_ES[calMonth]} ${calYear}</div>
-          <button class="mk-cal-nav-btn" onclick="changeMonth(1)">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-          </button>
-        </div>
-        <div class="mk-cal-grid">${doW}${cells}</div>
-      </div>`;
+    const rem = (firstDay + daysInMonth) % 7;
+    for (let i = 1; i <= (rem===0?0:7-rem); i++) cells += `<div class="mk-cal-day other-month">${i}</div>`;
+    return `<div class="mk-cal"><div class="mk-cal-nav">
+      <button class="mk-cal-nav-btn" onclick="changeMonth(-1)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg></button>
+      <div class="mk-cal-month">${MONTHS_ES[calMonth]} ${calYear}</div>
+      <button class="mk-cal-nav-btn" onclick="changeMonth(1)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg></button>
+    </div><div class="mk-cal-grid">${doW}${cells}</div></div>`;
   }
 
-  function changeMonth(dir) {
-    calMonth += dir;
-    if (calMonth > 11) { calMonth = 0; calYear++; }
-    if (calMonth < 0)  { calMonth = 11; calYear--; }
-    document.getElementById('mk-content').innerHTML = renderStep1();
-    updateContinueBtn();
-  }
-
-  function selectDate(y, m, d) {
-    booking.date = new Date(y, m, d);
-    booking.service = null; booking.time = null;
-    document.getElementById('mk-content').innerHTML = renderStep1();
-    updateContinueBtn();
-  }
-
+  function changeMonth(dir) { calMonth+=dir; if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;} document.getElementById('mk-content').innerHTML=renderStep1(); updateContinueBtn(); }
+  function selectDate(y,m,d) { booking.date=new Date(y,m,d); booking.service=null; booking.time=null; document.getElementById('mk-content').innerHTML=renderStep1(); updateContinueBtn(); }
   function formatDateLong(date) {
-    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const months = ['January','February','March','April','May','June',
-                    'July','August','September','October','November','December'];
+    const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
     return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
   }
 
-  // ─── Render por paso ───────────────────────────────────────────────────────
-  function renderStep() {
-    const content = document.getElementById('mk-content');
-    const fns = [null, renderStep1, renderStep2, renderStep3, renderStep4, renderStep5, renderStep6];
-    content.innerHTML = fns[booking.step]();
-    updateTabs();
-    updateContinueBtn();
-  }
+  function renderStep() { const fns=[null,renderStep1,renderStep2,renderStep3,renderStep4,renderStep5,renderStep6]; document.getElementById('mk-content').innerHTML=fns[booking.step](); updateTabs(); updateContinueBtn(); }
 
-  // STEP 1: Fecha
+  const _calIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>`;
+  const _dropIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.332-6.667 9.111-6.667 11.667C5.333 18.701 8.313 21 12 21s6.667-2.299 6.667-5.333C18.667 12.111 16.444 8.332 12 3Z"/></svg>`;
+  const _clockIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>`;
+
   function renderStep1() {
-    const placeholder = booking.date
-      ? `<div class="mk-summary">
-          <div class="mk-summary-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg></div>
-          <div class="mk-summary-text"><div class="mk-summary-date">${formatDateLong(booking.date)}</div></div>
-         </div>`
-      : `<div class="mk-placeholder">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
-          Por favor selecciona una fecha
-         </div>`;
-    return placeholder + renderCalendar();
+    const ph = booking.date
+      ? `<div class="mk-summary"><div class="mk-summary-icon">${_calIcon}</div><div class="mk-summary-text"><div class="mk-summary-date">${formatDateLong(booking.date)}</div></div></div>`
+      : `<div class="mk-placeholder">${_calIcon} Por favor selecciona una fecha</div>`;
+    return ph + renderCalendar();
   }
 
-  // STEP 2: Servicio
   function renderStep2() {
-    const services = [
-      { id: 'ducha', name: 'Ducha', price: 30 },
-      { id: 'bano',  name: 'Baño',  price: 30 }
-    ];
-    const dropIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.332-6.667 9.111-6.667 11.667C5.333 18.701 8.313 21 12 21s6.667-2.299 6.667-5.333C18.667 12.111 16.444 8.332 12 3Z"/></svg>`;
-
+    const services = [{id:'ducha',name:'Ducha',price:30},{id:'bano',name:'Baño',price:30}];
     const cards = services.map(s => {
-      const sel = booking.service?.id === s.id;
+      const sel = booking.service?.id===s.id;
       return `<div class="mk-option-card ${sel?'selected':''}" onclick="selectService('${s.id}','${s.name}',${s.price})">
-        <div class="mk-option-icon">${dropIcon}</div>
-        <div class="mk-option-info">
-          <div class="mk-option-name">${s.name}</div>
-          <div class="mk-option-price">€${s.price.toFixed(2)}</div>
-        </div>
+        <div class="mk-option-icon">${_dropIcon}</div>
+        <div class="mk-option-info"><div class="mk-option-name">${s.name}</div><div class="mk-option-price">€${s.price.toFixed(2)}</div></div>
         <button class="mk-select-btn ${sel?'selected-btn':''}" onclick="selectService('${s.id}','${s.name}',${s.price})">Seleccionar</button>
       </div>`;
     }).join('');
-
-    const placeholder = booking.service
-      ? `<div class="mk-summary">
-          <div class="mk-summary-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg></div>
-          <div class="mk-summary-text"><div class="mk-summary-date">${formatDateLong(booking.date)}</div></div>
-         </div>
-         <div class="mk-placeholder" style="color:var(--mk-navy);">
-           ${dropIcon}&nbsp; Servicio: ${booking.service.name} — €${booking.service.price.toFixed(2)}
-         </div>`
-      : `<div class="mk-summary">
-          <div class="mk-summary-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg></div>
-          <div class="mk-summary-text"><div class="mk-summary-date">${formatDateLong(booking.date)}</div></div>
-         </div>
-         <div class="mk-placeholder">
-           ${dropIcon} Por favor selecciona un servicio
-         </div>`;
-
-    return placeholder + `<div class="mk-options">${cards}</div>`;
+    const ph = booking.service
+      ? `<div class="mk-summary"><div class="mk-summary-icon">${_calIcon}</div><div class="mk-summary-text"><div class="mk-summary-date">${formatDateLong(booking.date)}</div></div></div><div class="mk-placeholder" style="color:var(--mk-navy);border-style:solid;">${_dropIcon}&nbsp; Servicio: ${booking.service.name} — €${booking.service.price.toFixed(2)}</div>`
+      : `<div class="mk-summary"><div class="mk-summary-icon">${_calIcon}</div><div class="mk-summary-text"><div class="mk-summary-date">${formatDateLong(booking.date)}</div></div></div><div class="mk-placeholder">${_dropIcon} Por favor selecciona un servicio</div>`;
+    return ph + `<div class="mk-options">${cards}</div>`;
   }
 
-  // STEP 3: Hora
   function renderStep3() {
-    const sunset = calcSunset(booking.date);
-    const tevilah = earliestTevilah(booking.date);
-    const sunsetStr  = formatHour(sunset);
-    const tevilahStr = formatHour(tevilah);
-
-    // Generate slots from (tevilah rounded up to next :00 or :30) until 23:30
-    const slots = [];
-    let slotHour = Math.ceil(tevilah * 2) / 2; // round up to nearest 0.5
-    while (slotHour <= 23.5) {
-      slots.push(slotHour);
-      slotHour += 0.5;
-    }
-
-    const calIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>`;
-    const clockIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>`;
-
-    const total = booking.service.price + booking.donation;
-
+    const sunset=calcSunset(booking.date), tevilah=earliestTevilah(booking.date);
+    const slots=[]; let h=Math.ceil(tevilah*2)/2; while(h<=23.5){slots.push(h);h+=0.5;}
     const slotsHtml = slots.map(h => {
-      const hh = Math.floor(h);
-      const mm = h % 1 === 0.5 ? '30' : '00';
-      const timeKey = `${String(hh).padStart(2,'0')}:${mm}`;
-      const sel = booking.time === timeKey;
-
-      return `<div class="mk-slot ${sel?'selected':''}" onclick="selectTime('${timeKey}')">
-        <div class="mk-slot-icon">${clockIcon}</div>
-        <div class="mk-slot-flex">
-          <div class="mk-slot-time">${timeKey}</div>
-          <div class="mk-slot-sub">Cita de 30 minutos</div>
-        </div>
-        <button class="mk-select-btn ${sel?'selected-btn':''}" onclick="selectTime('${timeKey}')">Seleccionar</button>
+      const hh=Math.floor(h), mm=h%1===0.5?'30':'00';
+      const tk=`${String(hh).padStart(2,'0')}:${mm}`, sel=booking.time===tk;
+      return `<div class="mk-slot ${sel?'selected':''}" onclick="selectTime('${tk}')">
+        <div class="mk-slot-icon">${_clockIcon}</div>
+        <div class="mk-slot-flex"><div class="mk-slot-time">${tk}</div><div class="mk-slot-sub">Cita de 30 minutos</div></div>
+        <button class="mk-select-btn ${sel?'selected-btn':''}" onclick="selectTime('${tk}')">Seleccionar</button>
       </div>`;
     }).join('');
-
-    return `
-      <div class="mk-summary">
-        <div class="mk-summary-icon">${calIcon}</div>
-        <div class="mk-summary-text">
-          <div class="mk-summary-date">${formatDateLong(booking.date)}</div>
-          <div class="mk-summary-detail">Servicio: ${booking.service.name} €${booking.service.price.toFixed(2)} &nbsp;·&nbsp; Total: €${total.toFixed(2)}</div>
-        </div>
-      </div>
-      <div class="mk-time-info">
-        <div class="mk-time-info-title">Por favor selecciona una hora</div>
-        <div class="mk-time-info-sub">
-          Shkiá: <strong>${sunsetStr}</strong><br>
-          Zman Tevilá — minhag Baal HaTanya (6°): <strong>${tevilahStr}</strong>
-        </div>
-      </div>
-      ${slotsHtml}`;
+    return `<div class="mk-summary"><div class="mk-summary-icon">${_calIcon}</div><div class="mk-summary-text"><div class="mk-summary-date">${formatDateLong(booking.date)}</div><div class="mk-summary-detail">Servicio: ${booking.service.name} €${booking.service.price.toFixed(2)}</div></div></div>
+    <div class="mk-time-info"><div class="mk-time-info-title">Selecciona una hora</div><div class="mk-time-info-sub">Shkiá: <strong>${formatHour(sunset)}</strong><br>Zman Tevilá — minhag Baal HaTanya (6°): <strong>${formatHour(tevilah)}</strong></div></div>
+    ${slotsHtml}`;
   }
 
-  // STEP 4: Notas
   function renderStep4() {
-    const calIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>`;
-    const total = booking.service.price + booking.donation;
-    const timeStr = booking.time;
-
-    return `
-      <div class="mk-summary">
-        <div class="mk-summary-icon">${calIcon}</div>
-        <div class="mk-summary-text">
-          <div class="mk-summary-date">${formatDateLong(booking.date)}</div>
-          <div class="mk-summary-detail">Servicio: ${booking.service.name} €${booking.service.price.toFixed(2)} &nbsp;·&nbsp; Hora: ${timeStr} &nbsp;·&nbsp; Total: €${total.toFixed(2)}</div>
-        </div>
-      </div>
-      <div class="mk-notes-box">
-        <label class="mk-notes-label">Notas para el mikve (opcional)</label>
-        <textarea class="mk-notes-ta" id="mk-notes-ta" placeholder="Ej: Es mi primera visita, tengo alguna pregunta especial..."
-          oninput="booking.notes=this.value">${escHtml(booking.notes)}</textarea>
-        <div class="mk-notes-hint">Esta información es confidencial y solo la verá el personal del mikve.</div>
-      </div>`;
+    return `<div class="mk-summary"><div class="mk-summary-icon">${_calIcon}</div><div class="mk-summary-text"><div class="mk-summary-date">${formatDateLong(booking.date)}</div><div class="mk-summary-detail">Servicio: ${booking.service.name} · Hora: ${booking.time}</div></div></div>
+    <div class="mk-notes-box"><label class="mk-notes-label">Notas para el mikve (opcional)</label><textarea class="mk-notes-ta" id="mk-notes-ta" placeholder="Ej: Es mi primera visita..." oninput="booking.notes=this.value">${escHtml(booking.notes)}</textarea><div class="mk-notes-hint">Esta información es confidencial y solo la verá el personal del mikve.</div></div>`;
   }
 
-  // STEP 5: Donación
   function renderStep5() {
-    const calIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>`;
-    const timeStr = booking.time;
-
-    const donationOpts = [
-      { id: 'no',  label: 'No, gracias', amount: 0 },
-      { id: 'd18', label: '€ 18',        amount: 18 },
-      { id: 'd36', label: '€ 36',        amount: 36 },
-      { id: 'd50', label: '€ 50',        amount: 50 },
-      { id: 'd72', label: '€ 72',        amount: 72 },
-      { id: 'd100',label: '€ 100',       amount: 100 }
-    ];
-
-    const optsHtml = donationOpts.map(o => {
-      const sel = booking.donationLabel === o.label;
-      const badge = o.amount === 0
-        ? `<div class="mk-donation-badge no">⊘</div>`
-        : `<div class="mk-donation-badge">€</div>`;
-      return `<div class="mk-donation-opt ${sel?'selected':''}" onclick="selectDonation(${o.amount},'${o.label}')">
-        ${badge}
-        <div class="mk-donation-amount">${o.label}</div>
-        <button class="mk-select-btn ${sel?'selected-btn':''}" onclick="selectDonation(${o.amount},'${o.label}')">Seleccionar</button>
-      </div>`;
+    const opts=[{id:'no',label:'No, gracias',amount:0},{id:'d18',label:'€ 18',amount:18},{id:'d36',label:'€ 36',amount:36},{id:'d50',label:'€ 50',amount:50},{id:'d72',label:'€ 72',amount:72},{id:'d100',label:'€ 100',amount:100}];
+    const optsHtml = opts.map(o => {
+      const sel=booking.donationLabel===o.label;
+      const badge=o.amount===0?`<div class="mk-donation-badge no">⊘</div>`:`<div class="mk-donation-badge">€</div>`;
+      return `<div class="mk-donation-opt ${sel?'selected':''}" onclick="selectDonation(${o.amount},'${o.label}')">${badge}<div class="mk-donation-amount">${o.label}</div><button class="mk-select-btn ${sel?'selected-btn':''}" onclick="selectDonation(${o.amount},'${o.label}')">Seleccionar</button></div>`;
     }).join('');
-
-    return `
-      <div class="mk-summary">
-        <div class="mk-summary-icon">${calIcon}</div>
-        <div class="mk-summary-text">
-          <div class="mk-summary-date">${formatDateLong(booking.date)}</div>
-          <div class="mk-summary-detail">Servicio: ${booking.service.name} €${booking.service.price.toFixed(2)} &nbsp;·&nbsp; Hora: ${timeStr}</div>
-          <div class="mk-summary-detail">Total: €${booking.service.price.toFixed(2)}</div>
-        </div>
-      </div>
-      <div class="mk-donation-intro">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
-        <div>
-          <div class="mk-donation-title">¿Deseas hacer una donación?</div>
-          <div class="mk-donation-sub">Tu donación apoya el mantenimiento y crecimiento del mikve.</div>
-        </div>
-      </div>
-      <div class="mk-donation-grid">${optsHtml}</div>`;
+    return `<div class="mk-summary"><div class="mk-summary-icon">${_calIcon}</div><div class="mk-summary-text"><div class="mk-summary-date">${formatDateLong(booking.date)}</div><div class="mk-summary-detail">Servicio: ${booking.service.name} · Hora: ${booking.time}</div></div></div>
+    <div class="mk-donation-intro"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg><div><div class="mk-donation-title">¿Deseas hacer una donación?</div><div class="mk-donation-sub">Tu donación apoya el mantenimiento del mikve.</div></div></div>
+    <div class="mk-donation-grid">${optsHtml}</div>`;
   }
 
-  // STEP 6: Pago
   function renderStep6() {
-    const timeStr = booking.time;
-    const total = booking.service.price + booking.donation;
-
-    const calIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>`;
-    const dropIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.332-6.667 9.111-6.667 11.667C5.333 18.701 8.313 21 12 21s6.667-2.299 6.667-5.333C18.667 12.111 16.444 8.332 12 3Z"/></svg>`;
-    const clockIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>`;
-    const infoIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>`;
-    const receiptIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/></svg>`;
-
+    const total=booking.service.price+booking.donation;
+    const infoIcon=`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>`;
+    const receiptIcon=`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/></svg>`;
     const cardHtml = booking.card
-      ? `<div class="mk-add-card" style="border-color:var(--mk-gold);background:var(--mk-gold-pale);">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:22px;height:22px;color:var(--mk-navy);"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/></svg>
-          <span class="mk-add-card-label">Tarjeta ···· ${escHtml(booking.card.last4)}</span>
-          <span style="font-size:0.75rem;color:var(--mk-muted);">Cambiar</span>
-        </div>`
-      : `<div class="mk-add-card" onclick="abrirCardModal()">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/></svg>
-          <span class="mk-add-card-label">Añadir tarjeta</span>
-          <span class="mk-add-card-arrow"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg></span>
-        </div>`;
-
-    return `
-      <div class="mk-payment-layout">
-        <div class="mk-payment-summary">
-          <div class="mk-payment-summary-header">
-            <div class="mk-payment-summary-header-icon">${calIcon}</div>
-            <div class="mk-pay-date">${formatDateLong(booking.date)}</div>
-          </div>
-          <div class="mk-payment-row">
-            <div class="mk-pay-row-icon">${dropIcon}</div>
-            <div>
-              <div class="mk-pay-row-label">Servicio</div>
-              <div class="mk-pay-row-value">${booking.service.name} — €${booking.service.price.toFixed(2)}</div>
-            </div>
-          </div>
-          <div class="mk-payment-row">
-            <div class="mk-pay-row-icon">${clockIcon}</div>
-            <div>
-              <div class="mk-pay-row-label">Hora</div>
-              <div class="mk-pay-row-value">${timeStr}</div>
-            </div>
-          </div>
-          ${booking.donation > 0 ? `
-          <div class="mk-payment-row">
-            <div class="mk-pay-row-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg></div>
-            <div>
-              <div class="mk-pay-row-label">Donación</div>
-              <div class="mk-pay-row-value">€${booking.donation.toFixed(2)}</div>
-            </div>
-          </div>` : ''}
-          <div class="mk-payment-row">
-            <div class="mk-pay-row-icon">${infoIcon}</div>
-            <div>
-              <div class="mk-pay-row-note">Esta cita puede cancelarse o cambiarse en cualquier momento antes de la hora programada. Se aplica una tarifa no reembolsable de €2,00 por cancelación.</div>
-            </div>
-          </div>
-          <div class="mk-payment-row">
-            <div class="mk-pay-row-icon">${receiptIcon}</div>
-            <div>
-              <div class="mk-pay-row-label">Total</div>
-              <div class="mk-pay-total">€${total.toFixed(2)}</div>
-            </div>
-          </div>
-        </div>
-        <div class="mk-payment-method">
-          <div class="mk-payment-method-title">Método de pago</div>
-          ${cardHtml}
-        </div>
-      </div>`;
+      ? `<div class="mk-add-card" style="border-color:var(--mk-gold);background:var(--mk-gold-pale);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:22px;height:22px;color:var(--mk-navy);"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/></svg><span class="mk-add-card-label">Tarjeta ···· ${escHtml(booking.card.last4)}</span><span style="font-size:0.75rem;color:var(--mk-muted);">Cambiar</span></div>`
+      : `<div class="mk-add-card" onclick="abrirCardModal()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/></svg><span class="mk-add-card-label">Añadir tarjeta</span><span class="mk-add-card-arrow"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg></span></div>`;
+    return `<div class="mk-payment-layout">
+      <div class="mk-payment-summary">
+        <div class="mk-payment-summary-header"><div class="mk-payment-summary-header-icon">${_calIcon}</div><div class="mk-pay-date">${formatDateLong(booking.date)}</div></div>
+        <div class="mk-payment-row"><div class="mk-pay-row-icon">${_dropIcon}</div><div><div class="mk-pay-row-label">Servicio</div><div class="mk-pay-row-value">${booking.service.name} — €${booking.service.price.toFixed(2)}</div></div></div>
+        <div class="mk-payment-row"><div class="mk-pay-row-icon">${_clockIcon}</div><div><div class="mk-pay-row-label">Hora</div><div class="mk-pay-row-value">${booking.time}</div></div></div>
+        ${booking.donation>0?`<div class="mk-payment-row"><div class="mk-pay-row-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg></div><div><div class="mk-pay-row-label">Donación</div><div class="mk-pay-row-value">€${booking.donation.toFixed(2)}</div></div></div>`:''}
+        <div class="mk-payment-row"><div class="mk-pay-row-icon">${infoIcon}</div><div><div class="mk-pay-row-note">Cancelación con tarifa no reembolsable de €2,00.</div></div></div>
+        <div class="mk-payment-row"><div class="mk-pay-row-icon">${receiptIcon}</div><div><div class="mk-pay-row-label">Total</div><div class="mk-pay-total">€${total.toFixed(2)}</div></div></div>
+      </div>
+      <div class="mk-payment-method"><div class="mk-payment-method-title">Método de pago</div>${cardHtml}</div>
+    </div>`;
   }
 
-  // ─── Selecciones ───────────────────────────────────────────────────────────
-  function selectService(id, name, price) {
-    booking.service = { id, name, price };
-    booking.time = null;
-    document.getElementById('mk-content').innerHTML = renderStep2();
-    updateContinueBtn();
-  }
+  function selectService(id,name,price) { booking.service={id,name,price}; booking.time=null; document.getElementById('mk-content').innerHTML=renderStep2(); updateContinueBtn(); }
+  function selectTime(tk) { booking.time=tk; document.getElementById('mk-content').innerHTML=renderStep3(); updateContinueBtn(); }
+  function selectDonation(amount,label) { booking.donation=amount; booking.donationLabel=label; document.getElementById('mk-content').innerHTML=renderStep5(); updateContinueBtn(); }
 
-  function selectTime(timeKey) {
-    booking.time = timeKey;
-    document.getElementById('mk-content').innerHTML = renderStep3();
-    updateContinueBtn();
-  }
+  function goToStep(n) { if(n>booking.step&&!canAdvance())return; booking.step=n; renderStep(); window.scrollTo({top:0,behavior:'smooth'}); }
+  function handleContinue() { if(!canAdvance())return; if(booking.step<6){booking.step++;renderStep();window.scrollTo({top:0,behavior:'smooth'});}else{confirmarReserva();} }
+  function canAdvance() { switch(booking.step){case 1:return!!booking.date;case 2:return!!booking.service;case 3:return!!booking.time;case 4:return true;case 5:return booking.donationLabel!=='';case 6:return!!booking.card;default:return false;} }
+  function updateTabs() { document.querySelectorAll('.mk-step-btn').forEach(btn=>{const n=parseInt(btn.dataset.step);btn.classList.remove('active','done');btn.disabled=false;if(n===booking.step)btn.classList.add('active');else if(n<booking.step)btn.classList.add('done');else if(n>booking.step+1)btn.disabled=true;}); }
+  function updateContinueBtn() { const btn=document.getElementById('mk-continue-btn');if(booking.step===6){btn.textContent=booking.card?'Confirmar reserva':'Añadir tarjeta para continuar';btn.disabled=!booking.card;}else{btn.textContent='Continuar';btn.disabled=!canAdvance();} }
+  function resetBooking() { booking.step=1;booking.date=null;booking.service=null;booking.time=null;booking.notes='';booking.donation=0;booking.donationLabel='';booking.card=null;booking.confirmed=false;calYear=new Date().getFullYear();calMonth=new Date().getMonth();renderStep();window.scrollTo({top:0,behavior:'smooth'}); }
 
-  function selectDonation(amount, label) {
-    booking.donation = amount;
-    booking.donationLabel = label;
-    document.getElementById('mk-content').innerHTML = renderStep5();
-    updateContinueBtn();
-  }
-
-  // ─── Navegación ────────────────────────────────────────────────────────────
-  function goToStep(n) {
-    if (n > booking.step && !canAdvance()) return;
-    booking.step = n;
-    renderStep();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function handleContinue() {
-    if (!canAdvance()) return;
-    if (booking.step < 6) {
-      booking.step++;
-      renderStep();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      confirmarReserva();
-    }
-  }
-
-  function canAdvance() {
-    switch (booking.step) {
-      case 1: return !!booking.date;
-      case 2: return !!booking.service;
-      case 3: return !!booking.time;
-      case 4: return true; // notes optional
-      case 5: return booking.donationLabel !== '';
-      case 6: return !!booking.card;
-      default: return false;
-    }
-  }
-
-  function updateTabs() {
-    document.querySelectorAll('.mk-step-btn').forEach(btn => {
-      const n = parseInt(btn.dataset.step);
-      btn.classList.remove('active','done');
-      btn.disabled = false;
-      if (n === booking.step) btn.classList.add('active');
-      else if (n < booking.step) btn.classList.add('done');
-      else {
-        // Can only jump to completed steps
-        if (n > booking.step + 1) btn.disabled = true;
-      }
-    });
-  }
-
-  function updateContinueBtn() {
-    const btn = document.getElementById('mk-continue-btn');
-    if (booking.step === 6) {
-      btn.textContent = booking.card ? 'Confirmar reserva' : 'Añadir tarjeta para continuar';
-      btn.disabled = !booking.card;
-    } else {
-      btn.textContent = 'Continuar';
-      btn.disabled = !canAdvance();
-    }
-  }
-
-  // ─── Reset ─────────────────────────────────────────────────────────────────
-  function resetBooking() {
-    booking.step = 1; booking.date = null; booking.service = null;
-    booking.time = null; booking.notes = ''; booking.donation = 0;
-    booking.donationLabel = ''; booking.card = null; booking.confirmed = false;
-    calYear = new Date().getFullYear(); calMonth = new Date().getMonth();
-    renderStep();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // ─── Confirmar reserva ─────────────────────────────────────────────────────
   async function confirmarReserva() {
-    const btn = document.getElementById('mk-continue-btn');
-    btn.disabled = true; btn.textContent = 'Procesando...';
-
+    const btn=document.getElementById('mk-continue-btn'); btn.disabled=true; btn.textContent='Procesando...';
     try {
-      const user = getCurrentUser();
-      const fecha = booking.date.toISOString().split('T')[0];
-      const [hh, mm] = booking.time.split(':');
-      const hora = `${hh.padStart(2,'0')}:${mm}:00`;
-
-      const { error } = await sb.from('mikve_reservas').insert({
-        usuario_id:   user.userId,
-        fecha:        fecha,
-        hora:         hora,
-        servicio:     booking.service.name,
-        precio:       booking.service.price,
-        donacion:     booking.donation,
-        total:        booking.service.price + booking.donation,
-        notas:        booking.notes || null,
-        estado:       'confirmada'
-      });
-
-      if (error) throw error;
-
-      booking.confirmed = true;
-      mostrarConfirmacion();
-
-    } catch (err) {
-      console.error(err);
-      // Show confirmation anyway for prototype
-      booking.confirmed = true;
-      mostrarConfirmacion();
-    }
+      const user=getCurrentUser(), fecha=booking.date.toISOString().split('T')[0];
+      const [hh,mm]=booking.time.split(':');
+      const {error}=await sb.from('mikve_reservas').insert({usuario_id:user.userId,fecha,hora:`${hh.padStart(2,'0')}:${mm}:00`,servicio:booking.service.name,precio:booking.service.price,donacion:booking.donation,total:booking.service.price+booking.donation,notas:booking.notes||null,estado:'confirmada'});
+      if(error)throw error;
+    } catch(err){console.error(err);}
+    booking.confirmed=true; mostrarConfirmacion();
   }
 
   function mostrarConfirmacion() {
-    const timeStr = booking.time;
-    const total = booking.service.price + booking.donation;
-
-    document.getElementById('mk-content').innerHTML = `
-      <div class="mk-confirmed">
-        <div class="mk-confirmed-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-        </div>
-        <h2>¡Reserva confirmada!</h2>
-        <p>Tu cita en el Mikve Barcelona ha sido reservada. Recibirás un recordatorio antes de tu visita.</p>
-        <div class="mk-confirmed-card">
-          <div class="mk-confirmed-row">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
-            <div class="mk-confirmed-row-val">${formatDateLong(booking.date)}</div>
-          </div>
-          <div class="mk-confirmed-row">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-            <div class="mk-confirmed-row-val">${timeStr}</div>
-          </div>
-          <div class="mk-confirmed-row">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.332-6.667 9.111-6.667 11.667C5.333 18.701 8.313 21 12 21s6.667-2.299 6.667-5.333C18.667 12.111 16.444 8.332 12 3Z"/></svg>
-            <div class="mk-confirmed-row-val">${booking.service.name} — €${booking.service.price.toFixed(2)}</div>
-          </div>
-          <div class="mk-confirmed-row">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/></svg>
-            <div class="mk-confirmed-row-val">Total: €${total.toFixed(2)}</div>
-          </div>
-        </div>
-        <button class="mk-continue-btn" style="max-width:300px;margin:0 auto;display:block;" onclick="resetBooking()">
-          Nueva reserva
-        </button>
-      </div>`;
-
-    document.getElementById('mk-bottom-bar').style.display = 'none';
-    document.querySelectorAll('.mk-step-btn').forEach(b => b.disabled = true);
+    const total=booking.service.price+booking.donation;
+    document.getElementById('mk-content').innerHTML=`<div class="mk-confirmed">
+      <div class="mk-confirmed-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg></div>
+      <h2>¡Reserva confirmada!</h2>
+      <p>Tu cita en el Mikve Barcelona ha sido reservada. Recibirás un recordatorio antes de tu visita.</p>
+      <div class="mk-confirmed-card">
+        <div class="mk-confirmed-row"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg><div class="mk-confirmed-row-val">${formatDateLong(booking.date)}</div></div>
+        <div class="mk-confirmed-row"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><div class="mk-confirmed-row-val">${booking.time}</div></div>
+        <div class="mk-confirmed-row"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.332-6.667 9.111-6.667 11.667C5.333 18.701 8.313 21 12 21s6.667-2.299 6.667-5.333C18.667 12.111 16.444 8.332 12 3Z"/></svg><div class="mk-confirmed-row-val">${booking.service.name} — €${booking.service.price.toFixed(2)}</div></div>
+        <div class="mk-confirmed-row"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/></svg><div class="mk-confirmed-row-val">Total: €${total.toFixed(2)}</div></div>
+      </div>
+      <button class="mk-continue-btn" style="max-width:300px;margin:0 auto;display:block;" onclick="resetBooking()">Nueva reserva</button>
+    </div>`;
+    document.getElementById('mk-bottom-bar').style.display='none';
+    document.querySelectorAll('.mk-step-btn').forEach(b=>b.disabled=true);
   }
 
-  // ─── Modal tarjeta ─────────────────────────────────────────────────────────
-  function abrirCardModal() {
-    document.getElementById('card-modal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function cerrarCardModal() {
-    document.getElementById('card-modal').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+  function abrirCardModal() { document.getElementById('card-modal').classList.add('open'); document.body.style.overflow='hidden'; }
+  function cerrarCardModal() { document.getElementById('card-modal').classList.remove('open'); document.body.style.overflow=''; }
   function confirmarTarjeta() {
-    const num = document.getElementById('card-number').value.replace(/\s/g,'');
-    if (num.length < 4) { showToast('Número de tarjeta incompleto', 'warning'); return; }
-    booking.card = { last4: num.slice(-4) };
-    cerrarCardModal();
-    document.getElementById('mk-content').innerHTML = renderStep6();
-    updateContinueBtn();
+    const num=document.getElementById('card-number').value.replace(/\s/g,'');
+    if(num.length<4){showToast('Número de tarjeta incompleto','warning');return;}
+    booking.card={last4:num.slice(-4)}; cerrarCardModal();
+    document.getElementById('mk-content').innerHTML=renderStep6(); updateContinueBtn();
   }
-  function formatCardNumber(input) {
-    let v = input.value.replace(/\D/g,'').slice(0,16);
-    input.value = v.match(/.{1,4}/g)?.join(' ') || v;
-  }
-  function formatExp(input) {
-    let v = input.value.replace(/\D/g,'');
-    if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2,4);
-    input.value = v;
-  }
-
-  // ─── Mis Reservas ─────────────────────────────────────────────────────────
-  function mkSwitchMode(mode) {
-    document.getElementById('mk-booking-view').style.display = mode === 'booking' ? '' : 'none';
-    document.getElementById('mk-reservas-view').style.display = mode === 'reservas' ? '' : 'none';
-    document.getElementById('mk-btn-booking').classList.toggle('active', mode === 'booking');
-    document.getElementById('mk-btn-reservas').classList.toggle('active', mode === 'reservas');
-    if (mode === 'reservas') mkLoadReservas();
-  }
-
-  async function mkLoadReservas() {
-    const view = document.getElementById('mk-reservas-view');
-    view.innerHTML = '<div style="text-align:center;padding:48px 24px;color:var(--mk-muted);">Cargando...</div>';
-    try {
-      const user = getCurrentUser();
-      const { data, error } = await sb.from('mikve_reservas')
-        .select('*')
-        .eq('usuario_id', user.userId)
-        .order('fecha', { ascending: false })
-        .order('hora', { ascending: true });
-      if (error) throw error;
-      mkRenderReservas(data || []);
-    } catch(e) {
-      view.innerHTML = '<div class="mk-reserva-empty"><p>Error al cargar reservas.</p></div>';
-    }
-  }
-
-  function mkRenderReservas(rows) {
-    const view = document.getElementById('mk-reservas-view');
-    if (!rows.length) {
-      view.innerHTML = `<div class="mk-reserva-empty">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
-        <p>Aún no tienes reservas.</p>
-      </div>`;
-      return;
-    }
-
-    const clockIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>`;
-    const dropIcon  = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.332-6.667 9.111-6.667 11.667C5.333 18.701 8.313 21 12 21s6.667-2.299 6.667-5.333C18.667 12.111 16.444 8.332 12 3Z"/></svg>`;
-    const euroIcon  = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 7.756a4.5 4.5 0 1 0 0 8.488M7.5 10.5h5.25m-5.25 3h5.25M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>`;
-
-    const cards = rows.map(r => {
-      const dateStr = r.fecha
-        ? new Date(r.fecha + 'T12:00:00').toLocaleDateString('es-ES', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
-        : '—';
-      const estado = r.estado || 'confirmada';
-      const footer = estado === 'confirmada'
-        ? `<div class="mk-reserva-card-footer">
-             <button class="mk-cancel-btn" onclick="mkCancelarReserva('${r.id}')">Cancelar reserva</button>
-           </div>`
-        : '';
-      return `<div class="mk-reserva-card" id="mkr-${r.id}">
-        <div class="mk-reserva-card-header">
-          <div class="mk-reserva-date">${escHtml(dateStr)}</div>
-          <span class="mk-reserva-badge ${escHtml(estado)}">${escHtml(estado)}</span>
-        </div>
-        <div class="mk-reserva-card-body">
-          <div class="mk-reserva-row">${clockIcon} ${escHtml(r.hora ? r.hora.slice(0,5) : '—')}</div>
-          <div class="mk-reserva-row">${dropIcon} ${escHtml(r.servicio || '—')}</div>
-          <div class="mk-reserva-row">${euroIcon} <strong>€${Number(r.total || 0).toFixed(2)}</strong></div>
-          ${r.notas ? `<div class="mk-reserva-row" style="color:var(--mk-muted);font-style:italic;font-size:.8125rem;">${escHtml(r.notas)}</div>` : ''}
-        </div>
-        ${footer}
-      </div>`;
-    }).join('');
-
-    view.innerHTML = `<div style="margin-bottom:12px;font-size:.8125rem;color:var(--mk-muted);">${rows.length} reserva${rows.length !== 1 ? 's' : ''}</div>` + cards;
-  }
-
-  async function mkCancelarReserva(id) {
-    if (!confirm('¿Cancelar esta reserva?')) return;
-    try {
-      const { error } = await sb.from('mikve_reservas').update({ estado: 'cancelada' }).eq('id', id);
-      if (error) throw error;
-      showToast('Reserva cancelada', 'success');
-      mkLoadReservas();
-    } catch(e) {
-      showToast('Error: ' + e.message, 'error');
-    }
-  }
+  function formatCardNumber(input){let v=input.value.replace(/\D/g,'').slice(0,16);input.value=v.match(/.{1,4}/g)?.join(' ')||v;}
+  function formatExp(input){let v=input.value.replace(/\D/g,'');if(v.length>=2)v=v.slice(0,2)+'/'+v.slice(2,4);input.value=v;}
 </script>
 </body>
 </html>
