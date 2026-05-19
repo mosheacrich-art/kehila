@@ -673,17 +673,6 @@ function buildBackBtn(activePage) {
   document.head.appendChild(style);
   document.body.appendChild(btn);
 
-  /* En pantallas anchas el contenido puede estar centrado con margin:auto,
-     así que alineamos el botón al borde izquierdo real del contenedor. */
-  function alignBtn() {
-    if (window.innerWidth <= 768) return;
-    var inner = document.querySelector('.main-content > *');
-    if (!inner) return;
-    var rect = inner.getBoundingClientRect();
-    if (rect.left > 0) btn.style.left = rect.left + 'px';
-  }
-  requestAnimationFrame(alignBtn);
-  window.addEventListener('resize', alignBtn);
 }
 
 /**
