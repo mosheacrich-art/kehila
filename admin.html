@@ -5956,15 +5956,19 @@ CREATE POLICY "mkv_svc_admin" ON mikve_servicios FOR ALL
       return;
     }
     try {
-      var [resReservas, resConfig] = await Promise.all([
-        sb.from('mikve_reservas').select('*').order('fecha', { ascending: false }),
-        sb.from('mikve_servicios').select('*').order('orden', { ascending: true })
-      ]);
-      if (resReservas.error) throw resReservas.error;
-      _mkvReservas = resReservas.data || [];
-      _mkvServicios = (resConfig.data && resConfig.data.length)
-        ? resConfig.data
-        : [{ id: 'local-1', nombre: 'Ducha', precio: 30, activo: true }, { id: 'local-2', nombre: 'Baño', precio: 30, activo: true }];
+      var { data: resData, error: resError } = await sb
+        .from('mikve_reservas').select('*').order('fecha', { ascending: false });
+      if (resError) throw resError;
+      _mkvReservas = resData || [];
+      // Servicios — tabla opcional, no bloquea si no existe
+      try {
+        var { data: svcData } = await sb.from('mikve_servicios').select('*').order('orden', { ascending: true });
+        _mkvServicios = (svcData && svcData.length)
+          ? svcData
+          : [{ id: 'local-1', nombre: 'Ducha', precio: 30, activo: true }, { id: 'local-2', nombre: 'Baño', precio: 30, activo: true }];
+      } catch(eSvc) {
+        _mkvServicios = [{ id: 'local-1', nombre: 'Ducha', precio: 30, activo: true }, { id: 'local-2', nombre: 'Baño', precio: 30, activo: true }];
+      }
       mikveShowTab('citas');
     } catch(e) {
       if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--color-danger);padding:32px;">Error: ' + escHtml(e.message) + '<br><span style="font-size:.75rem;color:var(--color-text-muted);">Asegúrate de tener las políticas RLS para admins en la tabla mikve_reservas</span></td></tr>';
