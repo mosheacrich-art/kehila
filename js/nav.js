@@ -729,16 +729,22 @@ function renderSubTabs(pageId) {
   var tabs = _SUB_TABS[group];
   if (!tabs) return;
 
+  // ── Inject page-transition styles once ──────────────────────────────
+  if (!document.getElementById('sub-tab-transition-styles')) {
+    var s = document.createElement('style');
+    s.id = 'sub-tab-transition-styles';
+    s.textContent = [
+      '@keyframes _stFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}',
+      '.main-content{animation:_stFadeIn 0.18s ease both;}'
+    ].join('');
+    document.head.appendChild(s);
+  }
+
   var GROUP_META = {
     jconnect:  { title: 'Jconnect',         subtitle: 'Directorio y comercio de la comunidad' },
     'rav-hub': { title: 'Torá y Comunidad',  subtitle: 'Shiurim, consultas y citas con el Rav' }
   };
   var meta = GROUP_META[group] || { title: group, subtitle: '' };
-
-  var tabsHtml = tabs.map(function(tab) {
-    var active = tab.id === pageId;
-    return '<a href="' + tab.href + '" style="display:inline-flex;align-items:center;padding:10px 18px;font-size:0.875rem;font-weight:' + (active ? '700' : '500') + ';color:' + (active ? 'var(--color-primary)' : 'var(--color-text-muted)') + ';text-decoration:none;border-bottom:2.5px solid ' + (active ? 'var(--color-primary)' : 'transparent') + ';margin-bottom:-2px;white-space:nowrap;transition:color 0.15s,border-color 0.15s;font-family:inherit;">' + escHtml(tab.label) + '</a>';
-  }).join('');
 
   var wrapper = document.createElement('div');
   wrapper.id = 'sub-tabs-bar';
@@ -747,18 +753,39 @@ function renderSubTabs(pageId) {
       '<h1 style="font-size:1.5rem;font-weight:700;color:var(--color-text);margin:0 0 4px;font-family:var(--font-brand);">' + escHtml(meta.title) + '</h1>' +
       '<p style="font-size:0.875rem;color:var(--color-text-muted);margin:0 0 16px;">' + escHtml(meta.subtitle) + '</p>' +
     '</div>' +
-    '<div style="display:flex;border-bottom:2px solid var(--color-border);overflow-x:auto;scrollbar-width:none;margin-bottom:24px;">' +
-      tabsHtml +
-    '</div>';
+    '<div id="sub-tabs-row" style="display:flex;border-bottom:2px solid var(--color-border);overflow-x:auto;scrollbar-width:none;margin-bottom:24px;"></div>';
 
   // Insert at the top of the page's inner content container
   var inner = document.querySelector('.main-content > div');
-  if (inner) {
-    inner.insertAdjacentElement('afterbegin', wrapper);
-  } else {
-    var main = document.querySelector('.main-content');
-    if (main) main.insertAdjacentElement('afterbegin', wrapper);
-  }
+  var container = inner || document.querySelector('.main-content');
+  if (!container) return;
+  container.insertAdjacentElement('afterbegin', wrapper);
+
+  var row = document.getElementById('sub-tabs-row');
+  tabs.forEach(function(tab) {
+    var active = tab.id === pageId;
+    var a = document.createElement('a');
+    a.href = tab.href;
+    a.textContent = tab.label;
+    a.style.cssText = 'display:inline-flex;align-items:center;padding:10px 18px;font-size:0.875rem;font-weight:' + (active ? '700' : '500') + ';color:' + (active ? 'var(--color-primary)' : 'var(--color-text-muted)') + ';text-decoration:none;border-bottom:2.5px solid ' + (active ? 'var(--color-primary)' : 'transparent') + ';margin-bottom:-2px;white-space:nowrap;font-family:inherit;transition:color 0.15s,border-color 0.15s;';
+    if (!active) {
+      a.addEventListener('mouseenter', function() { a.style.color = 'var(--color-text)'; });
+      a.addEventListener('mouseleave', function() { a.style.color = 'var(--color-text-muted)'; });
+    }
+    // Smooth fade-out before navigating
+    a.addEventListener('click', function(e) {
+      if (a.href === window.location.href) return;
+      e.preventDefault();
+      var mc = document.querySelector('.main-content');
+      if (mc) {
+        mc.style.transition = 'opacity 0.13s ease, transform 0.13s ease';
+        mc.style.opacity = '0';
+        mc.style.transform = 'translateY(-4px)';
+      }
+      setTimeout(function() { window.location.href = a.href; }, 130);
+    });
+    row.appendChild(a);
+  });
 }
 
 function initNav(activePage) {
