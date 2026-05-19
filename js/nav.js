@@ -89,7 +89,7 @@ const NAV_ITEMS = [
       },
       {
         id: 'mikve',
-        label: 'Mikve Barcelona',
+        label: 'Mikve',
         href: 'mikve.html',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3.75c-4.5 6-6.75 10.125-6.75 12.75a6.75 6.75 0 0 0 13.5 0c0-2.625-2.25-6.75-6.75-12.75Z"/></svg>`
       },

@@ -42,7 +42,7 @@ const TRANSLATIONS = {
     nav_comunidad:    'Jconnect',
     nav_rav_hub:      'Torá y Comunidad',
     nav_esencial:     'Servicios Beit Jabad',
-    nav_mikve:        'Mikve Barcelona',
+    nav_mikve:        'Mikve',
 
     // Común
     save:             'Guardar cambios',
@@ -183,7 +183,7 @@ const TRANSLATIONS = {
     nav_comunidad:    'Jconnect',
     nav_rav_hub:      'Torá y Comunidad',
     nav_esencial:     'Servicios Beit Jabad',
-    nav_mikve:        'Mikve Barcelona',
+    nav_mikve:        'Mikve',
 
     // Common
     save:             'Save changes',
