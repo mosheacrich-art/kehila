@@ -116,23 +116,6 @@
       </button>
     </div>
 
-    <!-- ═══ PANELS ═══ -->
-    <div class="com-panel active" id="panel-tienda">
-      <iframe class="com-iframe" src="tienda.html" title="Tienda" id="iframe-tienda"></iframe>
-    </div>
-
-    <div class="com-panel" id="panel-negocios">
-      <iframe class="com-iframe" src="business.html" title="Negocios" id="iframe-negocios" loading="lazy"></iframe>
-    </div>
-
-    <div class="com-panel" id="panel-profesionales">
-      <iframe class="com-iframe" src="linkedin-kehila.html" title="Profesionales" id="iframe-profesionales" loading="lazy"></iframe>
-    </div>
-
-    <div class="com-panel" id="panel-marketplace">
-      <iframe class="com-iframe" src="wallap.html" title="Marketplace" id="iframe-marketplace" loading="lazy"></iframe>
-    </div>
-
   </div>
 </div>
 
@@ -142,29 +125,12 @@
 <script>
   initNav('comunidad');
 
-  // Tab switching con historial del navegador
-  const tabs = document.querySelectorAll('.com-tab');
-  history.replaceState({ tab: 'marketplace' }, '');
+  const TAB_PAGES = { tienda: 'tienda.html', negocios: 'business.html', profesionales: 'linkedin-kehila.html', marketplace: 'wallap.html' };
 
-  tabs.forEach(tab => {
+  document.querySelectorAll('.com-tab').forEach(tab => {
     tab.addEventListener('click', () => {
-      const target = tab.dataset.tab;
-      tabs.forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.com-panel').forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('panel-' + target).classList.add('active');
-      history.pushState({ tab: target }, '');
+      window.location.href = TAB_PAGES[tab.dataset.tab];
     });
-  });
-
-  window.addEventListener('popstate', e => {
-    const target = (e.state && e.state.tab) ? e.state.tab : 'marketplace';
-    tabs.forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.com-panel').forEach(p => p.classList.remove('active'));
-    const btn = document.querySelector('.com-tab[data-tab="' + target + '"]');
-    if (btn) btn.classList.add('active');
-    const panel = document.getElementById('panel-' + target);
-    if (panel) panel.classList.add('active');
   });
 </script>
 </body>
