@@ -188,7 +188,7 @@
     .mk-mode-btn.active { background: var(--mk-gold); color: #fff; font-weight: 700; }
 
     /* Gallery */
-    .mk-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 20px -24px 0; border-radius: 14px; overflow: hidden; position: relative; z-index: 1; }
+    .mk-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 20px 0 0; border-radius: 14px 14px 0 0; overflow: hidden; position: relative; z-index: 1; }
     .mk-gallery img { width: 100%; height: 160px; object-fit: cover; display: block; }
     @media (max-width: 480px) { .mk-gallery { grid-template-columns: 1fr 1fr; margin: 16px -24px 0; } .mk-gallery img { height: 110px; } .mk-gallery img:last-child { grid-column: 1 / -1; height: 100px; } }
 
@@ -243,12 +243,11 @@
     <div class="mk-page-header-inner">
       <h1>Mikve Barcelona</h1>
       <p>Reserva tu visita</p>
-      <!-- Gallery inside header -->
-      <div class="mk-gallery">
-        <img src="img/mikve-1.jpg" alt="Mikve Barcelona" onerror="this.parentElement.style.display='none'">
-        <img src="img/mikve-2.jpg" alt="Mikve Barcelona" onerror="this.style.display='none'">
-        <img src="img/mikve-3.jpg" alt="Mikve Barcelona" onerror="this.style.display='none'">
-      </div>
+    </div>
+    <div class="mk-gallery">
+      <img src="img/mikve-1.jpg" alt="Mikve Barcelona" onerror="this.parentElement.style.display='none'">
+      <img src="img/mikve-2.jpg" alt="Mikve Barcelona" onerror="this.style.display='none'">
+      <img src="img/mikve-3.jpg" alt="Mikve Barcelona" onerror="this.style.display='none'">
     </div>
     <svg class="mk-header-wave" viewBox="0 0 1200 44" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M0 0 Q300 44 600 22 Q900 0 1200 44 L1200 44 L0 44 Z" fill="#EDE7DC"/>
