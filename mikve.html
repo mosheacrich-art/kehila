@@ -188,9 +188,9 @@
     .mk-mode-btn.active { background: var(--mk-gold); color: #fff; font-weight: 700; }
 
     /* Gallery */
-    .mk-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 18px; border-radius: 18px; overflow: hidden; }
-    .mk-gallery img { width: 100%; height: 130px; object-fit: cover; display: block; }
-    @media (max-width: 480px) { .mk-gallery { grid-template-columns: 1fr 1fr; } .mk-gallery img:last-child { grid-column: 1 / -1; height: 110px; } }
+    .mk-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 18px 0 0; border-radius: 14px; overflow: hidden; position: relative; z-index: 1; }
+    .mk-gallery img { width: 100%; height: 120px; object-fit: cover; display: block; }
+    @media (max-width: 480px) { .mk-gallery { grid-template-columns: 1fr 1fr; } .mk-gallery img:last-child { grid-column: 1 / -1; height: 100px; } }
 
     /* Reserva cards */
     .mk-reserva-empty { text-align: center; padding: 48px 24px; color: var(--mk-muted); }
@@ -243,6 +243,12 @@
     <div class="mk-page-header-inner">
       <h1>Mikve Barcelona</h1>
       <p>Reserva tu visita</p>
+      <!-- Gallery inside header -->
+      <div class="mk-gallery">
+        <img src="img/mikve-1.jpg" alt="Mikve Barcelona" onerror="this.parentElement.style.display='none'">
+        <img src="img/mikve-2.jpg" alt="Mikve Barcelona" onerror="this.style.display='none'">
+        <img src="img/mikve-3.jpg" alt="Mikve Barcelona" onerror="this.style.display='none'">
+      </div>
     </div>
     <svg class="mk-header-wave" viewBox="0 0 1200 44" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M0 0 Q300 44 600 22 Q900 0 1200 44 L1200 44 L0 44 Z" fill="#EDE7DC"/>
@@ -265,13 +271,6 @@
 
     <!-- Booking view -->
     <div id="mk-booking-view">
-
-    <!-- Gallery -->
-    <div class="mk-gallery">
-      <img src="img/mikve-1.jpg" alt="Mikve Barcelona" onerror="this.parentElement.style.display='none'">
-      <img src="img/mikve-2.jpg" alt="Mikve Barcelona" onerror="this.style.display='none'">
-      <img src="img/mikve-3.jpg" alt="Mikve Barcelona" onerror="this.style.display='none'">
-    </div>
 
     <div class="mk-steps" id="mk-steps">
       <button class="mk-step-btn active" data-step="1" onclick="goToStep(1)">
