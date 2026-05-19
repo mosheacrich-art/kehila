@@ -465,6 +465,63 @@
       color: var(--mk-navy); font-size: 0.9rem; font-weight: 700;
       cursor: pointer; font-family: inherit;
     }
+
+    /* ─── Mode toggle ─────────────────────────────────────────── */
+    .mk-mode-toggle {
+      display: flex; background: #fff;
+      border: 1.5px solid var(--mk-border);
+      border-radius: 14px; padding: 4px;
+      margin-bottom: 20px; gap: 2px;
+    }
+    .mk-mode-btn {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 12px; border-radius: 10px;
+      border: none; background: none; cursor: pointer;
+      font-size: 0.85rem; font-weight: 500;
+      color: var(--mk-muted); font-family: inherit; transition: all 0.15s;
+    }
+    .mk-mode-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .mk-mode-btn.active { background: var(--mk-gold-bg); color: var(--mk-navy); font-weight: 700; }
+
+    /* ─── Reserva cards ───────────────────────────────────────── */
+    .mk-reserva-empty {
+      text-align: center; padding: 48px 24px;
+      color: var(--mk-muted);
+    }
+    .mk-reserva-empty svg { width: 48px; height: 48px; margin: 0 auto 12px; display: block; opacity: 0.35; }
+    .mk-reserva-empty p { font-size: 0.9375rem; }
+    .mk-reserva-card {
+      background: #fff; border: 1.5px solid var(--mk-border);
+      border-radius: 16px; overflow: hidden; margin-bottom: 14px;
+    }
+    .mk-reserva-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; background: var(--mk-gold-pale);
+      border-bottom: 1.5px solid var(--mk-gold-bg);
+    }
+    .mk-reserva-date { font-size: 0.9375rem; font-weight: 700; color: var(--mk-navy); }
+    .mk-reserva-badge {
+      display: inline-block; padding: 3px 12px;
+      border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: capitalize;
+    }
+    .mk-reserva-badge.confirmada { background: #D1FAE5; color: #065F46; }
+    .mk-reserva-badge.completada { background: #DBEAFE; color: #1E40AF; }
+    .mk-reserva-badge.cancelada  { background: #FEE2E2; color: #991B1B; }
+    .mk-reserva-card-body { padding: 14px 18px; }
+    .mk-reserva-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 8px; font-size: 0.875rem; color: var(--mk-text);
+    }
+    .mk-reserva-row:last-child { margin-bottom: 0; }
+    .mk-reserva-row svg { width: 15px; height: 15px; color: var(--mk-gold); flex-shrink: 0; }
+    .mk-reserva-card-footer { padding: 0 18px 14px; display: flex; justify-content: flex-end; }
+    .mk-cancel-btn {
+      padding: 7px 16px; border-radius: 8px;
+      background: none; border: 1.5px solid #E5E7EB;
+      color: #EF4444; font-size: 0.8125rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .mk-cancel-btn:hover { background: #FEE2E2; border-color: #EF4444; }
   </style>
 </head>
 <body>
@@ -493,6 +550,21 @@
         </svg>
       </button>
     </div>
+
+    <!-- Mode toggle -->
+    <div class="mk-mode-toggle">
+      <button class="mk-mode-btn active" id="mk-btn-booking" onclick="mkSwitchMode('booking')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+        Nueva reserva
+      </button>
+      <button class="mk-mode-btn" id="mk-btn-reservas" onclick="mkSwitchMode('reservas')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+        Mis reservas
+      </button>
+    </div>
+
+    <!-- Booking view -->
+    <div id="mk-booking-view">
 
     <!-- Step tabs -->
     <div class="mk-steps" id="mk-steps">
@@ -531,6 +603,11 @@
         Continuar
       </button>
     </div>
+
+    </div><!-- /mk-booking-view -->
+
+    <!-- Reservas view -->
+    <div id="mk-reservas-view" style="display:none;"></div>
 
   </div>
 
@@ -1166,6 +1243,86 @@
     let v = input.value.replace(/\D/g,'');
     if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2,4);
     input.value = v;
+  }
+
+  // ─── Mis Reservas ─────────────────────────────────────────────────────────
+  function mkSwitchMode(mode) {
+    document.getElementById('mk-booking-view').style.display = mode === 'booking' ? '' : 'none';
+    document.getElementById('mk-reservas-view').style.display = mode === 'reservas' ? '' : 'none';
+    document.getElementById('mk-btn-booking').classList.toggle('active', mode === 'booking');
+    document.getElementById('mk-btn-reservas').classList.toggle('active', mode === 'reservas');
+    if (mode === 'reservas') mkLoadReservas();
+  }
+
+  async function mkLoadReservas() {
+    const view = document.getElementById('mk-reservas-view');
+    view.innerHTML = '<div style="text-align:center;padding:48px 24px;color:var(--mk-muted);">Cargando...</div>';
+    try {
+      const user = getCurrentUser();
+      const { data, error } = await sb.from('mikve_reservas')
+        .select('*')
+        .eq('usuario_id', user.userId)
+        .order('fecha', { ascending: false })
+        .order('hora', { ascending: true });
+      if (error) throw error;
+      mkRenderReservas(data || []);
+    } catch(e) {
+      view.innerHTML = '<div class="mk-reserva-empty"><p>Error al cargar reservas.</p></div>';
+    }
+  }
+
+  function mkRenderReservas(rows) {
+    const view = document.getElementById('mk-reservas-view');
+    if (!rows.length) {
+      view.innerHTML = `<div class="mk-reserva-empty">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+        <p>Aún no tienes reservas.</p>
+      </div>`;
+      return;
+    }
+
+    const clockIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>`;
+    const dropIcon  = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.332-6.667 9.111-6.667 11.667C5.333 18.701 8.313 21 12 21s6.667-2.299 6.667-5.333C18.667 12.111 16.444 8.332 12 3Z"/></svg>`;
+    const euroIcon  = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 7.756a4.5 4.5 0 1 0 0 8.488M7.5 10.5h5.25m-5.25 3h5.25M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>`;
+
+    const cards = rows.map(r => {
+      const dateStr = r.fecha
+        ? new Date(r.fecha + 'T12:00:00').toLocaleDateString('es-ES', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
+        : '—';
+      const estado = r.estado || 'confirmada';
+      const footer = estado === 'confirmada'
+        ? `<div class="mk-reserva-card-footer">
+             <button class="mk-cancel-btn" onclick="mkCancelarReserva('${r.id}')">Cancelar reserva</button>
+           </div>`
+        : '';
+      return `<div class="mk-reserva-card" id="mkr-${r.id}">
+        <div class="mk-reserva-card-header">
+          <div class="mk-reserva-date">${escHtml(dateStr)}</div>
+          <span class="mk-reserva-badge ${escHtml(estado)}">${escHtml(estado)}</span>
+        </div>
+        <div class="mk-reserva-card-body">
+          <div class="mk-reserva-row">${clockIcon} ${escHtml(r.hora ? r.hora.slice(0,5) : '—')}</div>
+          <div class="mk-reserva-row">${dropIcon} ${escHtml(r.servicio || '—')}</div>
+          <div class="mk-reserva-row">${euroIcon} <strong>€${Number(r.total || 0).toFixed(2)}</strong></div>
+          ${r.notas ? `<div class="mk-reserva-row" style="color:var(--mk-muted);font-style:italic;font-size:.8125rem;">${escHtml(r.notas)}</div>` : ''}
+        </div>
+        ${footer}
+      </div>`;
+    }).join('');
+
+    view.innerHTML = `<div style="margin-bottom:12px;font-size:.8125rem;color:var(--mk-muted);">${rows.length} reserva${rows.length !== 1 ? 's' : ''}</div>` + cards;
+  }
+
+  async function mkCancelarReserva(id) {
+    if (!confirm('¿Cancelar esta reserva?')) return;
+    try {
+      const { error } = await sb.from('mikve_reservas').update({ estado: 'cancelada' }).eq('id', id);
+      if (error) throw error;
+      showToast('Reserva cancelada', 'success');
+      mkLoadReservas();
+    } catch(e) {
+      showToast('Error: ' + e.message, 'error');
+    }
   }
 </script>
 </body>
