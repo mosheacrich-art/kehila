@@ -703,6 +703,46 @@ function buildBackBtn(activePage) {
  *   trackPageView('eventos');
  * });
  */
+// ─── Sub-page group tabs ────────────────────────────────────────────────────
+const _SUB_GROUPS = {
+  tienda: 'jconnect', business: 'jconnect', professionals: 'jconnect', wallap: 'jconnect',
+  shiurim: 'rav-hub', rav: 'rav-hub', 'citas-rabino': 'rav-hub'
+};
+const _SUB_TABS = {
+  jconnect: [
+    { id: 'tienda',        label: 'Tienda',          href: 'tienda.html' },
+    { id: 'business',      label: 'Negocios',         href: 'business.html' },
+    { id: 'professionals', label: 'Profesionales',    href: 'linkedin-kehila.html' },
+    { id: 'wallap',        label: 'Marketplace',      href: 'wallap.html' }
+  ],
+  'rav-hub': [
+    { id: 'shiurim',       label: 'Shiurim',          href: 'shiurim.html' },
+    { id: 'rav',           label: 'Preguntas al Rav',  href: 'rav.html' },
+    { id: 'citas-rabino',  label: 'Cita con el Rav',   href: 'citas-rabino.html' }
+  ]
+};
+
+function renderSubTabs(pageId) {
+  if (window.self !== window.top) return;
+  var group = _SUB_GROUPS[pageId];
+  if (!group) return;
+  var tabs = _SUB_TABS[group];
+  if (!tabs) return;
+
+  var tabsHtml = tabs.map(function(t) {
+    var active = t.id === pageId;
+    return '<a href="' + t.href + '" style="display:flex;align-items:center;padding:11px 18px;font-size:0.875rem;font-weight:' + (active ? '700' : '500') + ';color:' + (active ? 'var(--color-primary)' : 'var(--color-text-muted)') + ';text-decoration:none;border-bottom:2.5px solid ' + (active ? 'var(--color-primary)' : 'transparent') + ';margin-bottom:-2px;white-space:nowrap;transition:color 0.15s,border-color 0.15s;font-family:inherit;">' + escHtml(t.label) + '</a>';
+  }).join('');
+
+  var bar = document.createElement('div');
+  bar.id = 'sub-tabs-bar';
+  bar.style.cssText = 'display:flex;border-bottom:2px solid var(--color-border);overflow-x:auto;scrollbar-width:none;background:var(--color-white);position:sticky;top:0;z-index:90;padding:0 12px;';
+  bar.innerHTML = tabsHtml;
+
+  var main = document.querySelector('.main-content');
+  if (main) main.insertAdjacentElement('afterbegin', bar);
+}
+
 function initNav(activePage) {
   if (typeof trackPageView === 'function') trackPageView(activePage);
   // Cargar i18n.js si no está disponible
@@ -718,6 +758,7 @@ function initNav(activePage) {
   buildHamburger(activePage);
   buildBackBtn(activePage);
   buildLegalFooter();
+  renderSubTabs(activePage);
 }
 
 /**

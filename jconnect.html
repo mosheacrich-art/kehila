@@ -123,15 +123,7 @@
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
 <script>
-  initNav('comunidad');
-
-  const TAB_PAGES = { tienda: 'tienda.html', negocios: 'business.html', profesionales: 'linkedin-kehila.html', marketplace: 'wallap.html' };
-
-  document.querySelectorAll('.com-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      window.location.href = TAB_PAGES[tab.dataset.tab];
-    });
-  });
+  window.location.replace('tienda.html');
 </script>
 </body>
 </html>

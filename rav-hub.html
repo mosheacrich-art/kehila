@@ -119,15 +119,7 @@
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
 <script>
-  initNav('rav-hub');
-
-  const TAB_PAGES = { shiurim: 'shiurim.html', preguntas: 'rav.html', citas: 'citas-rabino.html' };
-
-  document.querySelectorAll('.rav-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      window.location.href = TAB_PAGES[tab.dataset.tab];
-    });
-  });
+  window.location.replace('shiurim.html');
 </script>
 </body>
 </html>
