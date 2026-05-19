@@ -379,13 +379,10 @@
 
     /* ─── Bottom bar ──────────────────────────────────────────── */
     .mk-bottom-bar {
-      position: fixed; bottom: 0; left: var(--sidebar-width); right: 0;
-      background: var(--mk-navy); padding: 14px 20px;
+      background: transparent;
+      padding: 24px 0 0;
       display: flex; align-items: center; gap: 12px;
-      z-index: 100;
-      padding-bottom: max(14px, env(safe-area-inset-bottom));
     }
-    @media (max-width: 768px) { .mk-bottom-bar { left: 0; } }
     .mk-book-btn {
       flex: 1;
       display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -528,13 +525,13 @@
     <!-- Step content -->
     <div id="mk-content"></div>
 
-  </div>
+    <!-- Bottom bar -->
+    <div class="mk-bottom-bar" id="mk-bottom-bar">
+      <button class="mk-continue-btn" id="mk-continue-btn" onclick="handleContinue()" disabled>
+        Continuar
+      </button>
+    </div>
 
-  <!-- Bottom bar -->
-  <div class="mk-bottom-bar" id="mk-bottom-bar">
-    <button class="mk-continue-btn" id="mk-continue-btn" onclick="handleContinue()" disabled>
-      Continuar
-    </button>
   </div>
 
 </main>
