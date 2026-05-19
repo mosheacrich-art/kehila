@@ -26,12 +26,11 @@
     @media (max-width: 768px) { .main-content { margin-left: 0; } }
 
     /* Page header */
-    .mk-page-header { background: var(--mk-navy); position: relative; padding: 44px 24px 0; text-align: center; }
+    .mk-page-header { background: var(--mk-navy); position: relative; padding: 44px 24px 0; text-align: center; border-radius: 0 0 36px 36px; overflow: hidden; }
     .mk-page-header-inner { position: relative; z-index: 1; }
     .mk-page-header h1 { font-family: var(--font-brand, Georgia, serif); font-size: 2rem; font-weight: 700; color: #fff; margin: 0 0 5px; letter-spacing: -0.01em; }
     .mk-page-header p { color: rgba(255,255,255,0.5); font-size: 0.8125rem; margin: 0 0 28px; letter-spacing: 0.06em; text-transform: uppercase; }
-    .mk-header-wave { width: 100%; height: 60px; display: block; position: relative; z-index: 2; margin-top: -20px; }
-    @media (max-width: 768px) { .mk-page-header { padding: 56px 24px 0; } .mk-page-header h1 { font-size: 1.625rem; } }
+    @media (max-width: 768px) { .mk-page-header { padding: 56px 24px 0; border-radius: 0 0 24px 24px; } .mk-page-header h1 { font-size: 1.625rem; } }
 
     /* Reset button */
     .mk-reset-btn { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; z-index: 2; }
@@ -249,9 +248,6 @@
       <img src="img/mikve-2.jpg" alt="Mikve Barcelona" onerror="this.style.display='none'">
       <img src="img/mikve-3.jpg" alt="Mikve Barcelona" onerror="this.style.display='none'">
     </div>
-    <svg class="mk-header-wave" viewBox="0 0 1200 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0 20 Q300 60 600 35 Q900 10 1200 50 L1200 60 L0 60 Z" fill="#EDE7DC"/>
-    </svg>
   </div>
 
   <div class="mk-container">
