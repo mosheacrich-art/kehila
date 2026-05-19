@@ -33,11 +33,10 @@
 
     @media (max-width: 700px) {
       .sv-grid {
-        display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 14px;
-        padding: 4px 16px 12px; scrollbar-width: none; scroll-snap-type: x mandatory;
+        display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+        padding: 0;
       }
-      .sv-grid::-webkit-scrollbar { display: none; }
-      .sv-grid .sv-card { flex: 0 0 260px; grid-column: auto; scroll-snap-align: start; }
+      .sv-grid .sv-card { grid-column: auto !important; }
     }
 
     /* ── Cards ── */
