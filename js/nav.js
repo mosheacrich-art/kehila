@@ -749,7 +749,7 @@ function initNav(activePage) {
   if (typeof t === 'undefined' && !document.querySelector('script[src*="i18n"]')) {
     const s = document.createElement('script');
     s.src = 'js/i18n.js';
-    s.onload = () => { buildSidebar(activePage); buildBottomNav(activePage); buildHamburger(activePage); buildBackBtn(activePage); buildLegalFooter(); };
+    s.onload = () => { buildSidebar(activePage); buildBottomNav(activePage); buildHamburger(activePage); buildBackBtn(activePage); buildLegalFooter(); renderSubTabs(activePage); };
     document.head.appendChild(s);
     return;
   }
