@@ -729,18 +729,36 @@ function renderSubTabs(pageId) {
   var tabs = _SUB_TABS[group];
   if (!tabs) return;
 
-  var tabsHtml = tabs.map(function(t) {
-    var active = t.id === pageId;
-    return '<a href="' + t.href + '" style="display:flex;align-items:center;padding:11px 18px;font-size:0.875rem;font-weight:' + (active ? '700' : '500') + ';color:' + (active ? 'var(--color-primary)' : 'var(--color-text-muted)') + ';text-decoration:none;border-bottom:2.5px solid ' + (active ? 'var(--color-primary)' : 'transparent') + ';margin-bottom:-2px;white-space:nowrap;transition:color 0.15s,border-color 0.15s;font-family:inherit;">' + escHtml(t.label) + '</a>';
+  var GROUP_META = {
+    jconnect:  { title: 'Jconnect',         subtitle: 'Directorio y comercio de la comunidad' },
+    'rav-hub': { title: 'Torá y Comunidad',  subtitle: 'Shiurim, consultas y citas con el Rav' }
+  };
+  var meta = GROUP_META[group] || { title: group, subtitle: '' };
+
+  var tabsHtml = tabs.map(function(tab) {
+    var active = tab.id === pageId;
+    return '<a href="' + tab.href + '" style="display:inline-flex;align-items:center;padding:10px 18px;font-size:0.875rem;font-weight:' + (active ? '700' : '500') + ';color:' + (active ? 'var(--color-primary)' : 'var(--color-text-muted)') + ';text-decoration:none;border-bottom:2.5px solid ' + (active ? 'var(--color-primary)' : 'transparent') + ';margin-bottom:-2px;white-space:nowrap;transition:color 0.15s,border-color 0.15s;font-family:inherit;">' + escHtml(tab.label) + '</a>';
   }).join('');
 
-  var bar = document.createElement('div');
-  bar.id = 'sub-tabs-bar';
-  bar.style.cssText = 'display:flex;border-bottom:2px solid var(--color-border);overflow-x:auto;scrollbar-width:none;background:var(--color-white);position:sticky;top:0;z-index:90;padding:0 12px;';
-  bar.innerHTML = tabsHtml;
+  var wrapper = document.createElement('div');
+  wrapper.id = 'sub-tabs-bar';
+  wrapper.innerHTML =
+    '<div style="padding:24px 0 0;">' +
+      '<h1 style="font-size:1.5rem;font-weight:700;color:var(--color-text);margin:0 0 4px;font-family:var(--font-brand);">' + escHtml(meta.title) + '</h1>' +
+      '<p style="font-size:0.875rem;color:var(--color-text-muted);margin:0 0 16px;">' + escHtml(meta.subtitle) + '</p>' +
+    '</div>' +
+    '<div style="display:flex;border-bottom:2px solid var(--color-border);overflow-x:auto;scrollbar-width:none;margin-bottom:24px;">' +
+      tabsHtml +
+    '</div>';
 
-  var main = document.querySelector('.main-content');
-  if (main) main.insertAdjacentElement('afterbegin', bar);
+  // Insert at the top of the page's inner content container
+  var inner = document.querySelector('.main-content > div');
+  if (inner) {
+    inner.insertAdjacentElement('afterbegin', wrapper);
+  } else {
+    var main = document.querySelector('.main-content');
+    if (main) main.insertAdjacentElement('afterbegin', wrapper);
+  }
 }
 
 function initNav(activePage) {
