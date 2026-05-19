@@ -589,49 +589,54 @@
     renderStep();
   });
 
-  // ─── Cálculo de puesta de sol (Barcelona) ────────────────────────────────
-  // Barcelona: lat 41.3851°N, lon 2.1734°E
-  function calcSunset(date) {
-    const lat = 41.3851 * Math.PI / 180;
-    const lon = 2.1734;
-    const start = new Date(date.getFullYear(), 0, 0);
-    const diff = date - start;
-    const dayOfYear = Math.floor(diff / 86400000);
+  // ─── Tiempos halájicos (Barcelona: lat 41.3851°N, lon 2.1734°E) ──────────
+  const BCN_LAT = 41.3851 * Math.PI / 180;
+  const BCN_LON = 2.1734;
+  const TZEIT_DEG = 6.0; // Baal HaTanya (Jabad) — grados bajo el horizonte
 
-    // Solar declination
+  function _solarData(date) {
+    const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
     const decl = -23.45 * Math.cos(2 * Math.PI * (dayOfYear + 10) / 365) * Math.PI / 180;
-
-    // Hour angle at sunset
-    const cosH = -Math.tan(lat) * Math.tan(decl);
-    const H = Math.acos(Math.max(-1, Math.min(1, cosH))) * 180 / Math.PI;
-
-    // Solar noon UTC for Barcelona
-    const solarNoon = 12 - lon / 15;
-
-    // Equation of time
+    const solarNoon = 12 - BCN_LON / 15;
     const B = (360 / 365 * (dayOfYear - 81)) * Math.PI / 180;
     const EoT = (9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B)) / 60;
-
-    const sunsetUTC = solarNoon + H / 15 - EoT;
-
-    // Barcelona timezone: CEST (UTC+2) Apr–Oct, CET (UTC+1) Nov–Mar
     const month = date.getMonth() + 1;
     const tz = (month >= 4 && month <= 10) ? 2 : 1;
+    return { decl, solarNoon, EoT, tz };
+  }
 
-    return sunsetUTC + tz; // decimal hours, local time
+  // Shkiah: puesta de sol (0° horizonte)
+  function calcSunset(date) {
+    const { decl, solarNoon, EoT, tz } = _solarData(date);
+    const cosH = -Math.tan(BCN_LAT) * Math.tan(decl);
+    const H = Math.acos(Math.max(-1, Math.min(1, cosH))) * 180 / Math.PI;
+    return solarNoon + H / 15 - EoT + tz;
+  }
+
+  // Tzeit: sol a X grados bajo el horizonte
+  function calcTzeit(date, deg) {
+    const { decl, solarNoon, EoT, tz } = _solarData(date);
+    const cosH = (-Math.sin(deg * Math.PI / 180) - Math.sin(BCN_LAT) * Math.sin(decl))
+                 / (Math.cos(BCN_LAT) * Math.cos(decl));
+    const H = Math.acos(Math.max(-1, Math.min(1, cosH))) * 180 / Math.PI;
+    return solarNoon + H / 15 - EoT + tz;
+  }
+
+  // Redondear hacia arriba al próximo intervalo de 15 min
+  function roundUp15(decHours) {
+    return Math.ceil(decHours * 4) / 4;
+  }
+
+  // Zman Tevilá = tzeit al minhag Baal HaTanya (6.0°)
+  // Shkiah se redondea hacia arriba a los próximos 15 min antes de calcular
+  function earliestTevilah(date) {
+    return calcTzeit(date, TZEIT_DEG);
   }
 
   function formatHour(decHours) {
     const h = Math.floor(decHours);
     const m = Math.round((decHours - h) * 60);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
-    return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
-  }
-
-  // Earliest tevilah = sunset + ~18 min (3 stars approximation)
-  function earliestTevilah(date) {
-    return calcSunset(date) + 18 / 60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
   }
 
   // ─── Calendario ────────────────────────────────────────────────────────────
@@ -804,16 +809,14 @@
     const slotsHtml = slots.map(h => {
       const hh = Math.floor(h);
       const mm = h % 1 === 0.5 ? '30' : '00';
-      const ampm = hh >= 12 ? 'PM' : 'AM';
-      const h12 = hh > 12 ? hh - 12 : (hh === 0 ? 12 : hh);
-      const timeKey = `${hh}:${mm}`;
+      const timeKey = `${String(hh).padStart(2,'0')}:${mm}`;
       const sel = booking.time === timeKey;
 
       return `<div class="mk-slot ${sel?'selected':''}" onclick="selectTime('${timeKey}')">
         <div class="mk-slot-icon">${clockIcon}</div>
         <div class="mk-slot-flex">
-          <div class="mk-slot-time">${h12}:${mm} <span>${ampm}</span></div>
-          <div class="mk-slot-sub">This is a 30 minute appointment</div>
+          <div class="mk-slot-time">${timeKey}</div>
+          <div class="mk-slot-sub">Cita de 30 minutos</div>
         </div>
         <button class="mk-select-btn ${sel?'selected-btn':''}" onclick="selectTime('${timeKey}')">Seleccionar</button>
       </div>`;
@@ -830,8 +833,8 @@
       <div class="mk-time-info">
         <div class="mk-time-info-title">Por favor selecciona una hora</div>
         <div class="mk-time-info-sub">
-          Puesta de sol (Shkiá) a las <strong>${sunsetStr}</strong><br>
-          Primera tevilá posible: <strong>${tevilahStr}</strong>
+          Shkiá: <strong>${sunsetStr}</strong><br>
+          Zman Tevilá — minhag Baal HaTanya (6°): <strong>${tevilahStr}</strong>
         </div>
       </div>
       ${slotsHtml}`;
@@ -841,11 +844,7 @@
   function renderStep4() {
     const calIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>`;
     const total = booking.service.price + booking.donation;
-    const [timH, timM] = booking.time.split(':');
-    const hh = parseInt(timH); const mm = timM;
-    const ampm = hh >= 12 ? 'PM' : 'AM';
-    const h12 = hh > 12 ? hh - 12 : (hh === 0 ? 12 : hh);
-    const timeStr = `${h12}:${mm} ${ampm}`;
+    const timeStr = booking.time;
 
     return `
       <div class="mk-summary">
@@ -866,11 +865,7 @@
   // STEP 5: Donación
   function renderStep5() {
     const calIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>`;
-    const [timH, timM] = booking.time.split(':');
-    const hh = parseInt(timH); const mm = timM;
-    const ampm = hh >= 12 ? 'PM' : 'AM';
-    const h12 = hh > 12 ? hh - 12 : (hh === 0 ? 12 : hh);
-    const timeStr = `${h12}:${mm} ${ampm}`;
+    const timeStr = booking.time;
 
     const donationOpts = [
       { id: 'no',  label: 'No, gracias', amount: 0 },
@@ -914,11 +909,7 @@
 
   // STEP 6: Pago
   function renderStep6() {
-    const [timH, timM] = booking.time.split(':');
-    const hh = parseInt(timH); const mm = timM;
-    const ampm = hh >= 12 ? 'PM' : 'AM';
-    const h12 = hh > 12 ? hh - 12 : (hh === 0 ? 12 : hh);
-    const timeStr = `${h12}:${mm} ${ampm}`;
+    const timeStr = booking.time;
     const total = booking.service.price + booking.donation;
 
     const calIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>`;
@@ -1113,11 +1104,7 @@
   }
 
   function mostrarConfirmacion() {
-    const [timH, timM] = booking.time.split(':');
-    const hh = parseInt(timH); const mm = timM;
-    const ampm = hh >= 12 ? 'PM' : 'AM';
-    const h12 = hh > 12 ? hh - 12 : (hh === 0 ? 12 : hh);
-    const timeStr = `${h12}:${mm} ${ampm}`;
+    const timeStr = booking.time;
     const total = booking.service.price + booking.donation;
 
     document.getElementById('mk-content').innerHTML = `
