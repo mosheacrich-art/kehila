@@ -1100,6 +1100,10 @@
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/></svg>
         Servicios
       </button>
+      <button class="admin-tab" data-tab="mikve" onclick="loadMikveAdmin()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3.75c-4.5 6-6.75 10.125-6.75 12.75a6.75 6.75 0 0 0 13.5 0c0-2.625-2.25-6.75-6.75-12.75Z"/></svg>
+        Mikve
+      </button>
       <button class="admin-tab" data-tab="ajustes">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
         Ajustes
@@ -1850,6 +1854,127 @@
       </div>
       <div id="svc-sol-list"></div>
     </div><!-- /panel-svc-solicitudes -->
+
+    <!-- ════ TAB: MIKVE ════ -->
+    <div class="tab-panel" id="panel-mikve">
+      <div style="margin-bottom:24px;">
+        <h2 style="font-size:1.1rem;font-weight:700;color:var(--color-text);margin:0 0 4px;">Mikve Barcelona</h2>
+        <p style="font-size:0.82rem;color:var(--color-text-muted);margin:0;">Gestión de reservas, ingresos y configuración.</p>
+      </div>
+
+      <!-- Sub-tabs -->
+      <div style="display:flex;gap:4px;border-bottom:2px solid var(--color-border);margin-bottom:24px;" id="mikve-subtabs">
+        <button class="mikve-stab active" data-stab="citas" onclick="mikveShowTab('citas')" style="padding:9px 18px;font-size:.85rem;font-weight:600;border:none;background:none;cursor:pointer;color:var(--color-primary);border-bottom:2.5px solid var(--color-primary);margin-bottom:-2px;font-family:var(--font-ui);white-space:nowrap;">Citas</button>
+        <button class="mikve-stab" data-stab="finanzas" onclick="mikveShowTab('finanzas')" style="padding:9px 18px;font-size:.85rem;font-weight:600;border:none;background:none;cursor:pointer;color:var(--color-text-muted);border-bottom:2.5px solid transparent;margin-bottom:-2px;font-family:var(--font-ui);white-space:nowrap;">Finanzas</button>
+        <button class="mikve-stab" data-stab="config" onclick="mikveShowTab('config')" style="padding:9px 18px;font-size:.85rem;font-weight:600;border:none;background:none;cursor:pointer;color:var(--color-text-muted);border-bottom:2.5px solid transparent;margin-bottom:-2px;font-family:var(--font-ui);white-space:nowrap;">Configuración</button>
+      </div>
+
+      <!-- ── SUB: CITAS ── -->
+      <div id="mikve-panel-citas">
+        <!-- Filtros -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;align-items:center;">
+          <select id="mkv-filter-estado" onchange="mikveRenderCitas()" style="padding:7px 12px;border:1.5px solid var(--color-border);border-radius:20px;font-size:.8125rem;font-family:var(--font-ui);background:var(--color-white);color:var(--color-text);outline:none;cursor:pointer;">
+            <option value="">Todos los estados</option>
+            <option value="confirmada">Confirmada</option>
+            <option value="completada">Completada</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+          <select id="mkv-filter-periodo" onchange="mikveRenderCitas()" style="padding:7px 12px;border:1.5px solid var(--color-border);border-radius:20px;font-size:.8125rem;font-family:var(--font-ui);background:var(--color-white);color:var(--color-text);outline:none;cursor:pointer;">
+            <option value="todas">Todas las fechas</option>
+            <option value="hoy">Hoy</option>
+            <option value="semana">Esta semana</option>
+            <option value="mes">Este mes</option>
+          </select>
+          <span id="mkv-citas-count" style="font-size:.78rem;color:var(--color-text-muted);margin-left:4px;"></span>
+        </div>
+        <div class="table-wrap">
+          <div style="overflow-x:auto;">
+            <table id="mkv-citas-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Servicio</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="mkv-citas-body">
+                <tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:32px;">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SUB: FINANZAS ── -->
+      <div id="mikve-panel-finanzas" style="display:none;">
+        <div class="metrics-grid" style="margin-bottom:28px;">
+          <div class="metric-card">
+            <p class="metric-label">Ingresos del mes</p>
+            <p class="metric-value success" id="mkv-fin-ingresos">—</p>
+            <p class="metric-change">Servicios facturados</p>
+          </div>
+          <div class="metric-card">
+            <p class="metric-label">Donaciones del mes</p>
+            <p class="metric-value" id="mkv-fin-donaciones">—</p>
+            <p class="metric-change up">Total donaciones</p>
+          </div>
+          <div class="metric-card">
+            <p class="metric-label">Citas completadas</p>
+            <p class="metric-value" id="mkv-fin-citas">—</p>
+            <p class="metric-change">Este mes</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header-row">
+            <p class="table-title">Transacciones del mes</p>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Servicio</th>
+                  <th>Precio</th>
+                  <th>Donación</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody id="mkv-fin-body">
+                <tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:32px;">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SUB: CONFIG ── -->
+      <div id="mikve-panel-config" style="display:none;">
+        <div style="background:var(--color-white);border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:22px;max-width:560px;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-muted);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--color-border);">Servicios</div>
+          <table style="width:100%;">
+            <thead><tr>
+              <th style="text-align:left;font-size:.75rem;font-weight:700;color:var(--color-text-muted);padding:0 0 10px;text-transform:uppercase;letter-spacing:.06em;">Servicio</th>
+              <th style="text-align:right;font-size:.75rem;font-weight:700;color:var(--color-text-muted);padding:0 0 10px;text-transform:uppercase;letter-spacing:.06em;">Precio</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-top:1px solid var(--color-border-light);">
+                <td style="padding:12px 0;font-size:.875rem;font-weight:600;color:var(--color-text);">Ducha</td>
+                <td style="padding:12px 0;text-align:right;font-size:.875rem;font-weight:700;color:var(--color-primary);">€30</td>
+              </tr>
+              <tr style="border-top:1px solid var(--color-border-light);">
+                <td style="padding:12px 0;font-size:.875rem;font-weight:600;color:var(--color-text);">Baño</td>
+                <td style="padding:12px 0;text-align:right;font-size:.875rem;font-weight:700;color:var(--color-primary);">€30</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size:.75rem;color:var(--color-text-muted);margin-top:14px;">Los precios se gestionan directamente en mikve.html.</p>
+        </div>
+      </div>
+    </div><!-- /panel-mikve -->
 
     <!-- ════ TAB: EQUIPO ════ -->
     <div class="tab-panel" id="panel-equipo">
@@ -5765,6 +5890,141 @@
       showToast('Solicitud eliminada.', 'success');
     } catch(e) { showToast('Error inesperado.', 'error'); }
   }
+
+  /* ══════════════════════════════
+     MIKVE ADMIN
+  ══════════════════════════════ */
+  var _mkvReservas = [];
+
+  async function loadMikveAdmin() {
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) { showToast('Sin conexión a Supabase', 'error'); return; }
+    try {
+      var { data, error } = await sb
+        .from('mikve_reservas')
+        .select('*')
+        .order('fecha', { ascending: false })
+        .order('hora', { ascending: true });
+      if (error) throw error;
+      _mkvReservas = data || [];
+      mikveShowTab('citas');
+    } catch(e) {
+      showToast('Error cargando Mikve: ' + e.message, 'error');
+    }
+  }
+
+  function mikveShowTab(tab) {
+    ['citas','finanzas','config'].forEach(function(t) {
+      var panel = document.getElementById('mikve-panel-' + t);
+      if (panel) panel.style.display = t === tab ? '' : 'none';
+    });
+    document.querySelectorAll('.mikve-stab').forEach(function(btn) {
+      var active = btn.dataset.stab === tab;
+      btn.style.color = active ? 'var(--color-primary)' : 'var(--color-text-muted)';
+      btn.style.borderBottom = active ? '2.5px solid var(--color-primary)' : '2.5px solid transparent';
+      btn.style.fontWeight = active ? '700' : '600';
+    });
+    if (tab === 'citas') mikveRenderCitas();
+    if (tab === 'finanzas') mikveRenderFinanzas();
+  }
+
+  function mikveFilteredCitas() {
+    var estado = document.getElementById('mkv-filter-estado')?.value || '';
+    var periodo = document.getElementById('mkv-filter-periodo')?.value || 'todas';
+    var hoy = new Date(); hoy.setHours(0,0,0,0);
+    return _mkvReservas.filter(function(r) {
+      if (estado && r.estado !== estado) return false;
+      if (periodo === 'hoy') {
+        var d = new Date(r.fecha + 'T00:00:00');
+        return d.toDateString() === hoy.toDateString();
+      }
+      if (periodo === 'semana') {
+        var d = new Date(r.fecha + 'T00:00:00');
+        var diff = (d - hoy) / 86400000;
+        return diff >= -7 && diff <= 0;
+      }
+      if (periodo === 'mes') {
+        var d = new Date(r.fecha + 'T00:00:00');
+        return d.getFullYear() === hoy.getFullYear() && d.getMonth() === hoy.getMonth();
+      }
+      return true;
+    });
+  }
+
+  function mikveRenderCitas() {
+    var rows = mikveFilteredCitas();
+    var count = document.getElementById('mkv-citas-count');
+    if (count) count.textContent = rows.length + ' cita' + (rows.length !== 1 ? 's' : '');
+    var tbody = document.getElementById('mkv-citas-body');
+    if (!tbody) return;
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:40px;">Sin reservas para este filtro</td></tr>';
+      return;
+    }
+    var estadoColors = { confirmada: '#1a4a70', completada: '#166534', cancelada: '#991b1b' };
+    tbody.innerHTML = rows.map(function(r) {
+      var color = estadoColors[r.estado] || '#475569';
+      var bg    = r.estado === 'confirmada' ? '#dbeafe' : r.estado === 'completada' ? '#dcfce7' : '#fee2e2';
+      return '<tr>'
+        + '<td>' + escHtml(r.fecha || '—') + '</td>'
+        + '<td>' + escHtml((r.hora || '—').slice(0,5)) + '</td>'
+        + '<td>' + escHtml(r.servicio || '—') + '</td>'
+        + '<td style="font-weight:700;">€' + ((r.total || 0).toFixed ? (r.total||0).toFixed(0) : (r.total||0)) + '</td>'
+        + '<td><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:.72rem;font-weight:700;background:' + bg + ';color:' + color + ';">' + escHtml(r.estado || '—') + '</span></td>'
+        + '<td style="white-space:nowrap;">'
+        + (r.estado !== 'completada' ? '<button onclick="mikveSetEstado('' + r.id + '','completada')" class="btn btn-primary btn-sm" style="margin-right:6px;">✓ Completada</button>' : '')
+        + (r.estado !== 'cancelada'  ? '<button onclick="mikveSetEstado('' + r.id + '','cancelada')"  style="padding:5px 10px;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);background:none;font-size:.75rem;cursor:pointer;font-family:var(--font-ui);">Cancelar</button>' : '')
+        + (r.notas ? ' <button onclick="mikveVerNotas('' + escHtml(r.notas).replace(/'/g,"\'") + '')" title="Ver notas" style="padding:5px 8px;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);background:none;cursor:pointer;font-size:.75rem;font-family:var(--font-ui);">Notas</button>' : '')
+        + '</td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  async function mikveSetEstado(id, estado) {
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
+    try {
+      var { error } = await sb.from('mikve_reservas').update({ estado: estado }).eq('id', id);
+      if (error) throw error;
+      var r = _mkvReservas.find(function(x){ return x.id === id; });
+      if (r) r.estado = estado;
+      mikveRenderCitas();
+      showToast('Estado actualizado: ' + estado, 'success');
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  }
+
+  function mikveVerNotas(notas) {
+    alert('Notas:\n\n' + notas);
+  }
+
+  function mikveRenderFinanzas() {
+    var hoy = new Date();
+    var mesRows = _mkvReservas.filter(function(r) {
+      var d = new Date(r.fecha + 'T00:00:00');
+      return d.getFullYear() === hoy.getFullYear() && d.getMonth() === hoy.getMonth() && r.estado !== 'cancelada';
+    });
+    var totalServicios = mesRows.reduce(function(s,r){ return s + (r.precio || 0); }, 0);
+    var totalDonaciones = mesRows.reduce(function(s,r){ return s + (r.donacion || 0); }, 0);
+    document.getElementById('mkv-fin-ingresos').textContent  = '€' + totalServicios;
+    document.getElementById('mkv-fin-donaciones').textContent = '€' + totalDonaciones;
+    document.getElementById('mkv-fin-citas').textContent = mesRows.filter(function(r){ return r.estado==='completada'; }).length;
+    var tbody = document.getElementById('mkv-fin-body');
+    if (!tbody) return;
+    if (!mesRows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:32px;">Sin transacciones este mes</td></tr>';
+      return;
+    }
+    tbody.innerHTML = mesRows.map(function(r) {
+      return '<tr>'
+        + '<td>' + escHtml(r.fecha || '—') + '</td>'
+        + '<td>' + escHtml((r.hora || '—').slice(0,5)) + '</td>'
+        + '<td>' + escHtml(r.servicio || '—') + '</td>'
+        + '<td>€' + (r.precio || 0) + '</td>'
+        + '<td>€' + (r.donacion || 0) + '</td>'
+        + '<td style="font-weight:700;">€' + (r.total || 0) + '</td>'
+        + '</tr>';
+    }).join('');
+  }
+
   </script>
 </body>
 </html>
