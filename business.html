@@ -1230,36 +1230,23 @@
           <div class="payment-plan-name">Perfil Profesional / Negocio</div>
           <div class="payment-plan-desc">Visible para toda la comunidad Keh&#237;l&#225;</div>
         </div>
-        <div class="payment-plan-amount" id="pay-plan-amount">2,99 &#8364;</div>
+        <div class="payment-plan-amount">2,99 &#8364;</div>
       </div>
 
       <div class="payment-field">
-        <div class="payment-field-label">N&#250;MERO DE TARJETA</div>
-        <input type="text" id="pay-card" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number">
-      </div>
-      <div class="payment-field-row">
-        <div class="payment-field">
-          <div class="payment-field-label">CADUCIDAD</div>
-          <input type="text" id="pay-exp" placeholder="MM / AA" maxlength="7" autocomplete="cc-exp">
-        </div>
-        <div class="payment-field">
-          <div class="payment-field-label">CVV</div>
-          <input type="text" id="pay-cvv" placeholder="123" maxlength="4" autocomplete="cc-csc">
-        </div>
-      </div>
-      <div class="payment-field">
-        <div class="payment-field-label">NOMBRE EN LA TARJETA</div>
-        <input type="text" id="pay-name" placeholder="Como aparece en la tarjeta">
+        <div class="payment-field-label">DATOS DE LA TARJETA</div>
+        <div id="card-element" style="padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;min-height:42px;"></div>
+        <div id="card-errors" style="color:#e53e3e;font-size:.8rem;margin-top:6px;min-height:18px;"></div>
       </div>
 
       <div class="payment-secure-note">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
         </svg>
-        Pago seguro cifrado · Se cobrar&#225; <span id="pay-secure-amount">2,99 &#8364;</span> cada mes
+        Pago seguro cifrado · Se cobrar&#225; 2,99 &#8364; cada mes
       </div>
 
-      <button class="btn-pay" id="btn-confirmar-pago">Confirmar suscripci&#243;n &mdash; <span id="pay-btn-amount">2,99 &#8364;</span>/mes</button>
+      <button class="btn-pay" id="btn-confirmar-pago">Confirmar suscripci&#243;n &mdash; 2,99 &#8364;/mes</button>
       <button class="btn-pay-cancel" id="btn-cancelar-pago">Cancelar</button>
 
       <div class="payment-badge-row">
@@ -1287,6 +1274,7 @@
   </div>
 </div>
 
+<script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
@@ -1967,10 +1955,10 @@
 
         pendingForm = e.target;
 
-        /* Subir logo a Supabase Storage si hay imagen */
         var submitBtn = document.querySelector('#publish-form .btn-publish');
-        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Publicando…'; }
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Preparando…'; }
 
+        /* Subir logo a Supabase Storage si hay imagen */
         var logoUrl = null;
         var logoData = getBizLogo();
         var sbUp = typeof getSupabase === 'function' ? getSupabase() : null;
@@ -1985,71 +1973,190 @@
             }
           } catch (uploadErr) { console.error('[Logo upload]', uploadErr); }
         }
-        pendingBiz.logoImg = logoUrl || pendingBiz.logoImg;
+        pendingBiz.logoImg = logoUrl || (editingBizId ? existingLogoUrl : null);
 
-        /* Guardar en Supabase directamente (sin modal de pago) */
-        var finalLogoUrl = logoUrl || (editingBizId ? existingLogoUrl : null);
-        var dbPayload = {
-          nombre: pendingBiz.nombre,
-          categoria: pendingBiz.categoria,
-          descripcion: pendingBiz.descripcion,
-          ciudad: pendingBiz.ciudad,
-          direccion: pendingBiz.direccion,
-          telefono: pendingBiz.telefono,
-          email: pendingBiz.email,
-          web: pendingBiz.web,
-          logo_url: finalLogoUrl
-        };
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = editingBizId ? 'Guardar cambios' : 'Publicar negocio'; }
+
+        /* If editing an existing listing, check if already subscribed — skip payment */
+        if (editingBizId) {
+          await _saveBizToDb(pendingBiz, editingBizId, null);
+          return;
+        }
+
+        /* Check if current user already has an active subscription */
         if (sbUp) {
-          var dbOp = editingBizId
-            ? sbUp.from('negocios').update(dbPayload).eq('id', editingBizId)
-            : sbUp.from('negocios').insert(Object.assign({}, dbPayload, {
-                propietario: pendingBiz.propietario || null,
-                kosher: false, cierra_shabat: false, verificado: false,
-                usuario_id: currentUserId
-              }));
-          var { error: dbErr } = await dbOp;
-          if (dbErr) {
-            showToast('Error al guardar: ' + dbErr.message, 'error');
-            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = editingBizId ? 'Guardar cambios' : 'Publicar negocio'; }
+          var { data: existingSub } = await sbUp
+            .from('negocios')
+            .select('stripe_subscription_status')
+            .eq('usuario_id', currentUserId)
+            .eq('stripe_subscription_status', 'active')
+            .maybeSingle();
+          if (existingSub) {
+            await _saveBizToDb(pendingBiz, null, null);
             return;
           }
         }
 
-        pendingBiz.logoImg = finalLogoUrl;
-        if (editingBizId) {
-          var idx = (MOCK_BUSINESSES || []).findIndex(function (x) { return String(x.id) === String(editingBizId); });
-          if (idx !== -1) Object.assign(MOCK_BUSINESSES[idx], pendingBiz);
-        } else {
-          if (typeof MOCK_BUSINESSES !== 'undefined') MOCK_BUSINESSES.unshift(pendingBiz);
-        }
-        activateTab('tab-directorio');
-        searchEl.value = ''; filterCat.value = ''; filterCity.value = '';
-        filterAndRender();
-        var first = bizGrid.querySelector('.biz-card');
-        if (first) first.classList.add('new-card');
-        showToast(editingBizId ? '¡Negocio actualizado!' : '¡Negocio publicado!', 'success');
-        editingBizId = null; existingLogoUrl = null;
+        /* Open payment modal */
+        document.getElementById('modal-pago').classList.add('open');
+        if (_stripeCard) _stripeCard.clear();
+        document.getElementById('card-errors').textContent = '';
 
-        if (pendingForm) {
-          pendingForm.reset();
-          formServices.length = 0;
-          renderFormServices();
-          clearBizLogo();
-          logoPreview.textContent = 'AB';
-          logoPreview.style.background = '#1B5E20';
-          selectedColor = '#1B5E20';
-          colorCircles.forEach(function (c, i) { c.classList.toggle('selected', i === 0); });
-          charCounter.textContent = '0 / 150';
-          charCounter.classList.remove('over');
-          sociosSectionEl.style.display = 'none';
-        }
-        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Publicar negocio'; }
-        pendingBiz = null; pendingForm = null;
-        editingBizId = null; existingLogoUrl = null;
       } catch (err) { console.error(err); }
     });
 
+    /* ─── Stripe payment flow ─── */
+    var STRIPE_PK = 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXX'; /* ← Mushky must replace this */
+    var SUPABASE_FUNCTIONS_URL = 'https://vvrvuhugpvqytelhsdnk.supabase.co/functions/v1';
+    var STRIPE_PRICE_ID = 'price_XXXXXXXXXXXXXXXXXXXXXXXX'; /* ← Mushky must replace this */
+
+    var _stripe = null;
+    var _stripeCard = null;
+    try {
+      _stripe = Stripe(STRIPE_PK);
+      var _stripeElements = _stripe.elements({ locale: 'es' });
+      _stripeCard = _stripeElements.create('card', {
+        style: {
+          base: { fontSize: '15px', color: '#1e293b', fontFamily: 'inherit', '::placeholder': { color: '#94a3b8' } },
+          invalid: { color: '#e53e3e' }
+        }
+      });
+      _stripeCard.mount('#card-element');
+      _stripeCard.on('change', function (e) {
+        document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
+      });
+    } catch (stripeInitErr) { console.error('[Stripe init]', stripeInitErr); }
+
+    document.getElementById('btn-cancelar-pago').addEventListener('click', function () {
+      document.getElementById('modal-pago').classList.remove('open');
+    });
+
+    document.getElementById('btn-confirmar-pago').addEventListener('click', async function () {
+      if (!_stripe || !_stripeCard) { showToast('Error al inicializar el pago.', 'error'); return; }
+      var btn = this;
+      btn.disabled = true; btn.textContent = 'Procesando…';
+      document.getElementById('card-errors').textContent = '';
+
+      try {
+        var sbPay = typeof getSupabase === 'function' ? getSupabase() : null;
+        var session = sbPay ? (await sbPay.auth.getSession()).data.session : null;
+        if (!session) { showToast('Sesión expirada. Vuelve a iniciar sesión.', 'error'); btn.disabled = false; btn.textContent = 'Confirmar suscripción — 2,99 €/mes'; return; }
+
+        /* Create PaymentMethod */
+        var userInfo = JSON.parse(localStorage.getItem('kehila_user') || '{}');
+        var { paymentMethod, error: pmErr } = await _stripe.createPaymentMethod({
+          type: 'card',
+          card: _stripeCard,
+          billing_details: {
+            name: userInfo.name || '',
+            email: userInfo.email || ''
+          }
+        });
+        if (pmErr) {
+          document.getElementById('card-errors').textContent = pmErr.message;
+          btn.disabled = false; btn.textContent = 'Confirmar suscripción — 2,99 €/mes';
+          return;
+        }
+
+        /* Call Edge Function */
+        var edgeRes = await fetch(SUPABASE_FUNCTIONS_URL + '/create-subscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + session.access_token
+          },
+          body: JSON.stringify({
+            paymentMethodId: paymentMethod.id,
+            priceId: STRIPE_PRICE_ID,
+            email: userInfo.email || '',
+            name: userInfo.name || '',
+            businessName: pendingBiz ? pendingBiz.nombre : ''
+          })
+        });
+        var edgeData = await edgeRes.json();
+        if (!edgeRes.ok || edgeData.error) {
+          document.getElementById('card-errors').textContent = edgeData.error || 'Error en el servidor.';
+          btn.disabled = false; btn.textContent = 'Confirmar suscripción — 2,99 €/mes';
+          return;
+        }
+
+        /* Confirm PaymentIntent if needed */
+        if (edgeData.clientSecret && edgeData.status !== 'active') {
+          var { error: confirmErr } = await _stripe.confirmCardPayment(edgeData.clientSecret);
+          if (confirmErr) {
+            document.getElementById('card-errors').textContent = confirmErr.message;
+            btn.disabled = false; btn.textContent = 'Confirmar suscripción — 2,99 €/mes';
+            return;
+          }
+        }
+
+        /* Save business to DB */
+        document.getElementById('modal-pago').classList.remove('open');
+        await _saveBizToDb(pendingBiz, null, edgeData.customerId);
+
+      } catch (payErr) {
+        console.error('[Payment]', payErr);
+        showToast('Error al procesar el pago. Inténtalo de nuevo.', 'error');
+        btn.disabled = false; btn.textContent = 'Confirmar suscripción — 2,99 €/mes';
+      }
+    });
+
+    async function _saveBizToDb(biz, bizId, stripeCustomerId) {
+      var sbDb = typeof getSupabase === 'function' ? getSupabase() : null;
+      var dbPayload = {
+        nombre: biz.nombre,
+        categoria: biz.categoria,
+        descripcion: biz.descripcion,
+        ciudad: biz.ciudad,
+        direccion: biz.direccion,
+        telefono: biz.telefono,
+        email: biz.email,
+        web: biz.web,
+        logo_url: biz.logoImg || null
+      };
+      if (stripeCustomerId) dbPayload.stripe_customer_id = stripeCustomerId;
+
+      if (sbDb) {
+        var dbOp = bizId
+          ? sbDb.from('negocios').update(dbPayload).eq('id', bizId)
+          : sbDb.from('negocios').insert(Object.assign({}, dbPayload, {
+              propietario: biz.propietario || null,
+              kosher: false, cierra_shabat: false, verificado: false,
+              usuario_id: currentUserId
+            }));
+        var { error: dbErr } = await dbOp;
+        if (dbErr) { showToast('Error al guardar: ' + dbErr.message, 'error'); return; }
+      }
+
+      if (bizId) {
+        var idx = (MOCK_BUSINESSES || []).findIndex(function (x) { return String(x.id) === String(bizId); });
+        if (idx !== -1) Object.assign(MOCK_BUSINESSES[idx], biz);
+      } else {
+        if (typeof MOCK_BUSINESSES !== 'undefined') MOCK_BUSINESSES.unshift(biz);
+      }
+      activateTab('tab-directorio');
+      searchEl.value = ''; filterCat.value = ''; filterCity.value = '';
+      filterAndRender();
+      var first = bizGrid.querySelector('.biz-card');
+      if (first) first.classList.add('new-card');
+      showToast(bizId ? '¡Negocio actualizado!' : '¡Negocio publicado!', 'success');
+      editingBizId = null; existingLogoUrl = null;
+
+      if (pendingForm) {
+        pendingForm.reset();
+        formServices.length = 0;
+        renderFormServices();
+        clearBizLogo();
+        logoPreview.textContent = 'AB';
+        logoPreview.style.background = '#1B5E20';
+        selectedColor = '#1B5E20';
+        colorCircles.forEach(function (c, i) { c.classList.toggle('selected', i === 0); });
+        charCounter.textContent = '0 / 150';
+        charCounter.classList.remove('over');
+        sociosSectionEl.style.display = 'none';
+      }
+      pendingBiz = null; pendingForm = null;
+    }
 
   } catch (e) { console.error(e); }
 
