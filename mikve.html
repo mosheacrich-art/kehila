@@ -412,26 +412,17 @@
     return ph + renderCalendar();
   }
 
-  // Services cache — populated from Supabase mikve_servicios, fallback to defaults
-  let _mkvCachedServices = null;
-  async function getMikveServices() {
-    if (_mkvCachedServices) return _mkvCachedServices;
-    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
-    if (sb) {
-      try {
-        const { data } = await sb.from('mikve_servicios').select('*').eq('activo', true).order('orden');
-        if (data && data.length) {
-          _mkvCachedServices = data.map((s,i) => ({ id: 'svc-' + i, name: s.nombre, price: Number(s.precio) }));
-          return _mkvCachedServices;
-        }
-      } catch(e) {}
-    }
-    _mkvCachedServices = [{id:'ducha',name:'Ducha',price:30},{id:'bano',name:'Baño',price:30}];
-    return _mkvCachedServices;
+  // Services — loaded from admin localStorage config
+  function getMikveServices() {
+    try {
+      const d = JSON.parse(localStorage.getItem('mikve_servicios'));
+      if (d && d.length) return d.map(s => ({ id: 'svc' + s.id, name: s.nombre, price: Number(s.precio) }));
+    } catch(e) {}
+    return [{id:'ducha',name:'Ducha',price:30},{id:'bano',name:'Baño',price:30}];
   }
 
   function renderStep2() {
-    const services = _mkvCachedServices || [{id:'ducha',name:'Ducha',price:30},{id:'bano',name:'Baño',price:30}];
+    const services = getMikveServices();
     const cards = services.map(s => {
       const sel = booking.service?.id===s.id;
       return `<div class="mk-option-card ${sel?'selected':''}" onclick="selectService('${s.id}','${s.name}',${s.price})">

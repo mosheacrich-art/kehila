@@ -1954,24 +1954,12 @@
       <!-- ── SUB: CONFIG ── -->
       <div id="mikve-panel-config" style="display:none;">
         <div style="background:var(--color-white);border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:22px;max-width:560px;">
-          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-muted);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--color-border);">Servicios</div>
-          <table style="width:100%;">
-            <thead><tr>
-              <th style="text-align:left;font-size:.75rem;font-weight:700;color:var(--color-text-muted);padding:0 0 10px;text-transform:uppercase;letter-spacing:.06em;">Servicio</th>
-              <th style="text-align:right;font-size:.75rem;font-weight:700;color:var(--color-text-muted);padding:0 0 10px;text-transform:uppercase;letter-spacing:.06em;">Precio</th>
-            </tr></thead>
-            <tbody>
-              <tr style="border-top:1px solid var(--color-border-light);">
-                <td style="padding:12px 0;font-size:.875rem;font-weight:600;color:var(--color-text);">Ducha</td>
-                <td style="padding:12px 0;text-align:right;font-size:.875rem;font-weight:700;color:var(--color-primary);">€30</td>
-              </tr>
-              <tr style="border-top:1px solid var(--color-border-light);">
-                <td style="padding:12px 0;font-size:.875rem;font-weight:600;color:var(--color-text);">Baño</td>
-                <td style="padding:12px 0;text-align:right;font-size:.875rem;font-weight:700;color:var(--color-primary);">€30</td>
-              </tr>
-            </tbody>
-          </table>
-          <p style="font-size:.75rem;color:var(--color-text-muted);margin-top:14px;">Los precios se gestionan directamente en mikve.html.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--color-border);">
+            <span style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-muted);">Servicios</span>
+            <button onclick="mkvConfigAdd()" class="btn btn-primary btn-sm">+ Añadir servicio</button>
+          </div>
+          <div id="mkv-config-list"></div>
+          <p style="font-size:.75rem;color:var(--color-text-muted);margin-top:14px;">Los cambios se aplican inmediatamente a nuevas reservas.</p>
         </div>
       </div>
     </div><!-- /panel-mikve -->
@@ -5931,6 +5919,7 @@
     });
     if (tab === 'citas') mikveRenderCitas();
     if (tab === 'finanzas') mikveRenderFinanzas();
+    if (tab === 'config') mikveRenderConfig();
   }
 
   function mikveFilteredCitas() {
@@ -6000,6 +5989,61 @@
 
   function mikveVerNotas(notas) {
     alert('Notas:\n\n' + notas);
+  }
+
+  /* ── Config servicios (localStorage) ── */
+  var MKV_KEY = 'mikve_servicios';
+  var MKV_DEFAULTS = [{ id: 1, nombre: 'Ducha', precio: 30 }, { id: 2, nombre: 'Baño', precio: 30 }];
+
+  function mkvGetServicios() {
+    try { var d = JSON.parse(localStorage.getItem(MKV_KEY)); return (d && d.length) ? d : MKV_DEFAULTS.slice(); } catch(e) { return MKV_DEFAULTS.slice(); }
+  }
+  function mkvSaveServicios(svcs) {
+    localStorage.setItem(MKV_KEY, JSON.stringify(svcs));
+  }
+
+  function mikveRenderConfig() {
+    var svcs = mkvGetServicios();
+    var el = document.getElementById('mkv-config-list');
+    if (!el) return;
+    if (!svcs.length) { el.innerHTML = '<p style="color:var(--color-text-muted);font-size:.85rem;padding:10px 0;">Sin servicios. Añade uno.</p>'; return; }
+    el.innerHTML = svcs.map(function(s) {
+      return '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--color-border-light);">'
+        + '<input id="mkv-svc-n-' + s.id + '" value="' + escHtml(s.nombre) + '" style="flex:1;padding:7px 10px;border:1.5px solid var(--color-border);border-radius:8px;font-size:.875rem;font-family:var(--font-ui);">'
+        + '<span style="font-size:.875rem;color:var(--color-text-muted);">€</span>'
+        + '<input id="mkv-svc-p-' + s.id + '" type="number" value="' + s.precio + '" min="0" style="width:72px;padding:7px 10px;border:1.5px solid var(--color-border);border-radius:8px;font-size:.875rem;font-family:var(--font-ui);">'
+        + '<button onclick="mkvConfigSave(' + s.id + ')" class="btn btn-primary btn-sm">Guardar</button>'
+        + '<button onclick="mkvConfigDelete(' + s.id + ')" style="padding:6px 10px;border:1.5px solid var(--color-danger);border-radius:8px;background:none;color:var(--color-danger);font-size:.8rem;cursor:pointer;">✕</button>'
+        + '</div>';
+    }).join('');
+  }
+
+  function mkvConfigSave(id) {
+    var nombre = (document.getElementById('mkv-svc-n-' + id) || {}).value;
+    var precio = parseFloat((document.getElementById('mkv-svc-p-' + id) || {}).value);
+    if (!nombre || isNaN(precio) || precio < 0) { showToast('Nombre y precio válidos requeridos', 'error'); return; }
+    var svcs = mkvGetServicios();
+    var s = svcs.find(function(x){ return x.id === id; });
+    if (s) { s.nombre = nombre.trim(); s.precio = precio; }
+    mkvSaveServicios(svcs);
+    mikveRenderConfig();
+    showToast('Servicio guardado', 'success');
+  }
+
+  function mkvConfigDelete(id) {
+    if (!confirm('¿Eliminar este servicio?')) return;
+    var svcs = mkvGetServicios().filter(function(x){ return x.id !== id; });
+    mkvSaveServicios(svcs);
+    mikveRenderConfig();
+    showToast('Servicio eliminado', 'success');
+  }
+
+  function mkvConfigAdd() {
+    var svcs = mkvGetServicios();
+    var newId = Date.now();
+    svcs.push({ id: newId, nombre: 'Nuevo servicio', precio: 0 });
+    mkvSaveServicios(svcs);
+    mikveRenderConfig();
   }
 
   function mikveEditarCita(id) {
