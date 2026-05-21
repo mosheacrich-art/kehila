@@ -345,7 +345,18 @@
         </div>
       </div>
     </div>
+    <!-- Paso 2: tarjeta Stripe -->
+    <div id="post-stripe-step" style="display:none;padding:0 0 4px;">
+      <p style="font-size:.75rem;color:var(--color-text-muted);margin-bottom:10px;display:flex;align-items:center;gap:5px;">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+        Pago seguro con Stripe
+      </p>
+      <div id="post-stripe-card" style="border:1.5px solid #E2E8F0;border-radius:10px;padding:12px 14px;background:#fff;"></div>
+      <div id="post-stripe-error" style="color:#e53e3e;font-size:.78rem;margin-top:7px;min-height:14px;"></div>
+    </div>
+
     <div class="modal-footer">
+      <button class="btn btn-ghost" id="btn-post-back" onclick="backPostDon()" style="display:none;">← Atrás</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-post-inscripcion')" id="btn-post-skip">Ahora no</button>
       <button class="btn btn-primary" id="btn-post-donar" onclick="pagarODonar()" disabled>
         <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 21Z"/></svg>
@@ -381,6 +392,7 @@
 
 <div class="toast-container"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://js.stripe.com/v3/"></script>
 <script src="js/data.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/auth.js"></script>
@@ -664,52 +676,128 @@ const hoy = new Date();
     document.getElementById('btn-post-donar').disabled = !(val > 0);
   });
 
+  const STRIPE_PK = 'pk_live_w1ok5XpTlqbZDgFzihwJPWEm';
+  let _evStripe = null, _evCardEl = null, _evClientSecret = null, _evAmount = 0, _evNombre = '';
+
+  function getEvStripe() {
+    if (!_evStripe && typeof Stripe !== 'undefined') _evStripe = Stripe(STRIPE_PK);
+    return _evStripe;
+  }
+
+  function backPostDon() {
+    document.getElementById('post-stripe-step').style.display = 'none';
+    document.getElementById('post-don-section').style.display = '';
+    document.getElementById('post-pago-section').style.display = '';
+    document.getElementById('btn-post-back').style.display = 'none';
+    document.getElementById('btn-post-skip').style.display = '';
+    document.getElementById('post-stripe-error').textContent = '';
+    if (_evCardEl) { _evCardEl.destroy(); _evCardEl = null; }
+    _evClientSecret = null;
+    const ev = MOCK_EVENTOS.find(e => e.id === postInscripcionEvId);
+    const precio = parseFloat(ev?.precio) || 0;
+    document.getElementById('btn-post-donar-label').textContent = precio > 0 ? 'Pagar' : 'Donar';
+    document.getElementById('btn-post-donar').disabled = !document.querySelector('.don-chip.selected');
+  }
+
   async function pagarODonar() {
     const ev = MOCK_EVENTOS.find(e => e.id === postInscripcionEvId);
     const precio = parseFloat(ev?.precio) || 0;
     const sb = getSupabase();
     const user = getCurrentUser();
 
-    if (precio > 0) {
-      // Pago de evento: precio × (yo + familiares)
-      const total = precio * (1 + postInscripcionFamilia.length);
+    const isStripeStep = document.getElementById('post-stripe-step').style.display !== 'none';
+
+    if (!isStripeStep) {
+      // Calcular importe
+      let amount, campana_nombre;
+      if (precio > 0) {
+        amount = precio * (1 + postInscripcionFamilia.length);
+        campana_nombre = `Pago evento: ${ev?.titulo || ''}`;
+      } else {
+        const selectedChip = document.querySelector('.don-chip.selected');
+        amount = selectedChip ? parseFloat(selectedChip.dataset.amount) : 0;
+        if (amount === 0) amount = parseFloat(document.getElementById('post-don-input').value) || 0;
+        if (!amount || amount <= 0) return;
+        campana_nombre = `Donativo evento: ${ev?.titulo || ''}`;
+      }
+      _evAmount = amount;
+      _evNombre = campana_nombre;
+
+      // Llamar Edge Function para obtener clientSecret
+      const btn = document.getElementById('btn-post-donar');
+      btn.disabled = true;
+      document.getElementById('btn-post-donar-label').textContent = 'Preparando...';
+      try {
+        const session = await sb.auth.getSession();
+        const token = session?.data?.session?.access_token;
+        const res = await fetch('https://vvrvuhugpvqytelhsdnk.supabase.co/functions/v1/create-payment-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ amount, campana_nombre }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.clientSecret) throw new Error(data.error || 'Error');
+        _evClientSecret = data.clientSecret;
+
+        // Mostrar paso de tarjeta
+        document.getElementById('post-don-section').style.display = 'none';
+        document.getElementById('post-pago-section').style.display = 'none';
+        document.getElementById('post-stripe-step').style.display = '';
+        document.getElementById('btn-post-back').style.display = '';
+        document.getElementById('btn-post-skip').style.display = 'none';
+        document.getElementById('btn-post-donar-label').textContent = `Pagar ${amount} €`;
+        btn.disabled = false;
+
+        const stripe = getEvStripe();
+        const elements = stripe.elements();
+        _evCardEl = elements.create('card', {
+          style: { base: { fontSize: '15px', color: '#1B2E5E', fontFamily: 'inherit', '::placeholder': { color: '#9CA3AF' } } },
+        });
+        _evCardEl.mount('#post-stripe-card');
+        _evCardEl.on('change', e => {
+          document.getElementById('post-stripe-error').textContent = e.error ? e.error.message : '';
+        });
+      } catch (err) {
+        btn.disabled = false;
+        document.getElementById('btn-post-donar-label').textContent = precio > 0 ? 'Pagar' : 'Donar';
+        showToast(err.message || 'Error iniciando el pago', 'error');
+      }
+      return;
+    }
+
+    // Confirmar pago con Stripe
+    const btn = document.getElementById('btn-post-donar');
+    btn.disabled = true;
+    document.getElementById('btn-post-donar-label').textContent = 'Procesando...';
+
+    const stripe = getEvStripe();
+    const { error, paymentIntent } = await stripe.confirmCardPayment(_evClientSecret, {
+      payment_method: { card: _evCardEl },
+    });
+
+    if (error) {
+      document.getElementById('post-stripe-error').textContent = error.message;
+      btn.disabled = false;
+      document.getElementById('btn-post-donar-label').textContent = `Pagar ${_evAmount} €`;
+      return;
+    }
+
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
       if (sb && user) {
         await sb.from('donaciones').insert({
-          usuario_id:     user.userId || null,
-          usuario_nombre: user.name   || 'Anónimo',
-          campana_nombre: `Pago evento: ${ev?.titulo || ''}`,
-          campana_id:     null,
-          cantidad:       total,
-          recurrente:     false,
-          dedicatoria:    postInscripcionFamilia.length
+          usuario_id: user.userId || null,
+          usuario_nombre: user.name || 'Anónimo',
+          campana_nombre: _evNombre,
+          campana_id: null,
+          cantidad: _evAmount,
+          recurrente: false,
+          dedicatoria: postInscripcionFamilia.length
             ? `Incluye: ${[user.name, ...postInscripcionFamilia].join(', ')}`
-            : null
+            : null,
         });
       }
       closeModal('modal-post-inscripcion');
-      const quienes = postInscripcionFamilia.length
-        ? ` para ti y ${postInscripcionFamilia.join(', ')}`
-        : '';
-      showToast(`Pago de ${total.toFixed(2)} € registrado${quienes}`, 'success');
-    } else {
-      // Donativo voluntario
-      const selectedChip = document.querySelector('.don-chip.selected');
-      let amount = selectedChip ? parseFloat(selectedChip.dataset.amount) : 0;
-      if (amount === 0) amount = parseFloat(document.getElementById('post-don-input').value) || 0;
-      if (!amount || amount <= 0) return;
-      if (sb && user) {
-        await sb.from('donaciones').insert({
-          usuario_id:     user.userId || null,
-          usuario_nombre: user.name   || 'Anónimo',
-          campana_nombre: `Donativo evento: ${ev?.titulo || ''}`,
-          campana_id:     null,
-          cantidad:       amount,
-          recurrente:     false,
-          dedicatoria:    null
-        });
-      }
-      closeModal('modal-post-inscripcion');
-      showToast(`¡Gracias por tu donativo de ${amount} €!`, 'success');
+      showToast(`¡Pago de ${_evAmount} € completado! Toda raba.`, 'success');
     }
   }
 
