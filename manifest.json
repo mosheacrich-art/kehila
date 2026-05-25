@@ -26,6 +26,48 @@
       "url": "url"
     }
   },
+  "file_handlers": [
+    {
+      "action": "/shiurim.html",
+      "accept": {
+        "application/pdf": [".pdf"]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+kehila",
+      "url": "/home.html?uri=%s"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "note_taking": {
+    "new_note_url": "/rav.html"
+  },
+  "scope_extensions": [
+    { "origin": "https://bcnkehila.com" }
+  ],
+  "widgets": [
+    {
+      "name": "Jabad BCN",
+      "description": "Próximos eventos y noticias de la comunidad",
+      "tag": "kehila-widget",
+      "screenshots": [
+        {
+          "src": "img/screenshot-1.png",
+          "sizes": "1080x1920",
+          "label": "Widget Kehila"
+        }
+      ],
+      "icons": [
+        { "src": "img/icon-192.png", "sizes": "192x192" }
+      ],
+      "auth": false,
+      "update": 86400
+    }
+  ],
   "shortcuts": [
     {
       "name": "Eventos",
