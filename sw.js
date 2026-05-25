@@ -37,7 +37,7 @@ self.addEventListener('fetch', e => {
       return caches.match(e.request).then(cached => {
         if (cached) return cached;
         if (e.request.mode === 'navigate') {
-          return caches.match('/kehila/home.html');
+          return caches.match('/home.html');
         }
       });
     })
