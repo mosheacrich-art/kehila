@@ -2771,6 +2771,58 @@
   })();
 
   /* ══════════════════════════════
+     TAB ANALYTICS — donaciones reales
+  ══════════════════════════════ */
+  async function loadAnalyticsDashboard() {
+    var sbA = getSupabase();
+    if (!sbA) return;
+
+    // Total donaciones y lista reciente
+    var listEl = document.getElementById('an-donativos-list');
+    if (listEl) listEl.innerHTML = '<p style="color:var(--color-text-muted);font-size:.82rem;padding:8px 0;">Cargando...</p>';
+
+    var res = await sbA.from('donaciones')
+      .select('usuario_nombre, campana_nombre, cantidad, recurrente, created_at')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    var rows = res.data || [];
+    var total = rows.reduce(function(s, r) { return s + (parseFloat(r.cantidad) || 0); }, 0);
+
+    // Actualizar métrica principal
+    var metEl = document.getElementById('metric-donativos');
+    if (metEl) metEl.textContent = total.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 });
+    var subEl = document.getElementById('metric-donativos-sub');
+    if (subEl) subEl.lastChild.textContent = rows.length + ' donativo' + (rows.length !== 1 ? 's' : '');
+
+    // Rellenar tabla
+    if (!listEl) return;
+    if (rows.length === 0) {
+      listEl.innerHTML = '<p style="color:var(--color-text-muted);font-size:.82rem;padding:8px 0;">Sin donativos todavía.</p>';
+      return;
+    }
+    listEl.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:.82rem;">'
+      + '<thead><tr style="border-bottom:1px solid var(--color-border);">'
+      + '<th style="text-align:left;padding:6px 8px;color:var(--color-text-muted);">Socio</th>'
+      + '<th style="text-align:left;padding:6px 8px;color:var(--color-text-muted);">Área</th>'
+      + '<th style="text-align:right;padding:6px 8px;color:var(--color-text-muted);">Importe</th>'
+      + '<th style="text-align:right;padding:6px 8px;color:var(--color-text-muted);">Fecha</th>'
+      + '</tr></thead><tbody>'
+      + rows.map(function(r) {
+          var fecha = r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES', { day:'2-digit', month:'short' }) : '—';
+          var importe = parseFloat(r.cantidad) || 0;
+          return '<tr style="border-bottom:1px solid var(--color-border-light);">'
+            + '<td style="padding:7px 8px;">' + escHtml(r.usuario_nombre || '—') + '</td>'
+            + '<td style="padding:7px 8px;color:var(--color-text-muted);">' + escHtml(r.campana_nombre || '—') + '</td>'
+            + '<td style="padding:7px 8px;text-align:right;font-weight:700;color:#C8791A;">'
+            + importe.toLocaleString('es-ES', { style:'currency', currency:'EUR', minimumFractionDigits: 0 }) + '</td>'
+            + '<td style="padding:7px 8px;text-align:right;color:var(--color-text-muted);">' + fecha + '</td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table>';
+  }
+
+  /* ══════════════════════════════
      TAB USUARIOS
   ══════════════════════════════ */
   // Estado mutable de usuarios para el prototipo

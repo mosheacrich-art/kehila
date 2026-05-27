@@ -2,6 +2,41 @@ import Stripe from 'https://esm.sh/stripe@14.25.0?target=deno'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { apiVersion: '2024-06-20' })
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
+
+async function sendThankYouEmail(to: string, nombre: string, cantidad: number, campana: string) {
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'Jabad Barcelona <donativos@jabadbarcelona.com>',
+        to,
+        subject: `¡Toda raba por tu donativo! 💛`,
+        html: `
+          <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#1B2E5E;">
+            <h2 style="color:#B8820A;margin-bottom:8px;">¡Toda raba, ${nombre || 'amigo/a'}!</h2>
+            <p style="font-size:16px;line-height:1.6;">
+              Hemos recibido tu donativo de <strong style="color:#C8791A;">${cantidad} €</strong>
+              para <strong>${campana}</strong>.
+            </p>
+            <p style="font-size:15px;line-height:1.6;color:#4A5568;">
+              Tu generosidad hace posible la continuidad de nuestra kehilá.
+              Cada aportación, grande o pequeña, es un pilar de nuestra comunidad.
+            </p>
+            <p style="font-size:15px;line-height:1.6;color:#4A5568;">
+              Que Hashem te bendiga y te devuelva con creces todo lo que das.
+            </p>
+            <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;">
+            <p style="font-size:13px;color:#9CA3AF;">
+              Jabad Barcelona · <a href="https://jabadlubavitch.vercel.app" style="color:#B8820A;">jabadlubavitch.vercel.app</a>
+            </p>
+          </div>
+        `,
+      }),
+    })
+  } catch (_) { /* no bloquear si falla el email */ }
+}
 
 Deno.serve(async (req) => {
   const sig = req.headers.get('stripe-signature')
@@ -41,11 +76,14 @@ Deno.serve(async (req) => {
         recurrente: false,
         dedicatoria,
       }, { onConflict: 'stripe_payment_intent_id', ignoreDuplicates: true })
-    }
-  }
 
-  if (event.type === 'payment_intent.payment_failed') {
-    // Solo logging — el frontend ya muestra el error al usuario
+      // Email de gracias
+      const { data: userData } = await supabase.auth.admin.getUserById(uid)
+      if (userData?.user?.email) {
+        const nombre = userData.user.user_metadata?.name || userData.user.user_metadata?.full_name || ''
+        await sendThankYouEmail(userData.user.email, nombre, cantidad, campana_nombre)
+      }
+    }
   }
 
   // Suscripciones de negocios (funcionalidad existente)
