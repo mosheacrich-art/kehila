@@ -232,10 +232,36 @@
           <td>Durante el uso</td>
           <td>Analíticas internas de la app (anónimo)</td>
         </tr>
+        <tr>
+          <td><strong>Documento de identidad (foto/escaneo)</strong></td>
+          <td>Al registrarse — solo para verificación de identidad</td>
+          <td>Verificación de pertenencia a la comunidad. Solo accesible por la administración. Eliminado tras aprobación o rechazo.</td>
+        </tr>
+        <tr>
+          <td><strong>Número de documento (DNI/NIE/Pasaporte)</strong></td>
+          <td>Al registrarse</td>
+          <td>Verificación de identidad interna de la comunidad</td>
+        </tr>
+        <tr>
+          <td><strong>Fecha de nacimiento y nacionalidad</strong></td>
+          <td>Al registrarse</td>
+          <td>Verificación de identidad y asignación a grupo de edad</td>
+        </tr>
+        <tr>
+          <td><strong>Dirección postal</strong></td>
+          <td>Al registrarse</td>
+          <td>Asignación a comunidad local y envíos si aplica. No compartida con otros miembros.</td>
+        </tr>
+        <tr>
+          <td><strong>Datos de rendimiento y uso de la app</strong></td>
+          <td>Automáticamente durante el uso</td>
+          <td>Mejora del rendimiento (Vercel Analytics — datos anonimizados, sin identificación personal)</td>
+        </tr>
       </tbody>
     </table>
     <div class="priv-highlight">
-      No recopilamos datos de pago directamente. Los pagos se procesan a través de plataformas externas con sus propias políticas de privacidad.
+      <strong>Documentos de identidad:</strong> Las fotos o escaneos de documentos (DNI, NIE, Pasaporte) son datos de <strong>categoría especial</strong> según el RGPD. Se almacenan cifrados en Supabase Storage, solo son accesibles por la administración de la comunidad, y se eliminan una vez completada la verificación de identidad o en caso de rechazo de la solicitud.<br><br>
+      <strong>Pagos:</strong> No procesamos datos de pago directamente. Los donativos se procesan mediante <strong>Stripe</strong> (stripe.com/es/privacy). Para compras en la tienda, los pagos se realizan fuera de la app. No almacenamos datos de tarjetas de crédito.
     </div>
   </div>
 
@@ -277,14 +303,62 @@
     <p style="margin-top:10px;">Puedes consultar la política de privacidad de Supabase en <a href="https://supabase.com/privacy" style="color:var(--color-primary);" target="_blank">supabase.com/privacy</a>.</p>
   </div>
 
+  <!-- 4b. Terceros -->
+  <div class="priv-section">
+    <h2><span class="priv-num">4b</span> Proveedores externos</h2>
+    <table class="priv-table">
+      <thead><tr><th>Proveedor</th><th>Finalidad</th><th>Política de privacidad</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Supabase</strong></td>
+          <td>Base de datos, autenticación y almacenamiento de archivos (servidores en la UE)</td>
+          <td><a href="https://supabase.com/privacy" target="_blank" style="color:var(--color-primary);">supabase.com/privacy</a></td>
+        </tr>
+        <tr>
+          <td><strong>Stripe</strong></td>
+          <td>Procesamiento de donativos. No almacenamos datos de tarjetas.</td>
+          <td><a href="https://stripe.com/es/privacy" target="_blank" style="color:var(--color-primary);">stripe.com/es/privacy</a></td>
+        </tr>
+        <tr>
+          <td><strong>Vercel Analytics</strong></td>
+          <td>Métricas de rendimiento anónimas (sin datos personales ni cookies de seguimiento)</td>
+          <td><a href="https://vercel.com/legal/privacy-policy" target="_blank" style="color:var(--color-primary);">vercel.com/legal/privacy-policy</a></td>
+        </tr>
+        <tr>
+          <td><strong>HebCal API</strong></td>
+          <td>Datos del calendario hebreo (API pública, sin datos de usuario)</td>
+          <td><a href="https://www.hebcal.com/home/privacy-policy" target="_blank" style="color:var(--color-primary);">hebcal.com/privacy-policy</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <!-- 5. Plazo de conservación -->
   <div class="priv-section">
     <h2><span class="priv-num">5</span> Plazo de conservación</h2>
     <ul>
       <li>Los datos de tu cuenta se conservan mientras mantengas una cuenta activa.</li>
-      <li>Si solicitas la baja, tus datos se eliminarán en un plazo máximo de <strong>30 días</strong>.</li>
+      <li>Los documentos de identidad se eliminan tras la verificación (máx. 30 días desde la aprobación o rechazo).</li>
+      <li>Si solicitas la baja, tus datos se eliminarán en un plazo máximo de <strong>30 días hábiles</strong>.</li>
       <li>Los datos de analíticas (visitas, lecturas) se conservan de forma anónima sin límite de tiempo.</li>
     </ul>
+  </div>
+
+  <!-- 5b. Eliminación de cuenta -->
+  <div class="priv-section">
+    <h2><span class="priv-num">5b</span> Eliminación de cuenta</h2>
+    <p>Puedes solicitar la eliminación de tu cuenta directamente desde la app:</p>
+    <ol style="padding-left:20px;margin-top:10px;">
+      <li style="margin-bottom:6px;font-size:.9rem;line-height:1.6;">Accede a <strong>Mi Perfil</strong> desde el menú de la app.</li>
+      <li style="margin-bottom:6px;font-size:.9rem;line-height:1.6;">Desplázate hasta la sección <strong>Zona de peligro</strong>.</li>
+      <li style="margin-bottom:6px;font-size:.9rem;line-height:1.6;">Haz clic en <strong>Solicitar eliminación de cuenta</strong> y confirma.</li>
+    </ol>
+    <p style="margin-top:12px;font-size:.9rem;line-height:1.6;">
+      También puedes solicitar la eliminación enviando un email a
+      <a href="mailto:info@jabad.barcelona" style="color:var(--color-primary);">info@jabad.barcelona</a>
+      indicando tu nombre y dirección de correo registrada.
+      Tu cuenta y todos tus datos personales se eliminarán en un plazo máximo de <strong>30 días hábiles</strong>.
+    </p>
   </div>
 
   <!-- 6. Tus derechos -->
