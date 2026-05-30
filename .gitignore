@@ -9,3 +9,23 @@ desktop.ini
 
 # Logs
 *.log
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Capacitor — archivos generados (no subir a git)
+# Las plataformas nativas SÍ se suben para que el equipo pueda buildear
+# Excluir solo temporales y builds
+android/app/build/
+android/.gradle/
+android/build/
+ios/DerivedData/
+ios/Pods/
+ios/App/App/public/
+www/
+
+# Firebase — claves privadas (NUNCA en git)
+android/app/google-services.json
+ios/App/App/GoogleService-Info.plist
+*service-account*.json
