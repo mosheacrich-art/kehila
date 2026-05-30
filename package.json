@@ -1,0 +1,25 @@
+{
+  "name": "jabad-barcelona",
+  "version": "1.0.0",
+  "description": "App de la comunidad Jabad Barcelona",
+  "scripts": {
+    "sync": "npx cap sync",
+    "open:ios": "npx cap open ios",
+    "open:android": "npx cap open android",
+    "build:android": "npx cap build android",
+    "build:ios": "npx cap build ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/ios": "^6.2.0",
+    "@capacitor/push-notifications": "^6.0.1",
+    "@capacitor/app": "^6.0.1",
+    "@capacitor/haptics": "^6.0.1",
+    "@capacitor/status-bar": "^6.0.1",
+    "@capacitor/splash-screen": "^6.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}

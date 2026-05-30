@@ -2286,5 +2286,16 @@
       navigator.serviceWorker.register("/sw.js").catch(()=>{});
     }
   </script>
+  <script src="js/push.js"></script>
+  <script>
+    // Inicializar push tras cargar la página y confirmar sesión activa
+    document.addEventListener('DOMContentLoaded', function() {
+      const u = getCurrentUser();
+      if (u && u.status === 'active') {
+        // Pequeño delay para no bloquear el render inicial
+        setTimeout(initPush, 1500);
+      }
+    });
+  </script>
 </body>
 </html>

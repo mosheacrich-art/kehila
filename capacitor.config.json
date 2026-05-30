@@ -1,0 +1,34 @@
+{
+  "appId": "com.jabadbarcelona.app",
+  "appName": "Jabad Barcelona",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "ios": {
+    "scheme": "Jabad Barcelona",
+    "contentInset": "automatic"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#1B2E5E",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#1B2E5E"
+    }
+  }
+}
