@@ -700,12 +700,11 @@ function buildBackBtn(activePage) {
  */
 // ─── Sub-page group tabs ────────────────────────────────────────────────────
 const _SUB_GROUPS = {
-  tienda: 'jconnect', business: 'jconnect', professionals: 'jconnect', wallap: 'jconnect',
+  business: 'jconnect', professionals: 'jconnect', wallap: 'jconnect',
   shiurim: 'rav-hub', rav: 'rav-hub', 'citas-rabino': 'rav-hub'
 };
 const _SUB_TABS = {
   jconnect: [
-    { id: 'tienda',        label: 'Tienda',          href: 'tienda.html' },
     { id: 'business',      label: 'Negocios',         href: 'business.html' },
     { id: 'professionals', label: 'Profesionales',    href: 'linkedin-kehila.html' },
     { id: 'wallap',        label: 'Marketplace',      href: 'wallap.html' }
