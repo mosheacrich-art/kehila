@@ -28,4 +28,5 @@ www/
 # Firebase — claves privadas (NUNCA en git)
 android/app/google-services.json
 ios/App/App/GoogleService-Info.plist
+_firebase_config/
 *service-account*.json
