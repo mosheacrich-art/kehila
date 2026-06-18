@@ -706,8 +706,7 @@ const _SUB_GROUPS = {
 const _SUB_TABS = {
   jconnect: [
     { id: 'business',      label: 'Negocios',         href: 'business.html' },
-    { id: 'professionals', label: 'Profesionales',    href: 'linkedin-kehila.html' },
-    { id: 'wallap',        label: 'Marketplace',      href: 'wallap.html' }
+    { id: 'professionals', label: 'Profesionales',    href: 'linkedin-kehila.html' }
   ],
   'rav-hub': [
     { id: 'shiurim',       label: 'Shiurim',          href: 'shiurim.html' },
