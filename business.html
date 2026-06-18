@@ -577,136 +577,6 @@
     }
     .btn-publish:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 
-    /* ─── Modal Pago ─── */
-    .payment-modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.55);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      overflow-y: auto;
-    }
-    .payment-modal-overlay.open { display: flex; }
-    .payment-box {
-      background: #fff;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 420px;
-      max-height: calc(100vh - 32px);
-      overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,.18);
-      animation: modalIn .22s ease;
-      margin: auto;
-    }
-    .payment-header {
-      background: linear-gradient(135deg, #1B2E5E 0%, #2A4080 100%);
-      padding: 16px 24px 14px;
-    }
-    .payment-header-label {
-      font-size: .72rem;
-      font-weight: 700;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.6);
-      margin-bottom: 6px;
-    }
-    .payment-header-price {
-      font-family: var(--font-brand);
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1;
-    }
-    .payment-header-price span {
-      font-size: .9rem;
-      font-weight: 400;
-      color: rgba(255,255,255,.65);
-      margin-left: 4px;
-    }
-    .payment-header-sub {
-      font-size: .8rem;
-      color: rgba(255,255,255,.55);
-      margin-top: 6px;
-    }
-    .payment-body { padding: 16px 24px 22px; }
-    .payment-plan-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #f8fafc;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-    }
-    .payment-plan-name { font-weight: 700; font-size: .9rem; color: #1a202c; }
-    .payment-plan-desc { font-size: .75rem; color: #718096; margin-top: 2px; }
-    .payment-plan-amount { font-weight: 800; font-size: 1rem; color: #1B2E5E; }
-    .payment-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
-    .payment-field-label { font-size: .75rem; font-weight: 600; color: #4a5568; letter-spacing: .04em; }
-    .payment-field input {
-      padding: 10px 13px;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 7px;
-      font-size: .875rem;
-      color: #1a202c;
-      font-family: var(--font-ui);
-      outline: none;
-      transition: border-color .15s;
-      background: #fff;
-    }
-    .payment-field input:focus { border-color: #1B2E5E; }
-    .payment-field-row { display: flex; gap: 12px; }
-    .payment-field-row .payment-field { flex: 1; }
-    .payment-secure-note {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: .72rem;
-      color: #a0aec0;
-      margin-bottom: 16px;
-    }
-    .payment-secure-note svg { width: 13px; height: 13px; flex-shrink: 0; color: #48bb78; }
-    .btn-pay {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #1B2E5E 0%, #2A4080 100%);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: .9375rem;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: var(--font-ui);
-      letter-spacing: .01em;
-      transition: opacity .15s;
-    }
-    .btn-pay:hover { opacity: .9; }
-    .btn-pay-cancel {
-      width: 100%;
-      padding: 10px;
-      background: none;
-      border: none;
-      font-size: .8125rem;
-      color: #a0aec0;
-      cursor: pointer;
-      margin-top: 8px;
-      font-family: var(--font-ui);
-    }
-    .btn-pay-cancel:hover { color: #718096; }
-    .payment-badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }
-    .payment-badge {
-      font-size: .68rem;
-      font-weight: 600;
-      color: #718096;
-      background: #f7fafc;
-      border: 1px solid #e2e8f0;
-      padding: 3px 9px;
-      border-radius: 4px;
-    }
-
     /* ─── Modals ─── */
     .modal-overlay {
       display: none;
@@ -1220,48 +1090,6 @@
   </div>
 </div>
 
-<!-- Modal: Pago suscripción -->
-<div class="payment-modal-overlay" id="modal-pago" role="dialog" aria-modal="true" aria-label="Pago de suscripción">
-  <div class="payment-box">
-    <div class="payment-header">
-      <div class="payment-header-label">Suscripci&#243;n mensual</div>
-      <div class="payment-header-price" id="pay-header-price">2,99 <span>&#8364; / mes</span></div>
-      <div class="payment-header-sub">Pago recurrente · Cancela cuando quieras</div>
-    </div>
-    <div class="payment-body">
-      <div class="payment-plan-row">
-        <div>
-          <div class="payment-plan-name">Perfil Profesional / Negocio</div>
-          <div class="payment-plan-desc">Visible para toda la comunidad Keh&#237;l&#225;</div>
-        </div>
-        <div class="payment-plan-amount">2,99 &#8364;</div>
-      </div>
-
-      <div class="payment-field">
-        <div class="payment-field-label">DATOS DE LA TARJETA</div>
-        <div id="card-element" style="padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;min-height:42px;"></div>
-        <div id="card-errors" style="color:#e53e3e;font-size:.8rem;margin-top:6px;min-height:18px;"></div>
-      </div>
-
-      <div class="payment-secure-note">
-        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
-        </svg>
-        Pago seguro cifrado · Se cobrar&#225; 2,99 &#8364; cada mes
-      </div>
-
-      <button class="btn-pay" id="btn-confirmar-pago">Confirmar suscripci&#243;n &mdash; 2,99 &#8364;/mes</button>
-      <button class="btn-pay-cancel" id="btn-cancelar-pago">Cancelar</button>
-
-      <div class="payment-badge-row">
-        <span class="payment-badge">Visa</span>
-        <span class="payment-badge">Mastercard</span>
-        <span class="payment-badge">Amex</span>
-        <span class="payment-badge">SSL seguro</span>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- Modal: Crop Logo -->
 <div class="modal-overlay" id="modal-crop" role="dialog" aria-modal="true" aria-label="Encuadrar logo">
@@ -1278,7 +1106,6 @@
   </div>
 </div>
 
-<script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
@@ -1987,122 +1814,10 @@
           return;
         }
 
-        /* Check if current user already has an active subscription */
-        if (sbUp) {
-          var { data: existingSub } = await sbUp
-            .from('negocios')
-            .select('stripe_subscription_status')
-            .eq('usuario_id', currentUserId)
-            .eq('stripe_subscription_status', 'active')
-            .maybeSingle();
-          if (existingSub) {
-            await _saveBizToDb(pendingBiz, null, null);
-            return;
-          }
-        }
-
-        /* Open payment modal */
-        document.getElementById('modal-pago').classList.add('open');
-        if (_stripeCard) _stripeCard.clear();
-        document.getElementById('card-errors').textContent = '';
+        /* Publish directly — no payment required */
+        await _saveBizToDb(pendingBiz, null, null);
 
       } catch (err) { console.error(err); }
-    });
-
-    /* ─── Stripe payment flow ─── */
-    var STRIPE_PK = 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXX'; /* ← Mushky must replace this */
-    var SUPABASE_FUNCTIONS_URL = 'https://vvrvuhugpvqytelhsdnk.supabase.co/functions/v1';
-    var STRIPE_PRICE_ID = 'price_XXXXXXXXXXXXXXXXXXXXXXXX'; /* ← Mushky must replace this */
-
-    var _stripe = null;
-    var _stripeCard = null;
-    try {
-      _stripe = Stripe(STRIPE_PK);
-      var _stripeElements = _stripe.elements({ locale: 'es' });
-      _stripeCard = _stripeElements.create('card', {
-        style: {
-          base: { fontSize: '15px', color: '#1e293b', fontFamily: 'inherit', '::placeholder': { color: '#94a3b8' } },
-          invalid: { color: '#e53e3e' }
-        }
-      });
-      _stripeCard.mount('#card-element');
-      _stripeCard.on('change', function (e) {
-        document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
-      });
-    } catch (stripeInitErr) { console.error('[Stripe init]', stripeInitErr); }
-
-    document.getElementById('btn-cancelar-pago').addEventListener('click', function () {
-      document.getElementById('modal-pago').classList.remove('open');
-    });
-
-    document.getElementById('btn-confirmar-pago').addEventListener('click', async function () {
-      if (!_stripe || !_stripeCard) { showToast('Error al inicializar el pago.', 'error'); return; }
-      var btn = this;
-      btn.disabled = true; btn.textContent = 'Procesando…';
-      document.getElementById('card-errors').textContent = '';
-
-      try {
-        var sbPay = typeof getSupabase === 'function' ? getSupabase() : null;
-        var session = sbPay ? (await sbPay.auth.getSession()).data.session : null;
-        if (!session) { showToast('Sesión expirada. Vuelve a iniciar sesión.', 'error'); btn.disabled = false; btn.textContent = 'Confirmar suscripción — 2,99 €/mes'; return; }
-
-        /* Create PaymentMethod */
-        var userInfo = JSON.parse(localStorage.getItem('kehila_user') || '{}');
-        var { paymentMethod, error: pmErr } = await _stripe.createPaymentMethod({
-          type: 'card',
-          card: _stripeCard,
-          billing_details: {
-            name: userInfo.name || '',
-            email: userInfo.email || ''
-          }
-        });
-        if (pmErr) {
-          document.getElementById('card-errors').textContent = pmErr.message;
-          btn.disabled = false; btn.textContent = 'Confirmar suscripción — 2,99 €/mes';
-          return;
-        }
-
-        /* Call Edge Function */
-        var edgeRes = await fetch(SUPABASE_FUNCTIONS_URL + '/create-subscription', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + session.access_token
-          },
-          body: JSON.stringify({
-            paymentMethodId: paymentMethod.id,
-            priceId: STRIPE_PRICE_ID,
-            email: userInfo.email || '',
-            name: userInfo.name || '',
-            businessName: pendingBiz ? pendingBiz.nombre : ''
-          })
-        });
-        var edgeData = await edgeRes.json();
-        if (!edgeRes.ok || edgeData.error) {
-          document.getElementById('card-errors').textContent = edgeData.error || 'Error en el servidor.';
-          btn.disabled = false; btn.textContent = 'Confirmar suscripción — 2,99 €/mes';
-          return;
-        }
-
-        /* Confirm PaymentIntent if needed */
-        if (edgeData.clientSecret && edgeData.status !== 'active') {
-          var { error: confirmErr } = await _stripe.confirmCardPayment(edgeData.clientSecret);
-          if (confirmErr) {
-            document.getElementById('card-errors').textContent = confirmErr.message;
-            btn.disabled = false; btn.textContent = 'Confirmar suscripción — 2,99 €/mes';
-            return;
-          }
-        }
-
-        /* Save business to DB */
-        document.getElementById('modal-pago').classList.remove('open');
-        await _saveBizToDb(pendingBiz, null, edgeData.customerId);
-
-      } catch (payErr) {
-        console.error('[Payment]', payErr);
-        showToast('Error al procesar el pago. Inténtalo de nuevo.', 'error');
-        btn.disabled = false; btn.textContent = 'Confirmar suscripción — 2,99 €/mes';
-      }
     });
 
     async function _saveBizToDb(biz, bizId, stripeCustomerId) {
