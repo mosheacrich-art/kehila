@@ -2662,9 +2662,12 @@
   }
 
   /* ─── Init ─── */
-  requireAdmin();
-  buildSidebar('admin');
-  (async () => { await verifyAdminRealtime(); })();
+  document.body.style.visibility = 'hidden';
+  (async () => {
+    if (!await verifyAdminRealtime()) return;
+    document.body.style.visibility = '';
+    buildSidebar('admin');
+  })();
 
   /* ══════════════════════════════
      TABS
