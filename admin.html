@@ -3367,7 +3367,7 @@
     const apellido = rand(apellidos);
     const ts = Date.now();
     const email = `test.${nombre.toLowerCase()}.${ts}@kehila-test.com`;
-    const password = 'Test1234!';
+    const password = 'Test' + Math.random().toString(36).slice(2, 10) + '!A1';
 
     const sb = getSupabase();
     if (!sb) { showToast('Supabase no disponible', 'error'); btn.disabled = false; btn.textContent = '+ Crear cuenta de prueba'; return; }
