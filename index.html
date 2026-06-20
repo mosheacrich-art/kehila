@@ -725,6 +725,9 @@
                 <span class="form-error" id="login-pw-error" style="display:none;"></span>
               </div>
 
+              <!-- Turnstile CAPTCHA -->
+              <div class="cf-turnstile" data-sitekey="0x4AAAAAAAAADoQ5dnm5NWzL2Ae" data-theme="light" style="margin-bottom:12px;"></div>
+
               <!-- Botón entrar -->
               <button type="submit" class="btn btn-primary btn-lg w-full mt-sm" id="btn-login">
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:18px;height:18px;">
@@ -1207,6 +1210,7 @@
   </div>
   <!-- FIN PANEL FORMULARIO -->
 
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/registro.js"></script>
@@ -1356,7 +1360,8 @@
       if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Entrando...'; }
 
       // Login (async: soporta Supabase y mock)
-      login(email, password).then(result => {
+      const captchaToken = document.querySelector('[name="cf-turnstile-response"]')?.value || '';
+      login(email, password, captchaToken).then(result => {
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Entrar'; }
 
         if (!result.ok) {

@@ -55,13 +55,14 @@ const SESSION_KEY = 'kehila_user';
  * @param {string} password
  * @returns {Promise<{ok: boolean, status?: string, error?: string}>}
  */
-async function login(email, password) {
+async function login(email, password, captchaToken = '') {
   const normalizedEmail = email.toLowerCase().trim();
   const sb = getSupabase();
   if (!sb) return { ok: false, error: 'No hay conexión con el servidor.' };
 
   try {
-    const { data, error } = await sb.auth.signInWithPassword({ email: normalizedEmail, password });
+    const authOptions = captchaToken ? { email: normalizedEmail, password, options: { captchaToken } } : { email: normalizedEmail, password };
+    const { data, error } = await sb.auth.signInWithPassword(authOptions);
     if (error) return { ok: false, error: 'Email o contraseña incorrectos.' };
 
     const { data: profile } = await sb
