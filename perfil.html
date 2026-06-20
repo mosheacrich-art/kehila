@@ -977,13 +977,24 @@
 
       try {
         const sb = getSupabase();
-        if (sb && user && user.userId) {
-          await sb.from('profiles').update({
-            status: 'deletion_requested',
-            deletion_requested_at: new Date().toISOString()
-          }).eq('id', user.userId);
-        }
-      } catch (_) { /* continuar aunque falle la BD */ }
+        const session = await sb.auth.getSession();
+        const token = session?.data?.session?.access_token;
+        if (!token) throw new Error('Sesión no válida');
+
+        const res = await fetch('https://vvrvuhugpvqytelhsdnk.supabase.co/functions/v1/delete-account', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al eliminar la cuenta');
+      } catch (err) {
+        const msgEl = document.getElementById('delete-msg');
+        msgEl.textContent = err.message || 'Error al eliminar la cuenta. Inténtalo de nuevo.';
+        msgEl.style.display = '';
+        btn.disabled = false;
+        btn.textContent = 'Eliminar mi cuenta';
+        return;
+      }
 
       // Limpiar sesión local
       localStorage.removeItem('kehila_user');
@@ -992,12 +1003,6 @@
         localStorage.removeItem('kehila_avatar_' + user.email);
         localStorage.removeItem('kehila_cart');
       }
-
-      // Cerrar sesión en Supabase
-      try {
-        const sb = getSupabase();
-        if (sb) await sb.auth.signOut();
-      } catch (_) {}
 
       window.location.href = 'index.html?deleted=1';
     }
