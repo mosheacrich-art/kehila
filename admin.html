@@ -4191,7 +4191,7 @@
             ? '<span class="price-text free">Consultar</span>'
             : `<span class="price-text">${formatEuros(w.precio)}</span>`}
         </td>
-        <td class="hide-md" style="font-size:.8125rem;">${tipoBadge[w.tipo] || w.tipo}</td>
+        <td class="hide-md" style="font-size:.8125rem;">${tipoBadge[w.tipo] || escHtml(w.tipo)}</td>
         <td>${w.estado === 'disponible'
           ? '<span class="badge badge-active">Disponible</span>'
           : '<span class="badge badge-banned">Oculto</span>'}</td>
@@ -4538,7 +4538,7 @@
     const CATS = { halajá:'Halajá', shabat:'Shabat', kashrut:'Kashrut', tefila:'Tefila', lifecycle:'Ciclo de vida', otro:'Otro' };
     list.innerHTML = filtered.map(p => {
       const fecha = p.created_at ? new Date(p.created_at).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' }) : '';
-      const catLabel = CATS[p.categoria] || p.categoria || '—';
+      const catLabel = CATS[p.categoria] || escHtml(p.categoria) || '—';
       const respHTML = p.respuesta
         ? `<div class="preg-respuesta">
              <div class="preg-respuesta-label">✓ Respuesta del Rav</div>
