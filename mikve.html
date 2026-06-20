@@ -313,22 +313,21 @@
 
 </main>
 
+<!-- Stripe card modal -->
 <div class="mk-modal-overlay" id="card-modal">
   <div class="mk-modal-box" onclick="event.stopPropagation()">
     <div class="mk-modal-title">Añadir tarjeta</div>
-    <div class="mk-field"><label>Número de tarjeta</label><input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNumber(this)"></div>
-    <div class="mk-field-row">
-      <div class="mk-field"><label>Caducidad</label><input type="text" id="card-exp" placeholder="MM/AA" maxlength="5" oninput="formatExp(this)"></div>
-      <div class="mk-field"><label>CVC</label><input type="text" id="card-cvc" placeholder="123" maxlength="4"></div>
-    </div>
-    <div class="mk-field"><label>Nombre en la tarjeta</label><input type="text" id="card-name" placeholder="Como aparece en la tarjeta"></div>
+    <p style="font-size:0.8rem;color:var(--mk-muted);margin-bottom:14px;">🔒 Pago seguro con Stripe</p>
+    <div id="mk-stripe-card-element" style="border:1.5px solid var(--mk-border);border-radius:10px;padding:12px 14px;background:#fff;"></div>
+    <div id="mk-stripe-card-error" style="color:#e53e3e;font-size:0.78rem;margin-top:7px;min-height:14px;"></div>
     <div class="mk-modal-actions">
       <button class="mk-modal-cancel" onclick="cerrarCardModal()">Cancelar</button>
-      <button class="mk-modal-confirm" onclick="confirmarTarjeta()">Guardar tarjeta</button>
+      <button class="mk-modal-confirm" id="mk-stripe-save-btn" onclick="confirmarTarjeta()">Guardar tarjeta</button>
     </div>
   </div>
 </div>
 
+<script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
@@ -507,14 +506,55 @@
   function resetBooking() { booking.step=1;booking.date=null;booking.service=null;booking.time=null;booking.notes='';booking.donation=0;booking.donationLabel='';booking.card=null;booking.confirmed=false;calYear=new Date().getFullYear();calMonth=new Date().getMonth();renderStep();window.scrollTo({top:0,behavior:'smooth'}); }
 
   async function confirmarReserva() {
-    const btn=document.getElementById('mk-continue-btn'); btn.disabled=true; btn.textContent='Procesando...';
+    const btn = document.getElementById('mk-continue-btn');
+    btn.disabled = true; btn.textContent = 'Procesando pago...';
     try {
-      const user=getCurrentUser(), fecha=booking.date.toISOString().split('T')[0];
-      const [hh,mm]=booking.time.split(':');
-      const {error}=await sb.from('mikve_reservas').insert({usuario_id:user.userId,fecha,hora:`${hh.padStart(2,'0')}:${mm}:00`,servicio:booking.service.name,precio:booking.service.price,donacion:booking.donation,total:booking.service.price+booking.donation,notas:booking.notes||null,estado:'confirmada'});
-      if(error)throw error;
-    } catch(err){console.error(err);}
-    booking.confirmed=true; mostrarConfirmacion();
+      const user = getCurrentUser();
+      const total = booking.service.price + booking.donation;
+      const session = await sb.auth.getSession();
+      const token = session?.data?.session?.access_token;
+
+      // 1. Create payment intent
+      const res = await fetch('https://vvrvuhugpvqytelhsdnk.supabase.co/functions/v1/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ amount: total, campana_nombre: 'Reserva Mikve', dedicatoria: booking.notes || '' })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.clientSecret) throw new Error(data.error || 'Error creando pago');
+      _mkClientSecret = data.clientSecret;
+
+      // 2. Confirm payment with Stripe
+      const stripe = getStripe();
+      const { error: stripeErr, paymentIntent } = await stripe.confirmCardPayment(_mkClientSecret, {
+        payment_method: booking.card.paymentMethodId
+      });
+      if (stripeErr) throw new Error(stripeErr.message);
+      if (paymentIntent.status !== 'succeeded') throw new Error('Pago no completado');
+
+      // 3. Save booking in Supabase
+      const fecha = booking.date.toISOString().split('T')[0];
+      const [hh, mm] = booking.time.split(':');
+      const { error } = await sb.from('mikve_reservas').insert({
+        usuario_id: user.userId, fecha,
+        hora: `${hh.padStart(2,'0')}:${mm}:00`,
+        servicio: booking.service.name,
+        precio: booking.service.price,
+        donacion: booking.donation,
+        total,
+        notas: booking.notes || null,
+        estado: 'confirmada',
+        stripe_payment_intent: paymentIntent.id
+      });
+      if (error) throw error;
+
+    } catch(err) {
+      showToast(err.message || 'Error al procesar el pago', 'error');
+      btn.disabled = false; btn.textContent = 'Confirmar reserva';
+      return;
+    }
+    booking.confirmed = true;
+    mostrarConfirmacion();
   }
 
   function mostrarConfirmacion() {
@@ -535,16 +575,53 @@
     document.querySelectorAll('.mk-step-btn').forEach(b=>b.disabled=true);
   }
 
-  function abrirCardModal() { document.getElementById('card-modal').classList.add('open'); document.body.style.overflow='hidden'; }
-  function cerrarCardModal() { document.getElementById('card-modal').classList.remove('open'); document.body.style.overflow=''; }
-  function confirmarTarjeta() {
-    const num=document.getElementById('card-number').value.replace(/\s/g,'');
-    if(num.length<4){showToast('Número de tarjeta incompleto','warning');return;}
-    booking.card={last4:num.slice(-4)}; cerrarCardModal();
-    document.getElementById('mk-content').innerHTML=renderStep6(); updateContinueBtn();
+  /* ── Stripe ──────────────────────────────────────── */
+  const STRIPE_PK = 'pk_live_w1ok5XpTlqbZDgFzihwJPWEm';
+  let _mkStripe = null, _mkCardElement = null, _mkClientSecret = null;
+
+  function getStripe() {
+    if (!_mkStripe && typeof Stripe !== 'undefined') _mkStripe = Stripe(STRIPE_PK);
+    return _mkStripe;
   }
-  function formatCardNumber(input){let v=input.value.replace(/\D/g,'').slice(0,16);input.value=v.match(/.{1,4}/g)?.join(' ')||v;}
-  function formatExp(input){let v=input.value.replace(/\D/g,'');if(v.length>=2)v=v.slice(0,2)+'/'+v.slice(2,4);input.value=v;}
+
+  function abrirCardModal() {
+    document.getElementById('card-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    // Mount Stripe card element
+    const stripe = getStripe();
+    if (!stripe) return;
+    if (_mkCardElement) { _mkCardElement.destroy(); _mkCardElement = null; }
+    const elements = stripe.elements();
+    _mkCardElement = elements.create('card', { style: { base: { fontSize: '16px', color: '#1A202C' } } });
+    _mkCardElement.mount('#mk-stripe-card-element');
+    _mkCardElement.on('change', e => {
+      document.getElementById('mk-stripe-card-error').textContent = e.error ? e.error.message : '';
+    });
+  }
+
+  function cerrarCardModal() {
+    document.getElementById('card-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  async function confirmarTarjeta() {
+    const btn = document.getElementById('mk-stripe-save-btn');
+    btn.disabled = true; btn.textContent = 'Guardando...';
+    document.getElementById('mk-stripe-card-error').textContent = '';
+    // Validate card is complete by creating a payment method
+    const stripe = getStripe();
+    const { paymentMethod, error } = await stripe.createPaymentMethod({ type: 'card', card: _mkCardElement });
+    if (error) {
+      document.getElementById('mk-stripe-card-error').textContent = error.message;
+      btn.disabled = false; btn.textContent = 'Guardar tarjeta';
+      return;
+    }
+    booking.card = { last4: paymentMethod.card.last4, paymentMethodId: paymentMethod.id };
+    cerrarCardModal();
+    document.getElementById('mk-content').innerHTML = renderStep6();
+    updateContinueBtn();
+    btn.disabled = false; btn.textContent = 'Guardar tarjeta';
+  }
 
   // ─── Mis Reservas ──────────────────────────────────────────────────────────
   function mkSwitchMode(mode) {
