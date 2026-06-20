@@ -3148,8 +3148,9 @@
     openModal('modal-aprobar');
   }
 
-  document.getElementById('btn-confirm-aprobar').addEventListener('click', () => {
+  document.getElementById('btn-confirm-aprobar').addEventListener('click', async () => {
     if (!pendingTarget) return;
+    if (!await verifyAdminRealtime()) return;
     const user = usersState.find(u => u.userId === pendingTarget);
     user.status = 'active';
     if (user.source === 'real') aprobarEnSupabase(user.userId);
@@ -3177,12 +3178,13 @@
     openModal('modal-banear');
   }
 
-  document.getElementById('btn-confirm-banear').addEventListener('click', () => {
+  document.getElementById('btn-confirm-banear').addEventListener('click', async () => {
     const reason = document.getElementById('ban-reason').value.trim();
     if (!reason) {
       document.getElementById('ban-reason-error').style.display = '';
       return;
     }
+    if (!await verifyAdminRealtime()) return;
     const user = usersState.find(u => u.userId === pendingTarget);
     user.status = 'banned';
     if (user.source === 'real') banearEnSupabase(user.userId);
@@ -4406,7 +4408,8 @@
    * [SEC-01] Pendiente verificar admin en servidor.
    * @param {number} idx
    */
-  function aprobarSolicitud(idx) {
+  async function aprobarSolicitud(idx) {
+    if (!await verifyAdminRealtime()) return;
     const list = JSON.parse(localStorage.getItem('kehila_pending') || '[]');
     const activas = list.filter(s => s.status === 'PENDING');
     if (!activas[idx]) return;
