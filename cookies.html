@@ -34,10 +34,6 @@
     .priv-footer { text-align: center; font-size: 0.8rem; color: var(--color-text-muted); margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--color-border); }
     @media (max-width: 600px) { .priv-section { padding: 20px 18px; } .priv-hero { padding: 24px 20px; } .priv-hero h1 { font-size: 1.3rem; } }
   </style>
-  <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);}</script>
-  <script defer src='/_vercel/insights/script.js'></script>
-  <script>window.si=window.si||function(){(window.siq=window.siq||[]).push(arguments);}</script>
-  <script defer src='/_vercel/speed-insights/script.js'></script>
 </head>
 <body>
 <div class="priv-wrap">
@@ -74,22 +70,28 @@
       </thead>
       <tbody>
         <tr>
-          <td><code>kehila_session</code></td>
+          <td><code>kehila_user</code></td>
           <td>localStorage</td>
-          <td>Mantener la sesión activa del usuario tras el login</td>
+          <td>Mantener la sesión activa del usuario tras el login (nombre, email, rol). No contiene contraseñas.</td>
           <td>Hasta cerrar sesión</td>
+        </tr>
+        <tr>
+          <td><code>sb-vvrvuhugpvqytelhsdnk-auth-token</code></td>
+          <td>localStorage</td>
+          <td>Token de autenticación cifrado de Supabase (proveedor de base de datos). Necesario para mantener la sesión segura.</td>
+          <td>Hasta cerrar sesión / expiración (1 hora renovable)</td>
         </tr>
         <tr>
           <td><code>kehila_lang</code></td>
           <td>localStorage</td>
-          <td>Guardar el idioma seleccionado (español / inglés)</td>
+          <td>Guardar el idioma seleccionado (español / inglés / hebreo)</td>
           <td>Persistente</td>
         </tr>
         <tr>
-          <td><code>kehila_analytics_v1</code></td>
+          <td><code>kehila_pending</code></td>
           <td>localStorage</td>
-          <td>Caché local de analíticas de uso (sin datos personales)</td>
-          <td>Persistente</td>
+          <td>Almacena temporalmente los datos de la solicitud de registro durante el proceso de alta. Se elimina tras completar el registro.</td>
+          <td>Temporal (durante el registro)</td>
         </tr>
       </tbody>
     </table>
