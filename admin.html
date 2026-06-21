@@ -2778,6 +2778,11 @@
    * @param {string} str - Fecha en formato ISO YYYY-MM-DD
    * @returns {string}
    */
+  function calcChildAge(fechaNac) {
+    if (!fechaNac) return '?';
+    return Math.floor((Date.now() - new Date(fechaNac)) / (365.25*24*60*60*1000));
+  }
+
   function formatDate(str) {
     if (!str) return '—';
     // Si ya tiene T (timestamp ISO completo), no añadir sufijo
@@ -2983,7 +2988,11 @@
     const tbody = document.getElementById('users-table-body');
     tbody.innerHTML = users.map(u => {
       let actions = '';
-      if (u.status === 'pending') {
+      if (u.is_child) {
+        const parent = usersState.find(x => x.userId === u.parent_id);
+        const parentName = parent ? escHtml(parent.name) : 'padre/madre';
+        actions = `<div style="font-size:.75rem;color:var(--color-text-muted);font-style:italic;">Gestionado por ${parentName}</div>`;
+      } else if (u.status === 'pending') {
         actions = `
           <div class="action-btns">
             <button class="tbl-action tbl-action-approve" onclick="promptAprobar('${u.userId}')">Aprobar</button>
@@ -3009,27 +3018,33 @@
           </div>`;
       }
 
+      const childBadge = u.is_child
+        ? '<span style="display:inline-block;margin-left:6px;background:#EFF6FF;color:#1D4ED8;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid #BFDBFE;vertical-align:middle;letter-spacing:.05em;">MENOR</span>'
+        : (u.source === 'real' ? '<span style="display:inline-block;margin-left:6px;background:var(--color-bg);color:var(--color-text-muted);font-size:0.6rem;font-weight:600;padding:1px 5px;border-radius:3px;border:1px solid var(--color-border);vertical-align:middle;letter-spacing:.05em;">REAL</span>' : '');
+
+      const emailLine = u.is_child
+        ? `<div class="user-cell-email" style="color:#1D4ED8;">Control parental</div>`
+        : `<div class="user-cell-email">${escHtml(u.email)}</div>`;
+
       return `
-        <tr id="user-row-${u.userId}">
+        <tr id="user-row-${u.userId}" ${u.is_child ? 'style="background:#F8FAFF;"' : ''}>
           <td>
             <div class="user-cell">
+              ${u.is_child ? '<div style="width:4px;height:36px;background:#BFDBFE;border-radius:2px;flex-shrink:0;margin-right:4px;"></div>' : ''}
               ${avatarHTML(u, 'sm')}
               <div class="user-cell-info">
-                <div class="user-cell-name">
-                  ${escHtml(u.name)}
-                  ${u.source === 'real' ? '<span style="display:inline-block;margin-left:6px;background:var(--color-bg);color:var(--color-text-muted);font-size:0.6rem;font-weight:600;padding:1px 5px;border-radius:3px;border:1px solid var(--color-border);vertical-align:middle;letter-spacing:.05em;">REAL</span>' : ''}
-                </div>
-                <div class="user-cell-email">${escHtml(u.email)}</div>
+                <div class="user-cell-name">${escHtml(u.name)}${childBadge}</div>
+                ${emailLine}
               </div>
             </div>
           </td>
           <td class="hide-sm">${badgeRole(u.role)}</td>
           <td id="status-cell-${u.userId}">${badgeStatus(u.status)}</td>
-          <td class="hide-md" style="font-size:.8rem;color:var(--color-text-muted);">${formatDate(u.joinDate)}</td>
+          <td class="hide-md" style="font-size:.8rem;color:var(--color-text-muted);">${u.is_child && u.fecha_nac ? calcChildAge(u.fecha_nac) + ' años' : formatDate(u.joinDate)}</td>
           <td>
             <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
               ${actions}
-              <button onclick="verPerfil('${u.userId}')" style="font-size:0.75rem;color:var(--color-primary);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;font-family:inherit;">Ver solicitud</button>
+              ${!u.is_child ? `<button onclick="verPerfil('${u.userId}')" style="font-size:0.75rem;color:var(--color-primary);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;font-family:inherit;">Ver solicitud</button>` : ''}
             </div>
           </td>
         </tr>`;
@@ -3305,7 +3320,9 @@
         practica:        p.practica        || null,
         familiar:        p.familiar        || false,
         familiar_nombre: p.familiar_nombre || null,
-        como_conocio:    p.como_conocio    || null
+        como_conocio:    p.como_conocio    || null,
+        is_child:        p.is_child        || false,
+        parent_id:       p.parent_id       || null
       }));
 
       // Añadir al principio de usersState (sin duplicar)
