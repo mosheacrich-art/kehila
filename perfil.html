@@ -190,6 +190,23 @@
       border-top: 1px solid var(--color-border);
     }
 
+    /* ─── Mis hijos ─── */
+    .hijo-badge {
+      display: inline-flex; align-items: center;
+      padding: 1px 7px; border-radius: 3px;
+      font-size: .65rem; font-weight: 700; letter-spacing: .03em;
+      background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;
+    }
+    .hijo-actions { display: flex; gap: 2px; flex-shrink: 0; }
+    .hijo-action-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--color-text-light); padding: 5px; border-radius: var(--radius-xs);
+      display: flex; align-items: center; transition: color var(--transition-fast);
+    }
+    .hijo-action-btn:hover { color: var(--color-primary); }
+    .hijo-action-btn.danger:hover { color: var(--color-danger); }
+    .hijo-action-btn svg { width: 15px; height: 15px; }
+
     /* ─── Mi familia ─── */
     .familia-list {
       display: flex;
@@ -373,6 +390,24 @@
           <div class="perfil-name" id="ph-name">—</div>
           <div class="perfil-email" id="ph-email">—</div>
           <div class="perfil-badges" id="ph-badges"></div>
+        </div>
+      </div>
+
+      <!-- ══ SECCIÓN: MIS HIJOS ══ -->
+      <div class="perfil-section" id="section-hijos">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--color-border);">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="perfil-section-title" style="margin-bottom:0;padding-bottom:0;border-bottom:none;">Mis hijos</div>
+            <span class="hijo-badge">Control parental</span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddHijoModal()">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Añadir hijo/a
+          </button>
+        </div>
+        <p style="font-size:.8rem;color:var(--color-text-muted);margin-bottom:12px;line-height:1.5;">Gestiona los perfiles de tus hijos. Podrás inscribirlos en actividades y eventos desde tu cuenta.</p>
+        <div class="familia-list" id="hijos-list">
+          <p class="familia-empty">Sin hijos registrados.</p>
         </div>
       </div>
 
@@ -564,6 +599,38 @@
             Eliminar mi cuenta
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal añadir/editar hijo -->
+  <div id="modal-hijo-overlay" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--color-white);border-radius:var(--radius-md);width:100%;max-width:440px;box-shadow:var(--shadow-lg);overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--color-border);">
+        <h3 id="modal-hijo-title" style="font-family:var(--font-brand);font-size:1rem;font-weight:700;color:var(--color-text);">Añadir hijo/a</h3>
+        <button onclick="closeAddHijoModal()" style="background:none;border:none;cursor:pointer;color:#9ca3af;padding:4px;line-height:0;">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+        <div class="form-group">
+          <label class="form-label required">Nombre</label>
+          <input type="text" id="hijo-nombre" class="form-input" placeholder="Nombre del niño/a">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Apellidos</label>
+          <input type="text" id="hijo-apellidos" class="form-input" placeholder="Apellidos">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Fecha de nacimiento</label>
+          <input type="date" id="hijo-fecha-nac" class="form-input">
+          <span id="hijo-fecha-err" style="font-size:.75rem;color:var(--color-danger);display:none;margin-top:4px;display:block;"></span>
+        </div>
+        <div id="hijo-err" style="display:none;font-size:.8rem;color:var(--color-danger);padding:8px 12px;background:#FEF2F2;border-radius:var(--radius-xs);line-height:1.5;"></div>
+      </div>
+      <div style="padding:14px 20px;border-top:1px solid var(--color-border);display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn btn-ghost btn-sm" onclick="closeAddHijoModal()">Cancelar</button>
+        <button class="btn btn-primary btn-sm" id="btn-guardar-hijo" onclick="guardarHijo()">Guardar</button>
       </div>
     </div>
   </div>
@@ -848,6 +915,188 @@
     }
 
     init();
+    loadHijos();
+
+    /* ══ HIJOS ══ */
+    let _hijosData = [];
+    let _hijoEditId = null;
+
+    function calcAge(fechaNac) {
+      if (!fechaNac) return null;
+      return Math.floor((Date.now() - new Date(fechaNac)) / (365.25*24*60*60*1000));
+    }
+
+    async function loadHijos() {
+      const sb = getSupabase();
+      if (!sb || !user?.userId) return;
+      try {
+        const { data } = await sb.from('profiles')
+          .select('id, name, initials, fecha_nac')
+          .eq('parent_id', user.userId)
+          .eq('is_child', true)
+          .order('name');
+        _hijosData = data || [];
+        renderHijos();
+      } catch(e) { console.error('Error cargando hijos:', e); }
+    }
+
+    function renderHijos() {
+      const list = document.getElementById('hijos-list');
+      if (!_hijosData.length) {
+        list.innerHTML = '<p class="familia-empty">Sin hijos registrados. Añade a tus hijos para inscribirlos en actividades.</p>';
+        return;
+      }
+      list.innerHTML = _hijosData.map(h => {
+        const age = calcAge(h.fecha_nac);
+        const color = getAvatarColor(h.name);
+        const initials = (h.initials || h.name?.slice(0,2) || '?').toUpperCase();
+        const ageStr = age !== null ? `${age} años` : 'Menor';
+        return `
+          <div class="familia-card">
+            <div class="avatar" data-color="${color}" style="width:36px;height:36px;font-size:.8rem;flex-shrink:0;">${initials}</div>
+            <div class="familia-card-info">
+              <div class="familia-card-name">${escHtml(h.name)}</div>
+              <div class="familia-card-rel">${ageStr} &middot; <span class="hijo-badge">Control parental</span></div>
+            </div>
+            <div class="hijo-actions">
+              <button class="hijo-action-btn" onclick="openEditHijoModal('${h.id}')" title="Editar">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z"/></svg>
+              </button>
+              <button class="hijo-action-btn danger" onclick="eliminarHijo('${h.id}', '${escHtml(h.name).replace(/'/g,"\\'")}')">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function openAddHijoModal() {
+      _hijoEditId = null;
+      document.getElementById('modal-hijo-title').textContent = 'Añadir hijo/a';
+      document.getElementById('hijo-nombre').value = '';
+      document.getElementById('hijo-apellidos').value = '';
+      document.getElementById('hijo-fecha-nac').value = '';
+      document.getElementById('hijo-err').style.display = 'none';
+      document.getElementById('hijo-fecha-err').style.display = 'none';
+      const today = new Date().toISOString().split('T')[0];
+      const minDate = new Date(Date.now() - 18*365.25*24*60*60*1000).toISOString().split('T')[0];
+      document.getElementById('hijo-fecha-nac').max = today;
+      document.getElementById('hijo-fecha-nac').min = minDate;
+      document.getElementById('btn-guardar-hijo').disabled = false;
+      document.getElementById('btn-guardar-hijo').textContent = 'Guardar';
+      document.getElementById('modal-hijo-overlay').style.display = 'flex';
+      setTimeout(() => document.getElementById('hijo-nombre').focus(), 100);
+    }
+
+    function openEditHijoModal(id) {
+      const hijo = _hijosData.find(h => h.id === id);
+      if (!hijo) return;
+      _hijoEditId = id;
+      document.getElementById('modal-hijo-title').textContent = 'Editar hijo/a';
+      const parts = (hijo.name || '').split(' ');
+      document.getElementById('hijo-nombre').value = parts[0] || '';
+      document.getElementById('hijo-apellidos').value = parts.slice(1).join(' ') || '';
+      document.getElementById('hijo-fecha-nac').value = hijo.fecha_nac || '';
+      document.getElementById('hijo-err').style.display = 'none';
+      document.getElementById('hijo-fecha-err').style.display = 'none';
+      const today = new Date().toISOString().split('T')[0];
+      const minDate = new Date(Date.now() - 18*365.25*24*60*60*1000).toISOString().split('T')[0];
+      document.getElementById('hijo-fecha-nac').max = today;
+      document.getElementById('hijo-fecha-nac').min = minDate;
+      document.getElementById('btn-guardar-hijo').disabled = false;
+      document.getElementById('btn-guardar-hijo').textContent = 'Guardar';
+      document.getElementById('modal-hijo-overlay').style.display = 'flex';
+    }
+
+    function closeAddHijoModal() {
+      document.getElementById('modal-hijo-overlay').style.display = 'none';
+      _hijoEditId = null;
+    }
+
+    async function guardarHijo() {
+      const nombre    = document.getElementById('hijo-nombre').value.trim();
+      const apellidos = document.getElementById('hijo-apellidos').value.trim();
+      const fechaNac  = document.getElementById('hijo-fecha-nac').value;
+      const errEl     = document.getElementById('hijo-err');
+      const fechaErr  = document.getElementById('hijo-fecha-err');
+      errEl.style.display = 'none';
+      fechaErr.style.display = 'none';
+
+      if (!nombre || !apellidos) {
+        errEl.textContent = 'El nombre y apellidos son obligatorios.';
+        errEl.style.display = '';
+        return;
+      }
+      if (!fechaNac) {
+        errEl.textContent = 'La fecha de nacimiento es obligatoria.';
+        errEl.style.display = '';
+        return;
+      }
+      const age = calcAge(fechaNac);
+      if (age < 0) {
+        fechaErr.textContent = 'La fecha de nacimiento no puede ser futura.';
+        fechaErr.style.display = '';
+        return;
+      }
+      if (age > 17) {
+        fechaErr.textContent = 'Esta función es para menores de 18 años.';
+        fechaErr.style.display = '';
+        return;
+      }
+
+      const btn = document.getElementById('btn-guardar-hijo');
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+
+      const fullName = (nombre + ' ' + apellidos).trim();
+      const initials = (nombre[0] + (apellidos[0] || '')).toUpperCase();
+      const childId  = _hijoEditId || crypto.randomUUID();
+      const sb = getSupabase();
+
+      try {
+        const { error } = await sb.from('profiles').upsert({
+          id:        childId,
+          name:      fullName,
+          nombre:    nombre,
+          apellidos: apellidos,
+          initials:  initials,
+          role:      'miembro',
+          status:    'active',
+          is_child:  true,
+          parent_id: user.userId,
+          fecha_nac: fechaNac,
+          comunidad: user.comunidad || 'Jabad Barcelona'
+        }, { onConflict: 'id' });
+
+        if (error) throw error;
+
+        closeAddHijoModal();
+        await loadHijos();
+        if (typeof showToast === 'function')
+          showToast(_hijoEditId ? 'Perfil actualizado' : `${fullName} añadido/a`, 'success');
+      } catch(e) {
+        errEl.textContent = 'Error al guardar. Inténtalo de nuevo.';
+        errEl.style.display = '';
+        console.error('guardarHijo error:', e);
+        btn.disabled = false;
+        btn.textContent = 'Guardar';
+      }
+    }
+
+    async function eliminarHijo(id, nombre) {
+      if (!confirm(`¿Eliminar el perfil de ${nombre}? Esta acción no se puede deshacer.`)) return;
+      const sb = getSupabase();
+      try {
+        const { error } = await sb.from('profiles').delete()
+          .eq('id', id).eq('parent_id', user.userId).eq('is_child', true);
+        if (error) throw error;
+        await loadHijos();
+        if (typeof showToast === 'function') showToast('Perfil eliminado', 'success');
+      } catch(e) {
+        if (typeof showToast === 'function') showToast('Error al eliminar', 'error');
+        console.error('eliminarHijo error:', e);
+      }
+    }
 
     /* ══ FAMILIA ══ */
     let _familiarSelected = null;
