@@ -10,14 +10,15 @@
     "build:ios": "npx cap build ios"
   },
   "dependencies": {
-    "@capacitor/core": "^8.3.4",
+    "@capacitor-community/stripe": "^8.1.1",
     "@capacitor/android": "^8.3.4",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/haptics": "^8.0.0",
     "@capacitor/ios": "^8.3.4",
     "@capacitor/push-notifications": "^8.0.0",
-    "@capacitor/app": "^8.0.0",
-    "@capacitor/haptics": "^8.0.0",
-    "@capacitor/status-bar": "^8.0.0",
-    "@capacitor/splash-screen": "^8.0.0"
+    "@capacitor/splash-screen": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.3.4"

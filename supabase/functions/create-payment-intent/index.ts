@@ -30,6 +30,7 @@ Deno.serve(async (req) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100),
       currency: 'eur',
+      payment_method_types: ['card'],
       metadata: {
         supabase_uid: user.id,
         campana_nombre: campana_nombre || 'Donativo',
