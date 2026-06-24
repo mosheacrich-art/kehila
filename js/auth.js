@@ -339,10 +339,12 @@ async function verifyAdminRealtime() {
 }
 
 (function () {
-  const isLoginPage = window.location.pathname.endsWith('index.html') ||
-                      window.location.pathname === '/' ||
-                      window.location.pathname.endsWith('/');
-  if (!isLoginPage) {
+  const publicPages = ['index.html', 'reset-password.html'];
+  const path = window.location.pathname;
+  const isPublic = path === '/' ||
+                   path.endsWith('/') ||
+                   publicPages.some(p => path.endsWith(p));
+  if (!isPublic) {
     requireAuth();
   }
 })();
