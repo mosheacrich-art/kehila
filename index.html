@@ -727,7 +727,7 @@
 
               <!-- Forgot password -->
               <div style="text-align:right;margin-top:-4px;">
-                <a href="reset-password.html" style="font-size:0.8125rem;color:var(--color-primary);font-weight:500;text-decoration:none;transition:color 0.15s ease;" onmouseover="this.style.color='var(--color-gold-dark)'" onmouseout="this.style.color='var(--color-primary)'">¿Olvidaste tu contraseña?</a>
+                <button type="button" onclick="openForgotModal()" style="background:none;border:none;cursor:pointer;font-size:0.8125rem;color:var(--color-primary);font-weight:500;padding:0;font-family:inherit;transition:color 0.15s ease;" onmouseover="this.style.color='#A8892E'" onmouseout="this.style.color='var(--color-primary)'">¿Olvidaste tu contraseña?</button>
               </div>
 
               <!-- Turnstile CAPTCHA -->
@@ -1196,6 +1196,63 @@
       </div>
     </footer>
 
+  <!-- Modal recuperar contraseña -->
+  <div id="forgot-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:20px;">
+    <div style="background:#fff;border-radius:14px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden;">
+
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid #e5e7eb;">
+        <div>
+          <div style="font-size:0.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#A8892E;margin-bottom:3px;display:flex;align-items:center;gap:5px;">
+            <span style="display:inline-block;width:12px;height:2px;background:#C9A84C;border-radius:1px;"></span>Recuperar acceso
+          </div>
+          <h3 style="font-family:var(--font-brand);font-size:1.15rem;font-weight:700;color:var(--color-text);margin:0;">¿Olvidaste tu contraseña?</h3>
+        </div>
+        <button onclick="closeForgotModal()" style="background:none;border:none;cursor:pointer;color:#9ca3af;padding:4px;line-height:0;flex-shrink:0;">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Body: step 1 — email input -->
+      <div id="forgot-step-1" style="padding:20px 24px 24px;">
+        <p style="font-size:0.875rem;color:var(--color-text-muted);margin-bottom:18px;line-height:1.6;">Introduce tu correo y te enviaremos un enlace para crear una nueva contraseña.</p>
+        <div id="forgot-msg" style="display:none;font-size:0.8rem;padding:10px 12px;border-radius:6px;margin-bottom:14px;line-height:1.5;"></div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label required" style="font-size:.8rem;" for="forgot-email">Correo electrónico</label>
+          <div class="input-with-icon">
+            <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+            </svg>
+            <input type="email" id="forgot-email" class="form-input" placeholder="tu@email.com" autocomplete="email">
+          </div>
+          <span id="forgot-email-err" class="form-error" style="display:none;"></span>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button type="button" onclick="closeForgotModal()" class="btn btn-ghost btn-sm" style="flex:1;">Cancelar</button>
+          <button type="button" id="btn-forgot-send" onclick="sendForgotEmail()" class="btn btn-primary btn-sm" style="flex:2;">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
+            Enviar enlace
+          </button>
+        </div>
+      </div>
+
+      <!-- Body: step 2 — sent confirmation -->
+      <div id="forgot-step-2" style="display:none;padding:28px 24px;text-align:center;">
+        <div style="width:64px;height:64px;background:#D1FAE5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#10B981" style="width:32px;height:32px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+          </svg>
+        </div>
+        <h4 style="font-family:var(--font-brand);font-size:1.1rem;font-weight:700;color:var(--color-text);margin-bottom:8px;">Revisa tu correo</h4>
+        <p style="font-size:0.875rem;color:var(--color-text-muted);line-height:1.65;margin-bottom:20px;">
+          Si <strong id="forgot-sent-email"></strong> está registrado, recibirás un enlace en los próximos minutos.<br><span style="font-size:.8rem;opacity:.8;">Revisa también la carpeta de spam.</span>
+        </p>
+        <button type="button" onclick="closeForgotModal()" class="btn btn-primary btn-sm w-full">Entendido</button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Modal términos y privacidad -->
   <div id="terms-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:20px;">
     <div style="background:#fff;border-radius:12px;max-width:560px;width:100%;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
@@ -1412,6 +1469,72 @@
       markInput('login-password', false);
       clearLoginMessage();
     });
+
+    /* ─── Forgot password modal ─── */
+    function openForgotModal() {
+      document.getElementById('forgot-email').value = document.getElementById('login-email').value || '';
+      document.getElementById('forgot-email-err').style.display = 'none';
+      document.getElementById('forgot-msg').style.display = 'none';
+      document.getElementById('forgot-step-1').style.display = '';
+      document.getElementById('forgot-step-2').style.display = 'none';
+      document.getElementById('forgot-modal').style.display = 'flex';
+      setTimeout(() => document.getElementById('forgot-email').focus(), 100);
+    }
+
+    function closeForgotModal() {
+      document.getElementById('forgot-modal').style.display = 'none';
+    }
+
+    document.getElementById('forgot-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeForgotModal();
+    });
+
+    document.getElementById('forgot-email').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') sendForgotEmail();
+    });
+
+    async function sendForgotEmail() {
+      const email = document.getElementById('forgot-email').value.trim();
+      const errEl = document.getElementById('forgot-email-err');
+      const msgEl = document.getElementById('forgot-msg');
+
+      errEl.style.display = 'none';
+      msgEl.style.display = 'none';
+      document.getElementById('forgot-email').classList.remove('error');
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errEl.textContent = 'Introduce un correo electrónico válido.';
+        errEl.style.display = '';
+        document.getElementById('forgot-email').classList.add('error');
+        return;
+      }
+
+      const btn = document.getElementById('btn-forgot-send');
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      try {
+        const sb = getSupabase();
+        const { error } = await sb.auth.resetPasswordForEmail(email, {
+          redirectTo: 'https://bcnkehila.com/reset-password.html'
+        });
+
+        if (error) throw error;
+      } catch(e) {
+        document.getElementById('forgot-msg').style.cssText = 'display:block;background:#FEE2E2;color:#991B1B;border:1px solid rgba(239,68,68,0.2);font-size:.8rem;padding:10px 12px;border-radius:6px;margin-bottom:14px;';
+        document.getElementById('forgot-msg').textContent = 'Error al enviar. Inténtalo de nuevo.';
+        btn.disabled = false;
+        btn.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg> Enviar enlace';
+        return;
+      }
+
+      document.getElementById('forgot-sent-email').textContent = email;
+      document.getElementById('forgot-step-1').style.display = 'none';
+      document.getElementById('forgot-step-2').style.display = '';
+
+      btn.disabled = false;
+      btn.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg> Enviar enlace';
+    }
 
     /* ─── Si ya hay sesión activa, redirigir ─── */
     (function checkExistingSession() {
