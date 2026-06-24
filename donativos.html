@@ -706,18 +706,7 @@
         <input type="text" id="don-ded" placeholder="En memoria de... / En honor a...">
       </div>
     </div>
-    <!-- Paso 2: formulario de tarjeta Stripe -->
-    <div id="payment-step" class="hidden" style="padding:0 22px 18px;">
-      <p style="font-size:.75rem;color:var(--color-text-muted);margin-bottom:10px;display:flex;align-items:center;gap:5px;">
-        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
-        Pago seguro con Stripe
-      </p>
-      <div id="stripe-card-element" style="border:1.5px solid #E2E8F0;border-radius:10px;padding:12px 14px;background:#fff;transition:border-color .15s;"></div>
-      <div id="stripe-card-error" style="color:#e53e3e;font-size:.78rem;margin-top:7px;min-height:14px;"></div>
-    </div>
-
     <div class="modal-don-ftr">
-      <button class="btn btn-ghost" id="btn-back-don" onclick="backToDon()" style="display:none;">← Atrás</button>
       <button class="btn btn-ghost" id="btn-cancel-don" onclick="closeModal()">Cancelar</button>
       <button class="btn-confirm-don" id="btn-confirm" disabled onclick="confirmDon()">
         <span id="confirm-lbl">Donar</span>
@@ -809,14 +798,14 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://js.stripe.com/v3/"></script>
 <script src="js/data.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/media.js"></script>
 <script>
-  var STRIPE_PK = 'pk_live_w1ok5XpTlqbZDgFzihwJPWEm';
+  // External donation URL — update with your Stripe Payment Link or website donation page
+  var DONATION_URL = 'https://jabad.barcelona/donar';
 
   requireAuth();
   initNav('donativos');
@@ -1091,14 +1080,6 @@
     document.getElementById('modal-don').classList.add('hidden');
     document.body.style.overflow = '';
     curId = null; selAmt = 0;
-    // Limpiar estado Stripe
-    document.getElementById('modal-don-body').style.display = '';
-    document.getElementById('payment-step').classList.add('hidden');
-    document.getElementById('btn-cancel-don').style.display = '';
-    document.getElementById('btn-back-don').style.display = 'none';
-    document.getElementById('stripe-card-error').textContent = '';
-    if (_cardElement) { _cardElement.destroy(); _cardElement = null; }
-    _stripeClientSecret = null;
   }
 
   function pickAmt(btn, n) {
@@ -1130,115 +1111,15 @@
     document.getElementById('confirm-lbl').textContent = selAmt > 0 ? 'Donar ' + selAmt + '€' + (rec==='mensual'?'/mes':'') : 'Donar';
   }
 
-  /* ── Stripe ──────────────────────────────────── */
-  let _stripe = null;
-  let _cardElement = null;
-  let _stripeClientSecret = null;
-
-  function getStripe() {
-    if (!_stripe && typeof Stripe !== 'undefined') _stripe = Stripe(STRIPE_PK);
-    return _stripe;
-  }
-
-  async function confirmDon() {
+  function confirmDon() {
     if (!selAmt) return;
-
-    const donBody = document.getElementById('payment-step');
-    const isPayStep = !donBody.classList.contains('hidden');
-
-    if (!isPayStep) {
-      // Paso 1 → llamar Edge Function y mostrar formulario de tarjeta
-      const btn = document.getElementById('btn-confirm');
-      btn.disabled = true;
-      document.getElementById('confirm-lbl').textContent = 'Preparando pago...';
-
-      try {
-        const nombreEl = document.getElementById('title-' + curId);
-        const nombre = nombreEl ? nombreEl.textContent : (curId === 'chai' ? 'Chai Club' : curId);
-        const ded = document.getElementById('don-ded').value.trim();
-
-        const session = await sb.auth.getSession();
-        const token = session?.data?.session?.access_token;
-        const res = await fetch('https://vvrvuhugpvqytelhsdnk.supabase.co/functions/v1/create-payment-intent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ amount: selAmt, campana_nombre: nombre, dedicatoria: ded }),
-        });
-        const data = await res.json();
-        if (!res.ok || !data.clientSecret) throw new Error(data.error || 'Error creando pago');
-
-        _stripeClientSecret = data.clientSecret;
-
-        // Mostrar paso de tarjeta
-        document.getElementById('modal-don-body').style.display = 'none';
-        document.getElementById('payment-step').classList.remove('hidden');
-        document.getElementById('btn-cancel-don').style.display = 'none';
-        document.getElementById('btn-back-don').style.display = '';
-        document.getElementById('confirm-lbl').textContent = 'Pagar ' + selAmt + '€';
-        btn.disabled = false;
-
-        // Montar Stripe Card Element
-        const stripe = getStripe();
-        const elements = stripe.elements();
-        _cardElement = elements.create('card', {
-          style: { base: { fontSize: '15px', color: '#1B2E5E', fontFamily: 'inherit', '::placeholder': { color: '#9CA3AF' } } },
-        });
-        _cardElement.mount('#stripe-card-element');
-        _cardElement.on('change', e => {
-          document.getElementById('stripe-card-error').textContent = e.error ? e.error.message : '';
-        });
-
-      } catch (err) {
-        document.getElementById('confirm-lbl').textContent = 'Donar ' + selAmt + '€';
-        document.getElementById('btn-confirm').disabled = false;
-        showToast(err.message || 'Error iniciando el pago', 'error');
-      }
-      return;
+    const url = DONATION_URL;
+    if (window.Capacitor && Capacitor.isNativePlatform()) {
+      window.open(url, '_system');
+    } else {
+      window.open(url, '_blank', 'noopener');
     }
-
-    // Paso 2 → confirmar pago con Stripe
-    const btn = document.getElementById('btn-confirm');
-    btn.disabled = true;
-    document.getElementById('confirm-lbl').textContent = 'Procesando...';
-
-    const stripe = getStripe();
-    const { error, paymentIntent } = await stripe.confirmCardPayment(_stripeClientSecret, {
-      payment_method: { card: _cardElement },
-    });
-
-    if (error) {
-      document.getElementById('stripe-card-error').textContent = error.message;
-      btn.disabled = false;
-      document.getElementById('confirm-lbl').textContent = 'Pagar ' + selAmt + '€';
-      return;
-    }
-
-    if (paymentIntent && paymentIntent.status === 'succeeded') {
-      const nombreEl = document.getElementById('title-' + curId);
-      const nombre = nombreEl ? nombreEl.textContent : (curId === 'chai' ? 'Chai Club' : curId);
-      const ded = document.getElementById('don-ded').value.trim();
-      if (sb && user) {
-        await sb.from('donaciones').insert({
-          usuario_id: user.userId, usuario_nombre: user.name || 'Socio',
-          campana_nombre: nombre, campana_id: null, cantidad: selAmt,
-          recurrente: false, dedicatoria: ded || null,
-        });
-      }
-      closeModal();
-      showToast('¡Toda raba! Donativo de ' + selAmt + '€ a ' + nombre + ' completado.', 'success');
-      loadTzedaka();
-    }
-  }
-
-  function backToDon() {
-    document.getElementById('modal-don-body').style.display = '';
-    document.getElementById('payment-step').classList.add('hidden');
-    document.getElementById('btn-cancel-don').style.display = '';
-    document.getElementById('btn-back-don').style.display = 'none';
-    document.getElementById('stripe-card-error').textContent = '';
-    if (_cardElement) { _cardElement.destroy(); _cardElement = null; }
-    _stripeClientSecret = null;
-    updBtn();
+    closeModal();
   }
 
   function pickChaiAmt(btn, n) {
