@@ -426,6 +426,16 @@ async function regSubmit() {
         como_conocio:    REG.data.comoConocio    || null
       }, { onConflict: 'id', ignoreDuplicates: false });
       if (upsertErr) console.error('Error guardando perfil:', upsertErr.message);
+
+      // Send welcome email (fire and forget — don't block the success screen)
+      sb.auth.getSession().then(({ data: { session } }) => {
+        if (session?.access_token) {
+          fetch('https://vvrvuhugpvqytelhsdnk.supabase.co/functions/v1/send-registration-email', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + session.access_token, 'Content-Type': 'application/json' }
+          }).catch(() => {});
+        }
+      }).catch(() => {});
     }
   }
 

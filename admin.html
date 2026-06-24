@@ -3285,16 +3285,14 @@
     const sb = getSupabase();
     if (!sb) return;
     try {
-      const { data: profiles, error } = await sb
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const [{ data: profiles, error }, { data: childRows }] = await Promise.all([
+        sb.from('profiles').select('*').order('created_at', { ascending: false }),
+        sb.from('children').select('id, parent_id, nombre, apellidos, fecha_nac, created_at').order('created_at', { ascending: false })
+      ]);
 
-      console.log('Supabase profiles:', profiles, 'error:', error);
-      if (error || !profiles || profiles.length === 0) return;
+      if (error) return;
 
-      // Convertir al formato de usersState y marcar como 'real'
-      const reales = profiles.map(p => ({
+      const reales = (profiles || []).map(p => ({
         userId:          p.id,
         doc_url:         p.doc_url          || null,
         name:            p.name || p.id.slice(0, 8),
@@ -3305,7 +3303,6 @@
         initials:        p.initials || p.name?.slice(0,2).toUpperCase() || '??',
         joinDate:        p.created_at?.slice(0,10) || new Date().toISOString().slice(0,10),
         source:          'real',
-        // campos extra del formulario de registro
         telefono:        p.telefono        || null,
         doc_tipo:        p.doc_tipo        || null,
         doc_numero:      p.doc_numero      || null,
@@ -3321,15 +3318,30 @@
         familiar:        p.familiar        || false,
         familiar_nombre: p.familiar_nombre || null,
         como_conocio:    p.como_conocio    || null,
-        is_child:        p.is_child        || false,
-        parent_id:       p.parent_id       || null
+        is_child:        false,
+        parent_id:       null
       }));
 
-      // Añadir al principio de usersState (sin duplicar)
-      const idsReales = reales.map(r => r.userId);
+      const menores = (childRows || []).map(c => ({
+        userId:    c.id,
+        name:      c.nombre + ' ' + c.apellidos,
+        email:     '—',
+        role:      'miembro',
+        status:    'active',
+        comunidad: 'Jabad Barcelona',
+        initials:  ((c.nombre?.[0] || '') + (c.apellidos?.[0] || '')).toUpperCase() || '??',
+        joinDate:  c.created_at?.slice(0,10) || '',
+        source:    'real',
+        fecha_nac: c.fecha_nac || null,
+        is_child:  true,
+        parent_id: c.parent_id
+      }));
+
+      const todos = [...reales, ...menores];
+      const ids = todos.map(r => r.userId);
       usersState = [
-        ...reales,
-        ...usersState.filter(u => !idsReales.includes(u.userId))
+        ...todos,
+        ...usersState.filter(u => !ids.includes(u.userId))
       ];
 
       initPendingBanner();
