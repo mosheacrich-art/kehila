@@ -804,8 +804,7 @@
 <script src="js/nav.js"></script>
 <script src="js/media.js"></script>
 <script>
-  var STRIPE_PK = 'pk_live_w1ok5XpTlqbZDgFzihwJPWEm';
-  var DONATION_URL = 'https://jabad.barcelona/donar'; // fallback (non-iOS / no Apple Pay)
+  var DONATION_URL = 'https://app.flowiz.io/bard/es/f/2019/';
 
   requireAuth();
   initNav('donativos');
@@ -1111,73 +1110,14 @@
     document.getElementById('confirm-lbl').textContent = selAmt > 0 ? 'Donar ' + selAmt + '€' + (rec==='mensual'?'/mes':'') : 'Donar';
   }
 
-  async function confirmDon() {
+  function confirmDon() {
     if (!selAmt) return;
-
-    const isNative = window.Capacitor && Capacitor.isNativePlatform();
-    if (!isNative) {
+    if (window.Capacitor && Capacitor.isNativePlatform()) {
+      window.open(DONATION_URL, '_system');
+    } else {
       window.open(DONATION_URL, '_blank', 'noopener');
-      closeModal();
-      return;
     }
-
-    const btn = document.getElementById('btn-confirm');
-    btn.disabled = true;
-    document.getElementById('confirm-lbl').textContent = 'Procesando...';
-
-    try {
-      await Capacitor.Plugins.Stripe.initialize({ publishableKey: STRIPE_PK });
-
-      const nombreEl = document.getElementById('title-' + curId);
-      const nombre = nombreEl ? nombreEl.textContent : (curId === 'chai' ? 'Chai Club' : curId);
-      const ded = document.getElementById('don-ded').value.trim();
-
-      const session = await sb.auth.getSession();
-      const token = session?.data?.session?.access_token;
-      const res = await fetch('https://vvrvuhugpvqytelhsdnk.supabase.co/functions/v1/create-payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ amount: selAmt, campana_nombre: nombre, dedicatoria: ded }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.clientSecret) throw new Error(data.error || 'Error creando pago');
-
-      await Capacitor.Plugins.Stripe.createApplePay({
-        paymentIntentClientSecret: data.clientSecret,
-        paymentSummaryItems: [{ label: nombre, amount: selAmt }],
-        merchantIdentifier: 'merchant.com.bcnkehila',
-        countryCode: 'ES',
-        currency: 'EUR',
-      });
-
-      const result = await Capacitor.Plugins.Stripe.presentApplePay();
-
-      if (result.paymentResult === 'paymentResultCompleted' || result.paymentResult === 'Completed') {
-        if (sb && user) {
-          await sb.from('donaciones').insert({
-            usuario_id: user.userId, usuario_nombre: user.name || 'Socio',
-            campana_nombre: nombre, campana_id: null, cantidad: selAmt,
-            recurrente: rec === 'mensual', dedicatoria: ded || null,
-          });
-        }
-        closeModal();
-        showToast('¡Toda raba! Donativo de ' + selAmt + '€ a ' + nombre + ' completado.', 'success');
-        loadTzedaka();
-        return;
-      }
-
-      if (result.paymentResult !== 'paymentResultCanceled' && result.paymentResult !== 'Canceled') {
-        throw new Error('El pago no se completó. Inténtalo de nuevo.');
-      }
-    } catch (err) {
-      const msg = (err.message || '').toLowerCase();
-      if (!msg.includes('cancel')) {
-        showToast(err.message || 'Error procesando el pago', 'error');
-      }
-    }
-
-    btn.disabled = false;
-    updBtn();
+    closeModal();
   }
 
   function pickChaiAmt(btn, n) {
