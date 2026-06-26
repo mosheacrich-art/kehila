@@ -1,6 +1,6 @@
 {
   "appId": "com.jabadbarcelona.app",
-  "appName": "Jabad Barcelona",
+  "appName": "Bcn Kehila",
   "webDir": "www",
   "server": {
     "url": "https://mosheacrich-art.github.io/kehila/",
@@ -8,7 +8,7 @@
     "androidScheme": "https"
   },
   "ios": {
-    "scheme": "Jabad Barcelona",
+    "scheme": "Bcn Kehila",
     "contentInset": "automatic"
   },
   "android": {

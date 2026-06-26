@@ -185,7 +185,7 @@ function regValidateStep1() {
     ok = false;
   } else { regClearFieldError('r1-email', 'r1-email-err'); }
 
-  if (!REG.data.telefono || REG.data.telefono.length < 6) {
+  if (REG.data.telefono && REG.data.telefono.length < 6) {
     regShowFieldError('r1-telefono', 'r1-telefono-err', 'Introduce un teléfono válido');
     ok = false;
   } else { regClearFieldError('r1-telefono', 'r1-telefono-err'); }
@@ -337,7 +337,7 @@ function regRenderSummary() {
       <div class="summary-title">Datos personales</div>
       <div class="summary-row"><span>Nombre</span><strong>${d.nombre} ${d.apellidos}</strong></div>
       <div class="summary-row"><span>Email</span><strong>${d.email}</strong></div>
-      <div class="summary-row"><span>Teléfono</span><strong>${d.telefonoPrefijo} ${d.telefono}</strong></div>
+      ${d.telefono ? `<div class="summary-row"><span>Teléfono</span><strong>${d.telefonoPrefijo} ${d.telefono}</strong></div>` : ''}
       <div class="summary-row"><span>Edad</span><strong>${age} años</strong></div>
     </div>
     <div class="summary-section">
@@ -408,7 +408,7 @@ async function regSubmit() {
         role:            'miembro',
         status:          'pending',
         comunidad:       'Jabad Barcelona',
-        telefono:        (REG.data.telefonoPrefijo || '+34') + ' ' + (REG.data.telefono || ''),
+        telefono:        REG.data.telefono ? (REG.data.telefonoPrefijo || '+34') + ' ' + REG.data.telefono : null,
         doc_tipo:        REG.data.docTipo        || null,
         doc_numero:      REG.data.docNumero      || null,
         fecha_nac:       REG.data.fechaNac       || null,
