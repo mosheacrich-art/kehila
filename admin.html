@@ -2020,8 +2020,9 @@
           </div>
         </div>
         <div class="table-wrap">
-          <div class="table-header-row">
-            <p class="table-title">Transacciones del mes</p>
+          <div class="table-header-row" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+            <p class="table-title" id="mkv-fin-title">Transacciones del mes</p>
+            <input type="month" id="mkv-fin-mes" style="border:1.5px solid var(--color-border);border-radius:8px;padding:6px 12px;font-size:.85rem;font-family:inherit;background:var(--color-bg);" onchange="mikveRenderFinanzas()">
           </div>
           <div style="overflow-x:auto;">
             <table>
@@ -6597,15 +6598,24 @@
 
   function mikveRenderFinanzas() {
     var hoy = new Date();
+    var mesInput = document.getElementById('mkv-fin-mes');
+    if (!mesInput.value) {
+      mesInput.value = hoy.getFullYear() + '-' + String(hoy.getMonth()+1).padStart(2,'0');
+    }
+    var parts = mesInput.value.split('-');
+    var selYear = parseInt(parts[0]), selMonth = parseInt(parts[1]) - 1;
     var mesRows = _mkvReservas.filter(function(r) {
       var d = new Date(r.fecha + 'T00:00:00');
-      return d.getFullYear() === hoy.getFullYear() && d.getMonth() === hoy.getMonth() && r.estado !== 'cancelada';
+      return d.getFullYear() === selYear && d.getMonth() === selMonth && r.estado !== 'cancelada';
     });
-    var totalServicios = mesRows.reduce(function(s,r){ return s + (r.precio || 0); }, 0);
-    var totalDonaciones = mesRows.reduce(function(s,r){ return s + (r.donacion || 0); }, 0);
-    document.getElementById('mkv-fin-ingresos').textContent  = '€' + totalServicios;
-    document.getElementById('mkv-fin-donaciones').textContent = '€' + totalDonaciones;
+    var totalServicios = mesRows.reduce(function(s,r){ return s + Number(r.precio || 0); }, 0);
+    var totalDonaciones = mesRows.reduce(function(s,r){ return s + Number(r.donacion || 0); }, 0);
+    document.getElementById('mkv-fin-ingresos').textContent  = '€' + totalServicios.toFixed(2);
+    document.getElementById('mkv-fin-donaciones').textContent = '€' + totalDonaciones.toFixed(2);
     document.getElementById('mkv-fin-citas').textContent = mesRows.filter(function(r){ return r.estado==='completada'; }).length;
+    var monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    var titleEl = document.getElementById('mkv-fin-title');
+    if (titleEl) titleEl.textContent = 'Transacciones — ' + monthNames[selMonth] + ' ' + selYear;
     var tbody = document.getElementById('mkv-fin-body');
     if (!tbody) return;
     if (!mesRows.length) {
