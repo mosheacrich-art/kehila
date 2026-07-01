@@ -551,18 +551,25 @@ const hoy = new Date();
       precioEl.style.display = 'none';
     }
 
-    // Cargar familiares vinculados
+    // Cargar familiares vinculados + hijos registrados en Supabase
     const currentUser = getCurrentUser();
     const userId = currentUser?.userId || currentUser?.email;
-    const familyLinks = userId ? getFamilyLinks(userId) : [];
+    const adultLinks = userId ? getFamilyLinks(userId) : [];
+    const childLinks = _hijosEvCache.map(h => ({
+      id:       'child-' + h.id,
+      name:     h.nombre + ' ' + h.apellidos,
+      initials: ((h.nombre?.[0] || '') + (h.apellidos?.[0] || '')).toUpperCase() || '?',
+      is_child: true
+    }));
+    const familyLinks = [...adultLinks, ...childLinks];
     const familyWrap = document.getElementById('modal-familia-wrap');
     const familyChecks = document.getElementById('modal-familia-checks');
     if (familyLinks.length) {
       familyChecks.innerHTML = familyLinks.map(f => `
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 8px;border-radius:var(--radius-xs);transition:background .15s;" onmouseover="this.style.background='var(--color-bg)'" onmouseout="this.style.background=''">
           <input type="checkbox" data-familia-id="${f.id}" data-familia-name="${f.name}" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--color-primary);cursor:pointer;">
-          <div class="avatar" data-color="${getAvatarColor(f.name)}" style="width:28px;height:28px;font-size:.7rem;flex-shrink:0;">${f.initials}</div>
-          <span style="font-size:.875rem;color:var(--color-text);font-weight:500;">${f.name}</span>
+          <div class="avatar" data-color="${f.is_child ? '5' : getAvatarColor(f.name)}" style="width:28px;height:28px;font-size:.7rem;flex-shrink:0;">${f.initials}</div>
+          <span style="font-size:.875rem;color:var(--color-text);font-weight:500;">${f.name}${f.is_child ? ' <span style="font-size:.7rem;color:#1D4ED8;font-weight:600;background:#EFF6FF;padding:1px 4px;border-radius:3px;border:1px solid #BFDBFE;">Menor</span>' : ''}</span>
         </label>`).join('');
       familyWrap.style.display = '';
     } else {
@@ -940,6 +947,22 @@ const hoy = new Date();
     renderLista();
   }
   loadEventos();
+
+  /* ─── Hijos: precargar desde Supabase para modal inscripción ─── */
+  let _hijosEvCache = [];
+  async function loadHijosParaEventos() {
+    const sb = getSupabase();
+    const user = getCurrentUser();
+    if (!sb || !user?.userId) return;
+    try {
+      const { data } = await sb.from('children')
+        .select('id, nombre, apellidos')
+        .eq('parent_id', user.userId)
+        .order('nombre');
+      _hijosEvCache = data || [];
+    } catch(e) {}
+  }
+  loadHijosParaEventos();
 
   /* ─── Admin FAB ─── */
   (function() {

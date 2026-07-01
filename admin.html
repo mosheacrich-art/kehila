@@ -3024,7 +3024,7 @@
         : (u.source === 'real' ? '<span style="display:inline-block;margin-left:6px;background:var(--color-bg);color:var(--color-text-muted);font-size:0.6rem;font-weight:600;padding:1px 5px;border-radius:3px;border:1px solid var(--color-border);vertical-align:middle;letter-spacing:.05em;">REAL</span>' : '');
 
       const emailLine = u.is_child
-        ? `<div class="user-cell-email" style="color:#1D4ED8;">Control parental</div>`
+        ? `<div class="user-cell-email" style="color:#1D4ED8;">Menor · ${u.parent_name ? escHtml(u.parent_name) : 'Control parental'}</div>`
         : `<div class="user-cell-email">${escHtml(u.email)}</div>`;
 
       return `
@@ -3323,20 +3323,24 @@
         parent_id:       null
       }));
 
-      const menores = (childRows || []).map(c => ({
-        userId:    c.id,
-        name:      c.nombre + ' ' + c.apellidos,
-        email:     '—',
-        role:      'miembro',
-        status:    'active',
-        comunidad: 'Jabad Barcelona',
-        initials:  ((c.nombre?.[0] || '') + (c.apellidos?.[0] || '')).toUpperCase() || '??',
-        joinDate:  c.created_at?.slice(0,10) || '',
-        source:    'real',
-        fecha_nac: c.fecha_nac || null,
-        is_child:  true,
-        parent_id: c.parent_id
-      }));
+      const menores = (childRows || []).map(c => {
+        const parent = (profiles || []).find(p => p.id === c.parent_id);
+        return {
+          userId:      c.id,
+          name:        c.nombre + ' ' + c.apellidos,
+          email:       '—',
+          role:        'miembro',
+          status:      'active',
+          comunidad:   'Jabad Barcelona',
+          initials:    ((c.nombre?.[0] || '') + (c.apellidos?.[0] || '')).toUpperCase() || '??',
+          joinDate:    c.created_at?.slice(0,10) || '',
+          source:      'real',
+          fecha_nac:   c.fecha_nac || null,
+          is_child:    true,
+          parent_id:   c.parent_id,
+          parent_name: parent?.name || null
+        };
+      });
 
       const todos = [...reales, ...menores];
       const ids = todos.map(r => r.userId);
