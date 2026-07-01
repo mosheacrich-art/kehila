@@ -1112,12 +1112,20 @@
 
   function confirmDon() {
     if (!selAmt) return;
+    closeModal();
     if (window.Capacitor && Capacitor.isNativePlatform()) {
       window.open(DONATION_URL, '_system');
+    } else if (/PWAShell/.test(navigator.userAgent)) {
+      // Native WKWebView: anchor click → linkActivated nav type →
+      // decidePolicyFor cancels + opens SFSafariViewController externally
+      const a = document.createElement('a');
+      a.href = DONATION_URL;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     } else {
       window.open(DONATION_URL, '_blank', 'noopener');
     }
-    closeModal();
   }
 
   function pickChaiAmt(btn, n) {
