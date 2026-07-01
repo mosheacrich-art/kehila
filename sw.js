@@ -4,7 +4,7 @@
    Push: muestra notificación nativa cuando la app está cerrada
    ============================================= */
 
-const CACHE = 'kehila-v10';
+const CACHE = 'kehila-v11';
 
 // Instalar: activar inmediatamente sin esperar
 self.addEventListener('install', e => {
