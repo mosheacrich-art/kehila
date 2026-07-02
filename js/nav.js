@@ -781,6 +781,12 @@ function renderSubTabs(pageId) {
   });
 }
 
+// Lock viewport: disable zoom and horizontal scroll in native WKWebView app
+(function() {
+  const vp = document.querySelector('meta[name="viewport"]');
+  if (vp) vp.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+})();
+
 function initNav(activePage) {
   if (typeof trackPageView === 'function') trackPageView(activePage);
   // Cargar i18n.js si no está disponible
