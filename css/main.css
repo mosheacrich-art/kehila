@@ -86,6 +86,7 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   max-width: 100%;
+  touch-action: pan-y;
 }
 
 body {
@@ -98,6 +99,7 @@ body {
   scrollbar-gutter: stable;
   overflow-x: hidden;
   max-width: 100%;
+  touch-action: pan-y;
 }
 
 img, video, svg {

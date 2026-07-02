@@ -785,6 +785,14 @@ function renderSubTabs(pageId) {
 (function() {
   const vp = document.querySelector('meta[name="viewport"]');
   if (vp) vp.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+
+  // Block pinch-zoom gestures at the JS level (WebKit-specific events)
+  document.addEventListener('gesturestart',  function(e) { e.preventDefault(); }, { passive: false });
+  document.addEventListener('gesturechange', function(e) { e.preventDefault(); }, { passive: false });
+  document.addEventListener('gestureend',    function(e) { e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchmove', function(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
 })();
 
 function initNav(activePage) {
