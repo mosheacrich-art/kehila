@@ -2618,6 +2618,30 @@
  */
 
   /* ══════════════════════════════════════════════════════════════
+     SEC-01 FIX — Verificación de rol en tiempo real al cargar admin
+     Oculta el body hasta confirmar el rol desde Supabase.
+     Impide que manipular localStorage dé acceso al panel.
+  ══════════════════════════════════════════════════════════════ */
+  document.body.style.visibility = 'hidden';
+  (async function checkAdminAccess() {
+    try {
+      const ok = await verifyAdminRealtime();
+      if (ok) {
+        document.body.style.visibility = 'visible';
+      }
+      // verifyAdminRealtime() already redirects on failure — no else needed
+    } catch(e) {
+      // Network error: fall back to localStorage check only
+      const localUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (localUser && ['admin', 'super_admin', 'staff'].includes(localUser.role)) {
+        document.body.style.visibility = 'visible';
+      } else {
+        window.location.href = 'home.html';
+      }
+    }
+  })();
+
+  /* ══════════════════════════════════════════════════════════════
      UPLOAD HELPERS
      Gestión de zonas de carga de imagen en formularios admin.
      Los IDs siguen el patrón: upload-area-{id}, file-{id},

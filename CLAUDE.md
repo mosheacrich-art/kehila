@@ -205,7 +205,7 @@ el.innerHTML = `<span>${escHtml(user.name)}</span>`;
 
 | # | Problema | Criticidad | Estado |
 |---|---|---|---|
-| SEC-01 | Admin check solo client-side (localStorage) | CRITICO | Pendiente — usar verifyAdminRealtime() |
+| SEC-01 | Admin check solo client-side (localStorage) | CRITICO | ✅ RESUELTO 2026-07-04 — body hidden until verifyAdminRealtime() confirms role from Supabase |
 | SEC-02 | Sin RLS en tablas principales | CRITICO | ✅ RESUELTO 2026-04-17 — 19 tablas protegidas |
 | SEC-03 | XSS en varios innerHTML | CRITICO | Parcialmente resuelto |
 | SEC-04 | Sin cabeceras HTTP (CSP, X-Frame) | ALTO | Pendiente — configurar via Cloudflare |
