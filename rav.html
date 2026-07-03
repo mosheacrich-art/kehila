@@ -463,13 +463,13 @@
         return `<div id="preg-${p.id}" style="background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.08);padding:18px 20px;margin-bottom:14px;border-left:4px solid ${estadoColor};">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--color-bg);color:var(--color-text-muted);">${p.categoria || 'Sin categoría'}</span>
-              <span style="font-size:.7rem;color:var(--color-text-muted);">${p.usuario_nombre || 'Anónimo'} · ${fecha}</span>
+              <span style="font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--color-bg);color:var(--color-text-muted);">${escHtml(p.categoria || 'Sin categoría')}</span>
+              <span style="font-size:.7rem;color:var(--color-text-muted);">${escHtml(p.usuario_nombre || 'Anónimo')} · ${fecha}</span>
             </div>
             <span style="font-size:.7rem;font-weight:600;color:${estadoColor};">${estadoLabel}</span>
           </div>
-          <p style="font-size:.9rem;color:var(--color-text);line-height:1.55;margin-bottom:12px;">${p.pregunta}</p>
-          ${p.respuesta ? `<div style="background:#F0FDF4;border-radius:8px;padding:12px 14px;font-size:.875rem;color:#065F46;line-height:1.5;"><strong>Respuesta:</strong> ${p.respuesta}</div>` : `
+          <p style="font-size:.9rem;color:var(--color-text);line-height:1.55;margin-bottom:12px;">${escHtml(p.pregunta)}</p>
+          ${p.respuesta ? `<div style="background:#F0FDF4;border-radius:8px;padding:12px 14px;font-size:.875rem;color:#065F46;line-height:1.5;"><strong>Respuesta:</strong> ${escHtml(p.respuesta)}</div>` : `
           <details style="margin-top:4px;">
             <summary style="font-size:.8rem;cursor:pointer;color:var(--color-primary);font-weight:600;list-style:none;">✏️ Responder</summary>
             <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;">
@@ -658,15 +658,15 @@
         <div class="qa-card">
           <div class="qa-question-part">
             <div class="qa-question-top">
-              <span class="qbadge ${badgeClass}">${qa.cat}</span>
+              <span class="qbadge ${badgeClass}">${escHtml(qa.cat)}</span>
               <div class="q-icon">
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"/>
                 </svg>
               </div>
             </div>
-            <p class="qa-question-text">${qa.pregunta}</p>
-            <p class="qa-question-meta">Pregunta anónima · ${qa.fecha}</p>
+            <p class="qa-question-text">${escHtml(qa.pregunta)}</p>
+            <p class="qa-question-meta">Pregunta anónima · ${escHtml(qa.fecha)}</p>
           </div>
           <div class="qa-answer-part">
             <div class="rav-answerer">
@@ -677,7 +677,7 @@
               </div>
             </div>
             <div id="resp-text-${qa.id}">
-              <p class="qa-answer-text ${isLong ? 'qa-answer-clamp' : ''}" id="resp-p-${qa.id}">${qa.respuesta}</p>
+              <p class="qa-answer-text ${isLong ? 'qa-answer-clamp' : ''}" id="resp-p-${qa.id}">${escHtml(qa.respuesta)}</p>
               ${isLong ? `<button class="qa-expand-btn" id="expand-btn-${qa.id}" onclick="expandResp('${qa.id}')">
                 Leer respuesta completa
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;">
@@ -778,13 +778,13 @@
         const estado = p.publica && p.estado === 'respondida' ? 'respondida_publica' : (p.estado || 'pendiente');
         const fecha = new Date(p.created_at).toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' });
         return `<div class="mis-preg-row">
-          <span class="mis-preg-ref">${p.referencia || ('#' + p.id?.slice(0,6))}</span>
+          <span class="mis-preg-ref">${escHtml(p.referencia || ('#' + p.id?.slice(0,6)))}</span>
           <div class="mis-preg-info">
-            <div class="mis-preg-cat"><span class="qbadge qbadge-${catClass}">${p.categoria}</span></div>
+            <div class="mis-preg-cat"><span class="qbadge qbadge-${catClass}">${escHtml(p.categoria)}</span></div>
             <div class="mis-preg-fecha">Enviada el ${fecha}</div>
           </div>
           <span class="badge ${badgeClass[estado] || ''}" style="font-size:.7rem;">${statusLabel[estado] || estado}</span>
-          ${p.respuesta ? `<button class="btn btn-sm btn-secondary" onclick="showToast('${p.respuesta.slice(0,80).replace(/'/g,'&apos;')}…','info',6000)">Ver respuesta</button>` : ''}
+          ${p.respuesta ? `<button class="btn btn-sm btn-secondary" onclick="showToast('${escHtml(p.respuesta.slice(0,80))}…','info',6000)">Ver respuesta</button>` : ''}
         </div>`;
       }).join('');
     } catch(e) { /* mantiene HTML mock */ }

@@ -207,7 +207,7 @@ el.innerHTML = `<span>${escHtml(user.name)}</span>`;
 |---|---|---|---|
 | SEC-01 | Admin check solo client-side (localStorage) | CRITICO | ✅ RESUELTO 2026-07-04 — body hidden until verifyAdminRealtime() confirms role from Supabase |
 | SEC-02 | Sin RLS en tablas principales | CRITICO | ✅ RESUELTO 2026-04-17 — 19 tablas protegidas |
-| SEC-03 | XSS en varios innerHTML | CRITICO | Parcialmente resuelto |
+| SEC-03 | XSS en varios innerHTML | CRITICO | ✅ RESUELTO 2026-07-04 — escHtml() en rav.html (preguntas, respuestas, nombres, categorías) |
 | SEC-04 | Sin cabeceras HTTP (CSP, X-Frame) | ALTO | Pendiente — configurar via Cloudflare |
 | SEC-05 | PII en localStorage sin cifrar | ALTO | Pendiente |
 | SEC-06 | Sin tokens CSRF | ALTO | Pendiente |
