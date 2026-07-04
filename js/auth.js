@@ -38,7 +38,9 @@ function getSupabase() {
   // El CDN de Supabase v2 expone supabase.createClient en window
   const lib = window.supabase || (window.supabaseJs) || null;
   if (lib && lib.createClient) {
-    _supabase = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    _supabase = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { storage: SESSION_STORAGE, persistSession: true, autoRefreshToken: true }
+    });
     console.log('✅ Supabase conectado');
   } else {
     console.warn('⚠️ SDK Supabase no encontrado, usando mock');
@@ -47,6 +49,13 @@ function getSupabase() {
 }
 
 const SESSION_KEY = 'kehila_user';
+
+// Native app (PWAShell WKWebView): use sessionStorage so session is cleared
+// when the app is killed, forcing re-login on next open.
+// Web browsers: use localStorage for persistent sessions.
+const SESSION_STORAGE = /PWAShell/.test(navigator.userAgent)
+  ? window.sessionStorage
+  : window.localStorage;
 
 // ─── Login ────────────────────────────────────
 /**
@@ -105,7 +114,7 @@ async function login(email, password, captchaToken = '') {
       loginAt: new Date().toISOString(),
       source: 'supabase'
     };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+    SESSION_STORAGE.setItem(SESSION_KEY, JSON.stringify(sessionData));
     return { ok: true, status: profile?.status || 'active' };
   } catch (e) {
     return { ok: false, error: 'Error de conexión. Inténtalo de nuevo.' };
@@ -149,7 +158,7 @@ async function logout() {
   if (sb) {
     try { await sb.auth.signOut(); } catch (e) {}
   }
-  localStorage.removeItem(SESSION_KEY);
+  SESSION_STORAGE.removeItem(SESSION_KEY);
   window.location.href = 'index.html';
 }
 
@@ -161,7 +170,7 @@ async function logout() {
  */
 function getCurrentUser() {
   try {
-    const raw = localStorage.getItem(SESSION_KEY);
+    const raw = SESSION_STORAGE.getItem(SESSION_KEY);
     if (!raw) return null;
     return JSON.parse(raw);
   } catch {
@@ -305,7 +314,7 @@ async function verifyAdminRealtime() {
   try {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {
-      localStorage.removeItem(SESSION_KEY);
+      SESSION_STORAGE.removeItem(SESSION_KEY);
       window.location.href = 'index.html';
       return null;
     }
@@ -319,14 +328,14 @@ async function verifyAdminRealtime() {
     if (profile.status === 'banned' || profile.status === 'suspended') { await logout(); return null; }
     if (!['admin', 'super_admin', 'staff'].includes(profile.role)) {
       // Rol revocado: limpiar sesión y redirigir
-      localStorage.setItem(SESSION_KEY, JSON.stringify({ ...localUser, role: profile.role, status: profile.status }));
+      SESSION_STORAGE.setItem(SESSION_KEY, JSON.stringify({ ...localUser, role: profile.role, status: profile.status }));
       window.location.href = 'home.html';
       return null;
     }
 
     // Sincronizar rol en localStorage por si cambio en BD
     if (profile.role !== localUser.role) {
-      localStorage.setItem(SESSION_KEY, JSON.stringify({ ...localUser, role: profile.role, status: profile.status }));
+      SESSION_STORAGE.setItem(SESSION_KEY, JSON.stringify({ ...localUser, role: profile.role, status: profile.status }));
       // Forzar recarga para aplicar cambios de rol
       window.location.reload();
       return null;
