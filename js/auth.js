@@ -57,6 +57,18 @@ const SESSION_STORAGE = /PWAShell/.test(navigator.userAgent)
   ? window.sessionStorage
   : window.localStorage;
 
+// Migración: en la app nativa, sesiones antiguas quedaron en localStorage.
+// Si no se limpian, index.html las ve como sesión activa mientras
+// requireAuth() lee sessionStorage vacío → bucle login↔home infinito.
+if (SESSION_STORAGE === window.sessionStorage) {
+  try {
+    localStorage.removeItem(SESSION_KEY);
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('sb-') && k.includes('-auth-token'))
+      .forEach(k => localStorage.removeItem(k));
+  } catch (e) { /* ignorar */ }
+}
+
 // ─── Login ────────────────────────────────────
 /**
  * Autentica un usuario con email y contrasena. Guarda sesion en localStorage.
