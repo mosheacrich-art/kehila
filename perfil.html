@@ -858,11 +858,11 @@
         if (inp) perfilData[f] = inp.value.trim();
       });
 
-      // Actualizar sesión en localStorage
-      const session = JSON.parse(localStorage.getItem('kehila_user') || '{}');
+      // Actualizar sesión (SESSION_STORAGE: sessionStorage en app nativa, localStorage en web)
+      const session = getCurrentUser() || {};
       session.name = (perfilData.nombre + ' ' + perfilData.apellidos).trim();
       session.telefono = perfilData.telefono;
-      localStorage.setItem('kehila_user', JSON.stringify(session));
+      SESSION_STORAGE.setItem('kehila_user', JSON.stringify(session));
 
       // Guardar en Supabase
       const sb = getSupabase();
@@ -1245,7 +1245,8 @@
         return;
       }
 
-      // Limpiar sesión local
+      // Limpiar sesión local (ambos storages por si quedan restos)
+      SESSION_STORAGE.removeItem('kehila_user');
       localStorage.removeItem('kehila_user');
       localStorage.removeItem('kehila_pending');
       if (user && user.email) {

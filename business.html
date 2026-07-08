@@ -1293,7 +1293,7 @@
   var currentConectarNombre = '';
   var editingBizId   = null;
   var existingLogoUrl = null;
-  var currentUserId  = (JSON.parse(localStorage.getItem('kehila_user') || '{}')).userId || null;
+  var currentUserId  = (getCurrentUser() || {}).userId || null;
 
   /* ─── Helpers ─── */
   function getInitials(name) {

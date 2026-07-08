@@ -1539,12 +1539,11 @@
     /* ─── Si ya hay sesión activa, redirigir ─── */
     (function checkExistingSession() {
       try {
-        const raw = localStorage.getItem('kehila_user');
-        if (raw) {
-          const user = JSON.parse(raw);
-          if (user && user.status === 'active') {
-            window.location.href = user.role === 'admin' ? 'admin.html' : 'home.html';
-          }
+        // getCurrentUser() lee del mismo storage que requireAuth()
+        // (sessionStorage en app nativa, localStorage en web)
+        const user = getCurrentUser();
+        if (user && user.status === 'active') {
+          window.location.href = user.role === 'admin' ? 'admin.html' : 'home.html';
         }
       } catch (e) { /* ignorar */ }
     })();
