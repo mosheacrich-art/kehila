@@ -30,3 +30,8 @@ android/app/google-services.json
 ios/App/App/GoogleService-Info.plist
 _firebase_config/
 *service-account*.json
+
+# Firma Android — claves privadas (NUNCA en git)
+android/keystore.properties
+android/*.jks
+android/*.keystore
