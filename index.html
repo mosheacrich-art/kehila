@@ -730,9 +730,6 @@
                 <button type="button" onclick="openForgotModal()" style="background:none;border:none;cursor:pointer;font-size:0.8125rem;color:var(--color-primary);font-weight:500;padding:0;font-family:inherit;transition:color 0.15s ease;" onmouseover="this.style.color='#A8892E'" onmouseout="this.style.color='var(--color-primary)'">¿Olvidaste tu contraseña?</button>
               </div>
 
-              <!-- Turnstile CAPTCHA -->
-              <div class="cf-turnstile" data-sitekey="0x4AAAAAAAAADoQ5dnm5NWzL2Ae" data-theme="light" style="margin-bottom:12px;"></div>
-
               <!-- Botón entrar -->
               <button type="submit" class="btn btn-primary btn-lg w-full mt-sm" id="btn-login">
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:18px;height:18px;">
@@ -1272,7 +1269,6 @@
   </div>
   <!-- FIN PANEL FORMULARIO -->
 
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/registro.js"></script>
@@ -1422,8 +1418,7 @@
       if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Entrando...'; }
 
       // Login (async: soporta Supabase y mock)
-      const captchaToken = document.querySelector('[name="cf-turnstile-response"]')?.value || '';
-      login(email, password, captchaToken).then(result => {
+      login(email, password).then(result => {
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Entrar'; }
 
         if (!result.ok) {
