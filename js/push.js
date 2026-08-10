@@ -50,43 +50,57 @@ async function initPush() {
 ───────────────────────────────────────────── */
 
 async function initNativePush() {
-  const { PushNotifications } = window.Capacitor.Plugins;
-  if (!PushNotifications) { if (PUSH_DEBUG) console.warn('[push] PushNotifications plugin no disponible'); return; }
+  // Todo el flujo nativo va protegido: si Firebase no está configurado
+  // (falta google-services.json) el plugin lanza una excepción nativa al
+  // pedir permisos o registrar, y sin este try/catch eso tira abajo la app
+  // entera ("Jabad Barcelona keeps stopping"). Nunca debe crashear la app.
+  try {
+    const { PushNotifications } = window.Capacitor.Plugins;
+    if (!PushNotifications) { if (PUSH_DEBUG) console.warn('[push] PushNotifications plugin no disponible'); return; }
 
-  // 1. Pedir permiso
-  const { receive } = await PushNotifications.requestPermissions();
-  if (receive !== 'granted') {
-    if (PUSH_DEBUG) console.log('[push] Permiso denegado');
-    return;
+    // 1. Pedir permiso
+    const { receive } = await PushNotifications.requestPermissions();
+    if (receive !== 'granted') {
+      if (PUSH_DEBUG) console.log('[push] Permiso denegado');
+      return;
+    }
+
+    // 2. Registrar para recibir token FCM / APNs
+    await PushNotifications.register();
+
+    // 3. Token recibido → guardar en Supabase
+    PushNotifications.addListener('registration', async (tokenData) => {
+      try {
+        const token = tokenData.value;
+        if (PUSH_DEBUG) console.log('[push] Token registrado:', token);
+        await savePushToken(token, IS_NATIVE ? detectPlatform() : 'web');
+      } catch (e) {
+        if (PUSH_DEBUG) console.warn('[push] Error guardando token:', e);
+      }
+    });
+
+    // 4. Error de registro
+    PushNotifications.addListener('registrationError', (err) => {
+      if (PUSH_DEBUG) console.error('[push] Error de registro:', err);
+    });
+
+    // 5. Notificación recibida en foreground → mostrar toast nativo
+    PushNotifications.addListener('pushNotificationReceived', (notification) => {
+      if (PUSH_DEBUG) console.log('[push] Recibida en foreground:', notification);
+      showPushToast(notification.title || 'Jabad Barcelona', notification.body || '', notification.data);
+    });
+
+    // 6. Usuario toca la notificación → navegar
+    PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+      if (PUSH_DEBUG) console.log('[push] Tapped:', action);
+      const data = action.notification?.data || {};
+      navigateFromPush(data);
+    });
+  } catch (e) {
+    // Firebase/FCM no configurado (google-services.json ausente) u otro
+    // fallo nativo: no interrumpimos la app, simplemente no hay push.
+    if (PUSH_DEBUG) console.warn('[push] Push nativo no disponible:', e);
   }
-
-  // 2. Registrar para recibir token FCM / APNs
-  await PushNotifications.register();
-
-  // 3. Token recibido → guardar en Supabase
-  PushNotifications.addListener('registration', async (tokenData) => {
-    const token = tokenData.value;
-    if (PUSH_DEBUG) console.log('[push] Token registrado:', token);
-    await savePushToken(token, IS_NATIVE ? detectPlatform() : 'web');
-  });
-
-  // 4. Error de registro
-  PushNotifications.addListener('registrationError', (err) => {
-    if (PUSH_DEBUG) console.error('[push] Error de registro:', err);
-  });
-
-  // 5. Notificación recibida en foreground → mostrar toast nativo
-  PushNotifications.addListener('pushNotificationReceived', (notification) => {
-    if (PUSH_DEBUG) console.log('[push] Recibida en foreground:', notification);
-    showPushToast(notification.title || 'Jabad Barcelona', notification.body || '', notification.data);
-  });
-
-  // 6. Usuario toca la notificación → navegar
-  PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
-    if (PUSH_DEBUG) console.log('[push] Tapped:', action);
-    const data = action.notification?.data || {};
-    navigateFromPush(data);
-  });
 }
 
 /* ─────────────────────────────────────────────
