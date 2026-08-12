@@ -271,6 +271,18 @@
     <!-- Booking view -->
     <div id="mk-booking-view">
 
+    <!-- Section toggle: women's mikve vs men's showers -->
+    <div class="mk-mode-toggle" style="margin-bottom:14px;">
+      <button class="mk-mode-btn active" id="mk-gender-mujer" onclick="mkSetGender('mujer')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+        Mujeres
+      </button>
+      <button class="mk-mode-btn" id="mk-gender-hombre" onclick="mkSetGender('hombre')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+        Hombres
+      </button>
+    </div>
+
     <div class="mk-steps" id="mk-steps">
       <button class="mk-step-btn active" data-step="1" onclick="goToStep(1)">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
@@ -333,7 +345,7 @@
 <script src="js/nav.js"></script>
 <script>
   const sb = (typeof getSupabase === 'function') ? getSupabase() : null;
-  const booking = { step:1, date:null, service:null, time:null, notes:'', donation:0, donationLabel:'No', card:null, confirmed:false };
+  const booking = { step:1, gender:'mujer', date:null, service:null, time:null, notes:'', donation:0, donationLabel:'No', card:null, confirmed:false };
 
   document.addEventListener('DOMContentLoaded', () => { requireAuth(); initNav('mikve'); getMikveServices(); renderStep(); });
 
@@ -415,8 +427,21 @@
     return ph + renderCalendar();
   }
 
-  // Services — loaded from admin localStorage config
+  // Price of the "Ducha" service from admin config (fallback €30)
+  function mkDuchaPrice() {
+    try {
+      const d = JSON.parse(localStorage.getItem('mikve_servicios'));
+      if (d && d.length) {
+        const duch = d.find(s => /ducha/i.test(s.nombre));
+        if (duch) return Number(duch.precio);
+      }
+    } catch(e) {}
+    return 30;
+  }
+
+  // Services — men's section offers only Ducha; women's uses admin config
   function getMikveServices() {
+    if (booking.gender === 'hombre') return [{ id:'ducha', name:'Ducha', price: mkDuchaPrice() }];
     try {
       const d = JSON.parse(localStorage.getItem('mikve_servicios'));
       if (d && d.length) return d.map(s => ({ id: 'svc' + s.id, name: s.nombre, price: Number(s.precio) }));
@@ -440,10 +465,8 @@
     return ph + `<div class="mk-options">${cards}</div>`;
   }
 
-  function renderStep3() {
-    const sunset=calcSunset(booking.date), tevilah=earliestTevilah(booking.date);
-    const slots=[]; let h=Math.ceil(tevilah*2)/2; while(h<=23.5){slots.push(h);h+=0.5;}
-    const slotsHtml = slots.map(h => {
+  function renderSlots(slots) {
+    return slots.map(h => {
       const hh=Math.floor(h), mm=h%1===0.5?'30':'00';
       const tk=`${String(hh).padStart(2,'0')}:${mm}`, sel=booking.time===tk;
       return `<div class="mk-slot ${sel?'selected':''}" onclick="selectTime('${tk}')">
@@ -452,9 +475,27 @@
         <button class="mk-select-btn ${sel?'selected-btn':''}" onclick="selectTime('${tk}')">Seleccionar</button>
       </div>`;
     }).join('');
-    return `<div class="mk-summary"><div class="mk-summary-icon">${_calIcon}</div><div class="mk-summary-text"><div class="mk-summary-date">${formatDateLong(booking.date)}</div><div class="mk-summary-detail">Servicio: ${booking.service.name} €${booking.service.price.toFixed(2)}</div></div></div>
-    <div class="mk-time-info"><div class="mk-time-info-title">Selecciona una hora</div><div class="mk-time-info-sub">Shkiá: <strong>${formatHour(sunset)}</strong><br>Zman Tevilá — minhag Baal HaTanya (6°): <strong>${formatHour(tevilah)}</strong></div></div>
-    ${slotsHtml}`;
+  }
+
+  function renderStep3() {
+    const summary = `<div class="mk-summary"><div class="mk-summary-icon">${_calIcon}</div><div class="mk-summary-text"><div class="mk-summary-date">${formatDateLong(booking.date)}</div><div class="mk-summary-detail">Servicio: ${booking.service.name} €${booking.service.price.toFixed(2)}</div></div></div>`;
+
+    // Men's showers — fixed daytime hours, no zman tevilah
+    if (booking.gender === 'hombre') {
+      const slots=[];
+      for (let h=8;  h<14; h+=0.5) slots.push(h);   // 8:00 – 13:30
+      for (let h=16; h<20; h+=0.5) slots.push(h);   // 16:00 – 19:30
+      return summary +
+        `<div class="mk-time-info"><div class="mk-time-info-title">Selecciona una hora</div><div class="mk-time-info-sub">Horario de duchas:<br><strong>8:00 – 14:00</strong> y <strong>16:00 – 20:00</strong></div></div>` +
+        renderSlots(slots);
+    }
+
+    // Women's mikve — slots from earliest permitted immersion time until night
+    const sunset=calcSunset(booking.date), tevilah=earliestTevilah(booking.date);
+    const slots=[]; let h=Math.ceil(tevilah*2)/2; while(h<=23.5){slots.push(h);h+=0.5;}
+    return summary +
+      `<div class="mk-time-info"><div class="mk-time-info-title">Selecciona una hora</div><div class="mk-time-info-sub">Shkiá: <strong>${formatHour(sunset)}</strong><br>Zman Tevilá — minhag Baal HaTanya (6°): <strong>${formatHour(tevilah)}</strong></div></div>` +
+      renderSlots(slots);
   }
 
   function renderStep4() {
@@ -503,7 +544,16 @@
   function canAdvance() { switch(booking.step){case 1:return!!booking.date;case 2:return!!booking.service;case 3:return!!booking.time;case 4:return true;case 5:return booking.donationLabel!=='';case 6:return!!booking.card;default:return false;} }
   function updateTabs() { document.querySelectorAll('.mk-step-btn').forEach(btn=>{const n=parseInt(btn.dataset.step);btn.classList.remove('active','done');btn.disabled=false;if(n===booking.step)btn.classList.add('active');else if(n<booking.step)btn.classList.add('done');else if(n>booking.step+1)btn.disabled=true;}); }
   function updateContinueBtn() { const btn=document.getElementById('mk-continue-btn');if(booking.step===6){btn.textContent=booking.card?'Confirmar reserva':'Añadir tarjeta para continuar';btn.disabled=!booking.card;}else{btn.textContent='Continuar';btn.disabled=!canAdvance();} }
-  function resetBooking() { booking.step=1;booking.date=null;booking.service=null;booking.time=null;booking.notes='';booking.donation=0;booking.donationLabel='';booking.card=null;booking.confirmed=false;calYear=new Date().getFullYear();calMonth=new Date().getMonth();renderStep();window.scrollTo({top:0,behavior:'smooth'}); }
+  function resetBooking() { booking.step=1;booking.date=null;booking.service=null;booking.time=null;booking.notes='';booking.donation=0;booking.donationLabel='';booking.card=null;booking.confirmed=false;calYear=new Date().getFullYear();calMonth=new Date().getMonth();const bb=document.getElementById('mk-bottom-bar');if(bb)bb.style.display='';renderStep();window.scrollTo({top:0,behavior:'smooth'}); }
+
+  // Switch between women's mikve and men's showers — different services & hours
+  function mkSetGender(g) {
+    if (booking.gender === g) return;
+    booking.gender = g;
+    document.getElementById('mk-gender-mujer').classList.toggle('active', g === 'mujer');
+    document.getElementById('mk-gender-hombre').classList.toggle('active', g === 'hombre');
+    resetBooking();
+  }
 
   async function confirmarReserva() {
     const btn = document.getElementById('mk-continue-btn');
@@ -538,7 +588,7 @@
       const { error } = await sb.from('mikve_reservas').insert({
         usuario_id: user.userId, fecha,
         hora: `${hh.padStart(2,'0')}:${mm}:00`,
-        servicio: booking.service.name,
+        servicio: booking.gender === 'hombre' ? booking.service.name + ' (Hombres)' : booking.service.name,
         precio: booking.service.price,
         donacion: booking.donation,
         total,
