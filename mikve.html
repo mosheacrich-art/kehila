@@ -427,21 +427,9 @@
     return ph + renderCalendar();
   }
 
-  // Price of the "Ducha" service from admin config (fallback €30)
-  function mkDuchaPrice() {
-    try {
-      const d = JSON.parse(localStorage.getItem('mikve_servicios'));
-      if (d && d.length) {
-        const duch = d.find(s => /ducha/i.test(s.nombre));
-        if (duch) return Number(duch.precio);
-      }
-    } catch(e) {}
-    return 30;
-  }
-
-  // Services — men's section offers only Ducha; women's uses admin config
+  // Services — men's section offers only Ducha (€10 fixed); women's uses admin config
   function getMikveServices() {
-    if (booking.gender === 'hombre') return [{ id:'ducha', name:'Ducha', price: mkDuchaPrice() }];
+    if (booking.gender === 'hombre') return [{ id:'ducha', name:'Ducha', price: 10 }];
     try {
       const d = JSON.parse(localStorage.getItem('mikve_servicios'));
       if (d && d.length) return d.map(s => ({ id: 'svc' + s.id, name: s.nombre, price: Number(s.precio) }));
