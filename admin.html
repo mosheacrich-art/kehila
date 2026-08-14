@@ -5712,15 +5712,31 @@
       // Selector de orientación: solo para imágenes de eventos, donde los
       // flyers varían mucho de formato (cuadrado, vertical, horizontal).
       var ratioControls = document.getElementById('crop-ratio-controls');
-      if (ratioControls) {
-        ratioControls.style.display = (id === 'ev') ? 'flex' : 'none';
+      if (ratioControls) ratioControls.style.display = (id === 'ev') ? 'flex' : 'none';
+
+      function markActiveRatioBtn(ratio) {
+        if (!ratioControls) return;
         ratioControls.querySelectorAll('.crop-ratio-btn').forEach(function(btn) {
-          btn.classList.toggle('active', Math.abs(parseFloat(btn.dataset.ratio) - _cropAspectRatio) < 0.01);
+          btn.classList.toggle('active', Math.abs(parseFloat(btn.dataset.ratio) - ratio) < 0.01);
         });
       }
+      markActiveRatioBtn(_cropAspectRatio);
 
       // Inicializar Cropper.js cuando la imagen esté lista
       imgEl.onload = function() {
+        // Auto-detectar la orientación real de la foto subida (solo eventos)
+        // y usarla como recorte por defecto — el admin no tiene que elegir
+        // nada a mano salvo que quiera cambiarlo.
+        if (id === 'ev' && imgEl.naturalWidth && imgEl.naturalHeight) {
+          var imgRatio = imgEl.naturalWidth / imgEl.naturalHeight;
+          var candidates = [1, 0.8, 16/9];
+          var closest = candidates.reduce(function(best, r) {
+            return Math.abs(r - imgRatio) < Math.abs(best - imgRatio) ? r : best;
+          });
+          _cropAspectRatio = closest;
+          markActiveRatioBtn(closest);
+        }
+
         _cropperInstance = new Cropper(imgEl, {
           aspectRatio    : _cropAspectRatio,
           viewMode       : 1,          // no salir del contenedor
