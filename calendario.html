@@ -612,6 +612,40 @@ async function loadCustomEvents(year, month) {
   } catch(e) { console.warn('loadCustomEvents:', e); }
 }
 
+/**
+ * Eventos creados desde el panel de admin / eventos.html (tabla `eventos`).
+ * Antes solo aparecían en el calendario si el usuario se inscribía — ahora
+ * se muestran para todos como "Evento comunidad", igual que los de
+ * calendario_eventos.
+ */
+async function loadComunidadEventos(year, month) {
+  const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+  if (!sb) return;
+  try {
+    const from = `${year}-${String(month+1).padStart(2,'0')}-01`;
+    const to   = `${year}-${String(month+1).padStart(2,'0')}-${new Date(year,month+1,0).getDate()}`;
+    const { data } = await sb.from('eventos')
+      .select('id, titulo, fecha, hora, lugar, descripcion')
+      .gte('fecha', from).lte('fecha', to);
+    if (data) {
+      data.forEach(ev => {
+        if (!ev.fecha) return;
+        if (!customEventsMap[ev.fecha]) customEventsMap[ev.fecha] = [];
+        if (!customEventsMap[ev.fecha].find(e => e.id === 'evt-' + ev.id)) {
+          customEventsMap[ev.fecha].push({
+            id: 'evt-' + ev.id,
+            titulo: ev.titulo,
+            hora: ev.hora || null,
+            lugar: ev.lugar || null,
+            descripcion: ev.descripcion || null,
+            tipo: 'comunidad'
+          });
+        }
+      });
+    }
+  } catch(e) { console.warn('loadComunidadEventos:', e); }
+}
+
 /* ─── Cambio de ciudad ─── */
 async function changeCity(key) {
   if (!CITIES[key]) return;
@@ -632,7 +666,11 @@ async function changeCity(key) {
 
   try {
     await ensureData(curYear);
-    await loadCustomEvents(curYear, curMonth);
+    await Promise.all([
+      loadCustomEvents(curYear, curMonth),
+      loadComunidadEventos(curYear, curMonth),
+      loadMisInscripciones()
+    ]);
     renderCal();
     updateCandlesPreview();
   } catch(e) { showError(); }
@@ -1003,17 +1041,22 @@ async function navMonth(delta) {
   if (curMonth > 11) { curMonth = 0;  curYear++; }
   if (curMonth < 0)  { curMonth = 11; curYear--; }
 
-  if (curYear !== loadedYear || loadedCityKey !== (localStorage.getItem('kehila_city') || 'madrid')) {
-    document.getElementById('cal-container').innerHTML = `
-      <div class="loading-state"><div class="loading-spinner"></div><p>Cargando calendario…</p></div>`;
-    try {
-      await ensureData(curYear);
-      await Promise.all([
-        loadCustomEvents(curYear, curMonth),
-        loadMisInscripciones()
-      ]);
-    } catch(e) { showError(); return; }
-  }
+  // ensureData() es caro y cubre todo el año — solo hace falta si cambió
+  // el año o la ciudad. Los eventos son por mes: hay que recargarlos SIEMPRE
+  // al navegar, o el mes nuevo se queda sin sus propios eventos.
+  const needsYearData = curYear !== loadedYear || loadedCityKey !== (localStorage.getItem('kehila_city') || 'madrid');
+
+  document.getElementById('cal-container').innerHTML = `
+    <div class="loading-state"><div class="loading-spinner"></div><p>Cargando calendario…</p></div>`;
+  try {
+    if (needsYearData) await ensureData(curYear);
+    await Promise.all([
+      loadCustomEvents(curYear, curMonth),
+      loadComunidadEventos(curYear, curMonth),
+      loadMisInscripciones()
+    ]);
+  } catch(e) { showError(); return; }
+
   selectedDate = null;
   renderCal();
 }
@@ -1042,6 +1085,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await ensureData(curYear);
     await Promise.all([
       loadCustomEvents(curYear, curMonth),
+      loadComunidadEventos(curYear, curMonth),
       loadMisInscripciones()
     ]);
     renderCal();
