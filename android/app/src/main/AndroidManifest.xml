@@ -44,4 +44,14 @@
     <!-- Vibración para notificaciones -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- Camera: profile photo and identity document upload during registration -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Microphone: audio/video features and virtual rabbi consultations -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Location: show nearby kosher restaurants and community services -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
 </manifest>

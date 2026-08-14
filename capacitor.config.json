@@ -1,5 +1,5 @@
 {
-  "appId": "com.kehilabcn.app",
+  "appId": "com.bcnkehila",
   "appName": "Bcn Kehila",
   "webDir": "www",
   "ios": {
@@ -15,7 +15,7 @@
     "SplashScreen": {
       "launchShowDuration": 400,
       "launchAutoHide": true,
-      "backgroundColor": "#1B2E5E",
+      "backgroundColor": "#2B35F0",
       "androidSplashResourceName": "splash",
       "androidScaleType": "CENTER",
       "showSpinner": false,
