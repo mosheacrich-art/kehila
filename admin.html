@@ -1020,6 +1020,10 @@
       transition: background 0.15s;
     }
     .crop-btn:hover { background: rgba(255,255,255,0.22); }
+    .crop-ratio-btn.active {
+      background: var(--color-primary, #1b2e5e);
+      font-weight: 600;
+    }
     .crop-btn-primary {
       background: var(--color-primary, #1b2e5e);
       padding: 9px 24px; font-weight: 600;
@@ -5646,6 +5650,11 @@
     <div id="crop-canvas-wrap">
       <img id="crop-source" src="" alt="Imagen a recortar">
     </div>
+    <div id="crop-ratio-controls" style="display:flex;gap:8px;justify-content:center;padding:8px 12px;">
+      <button class="crop-btn crop-ratio-btn" data-ratio="1" onclick="cropSetRatio(1, this)" title="Cuadrado">Cuadrado</button>
+      <button class="crop-btn crop-ratio-btn" data-ratio="0.8" onclick="cropSetRatio(0.8, this)" title="Vertical 4:5">Vertical</button>
+      <button class="crop-btn crop-ratio-btn" data-ratio="1.7777777778" onclick="cropSetRatio(16/9, this)" title="Horizontal 16:9">Horizontal</button>
+    </div>
     <div id="crop-modal-controls">
       <button class="crop-btn" onclick="cropZoom(-0.1)" title="Alejar">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
@@ -5700,6 +5709,16 @@
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
 
+      // Selector de orientación: solo para imágenes de eventos, donde los
+      // flyers varían mucho de formato (cuadrado, vertical, horizontal).
+      var ratioControls = document.getElementById('crop-ratio-controls');
+      if (ratioControls) {
+        ratioControls.style.display = (id === 'ev') ? 'flex' : 'none';
+        ratioControls.querySelectorAll('.crop-ratio-btn').forEach(function(btn) {
+          btn.classList.toggle('active', Math.abs(parseFloat(btn.dataset.ratio) - _cropAspectRatio) < 0.01);
+        });
+      }
+
       // Inicializar Cropper.js cuando la imagen esté lista
       imgEl.onload = function() {
         _cropperInstance = new Cropper(imgEl, {
@@ -5723,6 +5742,15 @@
       };
     };
     reader.readAsDataURL(file);
+  }
+
+  function cropSetRatio(ratio, btnEl) {
+    if (!_cropperInstance) return;
+    _cropAspectRatio = ratio;
+    _cropperInstance.setAspectRatio(ratio);
+    var controls = document.getElementById('crop-ratio-controls');
+    if (controls) controls.querySelectorAll('.crop-ratio-btn').forEach(function(b) { b.classList.remove('active'); });
+    if (btnEl) btnEl.classList.add('active');
   }
 
   function cropZoom(delta) {
