@@ -385,8 +385,14 @@ async function regSubmit() {
       await new Promise(r => setTimeout(r, 2000));
 
       // ── Subir foto del documento a Storage ──
+      // Si el email requiere confirmación, signUp() todavía no da sesión y el
+      // Storage (RLS: auth.uid() IS NOT NULL) rechaza la subida. En ese caso
+      // guardamos el documento localmente y se sube en el primer login
+      // confirmado (ver completePendingDocUpload en auth.js).
       let doc_url = null;
-      if (REG.data.docFile) {
+      let uploadOk = false;
+      const hasSession = !!result.data?.session;
+      if (REG.data.docFile && hasSession) {
         const ext = REG.data.docFileName.split('.').pop();
         const path = `${result.userId}/doc.${ext}`;
         const { error: uploadErr } = await sb.storage
@@ -394,8 +400,28 @@ async function regSubmit() {
           .upload(path, REG.data.docFile, { upsert: true });
         if (!uploadErr) {
           doc_url = path; // Guardar solo el path — bucket privado, URLs firmadas en admin
+          uploadOk = true;
         } else {
           console.error('Error subiendo foto:', uploadErr.message);
+        }
+      }
+      if (REG.data.docFile && !uploadOk) {
+        // Sin sesión (email sin confirmar) o fallo de red: guardar localmente
+        // y reintentar en el primer login (ver completePendingDocUpload en auth.js).
+        try {
+          const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(REG.data.docFile);
+          });
+          localStorage.setItem(`kehila_pending_doc_${result.userId}`, JSON.stringify({
+            fileName: REG.data.docFileName,
+            contentType: REG.data.docFile.type,
+            dataUrl
+          }));
+        } catch (e) {
+          console.error('Error guardando documento pendiente:', e);
         }
       }
 

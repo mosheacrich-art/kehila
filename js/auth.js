@@ -127,9 +127,42 @@ async function login(email, password, captchaToken = '') {
       source: 'supabase'
     };
     SESSION_STORAGE.setItem(SESSION_KEY, JSON.stringify(sessionData));
+    completePendingDocUpload(sb, data.user.id); // no await — no bloquea el login
     return { ok: true, status: profile?.status || 'active' };
   } catch (e) {
     return { ok: false, error: 'Error de conexión. Inténtalo de nuevo.' };
+  }
+}
+
+// ─── Documento pendiente (DNI/Pasaporte) ──────
+/**
+ * Si el registro se hizo sin sesión activa (email sin confirmar), el documento
+ * de identidad quedó guardado en localStorage en vez de subirse a Storage
+ * (ver regSubmit en registro.js). En el primer login ya hay sesión válida,
+ * así que lo subimos aquí y actualizamos el perfil.
+ */
+async function completePendingDocUpload(sb, userId) {
+  const key = `kehila_pending_doc_${userId}`;
+  const raw = localStorage.getItem(key);
+  if (!raw) return;
+
+  try {
+    const { fileName, contentType, dataUrl } = JSON.parse(raw);
+    const blob = await (await fetch(dataUrl)).blob();
+    const ext = (fileName || '').split('.').pop() || 'jpg';
+    const path = `${userId}/doc.${ext}`;
+
+    const { error: uploadErr } = await sb.storage
+      .from('documentos')
+      .upload(path, blob, { upsert: true, contentType });
+    if (uploadErr) { console.error('Error subiendo documento pendiente:', uploadErr.message); return; }
+
+    const { error: updateErr } = await sb.from('profiles').update({ doc_url: path }).eq('id', userId);
+    if (updateErr) { console.error('Error guardando doc_url pendiente:', updateErr.message); return; }
+
+    localStorage.removeItem(key);
+  } catch (e) {
+    console.error('Error completando documento pendiente:', e);
   }
 }
 
