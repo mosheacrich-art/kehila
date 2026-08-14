@@ -172,6 +172,13 @@
     .evento-card-full { position:relative; }
     .evento-card-full:hover .btn-trash { opacity:1; }
 
+    /* ─── Resaltado al llegar desde un enlace (ej. calendario) ─── */
+    .evento-highlight { animation: evento-flash 2s ease; }
+    @keyframes evento-flash {
+      0%, 100% { box-shadow: var(--shadow-sm); }
+      20%, 60% { box-shadow: 0 0 0 3px var(--color-primary), var(--shadow-md); }
+    }
+
     /* ─── Admin FAB ─── */
     .fab-admin { position:fixed; bottom:28px; right:28px; width:54px; height:54px; border-radius:50%; background:#C9A84C; color:#fff; border:none; font-size:1.6rem; cursor:pointer; box-shadow:0 4px 18px rgba(201,168,76,0.45); display:flex; align-items:center; justify-content:center; z-index:100; transition:background 0.15s,transform 0.15s; }
     .fab-admin:hover { background:#a8892e; transform:scale(1.06); }
@@ -946,6 +953,19 @@ const hoy = new Date();
       } catch(e) {}
     }
     renderLista();
+
+    // Si venimos de un enlace del calendario (eventos.html?evento=ID),
+    // saltar directo a esa tarjeta y resaltarla un momento.
+    const targetId = new URLSearchParams(location.search).get('evento');
+    if (targetId) {
+      setTimeout(() => {
+        const card = document.getElementById('evcard-' + targetId);
+        if (!card) return;
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('evento-highlight');
+        setTimeout(() => card.classList.remove('evento-highlight'), 2500);
+      }, 50);
+    }
   }
   loadEventos();
 
