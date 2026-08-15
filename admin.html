@@ -1268,7 +1268,7 @@
           <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
           Actualizar
         </button>
-        <button class="btn btn-primary" onclick="openModal('modal-evento')">
+        <button class="btn btn-primary" onclick="_resetEventoModal();openModal('modal-evento')">
           <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:17px;height:17px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
           Nuevo evento
         </button>
@@ -2387,8 +2387,8 @@
 <div class="modal-overlay hidden" id="modal-evento">
   <div class="modal modal-lg">
     <div class="modal-header">
-      <h3 class="modal-title">Nuevo evento</h3>
-      <button class="modal-close" onclick="closeModal('modal-evento')">
+      <h3 class="modal-title" id="modal-evento-title">Nuevo evento</h3>
+      <button class="modal-close" onclick="closeModal('modal-evento');_resetEventoModal()">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
       </button>
     </div>
@@ -2473,10 +2473,10 @@
       </form>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-evento')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-evento');_resetEventoModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveEvento()">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/></svg>
-        Guardar evento
+        <span id="btn-save-evento-txt">Guardar evento</span>
       </button>
     </div>
   </div>
@@ -3577,10 +3577,56 @@
           </div>
           <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;">
             <span class="badge badge-active">Activo</span>
+            <button class="btn btn-sm btn-secondary" onclick="editarEvento('${ev.id}')">Editar</button>
             <button class="btn btn-sm btn-danger" onclick="eliminarEvento('${ev.id}')">Eliminar</button>
           </div>
         </div>`;
     }).join('');
+  }
+
+  let _editEventoId = null;
+
+  /**
+   * Abre el modal de edición de evento con los datos actuales.
+   * @param {string} id - ID del evento
+   */
+  function editarEvento(id) {
+    const ev = eventsState.find(e => e.id === id);
+    if (!ev) return;
+    _editEventoId = id;
+    document.getElementById('modal-evento-title').textContent = 'Editar evento';
+    document.getElementById('btn-save-evento-txt').textContent = 'Guardar cambios';
+    document.getElementById('ev-titulo').value = ev.titulo || '';
+    document.getElementById('ev-desc').value = ev.descripcion || '';
+    document.getElementById('ev-inicio').value = ev.fecha && ev.hora ? `${ev.fecha}T${ev.hora}` : '';
+    document.getElementById('ev-fin').value = '';
+    document.getElementById('ev-lugar').value = ev.lugar || '';
+    document.getElementById('ev-aforo').value = ev.aforo || '';
+    document.getElementById('ev-mensaje-inscripcion').value = ev.mensaje_inscripcion || '';
+    clearUpload('ev');
+    if (ev.imagen_url) {
+      const el = document.getElementById('upload-img-ev');
+      el.src = ev.imagen_url;
+      el.dataset.fromDb = 'true'; // No re-enviar al guardar si no se cambia
+      document.getElementById('upload-ph-ev').style.display = 'none';
+      document.getElementById('upload-filled-ev').style.display = '';
+    }
+    ['ev-titulo-err','ev-inicio-err','ev-lugar-err'].forEach(id =>
+      document.getElementById(id).style.display = 'none');
+    ['ev-titulo','ev-inicio','ev-lugar'].forEach(id =>
+      document.getElementById(id).classList.remove('error'));
+    openModal('modal-evento');
+  }
+
+  /**
+   * Resetea el modal de evento a su estado de creación (no edición).
+   */
+  function _resetEventoModal() {
+    _editEventoId = null;
+    document.getElementById('modal-evento-title').textContent = 'Nuevo evento';
+    document.getElementById('btn-save-evento-txt').textContent = 'Guardar evento';
+    document.getElementById('form-evento').reset();
+    clearUpload('ev');
   }
 
   /**
@@ -3620,6 +3666,35 @@
     if (!lugar) { document.getElementById('ev-lugar-err').style.display = ''; document.getElementById('ev-lugar').classList.add('error'); valid = false; }
     if (!valid) return;
 
+    const imagenSubida = getUpload('ev');
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+
+    if (_editEventoId) {
+      const upd = {
+        titulo,
+        descripcion: document.getElementById('ev-desc').value,
+        fecha: inicio.split('T')[0],
+        hora: (inicio.split('T')[1] || '00:00').slice(0, 5),
+        lugar,
+        aforo: parseInt(document.getElementById('ev-aforo').value) || 50,
+        mensaje_inscripcion: document.getElementById('ev-mensaje-inscripcion').value.trim() || null
+      };
+      if (imagenSubida) upd.imagen_url = imagenSubida; // solo si se subió una nueva imagen
+
+      if (sb) {
+        const { error } = await sb.from('eventos').update(upd).eq('id', _editEventoId);
+        if (error) { showToast('Error al actualizar: ' + error.message, 'error'); return; }
+      }
+      const idx = eventsState.findIndex(e => e.id === _editEventoId);
+      if (idx !== -1) eventsState[idx] = { ...eventsState[idx], ...upd };
+
+      renderEventosAdmin();
+      closeModal('modal-evento');
+      _resetEventoModal();
+      showToast(`Evento "${titulo}" actualizado correctamente.`, 'success');
+      return;
+    }
+
     const evParaDB = {
       titulo,
       descripcion: document.getElementById('ev-desc').value,
@@ -3630,11 +3705,10 @@
       categoria: 'Comunidad',
       created_by: getCurrentUser()?.name || 'Admin',
       emoji: '📅',
-      imagen_url: getUpload('ev') || null,
+      imagen_url: imagenSubida || null,
       mensaje_inscripcion: document.getElementById('ev-mensaje-inscripcion').value.trim() || null
     };
 
-    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (sb) {
       const { data, error } = await sb.from('eventos').insert(evParaDB).select().single();
       if (error) { showToast('Error al guardar: ' + error.message, 'error'); return; }
@@ -3645,9 +3719,7 @@
 
     renderEventosAdmin();
     closeModal('modal-evento');
-    document.getElementById('form-evento').reset();
-    document.getElementById('ev-mensaje-inscripcion').value = '';
-    clearUpload('ev');
+    _resetEventoModal();
     showToast(`Evento "${titulo}" creado correctamente.`, 'success');
   }
 
