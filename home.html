@@ -1193,6 +1193,16 @@
       if (s.href) slide.style.cursor = 'pointer';
       if (s.href) slide.addEventListener('click', () => { window.location.href = s.href; });
 
+      // Cartel puramente informativo: imagen completa, sin recorte ni texto encima
+      if (s.tipo === 'informativo' && s.imagen_url) {
+        slide.innerHTML = `
+          <div class="banner-img-wrap">
+            <img class="banner-img-blur" src="${s.imagen_url}" aria-hidden="true" loading="lazy">
+            <img class="banner-img-main is-portrait" src="${s.imagen_url}" alt="${s.titulo || ''}" loading="lazy">
+          </div>`;
+        return slide;
+      }
+
       const textHTML = `
         ${s._cat ? `<div class="banner-slide-cat">${s._cat}</div>` : ''}
         <div class="banner-slide-overlay">

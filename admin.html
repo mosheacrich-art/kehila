@@ -1301,19 +1301,21 @@
         <!-- Tipo -->
         <div style="margin-bottom:14px;">
           <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Tipo de anuncio <span style="color:#ef4444;">*</span></label>
-          <select id="bn-tipo" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;background:#fff;color:#1a202c;">
+          <select id="bn-tipo" onchange="_bnTipoChanged()" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;background:#fff;color:#1a202c;">
             <option value="evento">Evento próximo</option>
             <option value="novedad">Novedad</option>
             <option value="comunicado">Comunicado</option>
             <option value="shabat">Shabat especial</option>
             <option value="festividad">Festividad</option>
             <option value="donativos">Campaña de donativos</option>
+            <option value="informativo">Cartel informativo (solo imagen, sin texto encima)</option>
           </select>
+          <p id="bn-tipo-hint" style="display:none;color:#64748b;font-size:0.75rem;margin-top:4px;">Se muestra la imagen completa, sin recorte ni texto superpuesto — ideal para carteles y calendarios ya diseñados.</p>
         </div>
 
         <!-- Título -->
         <div style="margin-bottom:14px;">
-          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Título <span style="color:#ef4444;">*</span></label>
+          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Título <span id="bn-titulo-req" style="color:#ef4444;">*</span></label>
           <input id="bn-titulo" type="text" placeholder="Ej. Seudá de Purim — ¡Este sábado!" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;box-sizing:border-box;color:#1a202c;background:#fff;">
           <p id="bn-titulo-err" style="display:none;color:#ef4444;font-size:0.75rem;margin-top:4px;">El título es obligatorio.</p>
         </div>
@@ -3918,8 +3920,24 @@
    */
   const TIPOS_BANNER_LABEL = {
     evento:'Evento', novedad:'Novedad', comunicado:'Comunicado',
-    shabat:'Shabat', festividad:'Festividad', donativos:'Donativos'
+    shabat:'Shabat', festividad:'Festividad', donativos:'Donativos',
+    informativo:'Informativo'
   };
+
+  /**
+   * Ajusta el formulario de "Nuevo banner" según el tipo elegido:
+   * para "informativo" el título deja de ser obligatorio (la imagen se
+   * muestra completa y sin texto encima, así que el título es solo una
+   * etiqueta interna para identificar el banner en la lista del admin).
+   */
+  function _bnTipoChanged() {
+    const esInformativo = document.getElementById('bn-tipo').value === 'informativo';
+    document.getElementById('bn-tipo-hint').style.display = esInformativo ? '' : 'none';
+    document.getElementById('bn-titulo-req').style.display = esInformativo ? 'none' : '';
+    document.getElementById('bn-titulo').placeholder = esInformativo
+      ? 'Ej. Calendario septiembre 2026 (solo para identificarlo aquí)'
+      : 'Ej. Seudá de Purim — ¡Este sábado!';
+  }
 
   /* ── Banner admin: layouts ── */
   const BN_LAYOUTS = [
@@ -3936,6 +3954,7 @@
     shabat:'linear-gradient(135deg,#3a2a10 0%,#8a6420 100%)',
     festividad:'linear-gradient(135deg,#3a1a10 0%,#9a3010 100%)',
     donativos:'linear-gradient(135deg,#1a2a3a 0%,#1a4a6e 100%)',
+    informativo:'linear-gradient(135deg,#374151 0%,#6b7280 100%)',
   };
   let _bnLayout  = 'single';
   let _bnSlots   = [{ url:'', pos_x:50, pos_y:50, zoom:1 }];
@@ -4091,7 +4110,8 @@
     const btn    = document.getElementById('bn-save-btn');
     const titulo = document.getElementById('bn-titulo').value.trim();
     const errEl  = document.getElementById('bn-titulo-err');
-    if (!titulo) { errEl.style.display='block'; document.getElementById('bn-titulo').focus(); return; }
+    const esInformativo = document.getElementById('bn-tipo').value === 'informativo';
+    if (!titulo && !esInformativo) { errEl.style.display='block'; document.getElementById('bn-titulo').focus(); return; }
     errEl.style.display='none';
 
     btn.disabled=true;
