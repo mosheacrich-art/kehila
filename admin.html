@@ -3569,10 +3569,12 @@
               </span>
             </div>
             <div class="aforo-bar">
-              <div class="progress-bar" style="max-width:100px;">
-                <div class="progress-fill" style="width:${pct}%;background:${fillColor};"></div>
-              </div>
-              <span>${inscritos}/${ev.aforo} inscritos</span>
+              ${ev.aforo ? `
+                <div class="progress-bar" style="max-width:100px;">
+                  <div class="progress-fill" style="width:${pct}%;background:${fillColor};"></div>
+                </div>
+                <span>${inscritos}/${ev.aforo} inscritos</span>
+              ` : `<span>${inscritos} inscritos · sin límite de aforo</span>`}
             </div>
           </div>
           <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;">
@@ -3667,6 +3669,8 @@
     if (!valid) return;
 
     const imagenSubida = getUpload('ev');
+    const aforoVal = document.getElementById('ev-aforo').value.trim();
+    const aforo = aforoVal ? parseInt(aforoVal) : null; // vacío = sin límite de aforo
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
 
     if (_editEventoId) {
@@ -3676,7 +3680,7 @@
         fecha: inicio.split('T')[0],
         hora: (inicio.split('T')[1] || '00:00').slice(0, 5),
         lugar,
-        aforo: parseInt(document.getElementById('ev-aforo').value) || 50,
+        aforo,
         mensaje_inscripcion: document.getElementById('ev-mensaje-inscripcion').value.trim() || null
       };
       if (imagenSubida) upd.imagen_url = imagenSubida; // solo si se subió una nueva imagen
@@ -3701,7 +3705,7 @@
       fecha: inicio.split('T')[0],
       hora: (inicio.split('T')[1] || '00:00').slice(0, 5),
       lugar,
-      aforo: parseInt(document.getElementById('ev-aforo').value) || 50,
+      aforo,
       categoria: 'Comunidad',
       created_by: getCurrentUser()?.name || 'Admin',
       emoji: '📅',

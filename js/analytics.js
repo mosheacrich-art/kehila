@@ -252,7 +252,7 @@ function _renderAnEventos() {
       + '<div class="an-event-name">' + ev.titulo + '</div>'
       + '<div class="an-event-meta">'
       + '<span class="an-event-date">' + _fmtDate(ev.fecha) + '</span>'
-      + '<span class="an-inscritos"><strong>' + ev.inscritos + '</strong> / ' + ev.aforo + '</span>'
+      + '<span class="an-inscritos"><strong>' + ev.inscritos + '</strong>' + (ev.aforo ? ' / ' + ev.aforo : '') + '</span>'
       + '<div class="an-bar-wrap"><div class="an-bar-fill ' + fillCls + '" style="width:' + Math.min(pct, 100) + '%"></div></div>'
       + '<span class="' + badgeCls + '" style="font-size:.7rem;padding:2px 8px;">' + pct + '%</span>'
       + '</div></div>';

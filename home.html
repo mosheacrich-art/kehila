@@ -1025,8 +1025,7 @@
         const fecha = new Date(ev.fecha + 'T00:00:00');
         const dia = fecha.getDate();
         const mes = mesesCortos[fecha.getMonth()];
-        const plazasLibres = ev.aforo - ev.inscritos;
-        const lleno = plazasLibres === 0;
+        const lleno = !!ev.aforo && (ev.aforo - ev.inscritos) <= 0;
         const inscrito = homeInscrito.has(String(ev.id));
         const tituloEsc = ev.titulo.replace(/'/g, "\\'");
 

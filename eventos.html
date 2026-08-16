@@ -483,8 +483,7 @@ const hoy = new Date();
 
     container.innerHTML = evs.map(ev => {
       const fecha = new Date(ev.fecha + 'T00:00:00');
-      const plazasLibres = ev.aforo - ev.inscritos;
-      const lleno = plazasLibres <= 0;
+      const lleno = !!ev.aforo && (ev.aforo - ev.inscritos) <= 0;
       const estaInscrito = inscrito.has(ev.id);
 
       let footerBtn = '';
@@ -526,7 +525,7 @@ const hoy = new Date();
               </div>
               <div class="ev-meta-item">
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
-                ${ev.inscritos}/${ev.aforo}
+                ${ev.aforo ? `${ev.inscritos}/${ev.aforo}` : `${ev.inscritos} inscritos`}
               </div>
             </div>
           </div>
@@ -1045,7 +1044,7 @@ const hoy = new Date();
             </div>
             <div class="form-group">
               <label>Aforo máximo</label>
-              <input id="ev-aforo" type="number" placeholder="50" value="50">
+              <input id="ev-aforo" type="number" placeholder="Dejar vacío = sin límite">
             </div>
             <div class="form-group">
               <label>Foto del evento</label>
@@ -1089,7 +1088,7 @@ const hoy = new Date();
         fecha,
         hora: document.getElementById('ev-hora').value,
         lugar: document.getElementById('ev-lugar').value.trim(),
-        aforo: parseInt(document.getElementById('ev-aforo').value) || 50,
+        aforo: document.getElementById('ev-aforo').value.trim() ? parseInt(document.getElementById('ev-aforo').value) : null,
         categoria: document.getElementById('ev-categoria').value,
         created_by: user.name,
         emoji: document.getElementById('ev-emoji').value.trim() || '📅',
