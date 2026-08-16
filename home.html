@@ -432,122 +432,79 @@
     .eventos-scroll::-webkit-scrollbar { display: none; }
 
     .evento-home-card {
-      flex: 0 0 268px;
-      background: var(--color-white);
+      flex: 0 0 200px;
+      background: transparent;
       border-radius: var(--radius-sm);
-      border: 1px solid var(--color-border);
       overflow: hidden;
-      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      cursor: pointer;
       display: flex;
       flex-direction: column;
     }
 
-    .evento-home-card:hover {
-      border-color: #c0c7d4;
-      box-shadow: var(--shadow-md);
-    }
-
     .evento-home-thumb {
-      height: 72px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 0 16px;
-      font-size: 2rem;
       position: relative;
+      aspect-ratio: 3 / 4;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+      border: 1px solid var(--color-border);
+      transition: box-shadow var(--transition-fast), transform var(--transition-fast);
     }
 
-    .evento-home-date-block {
+    .evento-home-card:hover .evento-home-thumb {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .evento-home-flyer-fallback {
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(255,255,255,0.2);
-      border-radius: var(--radius-sm);
-      padding: 6px 10px;
-      min-width: 48px;
-      text-align: center;
-      backdrop-filter: blur(4px);
+      gap: 2px;
     }
 
-    .evento-home-day {
+    .evento-home-flyer-fallback .evento-home-day {
       font-family: var(--font-brand);
-      font-size: 1.5rem;
+      font-size: 2.2rem;
       font-weight: 900;
       color: var(--color-white);
       line-height: 1;
     }
 
-    .evento-home-month {
-      font-size: 0.6rem;
+    .evento-home-flyer-fallback .evento-home-month {
+      font-size: 0.75rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: rgba(255,255,255,0.8);
+      color: rgba(255,255,255,0.85);
     }
 
-    .evento-home-emoji {
-      font-size: 2.2rem;
-      line-height: 1;
-    }
-
-    .evento-home-body {
-      padding: 14px 16px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .evento-home-cat {
+    .evento-home-status {
+      position: absolute;
+      top: 8px;
+      right: 8px;
       font-size: 0.65rem;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--color-gold-dark);
+      letter-spacing: 0.02em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      backdrop-filter: blur(4px);
     }
 
+    .evento-home-status.inscrito { background: rgba(6,95,70,0.9); color: #fff; }
+    .evento-home-status.lleno { background: rgba(153,27,27,0.9); color: #fff; }
+
     .evento-home-title {
-      font-size: 0.9375rem;
+      margin-top: 10px;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--color-text);
       line-height: 1.35;
     }
-
-    .evento-home-meta {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.775rem;
-      color: var(--color-text-muted);
-    }
-
-    .evento-home-meta svg {
-      width: 12px;
-      height: 12px;
-      color: var(--color-text-light);
-      flex-shrink: 0;
-    }
-
-    .evento-home-footer {
-      padding: 10px 16px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .plazas-badge {
-      font-size: 0.6875rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      padding: 2px 7px;
-      border-radius: var(--radius-xs);
-    }
-
-    .plazas-badge.libre { background: var(--color-success-light); color: #065F46; }
-    .plazas-badge.lleno { background: var(--color-danger-light); color: #991B1B; }
-    .plazas-badge.pocas { background: var(--color-warning-light); color: #92400E; }
 
     /* ─── 6. Card Shabat ─── */
     .shabat-card {
@@ -1070,69 +1027,36 @@
         const mes = mesesCortos[fecha.getMonth()];
         const plazasLibres = ev.aforo - ev.inscritos;
         const lleno = plazasLibres === 0;
-        const pocas = plazasLibres > 0 && plazasLibres <= 5;
-
-        let plazasClass = 'libre';
-        let plazasText = `${plazasLibres} plazas libres`;
-        if (lleno) { plazasClass = 'lleno'; plazasText = 'Completo'; }
-        else if (pocas) { plazasClass = 'pocas'; plazasText = `¡Solo ${plazasLibres} plazas!`; }
-
-        const _lleno_txt = lleno ? (typeof t === 'function' ? t('ev_completo') : 'Completo') : (typeof t === 'function' ? t('inscribirse') : 'Inscribirse');
-        const _plazas_lleno = typeof t === 'function' ? t('ev_completo') : 'Completo';
-        const _plazas_pocas = typeof t === 'function' ? t('ev_pocas').replace('{n}', plazasLibres) : `¡Solo ${plazasLibres} plazas!`;
-        const _plazas_libre = typeof t === 'function' ? t('ev_plazas').replace('{n}', plazasLibres) : `${plazasLibres} plazas libres`;
-        if (lleno) plazasText = _plazas_lleno;
-        else if (pocas) plazasText = _plazas_pocas;
-        else plazasText = _plazas_libre;
-
-        const conteoText = ev.aforo ? `${ev.inscritos}/${ev.aforo}` : null;
+        const inscrito = homeInscrito.has(String(ev.id));
+        const tituloEsc = ev.titulo.replace(/'/g, "\\'");
 
         return `
-          <div class="evento-home-card">
-            <div class="evento-home-thumb ${bgClasses[i % bgClasses.length]}">
-              <div class="evento-home-date-block">
-                <span class="evento-home-day">${dia}</span>
-                <span class="evento-home-month">${mes}</span>
-              </div>
+          <div class="evento-home-card" onclick="homeCardClick('${ev.id}', '${tituloEsc}', ${lleno}, ${inscrito})">
+            <div class="evento-home-thumb ${ev.imagen_url ? '' : bgClasses[i % bgClasses.length]}" ${ev.imagen_url ? `style="background-image:url('${ev.imagen_url}')"` : ''}>
+              ${!ev.imagen_url ? `
+                <div class="evento-home-flyer-fallback">
+                  <span class="evento-home-day">${dia}</span>
+                  <span class="evento-home-month">${mes}</span>
+                </div>` : ''}
+              ${inscrito ? `<span class="evento-home-status inscrito">Inscrito</span>`
+                : lleno ? `<span class="evento-home-status lleno">Completo</span>` : ''}
             </div>
-            <div class="evento-home-body">
-              <span class="evento-home-cat">${ev.categoria}</span>
-              <p class="evento-home-title">${ev.titulo}</p>
-              <div class="evento-home-meta">
-                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                </svg>
-                ${ev.hora}
-              </div>
-              <div class="evento-home-meta">
-                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/>
-                </svg>
-                ${ev.lugar.split(',')[0]}
-              </div>
-            </div>
-            <div class="evento-home-footer">
-              <span class="plazas-badge ${plazasClass}">${conteoText ? `${conteoText} · ` : ''}${plazasText}</span>
-              ${homeInscrito.has(String(ev.id))
-                ? `<div style="display:flex;align-items:center;gap:6px;">
-                     <span style="display:flex;align-items:center;gap:5px;background:var(--color-success-light);color:#065F46;border:1.5px solid var(--color-success);border-radius:8px;padding:5px 10px;font-size:.8rem;font-weight:600;">
-                       <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-                       Inscrito
-                     </span>
-                     <button onclick="cancelarInscripcionHome('${ev.id}')" title="Cancelar inscripción"
-                       style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:1.5px solid #fca5a5;background:#fff5f5;color:#dc2626;cursor:pointer;flex-shrink:0;">
-                       <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
-                     </button>
-                   </div>`
-                : `<button class="btn btn-primary btn-sm" ${lleno ? 'disabled' : ''} onclick="inscribirse('${ev.id}', '${ev.titulo.replace(/'/g, "\\'")}', ${lleno})">${_lleno_txt}</button>`
-              }
-            </div>
+            <p class="evento-home-title">${ev.titulo}</p>
           </div>`;
       }).join('');
     }
 
     let homePostEvId = null;
+
+    /**
+     * Maneja el click sobre una tarjeta de evento en el home.
+     * Si ya está inscrito o el evento está completo, lleva a eventos.html
+     * para gestionar la inscripción; si no, inscribe directamente.
+     */
+    function homeCardClick(id, titulo, lleno, inscrito) {
+      if (inscrito || lleno) { window.location.href = 'eventos.html'; return; }
+      inscribirse(id, titulo, lleno);
+    }
 
     async function inscribirse(id, titulo, lleno) {
       if (lleno) return;
@@ -1163,24 +1087,6 @@
       donarBtn.disabled = true;
       donarBtn.style.opacity = '.5';
       document.getElementById('modal-post-inscripcion').classList.remove('hidden');
-    }
-
-    async function cancelarInscripcionHome(id) {
-      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
-      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-      homeInscrito.delete(String(id));
-      renderEventos();
-      if (sb && user) {
-        const { error } = await sb.from('inscripciones')
-          .delete()
-          .eq('usuario_id', user.userId)
-          .eq('evento_id', String(id));
-        if (error) {
-          homeInscrito.add(String(id));
-          renderEventos();
-          showToast('Error al cancelar: ' + error.message, 'error');
-        }
-      }
     }
 
     function closePostModal() {
