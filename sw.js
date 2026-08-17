@@ -1,6 +1,9 @@
 /* =============================================
    Jabad Barcelona — Service Worker
-   Estrategia: network-first (siempre versión más reciente)
+   Estrategia: stale-while-revalidate (responde al instante desde
+   caché si existe, y actualiza esa caché en segundo plano para la
+   próxima visita — evita que cada cambio de página/pestaña espere
+   una ida y vuelta de red completa)
    Push: muestra notificación nativa cuando la app está cerrada
    ============================================= */
 
@@ -53,27 +56,27 @@ self.addEventListener('notificationclick', e => {
   }));
 });
 
-// Fetch: network-first siempre
+// Fetch: stale-while-revalidate — caché al instante, red en segundo plano
 self.addEventListener('fetch', e => {
   if (e.request.url.includes('supabase.co')) return;
   if (e.request.method !== 'GET') return;
 
   e.respondWith(
-    fetch(e.request).then(res => {
-      // Guardar en caché solo si la respuesta es válida
-      if (res.ok) {
-        const clone = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
-      }
-      return res;
-    }).catch(() => {
-      // Sin red: usar caché como fallback
-      return caches.match(e.request).then(cached => {
-        if (cached) return cached;
-        if (e.request.mode === 'navigate') {
-          return caches.match('/home.html');
+    caches.match(e.request).then(cached => {
+      const network = fetch(e.request).then(res => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
         }
+        return res;
+      }).catch(() => {
+        if (cached) return cached;
+        if (e.request.mode === 'navigate') return caches.match('/home.html');
       });
+
+      // Si hay versión en caché, responde con ella al instante y deja que
+      // la petición de red actualice la caché para la próxima vez.
+      return cached || network;
     })
   );
 });

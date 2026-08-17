@@ -1255,10 +1255,13 @@
         } catch(e) { /* usa mock como fallback */ }
       }
       renderEventos();
-      loadBanner();
     }
 
+    // El banner es lo primero que se ve (above the fold): se carga en paralelo
+    // con los eventos, no encadenado detrás — antes esperaba a que terminara
+    // loadHomeData() (~1s por la consulta de eventos) para siquiera empezar.
     loadHomeData();
+    loadBanner();
 
     document.addEventListener('langchange', () => {
       renderEventos();

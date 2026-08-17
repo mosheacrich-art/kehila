@@ -2692,6 +2692,29 @@
     return img.src;
   }
 
+  /**
+   * Si el valor es un Data URL (imagen recién recortada, aún no subida),
+   * la sube a Supabase Storage y devuelve la URL pública resultante.
+   * Si ya es una URL normal (o vacío), la devuelve tal cual.
+   * Evita guardar imágenes como base64 gigante directamente en la fila
+   * de la tabla (eso hincha cada consulta y ralentiza toda la página).
+   * @param {string|null} value - Data URL o URL normal
+   * @param {string} folder - Carpeta dentro del bucket 'community media'
+   * @returns {Promise<string|null>}
+   */
+  async function uploadIfDataUrl(value, folder) {
+    if (!value || !value.startsWith('data:')) return value;
+    var sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return value;
+    try {
+      var blob = await (await fetch(value)).blob();
+      var path = folder + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg';
+      var up = await sb.storage.from('community media').upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+      if (up.error) return value; // si falla la subida, mejor guardar el base64 que perder la imagen
+      return sb.storage.from('community media').getPublicUrl(path).data.publicUrl;
+    } catch (e) { return value; }
+  }
+
   /* ─── Init ─── */
   document.body.style.visibility = 'hidden';
   (async () => {
@@ -3670,7 +3693,7 @@
     if (!lugar) { document.getElementById('ev-lugar-err').style.display = ''; document.getElementById('ev-lugar').classList.add('error'); valid = false; }
     if (!valid) return;
 
-    const imagenSubida = getUpload('ev');
+    const imagenSubida = await uploadIfDataUrl(getUpload('ev'), 'eventos');
     const aforoVal = document.getElementById('ev-aforo').value.trim();
     const aforo = aforoVal ? parseInt(aforoVal) : null; // vacío = sin límite de aforo
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
@@ -3844,7 +3867,7 @@
    * Lee los inputs del modal #modal-noticia.
    * Si _noticiaEditId tiene valor, hace UPDATE; si no, INSERT.
    */
-  function saveNoticia() {
+  async function saveNoticia() {
     const titulo    = document.getElementById('news-titulo').value.trim();
     const contenido = document.getElementById('news-contenido').value.trim();
     let valid = true;
@@ -3857,8 +3880,8 @@
     if (!valid) return;
 
     const extracto = document.getElementById('news-extracto').value.trim();
-    const imagen = getUpload('news') || null;
-    const imagenSlide = getUpload('news-slide') || null;
+    const imagen = await uploadIfDataUrl(getUpload('news'), 'noticias') || null;
+    const imagenSlide = await uploadIfDataUrl(getUpload('news-slide'), 'noticias') || null;
     const destacada = document.getElementById('news-pin').checked;
 
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
