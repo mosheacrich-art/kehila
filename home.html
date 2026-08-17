@@ -506,6 +506,45 @@
       line-height: 1.35;
     }
 
+    /* ─── 5b. Carteles y avisos (scroll horizontal) ─── */
+    .cartel-scroll {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+    }
+    .cartel-scroll::-webkit-scrollbar { display: none; }
+
+    .cartel-home-card {
+      flex: 0 0 200px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cartel-home-thumb {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .cartel-home-card[data-clickable="true"] { cursor: pointer; }
+    .cartel-home-card[data-clickable="true"]:hover .cartel-home-thumb {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .cartel-home-title {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-text);
+      line-height: 1.35;
+    }
+
     /* ─── 6. Card Shabat ─── */
     .shabat-card {
       background: #252245;
@@ -862,6 +901,24 @@
       </div>
 
       <!-- ══════════════════════════════════
+           3b. CARTELES Y AVISOS (banners tipo "informativo")
+      ══════════════════════════════════ -->
+      <div class="home-section" id="carteles-section" style="display:none;">
+        <div class="home-section-header">
+          <h2 class="home-section-title">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15M4.5 9h15M4.5 15h15M3.75 4.5h16.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H3.75a.75.75 0 0 1-.75-.75V5.25a.75.75 0 0 1 .75-.75Z"/>
+            </svg>
+            <span>Carteles y avisos</span>
+          </h2>
+        </div>
+
+        <div class="cartel-scroll" id="carteles-container">
+          <!-- Generado por JS -->
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
            4. EVENTOS PRÓXIMOS
       ══════════════════════════════════ -->
       <div class="home-section">
@@ -1193,16 +1250,6 @@
       if (s.href) slide.style.cursor = 'pointer';
       if (s.href) slide.addEventListener('click', () => { window.location.href = s.href; });
 
-      // Cartel puramente informativo: imagen completa, sin recorte ni texto encima
-      if (s.tipo === 'informativo' && s.imagen_url) {
-        slide.innerHTML = `
-          <div class="banner-img-wrap">
-            <img class="banner-img-blur" src="${s.imagen_url}" aria-hidden="true" loading="lazy">
-            <img class="banner-img-main is-portrait" src="${s.imagen_url}" alt="${s.titulo || ''}" loading="lazy">
-          </div>`;
-        return slide;
-      }
-
       const textHTML = `
         ${s._cat ? `<div class="banner-slide-cat">${s._cat}</div>` : ''}
         <div class="banner-slide-overlay">
@@ -1312,6 +1359,31 @@
       startBannerTimer();
     }
 
+    /**
+     * Renderiza los banners tipo "informativo" (carteles/calendarios ya diseñados)
+     * como tarjetas verticales independientes del carrusel principal, ya que su
+     * formato de póster no encaja en la caja panorámica del carrusel.
+     */
+    function renderCarteles(slides) {
+      const section = document.getElementById('carteles-section');
+      const container = document.getElementById('carteles-container');
+      if (!slides.length) { section.style.display = 'none'; container.innerHTML = ''; return; }
+      section.style.display = '';
+      container.innerHTML = slides.map(s => {
+        const clickable = !!s.href;
+        return `
+          <div class="cartel-home-card" data-clickable="${clickable}" ${clickable ? `onclick="window.location.href='${s.href}'"` : ''}>
+            <div class="cartel-home-thumb">
+              <div class="banner-img-wrap">
+                <img class="banner-img-blur" src="${s.imagen_url}" aria-hidden="true" loading="lazy">
+                <img class="banner-img-main is-portrait" src="${s.imagen_url}" alt="${s.titulo || ''}" loading="lazy">
+              </div>
+            </div>
+            ${s.titulo ? `<p class="cartel-home-title">${s.titulo}</p>` : ''}
+          </div>`;
+      }).join('');
+    }
+
     async function loadBanner() {
       const sb = typeof getSupabase === 'function' ? getSupabase() : null;
       if (user && user.role === 'admin') {
@@ -1337,13 +1409,15 @@
                 imagen_url: s.imagen_url || ls.imagen_url || '' };
             });
             _lsBannerSave(merged); // sincronizar caché local con Supabase
-            renderBanner(merged);
+            renderBanner(merged.filter(s => s.tipo !== 'informativo'));
+            renderCarteles(merged.filter(s => s.tipo === 'informativo'));
             return;
           }
         } catch(e) { /* fallback a localStorage */ }
       }
       const lsSlides = _lsBannerGet();
-      renderBanner(lsSlides.length ? lsSlides : []);
+      renderBanner(lsSlides.filter(s => s.tipo !== 'informativo'));
+      renderCarteles(lsSlides.filter(s => s.tipo === 'informativo'));
     }
 
     /* ── Admin: localStorage como caché offline ── */
