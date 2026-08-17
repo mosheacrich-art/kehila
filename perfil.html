@@ -680,6 +680,7 @@
   <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/familia.js"></script>
+  <script src="js/media.js"></script>
   <script>
     const user = requireAuth();
     let editMode = false;
@@ -742,7 +743,9 @@
             if (data.ciudad)    perfilData.ciudad    = data.ciudad;
             if (data.cp)        perfilData.cp        = data.cp;
             if (data.direccion) perfilData.direccion = data.direccion;
-            if (data.avatar_url && !savedPhoto) perfilData.photo = data.avatar_url;
+            // La foto guardada en Supabase manda (sincroniza entre dispositivos);
+            // el valor local solo sirve de vista previa instantánea mientras carga.
+            if (data.avatar_url) perfilData.photo = data.avatar_url;
           }
         } catch(e) { /* usa datos localStorage como fallback */ }
       }
@@ -898,20 +901,35 @@
       }
     }
 
-    function handleAvatarUpload(e) {
+    async function handleAvatarUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
       if (file.size > 3 * 1024 * 1024) {
         alert('La imagen no puede superar 3MB.');
         return;
       }
-      const reader = new FileReader();
-      reader.onload = function(ev) {
-        perfilData.photo = ev.target.result;
-        localStorage.setItem('kehila_avatar_' + user.email, ev.target.result);
-        renderPerfil();
-      };
-      reader.readAsDataURL(file);
+
+      // Vista previa instantánea (URL local, no bloquea el hilo ni se guarda)
+      const localPreview = URL.createObjectURL(file);
+      perfilData.photo = localPreview;
+      renderPerfil();
+
+      const url = typeof uploadMedia === 'function' ? await uploadMedia(file, 'avatars') : null;
+      URL.revokeObjectURL(localPreview);
+      if (!url) {
+        if (typeof showToast === 'function') showToast('No se pudo subir la foto.', 'error');
+        return;
+      }
+
+      perfilData.photo = url;
+      localStorage.setItem('kehila_avatar_' + user.email, url); // caché local liviana (solo la URL, no la imagen)
+      renderPerfil();
+
+      const sb = getSupabase();
+      if (sb && user.userId) {
+        try { await sb.from('profiles').upsert({ id: user.userId, avatar_url: url }, { onConflict: 'id' }); }
+        catch (e) { /* la foto ya se ve local; se reintentará sincronizar en la próxima visita */ }
+      }
     }
 
     init();
