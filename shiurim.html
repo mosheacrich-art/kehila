@@ -91,8 +91,10 @@
     .pod-list { display: flex; flex-direction: column; gap: 12px; }
     .pod-card { background: var(--color-bg); border-radius: 14px; border: 1px solid rgba(27,46,94,.09); padding: 16px 18px; box-shadow: 0 2px 10px rgba(27,46,94,.06); }
     .pod-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
-    .pod-icon { width: 46px; height: 46px; border-radius: 10px; background: var(--color-primary, #1B2E5E); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .pod-icon { width: 46px; height: 46px; border-radius: 10px; background: var(--color-primary, #1B2E5E); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
     .pod-icon svg { width: 22px; height: 22px; color: #E0B820; }
+    .pod-icon-img { background: none; }
+    .pod-icon-img img { width: 100%; height: 100%; object-fit: cover; }
     .pod-meta { flex: 1; min-width: 0; }
     .pod-title { font-size: .9rem; font-weight: 700; color: var(--color-primary, #1B2E5E); line-height: 1.3; margin-bottom: 3px; }
     .pod-sub { font-size: .74rem; color: #64748b; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -417,9 +419,12 @@
       var MIC = '<svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"/></svg>';
       document.getElementById('list-podcasts').innerHTML = podcasts.map(function(p) {
         var liked = isLiked(p.id);
+        var podIcon = p.imagen_url
+          ? '<img src="' + p.imagen_url + '" alt="" loading="lazy">'
+          : MIC;
         return '<div class="pod-card">'
           + '<div class="pod-header">'
-          + '<div class="pod-icon">' + MIC + '</div>'
+          + '<div class="pod-icon' + (p.imagen_url ? ' pod-icon-img' : '') + '">' + podIcon + '</div>'
           + '<div class="pod-meta">'
           + '<div class="pod-title">' + p.titulo + '</div>'
           + '<div class="pod-sub">' + (p.maestro ? '<strong>' + p.maestro + '</strong>' : '') + '<span>' + fmt(p.fecha) + '</span>' + (p.duracion ? '<span>' + p.duracion + '</span>' : '') + '</div>'
