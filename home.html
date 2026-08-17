@@ -196,9 +196,9 @@
     /* Capa trasera: imagen difuminada que rellena todo el espacio */
     .banner-img-blur {
       position: absolute;
-      inset: -8%;
-      width: 116%;
-      height: 116%;
+      inset: -25%;
+      width: 150%;
+      height: 150%;
       object-fit: cover;
       object-position: center;
       filter: blur(22px) brightness(0.5) saturate(1.3);
@@ -520,6 +520,7 @@
       flex: 0 0 200px;
       display: flex;
       flex-direction: column;
+      cursor: pointer;
     }
 
     .cartel-home-thumb {
@@ -531,11 +532,26 @@
       transition: box-shadow var(--transition-fast), transform var(--transition-fast);
     }
 
-    .cartel-home-card[data-clickable="true"] { cursor: pointer; }
-    .cartel-home-card[data-clickable="true"]:hover .cartel-home-thumb {
+    .cartel-home-card:hover .cartel-home-thumb {
       box-shadow: var(--shadow-md);
       transform: translateY(-2px);
     }
+
+    .cartel-home-zoom-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .cartel-home-zoom-badge svg { width: 14px; height: 14px; }
 
     .cartel-home-title {
       margin-top: 10px;
@@ -543,6 +559,12 @@
       font-weight: 600;
       color: var(--color-text);
       line-height: 1.35;
+    }
+
+    .cartel-home-cta {
+      margin-top: 2px;
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
     }
 
     /* ─── 6. Card Shabat ─── */
@@ -995,6 +1017,15 @@
   <!-- Toast container -->
   <div class="toast-container" id="toast-container"></div>
 
+  <!-- Lightbox: ver cartel informativo a tamaño completo -->
+  <div id="cartel-lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1100;flex-direction:column;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this) closeCartelLightbox()">
+    <button onclick="closeCartelLightbox()" aria-label="Cerrar" style="position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+    </button>
+    <img id="cartel-lightbox-img" src="" alt="" style="max-width:100%;max-height:85vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+    <a id="cartel-lightbox-link" href="#" target="_blank" rel="noopener" style="display:none;margin-top:16px;background:#fff;color:#1b2e5e;padding:10px 22px;border-radius:999px;font-weight:600;font-size:.85rem;text-decoration:none;">Más información →</a>
+  </div>
+
   <!-- Modal post-inscripción + donativo -->
   <div class="modal-overlay hidden" id="modal-post-inscripcion" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;">
     <div class="modal modal-sm" style="background:#fff;border-radius:16px;width:100%;max-width:420px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.18);">
@@ -1364,25 +1395,50 @@
      * como tarjetas verticales independientes del carrusel principal, ya que su
      * formato de póster no encaja en la caja panorámica del carrusel.
      */
+    let cartelSlidesData = [];
+    const ZOOM_ICON = '<svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m-3-3h6"/></svg>';
+
     function renderCarteles(slides) {
       const section = document.getElementById('carteles-section');
       const container = document.getElementById('carteles-container');
       if (!slides.length) { section.style.display = 'none'; container.innerHTML = ''; return; }
       section.style.display = '';
-      container.innerHTML = slides.map(s => {
-        const clickable = !!s.href;
-        return `
-          <div class="cartel-home-card" data-clickable="${clickable}" ${clickable ? `onclick="window.location.href='${s.href}'"` : ''}>
+      cartelSlidesData = slides;
+      container.innerHTML = slides.map((s, i) => `
+          <div class="cartel-home-card" onclick="openCartelLightbox(${i})">
             <div class="cartel-home-thumb">
               <div class="banner-img-wrap">
                 <img class="banner-img-blur" src="${s.imagen_url}" aria-hidden="true" loading="lazy">
                 <img class="banner-img-main is-portrait" src="${s.imagen_url}" alt="${s.titulo || ''}" loading="lazy">
               </div>
+              <div class="cartel-home-zoom-badge">${ZOOM_ICON}</div>
             </div>
             ${s.titulo ? `<p class="cartel-home-title">${s.titulo}</p>` : ''}
-          </div>`;
-      }).join('');
+            <p class="cartel-home-cta">Toca para ver completo</p>
+          </div>`
+      ).join('');
     }
+
+    function openCartelLightbox(i) {
+      const s = cartelSlidesData[i];
+      if (!s) return;
+      document.getElementById('cartel-lightbox-img').src = s.imagen_url;
+      document.getElementById('cartel-lightbox-img').alt = s.titulo || '';
+      const linkEl = document.getElementById('cartel-lightbox-link');
+      if (s.href) { linkEl.href = s.href; linkEl.style.display = ''; }
+      else { linkEl.style.display = 'none'; }
+      document.getElementById('cartel-lightbox').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeCartelLightbox() {
+      document.getElementById('cartel-lightbox').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && document.getElementById('cartel-lightbox').style.display === 'flex') closeCartelLightbox();
+    });
 
     async function loadBanner() {
       const sb = typeof getSupabase === 'function' ? getSupabase() : null;
