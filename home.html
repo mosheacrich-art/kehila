@@ -84,22 +84,29 @@
     }
 
     /* Tarjeta de horarios */
+    .tefila-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin: 0 0 6px;
+    }
+
     .tefila-card {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 4px 16px;
+      gap: 6px 20px;
       background: var(--color-white);
       color: var(--color-text);
       border-radius: var(--radius-sm);
       border: 1px solid var(--color-border);
       box-shadow: var(--shadow-sm);
-      padding: 9px 16px;
+      padding: 13px 20px;
       flex-shrink: 0;
     }
 
     .tefila-card-label {
-      font-size: 0.68rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--color-text-muted);
       white-space: nowrap;
@@ -109,42 +116,49 @@
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 4px 14px;
+      gap: 6px 18px;
     }
 
     #horarios-semana, #horarios-shabat {
       display: flex;
       align-items: center;
-      gap: 4px 14px;
+      gap: 6px 18px;
     }
 
     .tefila-row {
       display: flex;
       align-items: baseline;
-      gap: 5px;
+      gap: 6px;
       white-space: nowrap;
     }
 
     .tefila-row + .tefila-row {
-      padding-left: 14px;
+      padding-left: 18px;
       border-left: 1px solid var(--color-border);
     }
 
     #horarios-shabat {
-      padding-left: 14px;
+      padding-left: 18px;
       border-left: 1px solid var(--color-border);
     }
 
     .tefila-name {
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       color: var(--color-text-muted);
     }
 
     .tefila-time {
-      font-size: 0.8125rem;
+      font-size: 1rem;
       font-weight: 700;
       color: var(--color-gold-dark, var(--color-gold));
       font-family: var(--font-brand);
+    }
+
+    .tefila-shabat-icon {
+      width: 13px;
+      height: 13px;
+      color: var(--color-gold-dark, var(--color-gold));
+      flex-shrink: 0;
     }
 
     @media (max-width: 600px) {
@@ -156,10 +170,10 @@
       .home-header { gap: 8px; margin-bottom: 10px; }
       .home-greeting { font-size: 1.3rem; }
       .home-greeting-label { margin-bottom: 2px; font-size: 0.7rem; }
-      .tefila-card { padding: 8px 12px; gap: 3px 10px; }
+      .tefila-card { padding: 11px 14px; gap: 5px 12px; }
       .tefila-card-label { display: none; }
-      #horarios-rows, #horarios-semana, #horarios-shabat { gap: 3px 10px; }
-      .tefila-row + .tefila-row, #horarios-shabat { padding-left: 10px; }
+      #horarios-rows, #horarios-semana, #horarios-shabat { gap: 5px 12px; }
+      .tefila-row + .tefila-row, #horarios-shabat { padding-left: 12px; }
     }
 
     /* ─── 2. Banner carousel ─── */
@@ -828,20 +842,24 @@
           </p>
         </div>
 
-        <div class="tefila-card" id="tefila-horarios-card">
-          <p class="tefila-card-label" data-i18n="home_sinagoga">Hoy en la sinagoga</p>
-          <div id="horarios-rows">
-            <div id="horarios-semana">
-              <div class="tefila-row"><span class="tefila-name">Shajarit</span><span class="tefila-time">07:30</span></div>
-              <div class="tefila-row"><span class="tefila-name">Minjá</span><span class="tefila-time">19:30</span></div>
+        <div>
+          <p class="tefila-title">Horarios de nuestra Kehila</p>
+          <div class="tefila-card" id="tefila-horarios-card">
+            <p class="tefila-card-label" data-i18n="home_sinagoga">Hoy en la sinagoga</p>
+            <div id="horarios-rows">
+              <div id="horarios-semana">
+                <div class="tefila-row"><span class="tefila-name">Shajarit</span><span class="tefila-time">07:30</span></div>
+                <div class="tefila-row"><span class="tefila-name">Minjá</span><span class="tefila-time">19:30</span></div>
+              </div>
+              <div id="horarios-shabat" onclick="document.getElementById('shabat-card-section').scrollIntoView({behavior:'smooth',block:'start'})" style="cursor:pointer;" title="Ver horarios de Shabbat">
+                <div class="tefila-row"><span class="tefila-name">Encendido de velas</span><span class="tefila-time">19:42</span></div>
+                <svg class="tefila-shabat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25 12 15.75 4.5 8.25"/></svg>
+              </div>
             </div>
-            <div id="horarios-shabat" onclick="document.getElementById('shabat-card-section').scrollIntoView({behavior:'smooth',block:'start'})" style="cursor:pointer;" title="Ver horarios de Shabbat">
-              <div class="tefila-row"><span class="tefila-name">Encendido de velas</span><span class="tefila-time">19:42</span></div>
-            </div>
+            <button id="btn-edit-horarios" onclick="abrirEditHorarios()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:var(--color-text-muted);transition:color 0.15s;flex-shrink:0;margin-left:auto;" title="Editar horarios">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+            </button>
           </div>
-          <button id="btn-edit-horarios" onclick="abrirEditHorarios()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:var(--color-text-muted);transition:color 0.15s;flex-shrink:0;margin-left:auto;" title="Editar horarios">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
-          </button>
         </div>
       </div>
 
@@ -2049,9 +2067,10 @@
       ).join('');
       const container = document.getElementById('horarios-rows');
       if (!container) return;
+      const shabatIcon = '<svg class="tefila-shabat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25 12 15.75 4.5 8.25"/></svg>';
       container.innerHTML =
         `<div id="horarios-semana">${rowsHTML(semana)}</div>
-         <div id="horarios-shabat" onclick="document.getElementById('shabat-card-section').scrollIntoView({behavior:'smooth',block:'start'})" style="cursor:pointer;" title="Ver horarios de Shabbat">${rowsHTML(shabat)}</div>`;
+         <div id="horarios-shabat" onclick="document.getElementById('shabat-card-section').scrollIntoView({behavior:'smooth',block:'start'})" style="cursor:pointer;" title="Ver horarios de Shabbat">${rowsHTML(shabat)}${shabatIcon}</div>`;
       applyCandleSync();
     }
 
