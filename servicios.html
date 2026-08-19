@@ -252,6 +252,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
+<script src="js/media.js"></script>
 <script>
 (function () {
   'use strict';
@@ -853,8 +854,11 @@
     var label = input.closest('.sv-admin-edit');
     if (label) label.style.opacity = '0.5';
     try {
-      var path = 'servicios/' + serviceId + '_' + Date.now() + '.' + file.name.split('.').pop();
-      var { data: upData, error: upErr } = await sb.storage.from('negocios').upload(path, file, { upsert: true, contentType: file.type });
+      // Comprimir antes de subir: fotos de cámara directas pesaban varios
+      // cientos de KB / hasta 1MB cada una y ralentizaban la carga de la página.
+      var upFile = typeof resizeImageFile === 'function' ? await resizeImageFile(file) : file;
+      var path = 'servicios/' + serviceId + '_' + Date.now() + '.' + upFile.name.split('.').pop();
+      var { data: upData, error: upErr } = await sb.storage.from('negocios').upload(path, upFile, { upsert: true, contentType: upFile.type });
       if (upErr) { alert('Error al subir: ' + upErr.message); return; }
       var url = sb.storage.from('negocios').getPublicUrl(upData.path).data.publicUrl;
       await sb.from('servicios_config').upsert({ id: serviceId, image_url: url, updated_at: new Date().toISOString() });
