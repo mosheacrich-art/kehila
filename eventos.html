@@ -971,15 +971,11 @@ const hoy = new Date();
         card.classList.add('evento-highlight');
         setTimeout(() => card.classList.remove('evento-highlight'), 2500);
       };
-      const scrollToTargetRetry = () => { scrollToTarget(); setTimeout(scrollToTarget, 400); };
-      // Esperar a que la página termine de cargar (imágenes incluidas) antes
-      // de saltar — si se hace demasiado pronto, el navegador puede restaurar
-      // su propio scroll (o el layout aún cambiante por imágenes) y deshacerlo.
-      if (document.readyState === 'complete') {
-        setTimeout(scrollToTargetRetry, 150);
-      } else {
-        window.addEventListener('load', () => setTimeout(scrollToTargetRetry, 150), { once: true });
-      }
+      // Reintenta varias veces con retrasos crecientes: las imágenes de
+      // los flyers siguen cargando y desplazando el layout durante un rato,
+      // así que un solo intento (incluso esperando 'load') puede quedar
+      // corto o largo según cuánto tarden en llegar.
+      [200, 600, 1200, 2000].forEach(delay => setTimeout(scrollToTarget, delay));
     }
   }
   loadEventos();
