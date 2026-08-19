@@ -412,6 +412,10 @@
 <script src="js/nav.js"></script>
 <script src="js/media.js"></script>
 <script>
+  // Evita que el navegador restaure su propio scroll y pelee con el salto
+  // manual a una tarjeta concreta (ver deep-link ?evento=ID más abajo).
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
   requireAuth();
   initNav('eventos');
 
@@ -957,13 +961,21 @@ const hoy = new Date();
     // saltar directo a esa tarjeta y resaltarla un momento.
     const targetId = new URLSearchParams(location.search).get('evento');
     if (targetId) {
-      setTimeout(() => {
+      const scrollToTarget = () => {
         const card = document.getElementById('evcard-' + targetId);
         if (!card) return;
         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
         card.classList.add('evento-highlight');
         setTimeout(() => card.classList.remove('evento-highlight'), 2500);
-      }, 50);
+      };
+      // Esperar a que la página termine de cargar (imágenes incluidas) antes
+      // de saltar — si se hace demasiado pronto, el navegador puede restaurar
+      // su propio scroll (o el layout aún cambiante por imágenes) y deshacerlo.
+      if (document.readyState === 'complete') {
+        setTimeout(scrollToTarget, 150);
+      } else {
+        window.addEventListener('load', () => setTimeout(scrollToTarget, 150), { once: true });
+      }
     }
   }
   loadEventos();
