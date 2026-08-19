@@ -964,17 +964,21 @@ const hoy = new Date();
       const scrollToTarget = () => {
         const card = document.getElementById('evcard-' + targetId);
         if (!card) return;
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Salto instantáneo (no 'smooth'): una animación larga se puede
+        // interrumpir a medias si algo más reordena el layout mientras
+        // tanto (imágenes que siguen cargando, etc.) — instantáneo evita eso.
+        card.scrollIntoView({ behavior: 'auto', block: 'center' });
         card.classList.add('evento-highlight');
         setTimeout(() => card.classList.remove('evento-highlight'), 2500);
       };
+      const scrollToTargetRetry = () => { scrollToTarget(); setTimeout(scrollToTarget, 400); };
       // Esperar a que la página termine de cargar (imágenes incluidas) antes
       // de saltar — si se hace demasiado pronto, el navegador puede restaurar
       // su propio scroll (o el layout aún cambiante por imágenes) y deshacerlo.
       if (document.readyState === 'complete') {
-        setTimeout(scrollToTarget, 150);
+        setTimeout(scrollToTargetRetry, 150);
       } else {
-        window.addEventListener('load', () => setTimeout(scrollToTarget, 150), { once: true });
+        window.addEventListener('load', () => setTimeout(scrollToTargetRetry, 150), { once: true });
       }
     }
   }
