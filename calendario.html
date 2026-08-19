@@ -293,6 +293,15 @@
   </div>
 </div>
 
+<!-- Lightbox: ver flyer de evento a tamaño completo (mismo patrón que home.html) -->
+<div id="evento-lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1100;flex-direction:column;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this) closeEventoLightbox()">
+  <button onclick="closeEventoLightbox()" aria-label="Cerrar" style="position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1;">
+    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+  </button>
+  <img id="evento-lightbox-img" src="" alt="" style="display:block;width:auto;max-width:100%;max-height:80vh;object-fit:contain;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+  <p id="evento-lightbox-title" style="color:#fff;font-weight:700;font-size:1.05rem;text-align:center;margin-top:16px;max-width:600px;"></p>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
@@ -627,7 +636,7 @@ async function loadComunidadEventos(year, month) {
     const from = `${year}-${String(month+1).padStart(2,'0')}-01`;
     const to   = `${year}-${String(month+1).padStart(2,'0')}-${new Date(year,month+1,0).getDate()}`;
     const { data } = await sb.from('eventos')
-      .select('id, titulo, fecha, hora, lugar, descripcion')
+      .select('id, titulo, fecha, hora, lugar, descripcion, imagen_url')
       .gte('fecha', from).lte('fecha', to);
     if (data) {
       data.forEach(ev => {
@@ -640,6 +649,7 @@ async function loadComunidadEventos(year, month) {
             hora: ev.hora || null,
             lugar: ev.lugar || null,
             descripcion: ev.descripcion || null,
+            imagen_url: ev.imagen_url || null,
             tipo: 'comunidad'
           });
         }
@@ -975,12 +985,14 @@ function selectDate(key) {
       // llevan un enlace directo al evento.
       const isEventosTable = ev.id.startsWith('evt-');
       const realId = isEventosTable ? ev.id.slice(4) : null;
-      html += `<div class="cal-ev-item" id="calev-${ev.id}">
+      const hasFlyer = !!ev.imagen_url;
+      html += `<div class="cal-ev-item" id="calev-${ev.id}" ${hasFlyer ? `style="cursor:pointer;" onclick="openEventoLightbox('${key}','${ev.id}')"` : ''}>
         ${_calIsAdmin && !isEventosTable ? `<button class="cal-ev-item-del" onclick="deleteCalEv('${ev.id}','${key}',event)" title="Eliminar">✕</button>` : ''}
+        ${hasFlyer ? `<img src="${ev.imagen_url}" alt="${ev.titulo}" style="width:100%;border-radius:6px;margin-bottom:8px;display:block;">` : ''}
         <div class="cal-ev-item-title">${ev.titulo}</div>
         ${ev.hora ? `<div class="cal-ev-item-hora">🕐 ${ev.hora}</div>` : ''}
         ${ev.descripcion ? `<div class="cal-ev-item-desc">${ev.descripcion}</div>` : ''}
-        ${isEventosTable ? `<a class="cal-ev-item-link" href="eventos.html?evento=${realId}">Ver en Eventos →</a>` : ''}
+        ${isEventosTable ? `<a class="cal-ev-item-link" href="eventos.html?evento=${realId}" onclick="event.stopPropagation()">Ver en Eventos →</a>` : ''}
       </div>`;
     });
     hasContent = true;
@@ -1010,6 +1022,25 @@ function selectDate(key) {
 
   document.getElementById('cal-side-detail').innerHTML = html;
 }
+
+function openEventoLightbox(key, id) {
+  const ev = (customEventsMap[key] || []).find(e => e.id === id);
+  if (!ev || !ev.imagen_url) return;
+  document.getElementById('evento-lightbox-img').src = ev.imagen_url;
+  document.getElementById('evento-lightbox-img').alt = ev.titulo || '';
+  document.getElementById('evento-lightbox-title').textContent = ev.titulo || '';
+  document.getElementById('evento-lightbox').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEventoLightbox() {
+  document.getElementById('evento-lightbox').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('evento-lightbox').style.display === 'flex') closeEventoLightbox();
+});
 
 function showCalAddForm(key) { document.getElementById(`cal-add-form-${key}`).style.display = ''; }
 function hideCalAddForm(key) { document.getElementById(`cal-add-form-${key}`).style.display = 'none'; }
