@@ -960,17 +960,14 @@ const hoy = new Date();
     // Si venimos de un enlace del calendario (eventos.html?evento=ID),
     // saltar directo a esa tarjeta y resaltarla un momento.
     const targetId = new URLSearchParams(location.search).get('evento');
-    console.log('[DEBUG deep-link] targetId=', targetId);
     if (targetId) {
       const scrollToTarget = () => {
         const card = document.getElementById('evcard-' + targetId);
-        console.log('[DEBUG deep-link] scrollToTarget fired, card found=', !!card, card ? card.getBoundingClientRect() : null);
         if (!card) return;
         // Salto instantáneo (no 'smooth'): una animación larga se puede
         // interrumpir a medias si algo más reordena el layout mientras
         // tanto (imágenes que siguen cargando, etc.) — instantáneo evita eso.
         card.scrollIntoView({ behavior: 'auto', block: 'center' });
-        console.log('[DEBUG deep-link] after scrollIntoView, scrollY=', window.scrollY);
         card.classList.add('evento-highlight');
         setTimeout(() => card.classList.remove('evento-highlight'), 2500);
       };
