@@ -113,7 +113,7 @@
     .cal-side {
       background: var(--color-white); border-radius: var(--radius-md);
       box-shadow: var(--shadow-sm); padding: 20px;
-      position: sticky; top: 20px; max-height: calc(100vh - 80px); overflow-y: auto;
+      position: sticky; top: 20px; align-self: start;
     }
     .cal-side-title { font-size: .9375rem; font-weight: 700; color: var(--color-text); margin-bottom: 14px; }
     .cal-empty { text-align: center; color: var(--color-text-light); font-size: .875rem; padding: 24px 0; }
@@ -986,14 +986,20 @@ function selectDate(key) {
       const isEventosTable = ev.id.startsWith('evt-');
       const realId = isEventosTable ? ev.id.slice(4) : null;
       const hasFlyer = !!ev.imagen_url;
-      html += `<div class="cal-ev-item" id="calev-${ev.id}" ${hasFlyer ? `style="cursor:pointer;" onclick="openEventoLightbox('${key}','${ev.id}')"` : ''}>
-        ${_calIsAdmin && !isEventosTable ? `<button class="cal-ev-item-del" onclick="deleteCalEv('${ev.id}','${key}',event)" title="Eliminar">✕</button>` : ''}
-        ${hasFlyer ? `<img src="${ev.imagen_url}" alt="${ev.titulo}" style="width:100%;border-radius:6px;margin-bottom:8px;display:block;">` : ''}
+      const evBody = `
         <div class="cal-ev-item-title">${ev.titulo}</div>
         ${ev.hora ? `<div class="cal-ev-item-hora">🕐 ${ev.hora}</div>` : ''}
         ${ev.descripcion ? `<div class="cal-ev-item-desc">${ev.descripcion}</div>` : ''}
-        ${isEventosTable ? `<a class="cal-ev-item-link" href="eventos.html?evento=${realId}" onclick="event.stopPropagation()">Ver en Eventos →</a>` : ''}
-      </div>`;
+        ${isEventosTable ? `<a class="cal-ev-item-link" href="eventos.html?evento=${realId}" onclick="event.stopPropagation()">Ver en Eventos →</a>` : ''}`;
+      html += hasFlyer
+        ? `<div class="cal-ev-item" id="calev-${ev.id}" style="cursor:pointer;display:flex;gap:10px;align-items:flex-start;" onclick="openEventoLightbox('${key}','${ev.id}')">
+            <img src="${ev.imagen_url}" alt="${ev.titulo}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0;">
+            <div style="flex:1;min-width:0;">${evBody}</div>
+          </div>`
+        : `<div class="cal-ev-item" id="calev-${ev.id}">
+            ${_calIsAdmin && !isEventosTable ? `<button class="cal-ev-item-del" onclick="deleteCalEv('${ev.id}','${key}',event)" title="Eliminar">✕</button>` : ''}
+            ${evBody}
+          </div>`;
     });
     hasContent = true;
   }
