@@ -961,21 +961,29 @@ const hoy = new Date();
     // saltar directo a esa tarjeta y resaltarla un momento.
     const targetId = new URLSearchParams(location.search).get('evento');
     if (targetId) {
+      // Un único salto (no varios reintentos, que "peleaban" entre sí y con
+      // cualquier scroll manual del usuario y se sentía como un bug) — se
+      // dispara en cuanto las imágenes de las tarjetas terminan de cargar
+      // (para que el layout ya esté estable), con un margen de seguridad
+      // por si alguna imagen tarda demasiado o falla.
+      let scrolled = false;
       const scrollToTarget = () => {
+        if (scrolled) return;
+        scrolled = true;
         const card = document.getElementById('evcard-' + targetId);
         if (!card) return;
-        // Salto instantáneo (no 'smooth'): una animación larga se puede
-        // interrumpir a medias si algo más reordena el layout mientras
-        // tanto (imágenes que siguen cargando, etc.) — instantáneo evita eso.
         card.scrollIntoView({ behavior: 'auto', block: 'center' });
         card.classList.add('evento-highlight');
         setTimeout(() => card.classList.remove('evento-highlight'), 2500);
       };
-      // Reintenta varias veces con retrasos crecientes: las imágenes de
-      // los flyers siguen cargando y desplazando el layout durante un rato,
-      // así que un solo intento (incluso esperando 'load') puede quedar
-      // corto o largo según cuánto tarden en llegar.
-      [200, 600, 1200, 2000].forEach(delay => setTimeout(scrollToTarget, delay));
+      const pendingImgs = [...document.querySelectorAll('#eventos-list img')].filter(img => !img.complete);
+      let remaining = pendingImgs.length;
+      pendingImgs.forEach(img => {
+        const onDone = () => { remaining--; if (remaining <= 0) scrollToTarget(); };
+        img.addEventListener('load', onDone, { once: true });
+        img.addEventListener('error', onDone, { once: true });
+      });
+      setTimeout(scrollToTarget, pendingImgs.length ? 1200 : 80);
     }
   }
   loadEventos();
