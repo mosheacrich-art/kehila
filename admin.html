@@ -4322,8 +4322,9 @@
     for (const file of files) {
       const url = await uploadMedia(file, 'comunidad');
       if (!url) continue;
-      const { error } = await sb.from('banner_slides').insert({ tipo: 'fotos_comunidad', imagen_url: url, activo: true, orden: nextOrden++ });
+      const { error } = await sb.from('banner_slides').insert({ tipo: 'fotos_comunidad', titulo: '', imagen_url: url, activo: true, orden: nextOrden++ });
       if (!error) okCount++;
+      else console.warn('banner_slides insert error:', error.message);
     }
 
     uploading.style.display = 'none';
