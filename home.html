@@ -373,6 +373,14 @@
     }
     .banner-admin-btn:hover { background: rgba(255,255,255,0.28); }
 
+    .community-photos-title {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin: 0 0 10px 2px;
+    }
+    @media (max-width: 480px) { .community-photos-title { font-size: 0.95rem; } }
+
     /* ─── Sección genérica ─── */
     .home-section {
       margin-bottom: 28px;
@@ -924,21 +932,24 @@
       </div>
 
       <!-- ══════════════════════════════════
-           3. BANNER CAROUSEL
+           3. FOTOS DE LA COMUNIDAD (carrusel del mes)
       ══════════════════════════════════ -->
-      <div class="banner-carousel" id="banner-carousel">
-        <div class="banner-slides" id="banner-slides-track"></div>
-        <div class="banner-dots" id="banner-dots"></div>
-        <button class="banner-btn-prev" id="banner-prev" aria-label="Anterior">
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
-        </button>
-        <button class="banner-btn-next" id="banner-next" aria-label="Siguiente">
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-        </button>
-        <button class="banner-admin-btn" id="banner-admin-btn">
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
-          <span data-i18n="home_banner_manage">Gestionar</span>
-        </button>
+      <div class="home-section" id="community-photos-section" style="display:none;">
+        <h3 class="community-photos-title" id="community-photos-title"></h3>
+        <div class="banner-carousel" id="banner-carousel">
+          <div class="banner-slides" id="banner-slides-track"></div>
+          <div class="banner-dots" id="banner-dots"></div>
+          <button class="banner-btn-prev" id="banner-prev" aria-label="Anterior">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+          </button>
+          <button class="banner-btn-next" id="banner-next" aria-label="Siguiente">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+          </button>
+          <a class="banner-admin-btn" id="banner-admin-btn" href="admin.html" style="text-decoration:none;">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+            <span data-i18n="home_banner_manage">Gestionar</span>
+          </a>
+        </div>
       </div>
 
       <!-- ══════════════════════════════════
@@ -1159,129 +1170,89 @@
     });
 
     /* ══════════════════════════════════════
-       BANNER CAROUSEL
+       FOTOS DE LA COMUNIDAD (carrusel del mes hebreo anterior)
+       Gestionadas desde admin.html → "Fotos de la comunidad".
     ══════════════════════════════════════ */
-    const BANNER_FALLBACK = [
-      { imagen_url: 'img/banner-bienvenidos.jpg', titulo: 'Bienvenidos a Jabad Barcelona', subtitulo: 'Tu comunidad judía en Barcelona', color: 'linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%)' }
-    ];
+    let cPhotos = [];
+    let cPhotoCurrent = 0;
+    let cPhotoTimer = null;
 
-    let bannerSlides = [];
-    let bannerCurrent = 0;
-    let bannerTimer = null;
+    function prevHebrewMonthLabel() {
+      try {
+        const now = new Date();
+        const d = new Date(now.getFullYear(), now.getMonth() - 1, 15);
+        const label = new Intl.DateTimeFormat('en-u-ca-hebrew', { month: 'long' }).format(d);
+        return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+      } catch(e) { return ''; }
+    }
 
-    function buildBannerSlide(s) {
+    function openImageLightbox(url) {
+      const scrollEl = document.getElementById('cartel-lightbox-scroll');
+      scrollEl.innerHTML = `<img src="${url}" alt="" style="display:block;width:auto;max-width:100%;max-height:85vh;object-fit:contain;">`;
+      scrollEl.scrollTop = 0;
+      document.getElementById('cartel-lightbox-hint').style.display = 'none';
+      document.getElementById('cartel-lightbox-link').style.display = 'none';
+      document.getElementById('cartel-lightbox').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function buildPhotoSlide(url) {
       const slide = document.createElement('div');
       slide.className = 'banner-slide';
-      if (s.href) slide.style.cursor = 'pointer';
-      if (s.href) slide.addEventListener('click', () => { window.location.href = s.href; });
-
-      const textHTML = `
-        ${s._cat ? `<div class="banner-slide-cat">${s._cat}</div>` : ''}
-        <div class="banner-slide-overlay">
-          <div class="banner-slide-text">
-            ${s.titulo ? `<div class="banner-slide-title">${s.titulo}</div>` : ''}
-            ${s.subtitulo ? `<div class="banner-slide-subtitle">${s.subtitulo}</div>` : ''}
-          </div>
+      slide.style.cursor = 'pointer';
+      slide.addEventListener('click', () => openImageLightbox(url));
+      slide.innerHTML = `
+        <div class="banner-img-wrap">
+          <img class="banner-img-blur" src="${url}" aria-hidden="true" loading="lazy">
+          <img class="banner-img-main" src="${url}" alt="" loading="lazy">
         </div>`;
-
-      // Función para construir una celda de slot con posición/zoom
-      function buildSlotCell(slotOrUrl, flex) {
-        const url  = typeof slotOrUrl === 'string' ? slotOrUrl : (slotOrUrl?.url || '');
-        const ox   = typeof slotOrUrl === 'object' ? (slotOrUrl?.pos_x ?? 50) : 50;
-        const oy   = typeof slotOrUrl === 'object' ? (slotOrUrl?.pos_y ?? 50) : 50;
-        const zoom = typeof slotOrUrl === 'object' ? (slotOrUrl?.zoom  ?? 1)  : 1;
-        if (!url) return `<div style="flex:${flex};height:100%;background:#2a3a5e;"></div>`;
-        return `<div style="flex:${flex};height:100%;position:relative;overflow:hidden;">
-          <img src="${url}" aria-hidden="true" style="position:absolute;inset:-8%;width:116%;height:116%;object-fit:cover;object-position:${ox}% ${oy}%;filter:blur(18px) brightness(0.5) saturate(1.2);pointer-events:none;">
-          <img src="${url}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${ox}% ${oy}%;transform:scale(${zoom});transform-origin:${ox}% ${oy}%;display:block;">
-        </div>`;
-      }
-
-      if (s.slots && s.slots.length) {
-        // Nuevo formato con layout
-        const layout = s.layout || 'single';
-        let cells = '';
-        if (layout === 'single') {
-          cells = buildSlotCell(s.slots[0], 1);
-        } else if (layout === 'split2') {
-          cells = buildSlotCell(s.slots[0], 1) + buildSlotCell(s.slots[1] || '', 1);
-        } else if (layout === 'mosaic_l') {
-          cells = buildSlotCell(s.slots[0], 1.6) + buildSlotCell(s.slots[1] || '', 1);
-        } else if (layout === 'mosaic_r') {
-          cells = buildSlotCell(s.slots[0], 1) + buildSlotCell(s.slots[1] || '', 1.6);
-        } else if (layout === 'split3') {
-          cells = buildSlotCell(s.slots[0], 1) + buildSlotCell(s.slots[1] || '', 1) + buildSlotCell(s.slots[2] || '', 1);
+      slide.querySelector('.banner-img-main').addEventListener('load', function() {
+        if (this.naturalWidth > 0 && this.naturalHeight > 0 && this.naturalWidth / this.naturalHeight < 1.4) {
+          this.classList.add('is-portrait');
         }
-        slide.innerHTML = `<div style="display:flex;width:100%;height:100%;gap:2px;">${cells}</div>${textHTML}`;
-      } else if (s.fotos && s.fotos.length >= 2) {
-        // Formato antiguo con múltiples fotos
-        const cols = s.fotos.map(f => buildSlotCell(f, 1)).join('');
-        slide.innerHTML = `<div style="display:flex;width:100%;height:100%;gap:2px;">${cols}</div>${textHTML}`;
-      } else if (s.imagen_url) {
-        // Formato antiguo foto única — usa blur adaptativo
-        slide.innerHTML = `
-          <div class="banner-img-wrap">
-            <img class="banner-img-blur" src="${s.imagen_url}" aria-hidden="true" loading="lazy">
-            <img class="banner-img-main" src="${s.imagen_url}" alt="${s.titulo || ''}" loading="lazy"
-              onerror="this.closest('.banner-img-wrap').style.display='none'">
-          </div>
-          ${textHTML}`;
-        slide.querySelector('.banner-img-main').addEventListener('load', function() {
-          if (this.naturalWidth > 0 && this.naturalHeight > 0 && this.naturalWidth / this.naturalHeight < 1.4) {
-            this.classList.add('is-portrait');
-          }
-        });
-      } else {
-        slide.innerHTML = `
-          <div class="banner-slide-placeholder" style="background:${s.color || '#1a1a2e'}">
-          </div>
-          ${textHTML}`;
-      }
+      });
       return slide;
     }
 
-    function bannerGoTo(idx) {
-      bannerCurrent = (idx + bannerSlides.length) % bannerSlides.length;
-      document.getElementById('banner-slides-track').style.transform = `translateX(-${bannerCurrent * 100}%)`;
-      document.querySelectorAll('.banner-dot').forEach((d, i) => d.classList.toggle('active', i === bannerCurrent));
+    function cPhotoGoTo(idx) {
+      cPhotoCurrent = (idx + cPhotos.length) % cPhotos.length;
+      document.getElementById('banner-slides-track').style.transform = `translateX(-${cPhotoCurrent * 100}%)`;
+      document.querySelectorAll('.banner-dot').forEach((d, i) => d.classList.toggle('active', i === cPhotoCurrent));
     }
 
-    function startBannerTimer() {
-      clearInterval(bannerTimer);
-      if (bannerSlides.length > 1) bannerTimer = setInterval(() => bannerGoTo(bannerCurrent + 1), 10000);
+    function startCPhotoTimer() {
+      clearInterval(cPhotoTimer);
+      if (cPhotos.length > 1) cPhotoTimer = setInterval(() => cPhotoGoTo(cPhotoCurrent + 1), 4500);
     }
 
-    function renderBanner(slides) {
-      bannerSlides = slides;
+    function renderCommunityPhotos(urls) {
+      cPhotos = urls;
+      const section = document.getElementById('community-photos-section');
       const track = document.getElementById('banner-slides-track');
       const dots = document.getElementById('banner-dots');
       track.innerHTML = '';
       dots.innerHTML = '';
 
-      if (!slides.length) {
-        track.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1b2e5e 0%,#0f3460 100%);flex-shrink:0;">
-          <div style="text-align:center;color:#fff;opacity:0.7;">
-            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:40px;height:40px;margin:0 auto 10px;display:block;"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M13.5 12a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
-            <p style="font-size:0.85rem;margin:0;">Sin banners activos</p>
-          </div>
-        </div>`;
-        return;
-      }
+      if (!urls.length) { section.style.display = 'none'; return; }
+      section.style.display = '';
 
-      slides.forEach((s, i) => {
-        track.appendChild(buildBannerSlide(s));
+      document.getElementById('community-photos-title').textContent =
+        `Momentos inolvidables de nuestra comunidad en ${prevHebrewMonthLabel()}`;
+
+      urls.forEach((url, i) => {
+        track.appendChild(buildPhotoSlide(url));
         const dot = document.createElement('button');
         dot.className = 'banner-dot' + (i === 0 ? ' active' : '');
-        dot.setAttribute('aria-label', 'Slide ' + (i + 1));
-        dot.addEventListener('click', () => { bannerGoTo(i); startBannerTimer(); });
+        dot.setAttribute('aria-label', 'Foto ' + (i + 1));
+        dot.addEventListener('click', () => { cPhotoGoTo(i); startCPhotoTimer(); });
         dots.appendChild(dot);
       });
 
-      document.getElementById('banner-prev').addEventListener('click', () => { bannerGoTo(bannerCurrent - 1); startBannerTimer(); });
-      document.getElementById('banner-next').addEventListener('click', () => { bannerGoTo(bannerCurrent + 1); startBannerTimer(); });
+      document.getElementById('banner-prev').addEventListener('click', () => { cPhotoGoTo(cPhotoCurrent - 1); startCPhotoTimer(); });
+      document.getElementById('banner-next').addEventListener('click', () => { cPhotoGoTo(cPhotoCurrent + 1); startCPhotoTimer(); });
 
-      bannerGoTo(0);
-      startBannerTimer();
+      cPhotoGoTo(0);
+      startCPhotoTimer();
     }
 
     /**
@@ -1348,556 +1319,19 @@
         const btn = document.getElementById('banner-admin-btn');
         if (btn) btn.style.display = 'flex';
       }
-      if (sb) {
-        try {
-          const { data } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
-          if (data?.length) {
-            // Enriquecer con base64 del caché local si los slots de Supabase tienen URLs vacías
-            const localMap = {};
-            _lsBannerGet().forEach(s => { if (s.id) localMap[String(s.id)] = s; });
-            const merged = data.map(s => {
-              const ls = localMap[String(s.id)];
-              if (!ls) return s;
-              // Si los slots de Supabase tienen url vacía pero los locales tienen base64, usar el local
-              const mergedSlots = (s.slots || []).map((sl, i) => {
-                const lsl = ls.slots?.[i];
-                return (!sl.url && lsl?.url) ? { ...sl, url: lsl.url } : sl;
-              });
-              return { ...s, slots: mergedSlots.length ? mergedSlots : (ls.slots || []),
-                imagen_url: s.imagen_url || ls.imagen_url || '' };
-            });
-            _lsBannerSave(merged); // sincronizar caché local con Supabase
-            renderBanner(merged.filter(s => s.tipo !== 'informativo'));
-            renderCarteles(merged.filter(s => s.tipo === 'informativo'));
-            return;
-          }
-        } catch(e) { /* fallback a localStorage */ }
-      }
-      const lsSlides = _lsBannerGet();
-      renderBanner(lsSlides.filter(s => s.tipo !== 'informativo'));
-      renderCarteles(lsSlides.filter(s => s.tipo === 'informativo'));
-    }
-
-    /* ── Admin: localStorage como caché offline ── */
-    function _lsBannerGet() {
-      try { return JSON.parse(localStorage.getItem('banner_custom') || '[]'); } catch(e) { return []; }
-    }
-    function _lsBannerSave(arr) {
-      // Guardar en localStorage — si hay base64 las guardamos tal cual; si hay URLs de Storage, mejor aún
-      try { localStorage.setItem('banner_custom', JSON.stringify(arr)); }
-      catch(e) {
-        // Cuota superada: guardar versión ligera (sin base64)
-        const light = arr.map(s => ({
-          ...s,
-          imagen_url: s.imagen_url?.startsWith('data:') ? '' : (s.imagen_url || ''),
-          slots: (s.slots || []).map(sl => ({ ...sl, url: sl.url?.startsWith('data:') ? '' : (sl.url || '') }))
-        }));
-        try { localStorage.setItem('banner_custom', JSON.stringify(light)); } catch(_) {}
-      }
-    }
-
-    /* ── Subir imagen al bucket "banners" de Supabase Storage ── */
-    async function uploadBannerImage(dataUrl, filename) {
-      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
-      if (!sb || !dataUrl.startsWith('data:')) return null;
+      if (!sb) { renderCommunityPhotos([]); renderCarteles([]); return; }
       try {
-        const res  = await fetch(dataUrl);
-        const blob = await res.blob();
-        const path = `slides/${Date.now()}_${filename}`;
-        const { data, error } = await sb.storage.from('banners').upload(path, blob, {
-          contentType: 'image/jpeg', upsert: false
-        });
-        if (error) return null;
-        const { data: pub } = sb.storage.from('banners').getPublicUrl(data.path);
-        return pub?.publicUrl || null;
-      } catch(e) { return null; }
+        const [{ data: photos }, { data: carteles }] = await Promise.all([
+          sb.from('banner_slides').select('imagen_url, orden').eq('tipo', 'fotos_comunidad').eq('activo', true).order('orden'),
+          sb.from('banner_slides').select('*').eq('tipo', 'informativo').eq('activo', true).order('orden'),
+        ]);
+        renderCommunityPhotos((photos || []).map(p => p.imagen_url).filter(Boolean));
+        renderCarteles(carteles || []);
+      } catch(e) {
+        renderCommunityPhotos([]);
+        renderCarteles([]);
+      }
     }
-
-    /* ── Banner: layouts disponibles ── */
-    const BANNER_LAYOUTS = [
-      { id: 'single',    label: '1 foto',      slots: 1, icon: '▬' },
-      { id: 'split2',    label: '2 iguales',   slots: 2, icon: '▬▬' },
-      { id: 'mosaic_l',  label: 'Grande izq.', slots: 2, icon: '▬▬' },
-      { id: 'mosaic_r',  label: 'Grande der.', slots: 2, icon: '▬▬' },
-      { id: 'split3',    label: '3 columnas',  slots: 3, icon: '▬▬▬' },
-    ];
-
-    /* ── Drag-to-position helper ── */
-    function setupPosDrag(wrap, img, onUpdate) {
-      let dragging = false, sx, sy, sox, soy;
-      const start = (cx, cy) => {
-        dragging = true; sx = cx; sy = cy;
-        sox = parseFloat(img.dataset.ox || 50); soy = parseFloat(img.dataset.oy || 50);
-        wrap.style.cursor = 'grabbing';
-      };
-      const move = (cx, cy) => {
-        if (!dragging) return;
-        const r = wrap.getBoundingClientRect();
-        const ox = Math.max(0, Math.min(100, sox - (cx - sx) / r.width  * 100));
-        const oy = Math.max(0, Math.min(100, soy - (cy - sy) / r.height * 100));
-        img.dataset.ox = ox; img.dataset.oy = oy;
-        img.style.objectPosition = `${ox}% ${oy}%`;
-        img.style.transformOrigin = `${ox}% ${oy}%`;
-        onUpdate(ox, oy);
-      };
-      const end = () => { dragging = false; wrap.style.cursor = 'grab'; };
-      wrap.addEventListener('mousedown',  e => { start(e.clientX, e.clientY); e.preventDefault(); });
-      document.addEventListener('mousemove', e => move(e.clientX, e.clientY));
-      document.addEventListener('mouseup', end);
-      wrap.addEventListener('touchstart',  e => { start(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
-      document.addEventListener('touchmove',  e => { if (dragging) { move(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); } }, { passive: false });
-      document.addEventListener('touchend', end);
-      wrap.style.cursor = 'grab';
-    }
-
-    function abrirBannerAdmin() {
-      if (document.getElementById('banner-overlay')) return;
-
-      const TIPOS_BANNER = [
-        { value: 'evento',      label: 'Evento próximo' },
-        { value: 'novedad',     label: 'Novedad' },
-        { value: 'comunicado',  label: 'Comunicado' },
-        { value: 'shabat',      label: 'Shabat especial' },
-        { value: 'festividad',  label: 'Festividad' },
-        { value: 'donativos',   label: 'Campaña de donativos' },
-      ];
-
-      const ENLACES_BANNER = [
-        { value: '',              label: 'Sin enlace' },
-        { value: 'eventos.html',  label: 'Eventos' },
-        { value: 'calendario.html', label: 'Calendario' },
-        { value: 'donativos.html',label: 'Donativos' },
-        { value: 'kosher.html',   label: 'Kosher' },
-        { value: 'rav.html',      label: 'Rav / Preguntas' },
-        { value: 'shiurim.html',  label: 'Shiurim' },
-        { value: 'servicios.html',label: 'Servicios' },
-      ];
-
-      const iStyle = 'width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;box-sizing:border-box;color:#1a202c;background:#fff;transition:border-color .15s;';
-      const labelStyle = 'display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;';
-      const groupStyle = 'margin-bottom:14px;';
-
-      const overlay = document.createElement('div');
-      overlay.id = 'banner-overlay';
-      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px;';
-      overlay.innerHTML = `
-        <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,0.22);">
-
-          <!-- Header -->
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #f1f5f9;flex-shrink:0;">
-            <div>
-              <h3 style="font-size:1.05rem;font-weight:700;color:#1a202c;margin:0;font-family:var(--font-brand);">Anuncios del banner</h3>
-              <p style="font-size:0.75rem;color:#94a3b8;margin:3px 0 0;">Novedades y comunicados de Jabad Barcelona</p>
-            </div>
-            <button id="btn-cerrar-banner" style="background:none;border:none;cursor:pointer;color:#94a3b8;padding:6px;line-height:0;border-radius:8px;">
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
-            </button>
-          </div>
-
-          <!-- Slides actuales -->
-          <div style="padding:16px 24px 0;flex-shrink:0;">
-            <p style="${labelStyle}">Anuncios activos</p>
-            <div id="banner-list-container"></div>
-          </div>
-
-          <!-- Formulario nuevo anuncio -->
-          <div style="padding:16px 24px 20px;overflow-y:auto;flex:1;">
-            <div style="border-top:1px solid #f1f5f9;padding-top:16px;margin-bottom:4px;">
-              <p id="form-section-title" style="font-size:0.875rem;font-weight:700;color:#1b2e5e;margin:0 0 14px;">Nuevo anuncio</p>
-
-              <div style="${groupStyle}">
-                <label style="${labelStyle}">Tipo de anuncio <span style="color:#ef4444;">*</span></label>
-                <select id="bnew-tipo" style="${iStyle}">
-                  ${TIPOS_BANNER.map(t => `<option value="${t.value}">${t.label}</option>`).join('')}
-                </select>
-              </div>
-
-              <div style="${groupStyle}">
-                <label style="${labelStyle}">Título <span style="color:#ef4444;">*</span></label>
-                <input id="bnew-titulo" type="text" placeholder="Ej. Seudá de Purim — ¡Este sábado!" style="${iStyle}">
-                <p id="bnew-titulo-err" style="display:none;color:#ef4444;font-size:0.75rem;margin-top:4px;">El título es obligatorio.</p>
-              </div>
-
-              <div style="${groupStyle}">
-                <label style="${labelStyle}">Descripción <span style="color:#94a3b8;font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
-                <input id="bnew-subtitulo" type="text" placeholder="Breve descripción — 1 o 2 líneas" style="${iStyle}">
-              </div>
-
-              <!-- Layout selector -->
-              <div style="${groupStyle}">
-                <label style="${labelStyle}">Diseño del banner</label>
-                <div id="layout-selector" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
-                  ${BANNER_LAYOUTS.map(l => `
-                    <button type="button" data-layout="${l.id}" style="border:2px solid #e2e8f0;border-radius:8px;padding:7px 4px 5px;background:#f8fafc;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center;">
-                      <div style="font-size:0.6rem;letter-spacing:.05em;color:#1b2e5e;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${l.label}</div>
-                      <div style="display:flex;gap:2px;height:18px;border-radius:3px;overflow:hidden;">
-                        ${l.id === 'single'   ? '<div style="flex:1;background:#1b2e5e;border-radius:2px;"></div>' : ''}
-                        ${l.id === 'split2'   ? '<div style="flex:1;background:#1b2e5e;border-radius:2px;"></div><div style="flex:1;background:#c9a84c;border-radius:2px;"></div>' : ''}
-                        ${l.id === 'mosaic_l' ? '<div style="flex:1.6;background:#1b2e5e;border-radius:2px;"></div><div style="flex:1;background:#c9a84c;border-radius:2px;"></div>' : ''}
-                        ${l.id === 'mosaic_r' ? '<div style="flex:1;background:#c9a84c;border-radius:2px;"></div><div style="flex:1.6;background:#1b2e5e;border-radius:2px;"></div>' : ''}
-                        ${l.id === 'split3'   ? '<div style="flex:1;background:#1b2e5e;border-radius:2px;"></div><div style="flex:1;background:#c9a84c;border-radius:2px;"></div><div style="flex:1;background:#4a7c5e;border-radius:2px;"></div>' : ''}
-                      </div>
-                    </button>`).join('')}
-                </div>
-              </div>
-
-              <!-- Slots de fotos (se generan dinámicamente) -->
-              <div id="banner-slots-wrap" style="${groupStyle}">
-                <label style="${labelStyle}">Fotos</label>
-                <div id="banner-slots"></div>
-              </div>
-
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-                <div>
-                  <label style="${labelStyle}">Enlace al pulsar</label>
-                  <select id="bnew-enlace" style="${iStyle}">
-                    ${ENLACES_BANNER.map(e => `<option value="${e.value}">${e.label}</option>`).join('')}
-                  </select>
-                </div>
-                <div>
-                  <label style="${labelStyle}">Válido hasta <span style="color:#94a3b8;font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
-                  <input id="bnew-hasta" type="date" style="${iStyle}">
-                </div>
-              </div>
-
-              <button id="bnew-save" style="width:100%;background:#1b2e5e;color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:0.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                Publicar anuncio
-              </button>
-            </div>
-          </div>
-        </div>`;
-      document.body.appendChild(overlay);
-
-      // Cerrar
-      overlay.querySelector('#btn-cerrar-banner').addEventListener('click', () => overlay.remove());
-      overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
-
-      const TIPO_COLORS = {
-        evento:     'linear-gradient(135deg,#1b2e5e 0%,#2d4a9e 100%)',
-        novedad:    'linear-gradient(135deg,#1a3a2a 0%,#1f6b4a 100%)',
-        comunicado: 'linear-gradient(135deg,#2a1a3a 0%,#5a2a8e 100%)',
-        shabat:     'linear-gradient(135deg,#3a2a10 0%,#8a6420 100%)',
-        festividad: 'linear-gradient(135deg,#3a1a10 0%,#9a3010 100%)',
-        donativos:  'linear-gradient(135deg,#1a2a3a 0%,#1a4a6e 100%)',
-      };
-
-      let _cachedSlides = [];
-      let _editingId = null;
-
-      async function refreshList() {
-        const sb = typeof getSupabase === 'function' ? getSupabase() : null;
-        const container = overlay.querySelector('#banner-list-container');
-        container.innerHTML = '<p style="font-size:0.8rem;color:#94a3b8;padding:6px 0;">Cargando…</p>';
-
-        if (sb) {
-          try {
-            const { data } = await sb.from('banner_slides').select('*').eq('activo', true).order('orden');
-            _cachedSlides = data || [];
-          } catch(e) { _cachedSlides = _lsBannerGet(); }
-        } else {
-          _cachedSlides = _lsBannerGet();
-        }
-
-        if (!_cachedSlides.length) {
-          container.innerHTML = '<p style="font-size:0.82rem;color:#94a3b8;padding:8px 0 12px;">Sin anuncios activos — se muestra el banner predeterminado.</p>';
-          return;
-        }
-
-        container.innerHTML = _cachedSlides.map((s, i) => {
-          const tipoLabel = TIPOS_BANNER.find(t => t.value === s.tipo)?.label || s.tipo || 'Anuncio';
-          return `
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;">
-              ${s.imagen_url
-                ? `<img src="${s.imagen_url}" style="width:72px;height:44px;object-fit:cover;border-radius:7px;flex-shrink:0;">`
-                : `<div style="width:72px;height:44px;border-radius:7px;background:${s.color||'#1b2e5e'};flex-shrink:0;"></div>`}
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#c9a84c;margin-bottom:2px;">${tipoLabel}</div>
-                <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#1a202c;">${s.titulo||'(sin título)'}</div>
-                ${s.subtitulo ? `<div style="font-size:0.73rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.subtitulo}</div>` : ''}
-              </div>
-              <div style="display:flex;gap:5px;flex-shrink:0;">
-                <button data-edit-idx="${i}" style="background:#eff6ff;border:1px solid #bfdbfe;cursor:pointer;color:#1d4ed8;padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;">Editar</button>
-                <button data-del-id="${s.id}" data-del-idx="${i}" style="background:#fef2f2;border:1px solid #fecaca;cursor:pointer;color:#dc2626;padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;">Eliminar</button>
-              </div>
-            </div>`;
-        }).join('');
-
-        container.querySelectorAll('[data-edit-idx]').forEach(btn => {
-          btn.addEventListener('click', () => startEdit(_cachedSlides[parseInt(btn.dataset.editIdx)]));
-        });
-
-        container.querySelectorAll('[data-del-id]').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const id  = btn.dataset.delId;
-            const idx = parseInt(btn.dataset.delIdx);
-            btn.disabled = true;
-            btn.textContent = '…';
-
-            // Borrar en Supabase
-            const sb2 = typeof getSupabase === 'function' ? getSupabase() : null;
-            if (sb2 && id && !String(id).startsWith('ls_')) {
-              try { await sb2.from('banner_slides').delete().eq('id', id); } catch(e) {}
-            }
-            // Borrar en localStorage
-            const arr = _lsBannerGet();
-            const lsIdx = arr.findIndex(s => s.id === id);
-            if (lsIdx !== -1) arr.splice(lsIdx, 1);
-            _lsBannerSave(arr);
-
-            loadBanner();
-            refreshList();
-          });
-        });
-      }
-
-      refreshList();
-
-      function startEdit(s) {
-        if (!s) return;
-        _editingId = s.id;
-        overlay.querySelector('#bnew-titulo').value    = s.titulo    || '';
-        overlay.querySelector('#bnew-subtitulo').value = s.subtitulo || '';
-        overlay.querySelector('#bnew-hasta').value     = s.hasta     || '';
-        const tipoSel   = overlay.querySelector('#bnew-tipo');
-        const enlaceSel = overlay.querySelector('#bnew-enlace');
-        if (tipoSel   && s.tipo) tipoSel.value   = s.tipo;
-        if (enlaceSel && s.href) enlaceSel.value  = s.href;
-        _activeLayout = s.layout || 'single';
-        _slotData = (s.slots && s.slots.length)
-          ? s.slots.map(sl => ({ url: sl.url || '', pos_x: sl.pos_x ?? 50, pos_y: sl.pos_y ?? 50, zoom: sl.zoom ?? 1 }))
-          : [{ url: s.imagen_url || '', pos_x: 50, pos_y: 50, zoom: 1 }];
-        const layoutBtn = overlay.querySelector(`#layout-selector button[data-layout="${_activeLayout}"]`);
-        if (layoutBtn) layoutBtn.click(); else renderSlots();
-        overlay.querySelector('#form-section-title').textContent = 'Editar anuncio';
-        overlay.querySelector('#bnew-save').innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg> Guardar cambios';
-        overlay.querySelector('#bnew-titulo').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-
-      /* ── Estado slots ── */
-      let _activeLayout = 'single';
-      // slotData[i] = { url, pos_x, pos_y, zoom }
-      let _slotData = [{ url:'', pos_x:50, pos_y:50, zoom:1 }];
-
-      function slotCount() {
-        return BANNER_LAYOUTS.find(l => l.id === _activeLayout)?.slots || 1;
-      }
-
-      function renderSlots() {
-        const wrap = overlay.querySelector('#banner-slots');
-        const n = slotCount();
-        // Ajustar array
-        while (_slotData.length < n) _slotData.push({ url:'', pos_x:50, pos_y:50, zoom:1 });
-
-        wrap.innerHTML = '';
-        for (let i = 0; i < n; i++) {
-          const sd = _slotData[i];
-          const div = document.createElement('div');
-          div.style.cssText = 'margin-bottom:12px;';
-          div.innerHTML = `
-            <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:5px;">
-              ${n > 1 ? `Foto ${i+1}` : 'Foto'}
-            </div>
-            <label style="display:flex;align-items:center;gap:8px;border:1.5px dashed #cbd5e1;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:0.82rem;color:#64748b;background:#f8fafc;margin-bottom:5px;">
-              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M10.5 8.25h.008v.008H10.5V8.25Z"/></svg>
-              <span class="slot-file-label">Subir desde dispositivo</span>
-              <input type="file" class="slot-file" accept="image/*" style="display:none;" data-slot="${i}">
-            </label>
-            <input type="text" class="slot-url" placeholder="O pegar URL de imagen" data-slot="${i}"
-              style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.83rem;font-family:inherit;outline:none;box-sizing:border-box;color:#1a202c;background:#fff;margin-bottom:6px;"
-              value="${sd.url}">
-
-            <!-- Vista previa + posicionador -->
-            <div class="slot-preview-wrap" data-slot="${i}"
-              style="position:relative;width:100%;height:90px;border-radius:8px;overflow:hidden;background:#e2e8f0;${sd.url ? '' : 'display:none;'}cursor:grab;user-select:none;">
-              <img class="slot-preview-img" data-ox="${sd.pos_x}" data-oy="${sd.pos_y}"
-                src="${sd.url}"
-                style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${sd.pos_x}% ${sd.pos_y}%;transform:scale(${sd.zoom});transform-origin:${sd.pos_x}% ${sd.pos_y}%;display:block;">
-              <div style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.5);color:#fff;font-size:0.62rem;padding:2px 6px;border-radius:4px;pointer-events:none;">Arrastra para posicionar</div>
-            </div>
-
-            <!-- Zoom -->
-            <div style="display:${sd.url ? 'flex' : 'none'};align-items:center;gap:8px;margin-top:5px;" class="slot-zoom-row" data-slot="${i}">
-              <span style="font-size:0.72rem;color:#64748b;white-space:nowrap;">Zoom</span>
-              <input type="range" class="slot-zoom" data-slot="${i}" min="0.3" max="2.5" step="0.05" value="${sd.zoom}"
-                style="flex:1;accent-color:#1b2e5e;">
-              <span class="slot-zoom-val" style="font-size:0.72rem;color:#64748b;width:28px;text-align:right;">${Math.round(sd.zoom*100)}%</span>
-            </div>`;
-
-          wrap.appendChild(div);
-
-          // Drag-to-position
-          const pwrap = div.querySelector('.slot-preview-wrap');
-          const pimg  = div.querySelector('.slot-preview-img');
-          setupPosDrag(pwrap, pimg, (ox, oy) => { _slotData[i].pos_x = ox; _slotData[i].pos_y = oy; });
-
-          // Zoom slider
-          div.querySelector('.slot-zoom').addEventListener('input', function() {
-            const z = parseFloat(this.value);
-            _slotData[i].zoom = z;
-            pimg.style.transform = `scale(${z})`;
-            pimg.style.transformOrigin = `${_slotData[i].pos_x}% ${_slotData[i].pos_y}%`;
-            div.querySelector('.slot-zoom-val').textContent = Math.round(z * 100) + '%';
-          });
-
-          // File upload → intenta Supabase Storage, cae en base64
-          div.querySelector('.slot-file').addEventListener('change', async function() {
-            const file = this.files[0]; if (!file) return;
-            const label = div.querySelector('.slot-file-label');
-            label.textContent = 'Subiendo…';
-            const dataUrl = await resizeImageBanner(file);
-            if (!dataUrl) { label.textContent = 'Error al procesar imagen'; return; }
-            // Intenta subir a Supabase Storage (URL pública permanente)
-            const storageUrl = await uploadBannerImage(dataUrl, `slot${i}.jpg`);
-            const finalUrl = storageUrl || dataUrl; // fallback a base64 si Storage no disponible
-            label.textContent = storageUrl ? '✓ Guardada en servidor' : file.name;
-            _slotData[i].url = finalUrl;
-            div.querySelector('.slot-url').value = storageUrl ? storageUrl : '';
-            applySlotUrl(div, i, finalUrl);
-          });
-
-          // URL input
-          div.querySelector('.slot-url').addEventListener('input', function() {
-            const url = this.value.trim();
-            _slotData[i].url = url;
-            applySlotUrl(div, i, url);
-          });
-        }
-      }
-
-      function applySlotUrl(div, i, url) {
-        const pwrap = div.querySelector('.slot-preview-wrap');
-        const pimg  = div.querySelector('.slot-preview-img');
-        const zrow  = div.querySelector('.slot-zoom-row');
-        if (url) {
-          pimg.src = url;
-          pimg.style.objectPosition = `${_slotData[i].pos_x}% ${_slotData[i].pos_y}%`;
-          pwrap.style.display = 'relative';
-          pwrap.style.display = '';
-          zrow.style.display  = 'flex';
-        } else {
-          pwrap.style.display = 'none';
-          zrow.style.display  = 'none';
-        }
-      }
-
-      async function resizeImageBanner(file) {
-        return new Promise(resolve => {
-          const img = new Image();
-          const u = URL.createObjectURL(file);
-          img.onload = () => {
-            URL.revokeObjectURL(u);
-            const maxW = 1200, maxH = 600;
-            let w = img.width, h = img.height;
-            if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
-            if (h > maxH) { w = Math.round(w * maxH / h); h = maxH; }
-            const c = document.createElement('canvas'); c.width = w; c.height = h;
-            c.getContext('2d').drawImage(img, 0, 0, w, h);
-            resolve(c.toDataURL('image/jpeg', 0.88));
-          };
-          img.onerror = () => { URL.revokeObjectURL(u); resolve(null); };
-          img.src = u;
-        });
-      }
-
-      // Layout selector click
-      overlay.querySelectorAll('#layout-selector button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          _activeLayout = btn.dataset.layout;
-          overlay.querySelectorAll('#layout-selector button').forEach(b => {
-            b.style.borderColor = b === btn ? '#1b2e5e' : '#e2e8f0';
-            b.style.background  = b === btn ? '#eff6ff' : '#f8fafc';
-          });
-          renderSlots();
-        });
-      });
-      // Activar el primero por defecto
-      overlay.querySelector('#layout-selector button[data-layout="single"]').click();
-
-      // Guardar
-      overlay.querySelector('#bnew-save').addEventListener('click', async () => {
-        const titulo = overlay.querySelector('#bnew-titulo').value.trim();
-        const errEl  = overlay.querySelector('#bnew-titulo-err');
-        if (!titulo) { errEl.style.display = 'block'; overlay.querySelector('#bnew-titulo').focus(); return; }
-        errEl.style.display = 'none';
-
-        const saveBtn = overlay.querySelector('#bnew-save');
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'Publicando…';
-
-        const tipo      = overlay.querySelector('#bnew-tipo').value;
-        const subtitulo = overlay.querySelector('#bnew-subtitulo').value.trim();
-        const href      = overlay.querySelector('#bnew-enlace').value || null;
-        const hasta     = overlay.querySelector('#bnew-hasta').value || null;
-        const color     = TIPO_COLORS[tipo] || TIPO_COLORS.novedad;
-
-        const slots = _slotData.slice(0, slotCount()).map(sd => ({
-          url: sd.url, pos_x: Math.round(sd.pos_x), pos_y: Math.round(sd.pos_y), zoom: +sd.zoom.toFixed(2)
-        }));
-        const imagen_url = slots[0]?.url || '';
-
-        const newSlide = { tipo, titulo, subtitulo, imagen_url, color, href, hasta, activo: true,
-          layout: _activeLayout, slots };
-
-        const sb = typeof getSupabase === 'function' ? getSupabase() : null;
-        let savedToSupabase = false;
-        if (sb) {
-          try {
-            const slotsForDb = slots.map(s => ({
-              ...s, url: s.url?.startsWith('data:') ? '' : (s.url || '')
-            }));
-            const slideForDb = {
-              ...newSlide,
-              imagen_url: imagen_url?.startsWith('data:') ? '' : imagen_url,
-              slots: slotsForDb
-            };
-            if (_editingId && !String(_editingId).startsWith('ls_')) {
-              const { error } = await sb.from('banner_slides').update(slideForDb).eq('id', _editingId);
-              if (!error) { newSlide.id = _editingId; savedToSupabase = true; }
-              else { console.error('[Banner UPDATE error]', error.message, error); showToast('Error Supabase: ' + error.message, 'error'); }
-            } else {
-              const { data, error } = await sb.from('banner_slides').insert(slideForDb).select().single();
-              if (!error && data) { newSlide.id = data.id; savedToSupabase = true; }
-              else if (error) { console.error('[Banner INSERT error]', error.message, error); showToast('Error Supabase: ' + error.message, 'error'); }
-            }
-          } catch(e) { console.error('[Banner save exception]', e); }
-        }
-
-        if (!newSlide.id) newSlide.id = _editingId || ('ls_' + Date.now());
-        // localStorage: update or push
-        const arr = _lsBannerGet();
-        if (_editingId) {
-          const idx = arr.findIndex(s => s.id === _editingId);
-          if (idx !== -1) arr[idx] = newSlide; else arr.push(newSlide);
-        } else {
-          arr.push(newSlide);
-        }
-        _lsBannerSave(arr);
-
-        if (!savedToSupabase) {
-          showToast('Guardado localmente.', 'warning');
-        }
-
-        // Reset form
-        _editingId = null;
-        overlay.querySelector('#bnew-titulo').value = '';
-        overlay.querySelector('#bnew-subtitulo').value = '';
-        overlay.querySelector('#bnew-hasta').value = '';
-        overlay.querySelector('#bnew-tipo').selectedIndex = 0;
-        overlay.querySelector('#bnew-enlace').selectedIndex = 0;
-        overlay.querySelector('#form-section-title').textContent = 'Nuevo anuncio';
-        _slotData = [{ url:'', pos_x:50, pos_y:50, zoom:1 }];
-        _activeLayout = 'single';
-        overlay.querySelector('#layout-selector button[data-layout="single"]').click();
-
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicar anuncio';
-        showToast(_editingId ? 'Anuncio actualizado' : 'Anuncio publicado y guardado', 'success');
-        loadBanner(); refreshList();
-      });
-    }
-
-    document.getElementById('banner-admin-btn').addEventListener('click', abrirBannerAdmin);
 
     /* ─── Cerrar dropdowns al click fuera ─── */
     document.addEventListener('click', function (e) {

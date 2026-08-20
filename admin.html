@@ -1079,7 +1079,7 @@
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5"/></svg>
         Eventos
       </button>
-      <button class="admin-tab" data-tab="noticias" onclick="loadBannersAdmin()">
+      <button class="admin-tab" data-tab="noticias" onclick="loadBannersAdmin(); loadFotosComunidadAdmin();">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M13.5 12a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
         Banner
       </button>
@@ -1282,42 +1282,44 @@
     ════════════════════════════════ -->
     <div class="tab-panel" id="panel-noticias">
 
+      <!-- Fotos de la comunidad (carrusel del inicio) -->
+      <div style="margin-bottom:28px;">
+        <div style="margin-bottom:14px;">
+          <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin:0 0 2px;">Fotos de la comunidad</p>
+          <p style="font-size:0.82rem;color:#94a3b8;margin:0;">Carrusel del inicio. Sube las mejores fotos del mes — el título se genera solo ("Momentos inolvidables de nuestra comunidad en [mes hebreo anterior]"). Cuando cambie el mes, borra estas y sube las nuevas.</p>
+        </div>
+        <div id="fc-upload-zone" style="border:1.5px dashed #cbd5e1;border-radius:10px;padding:22px;text-align:center;cursor:pointer;background:#f8fafc;" onclick="document.getElementById('fc-file-input').click()">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#64748b" style="display:block;margin:0 auto 8px;"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+          <p style="font-size:0.85rem;color:#64748b;margin:0;">Toca para subir fotos (puedes elegir varias a la vez)</p>
+        </div>
+        <input type="file" id="fc-file-input" accept="image/*" multiple style="display:none;" onchange="handleFotosComunidadUpload(this.files)">
+        <p id="fc-uploading" style="display:none;font-size:0.8rem;color:#64748b;margin:10px 0 0;">Subiendo fotos…</p>
+        <div id="fc-photos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:14px;"></div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 24px;">
+
       <!-- Header -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
         <div>
-          <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin:0 0 2px;">Banner del inicio</p>
-          <p style="font-size:0.82rem;color:#94a3b8;margin:0;">Slides del carrusel principal de la app</p>
+          <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin:0 0 2px;">Carteles informativos</p>
+          <p style="font-size:0.82rem;color:#94a3b8;margin:0;">Posters o calendarios ya diseñados — se muestran a imagen completa, sin texto encima</p>
         </div>
         <button id="btn-toggle-banner-form" onclick="toggleBannerForm()" style="display:inline-flex;align-items:center;gap:7px;background:#1b2e5e;color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:0.83rem;font-weight:600;cursor:pointer;white-space:nowrap;">
           <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-          Añadir banner
+          Añadir cartel
         </button>
       </div>
 
-      <!-- Formulario nuevo banner (colapsable) -->
+      <!-- Formulario nuevo cartel (colapsable) -->
       <div id="banner-new-form" style="display:none;background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:20px;margin-bottom:18px;">
-        <p style="font-size:0.875rem;font-weight:700;color:#1b2e5e;margin:0 0 16px;">Nuevo banner</p>
-
-        <!-- Tipo -->
-        <div style="margin-bottom:14px;">
-          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Tipo de anuncio <span style="color:#ef4444;">*</span></label>
-          <select id="bn-tipo" onchange="_bnTipoChanged()" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;background:#fff;color:#1a202c;">
-            <option value="evento">Evento próximo</option>
-            <option value="novedad">Novedad</option>
-            <option value="comunicado">Comunicado</option>
-            <option value="shabat">Shabat especial</option>
-            <option value="festividad">Festividad</option>
-            <option value="donativos">Campaña de donativos</option>
-            <option value="informativo">Cartel informativo (solo imagen, sin texto encima)</option>
-          </select>
-          <p id="bn-tipo-hint" style="display:none;color:#64748b;font-size:0.75rem;margin-top:4px;">Se muestra la imagen completa, sin recorte ni texto superpuesto — ideal para carteles y calendarios ya diseñados.</p>
-        </div>
+        <p style="font-size:0.875rem;font-weight:700;color:#1b2e5e;margin:0 0 16px;">Nuevo cartel informativo</p>
+        <p style="color:#64748b;font-size:0.78rem;margin:0 0 14px;">Se muestra la imagen completa, sin recorte ni texto superpuesto — ideal para carteles y calendarios ya diseñados.</p>
 
         <!-- Título -->
         <div style="margin-bottom:14px;">
-          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Título <span id="bn-titulo-req" style="color:#ef4444;">*</span></label>
-          <input id="bn-titulo" type="text" placeholder="Ej. Seudá de Purim — ¡Este sábado!" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;box-sizing:border-box;color:#1a202c;background:#fff;">
-          <p id="bn-titulo-err" style="display:none;color:#ef4444;font-size:0.75rem;margin-top:4px;">El título es obligatorio.</p>
+          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#475569;margin-bottom:5px;">Título <span style="color:#94a3b8;font-weight:400;text-transform:none;letter-spacing:0;">(opcional, solo para identificarlo aquí)</span></label>
+          <input id="bn-titulo" type="text" placeholder="Ej. Calendario septiembre 2026" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:0.875rem;font-family:inherit;outline:none;box-sizing:border-box;color:#1a202c;background:#fff;">
         </div>
 
         <!-- Descripción -->
@@ -3939,28 +3941,9 @@
   }
 
   /**
-   * Carga banners desde Supabase y los muestra en el panel admin.
+   * Carga carteles informativos desde Supabase y los muestra en el panel admin.
    */
-  const TIPOS_BANNER_LABEL = {
-    evento:'Evento', novedad:'Novedad', comunicado:'Comunicado',
-    shabat:'Shabat', festividad:'Festividad', donativos:'Donativos',
-    informativo:'Informativo'
-  };
-
-  /**
-   * Ajusta el formulario de "Nuevo banner" según el tipo elegido:
-   * para "informativo" el título deja de ser obligatorio (la imagen se
-   * muestra completa y sin texto encima, así que el título es solo una
-   * etiqueta interna para identificar el banner en la lista del admin).
-   */
-  function _bnTipoChanged() {
-    const esInformativo = document.getElementById('bn-tipo').value === 'informativo';
-    document.getElementById('bn-tipo-hint').style.display = esInformativo ? '' : 'none';
-    document.getElementById('bn-titulo-req').style.display = esInformativo ? 'none' : '';
-    document.getElementById('bn-titulo').placeholder = esInformativo
-      ? 'Ej. Calendario septiembre 2026 (solo para identificarlo aquí)'
-      : 'Ej. Seudá de Purim — ¡Este sábado!';
-  }
+  const TIPOS_BANNER_LABEL = { informativo:'Informativo' };
 
   /* ── Banner admin: layouts ── */
   const BN_LAYOUTS = [
@@ -4132,10 +4115,6 @@
   async function saveNewBannerAdmin() {
     const btn    = document.getElementById('bn-save-btn');
     const titulo = document.getElementById('bn-titulo').value.trim();
-    const errEl  = document.getElementById('bn-titulo-err');
-    const esInformativo = document.getElementById('bn-tipo').value === 'informativo';
-    if (!titulo && !esInformativo) { errEl.style.display='block'; document.getElementById('bn-titulo').focus(); return; }
-    errEl.style.display='none';
 
     btn.disabled=true;
     btn.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicando…';
@@ -4144,7 +4123,7 @@
     if (!sb) { showToast('Sin conexión a Supabase','error'); btn.disabled=false; btn.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicar anuncio'; return; }
 
     const subtitulo = document.getElementById('bn-subtitulo').value.trim();
-    const tipo      = document.getElementById('bn-tipo').value;
+    const tipo      = 'informativo';
     const href      = document.getElementById('bn-enlace').value || null;
     const hasta     = document.getElementById('bn-hasta').value || null;
     const color     = BN_TIPO_COLORS[tipo] || BN_TIPO_COLORS.novedad;
@@ -4163,7 +4142,7 @@
       return;
     }
 
-    showToast('Banner publicado','success');
+    showToast('Cartel publicado','success');
     btn.disabled=false;
     btn.innerHTML='<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Publicar anuncio';
     document.getElementById('bn-titulo').value='';
@@ -4181,18 +4160,17 @@
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (!sb) { container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Sin conexión a Supabase.</p>'; return; }
 
-    const { data, error } = await sb.from('banner_slides').select('*').order('orden');
+    const { data, error } = await sb.from('banner_slides').select('*').eq('tipo', 'informativo').order('orden');
     if (error) {
-      container.innerHTML = `<p style="text-align:center;color:#dc2626;padding:40px 0;">Error al cargar banners: ${escHtml(error.message)}</p>`;
+      container.innerHTML = `<p style="text-align:center;color:#dc2626;padding:40px 0;">Error al cargar carteles: ${escHtml(error.message)}</p>`;
       return;
     }
     if (!data || !data.length) {
-      container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">No hay banners. Crea uno con el botón de arriba.</p>';
+      container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">No hay carteles. Crea uno con el botón de arriba.</p>';
       return;
     }
 
     container.innerHTML = data.map(s => {
-      const tipo   = TIPOS_BANNER_LABEL[s.tipo] || s.tipo || 'Anuncio';
       const hasta  = s.hasta ? `Válido hasta ${new Date(s.hasta).toLocaleDateString('es-ES')}` : '';
       const thumb  = s.imagen_url
         ? `<img src="${escHtml(s.imagen_url)}" style="width:80px;height:50px;object-fit:cover;border-radius:8px;flex-shrink:0;">`
@@ -4210,7 +4188,6 @@
             ${thumb}
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-                <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#c9a84c;">${escHtml(tipo)}</span>
                 ${activoBadge}
               </div>
               <div style="font-size:0.9rem;font-weight:600;color:#1a202c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(s.titulo || '(sin título)')}</div>
@@ -4233,13 +4210,7 @@
                 <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Descripción</label>
                 <input id="be-subtitulo-${escHtml(String(s.id))}" value="${escHtml(s.subtitulo||'')}" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;">
               </div>
-              <div>
-                <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Tipo</label>
-                <select id="be-tipo-${escHtml(String(s.id))}" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;">
-                  ${Object.entries(TIPOS_BANNER_LABEL).map(([v,l]) => `<option value="${v}"${s.tipo===v?' selected':''}>${l}</option>`).join('')}
-                </select>
-              </div>
-              <div>
+              <div style="grid-column:1/-1;">
                 <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:block;margin-bottom:4px;">Válido hasta</label>
                 <input id="be-hasta-${escHtml(String(s.id))}" type="date" value="${escHtml(s.hasta||'')}" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;">
               </div>
@@ -4263,7 +4234,7 @@
           const { error } = await sb2.from('banner_slides').update({ activo: nuevoActivo }).eq('id', id);
           if (error) { showToast('Error: ' + error.message, 'error'); loadBannersAdmin(); return; }
         }
-        showToast(nuevoActivo ? 'Banner activado — visible para todos' : 'Banner desactivado', nuevoActivo ? 'success' : 'warning');
+        showToast(nuevoActivo ? 'Cartel activado — visible para todos' : 'Cartel desactivado', nuevoActivo ? 'success' : 'warning');
         loadBannersAdmin();
       });
     });
@@ -4284,29 +4255,88 @@
         const id = btn.dataset.bannerSave;
         const titulo    = document.getElementById(`be-titulo-${id}`).value.trim();
         const subtitulo = document.getElementById(`be-subtitulo-${id}`).value.trim();
-        const tipo      = document.getElementById(`be-tipo-${id}`).value;
         const hasta     = document.getElementById(`be-hasta-${id}`).value || null;
         btn.textContent = 'Guardando…'; btn.disabled = true;
         const sb2 = typeof getSupabase === 'function' ? getSupabase() : null;
         if (sb2) {
-          const { error } = await sb2.from('banner_slides').update({ titulo, subtitulo, tipo, hasta }).eq('id', id);
+          const { error } = await sb2.from('banner_slides').update({ titulo, subtitulo, hasta }).eq('id', id);
           if (error) { showToast('Error: ' + error.message, 'error'); btn.textContent = 'Guardar cambios'; btn.disabled = false; return; }
         }
-        showToast('Banner actualizado', 'success');
+        showToast('Cartel actualizado', 'success');
         loadBannersAdmin();
       });
     });
     container.querySelectorAll('[data-banner-del]').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('¿Eliminar este banner permanentemente?')) return;
+        if (!confirm('¿Eliminar este cartel permanentemente?')) return;
         const id = btn.dataset.bannerDel;
         btn.disabled = true; btn.textContent = '…';
         const sb2 = typeof getSupabase === 'function' ? getSupabase() : null;
         if (sb2) await sb2.from('banner_slides').delete().eq('id', id);
-        showToast('Banner eliminado', 'success');
+        showToast('Cartel eliminado', 'success');
         loadBannersAdmin();
       });
     });
+  }
+
+  /* ══════════════════════════════
+     FOTOS DE LA COMUNIDAD (carrusel del inicio)
+     Filas de banner_slides con tipo='fotos_comunidad' — sin título,
+     subtítulo, layout ni enlace: solo la foto. home.html arma el
+     título ("...en {mes hebreo anterior}") automáticamente al mostrarlas.
+  ══════════════════════════════ */
+  async function loadFotosComunidadAdmin() {
+    const grid = document.getElementById('fc-photos-grid');
+    if (!grid) return;
+    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--color-text-muted);padding:20px 0;">Cargando fotos…</p>';
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) { grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--color-text-muted);padding:20px 0;">Sin conexión a Supabase.</p>'; return; }
+
+    const { data, error } = await sb.from('banner_slides').select('id, imagen_url').eq('tipo', 'fotos_comunidad').order('orden');
+    if (error) { grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#dc2626;padding:20px 0;">Error: ${escHtml(error.message)}</p>`; return; }
+    if (!data || !data.length) { grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--color-text-muted);padding:20px 0;">Aún no hay fotos este mes.</p>'; return; }
+
+    grid.innerHTML = data.map(r => `
+      <div style="position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1;background:#e2e8f0;">
+        <img src="${escHtml(r.imagen_url)}" style="width:100%;height:100%;object-fit:cover;display:block;">
+        <button data-fc-del="${escHtml(String(r.id))}" title="Eliminar" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.55);border:none;color:#fff;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+      </div>`).join('');
+
+    grid.querySelectorAll('[data-fc-del]').forEach(btn => {
+      btn.addEventListener('click', () => deleteFotoComunidad(btn.dataset.fcDel));
+    });
+  }
+
+  async function handleFotosComunidadUpload(files) {
+    if (!files || !files.length) return;
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) { showToast('Sin conexión a Supabase', 'error'); return; }
+
+    const uploading = document.getElementById('fc-uploading');
+    uploading.style.display = '';
+
+    const { data: existing } = await sb.from('banner_slides').select('orden').eq('tipo', 'fotos_comunidad').order('orden', { ascending: false }).limit(1);
+    let nextOrden = (existing?.[0]?.orden || 0) + 1;
+
+    let okCount = 0;
+    for (const file of files) {
+      const url = await uploadMedia(file, 'comunidad');
+      if (!url) continue;
+      const { error } = await sb.from('banner_slides').insert({ tipo: 'fotos_comunidad', imagen_url: url, activo: true, orden: nextOrden++ });
+      if (!error) okCount++;
+    }
+
+    uploading.style.display = 'none';
+    document.getElementById('fc-file-input').value = '';
+    loadFotosComunidadAdmin();
+    showToast(okCount ? `${okCount} foto(s) subida(s)` : 'No se pudo subir ninguna foto', okCount ? 'success' : 'error');
+  }
+
+  async function deleteFotoComunidad(id) {
+    if (!confirm('¿Eliminar esta foto?')) return;
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (sb) await sb.from('banner_slides').delete().eq('id', id);
+    loadFotosComunidadAdmin();
   }
 
   /* ══════════════════════════════
