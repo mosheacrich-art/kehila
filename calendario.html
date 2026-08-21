@@ -119,28 +119,36 @@
     .cal-side-title { font-size: .9375rem; font-weight: 700; color: var(--color-text); margin-bottom: 14px; }
     .cal-empty { text-align: center; color: var(--color-text-light); font-size: .875rem; padding: 24px 0; }
 
-    /* ── Tarjeta Shabat en el panel ── */
+    /* ── Tarjeta Shabat en el panel — acento dorado ── */
     .side-shabat-card {
-      background: var(--color-primary); border-radius: var(--radius-md);
-      padding: 16px; margin-bottom: 12px; color: #fff; position: relative; overflow: hidden;
+      background: var(--color-gold-light); border-radius: var(--radius-md);
+      padding: 0; margin-bottom: 12px; color: var(--color-text); position: relative; overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,.05);
     }
     .side-shabat-card::before {
-      content: '✡'; position: absolute; right: 12px; top: 8px;
-      font-size: 3rem; opacity: .08; pointer-events: none;
+      content: ''; position: absolute; top: -40px; right: -50px; width: 220px; height: 220px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 4 93 78 7 78Z' fill='none' stroke='%23C9A84C' stroke-width='1.4'/%3E%3Cpath d='M50 96 7 22 93 22Z' fill='none' stroke='%23C9A84C' stroke-width='1.4'/%3E%3C/svg%3E");
+      opacity: .16; pointer-events: none;
     }
-    .side-shabat-label { font-size: .625rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.55); margin-bottom: 4px; }
-    .side-shabat-parasha { font-family: var(--font-brand); font-size: 1.15rem; font-weight: 700; color: #fff; line-height: 1.2; }
-    .side-shabat-he { font-family: var(--font-brand); font-size: .95rem; color: rgba(255,255,255,.55); direction: rtl; display: block; margin-top: 1px; }
-    .side-shabat-especial { font-size: .7rem; font-weight: 600; color: var(--color-gold); margin-top: 4px; }
-    .side-shabat-times { display: flex; gap: 16px; margin-top: 14px; flex-wrap: wrap; }
-    .side-time-item { display: flex; flex-direction: column; gap: 1px; }
-    .side-time-label { font-size: .6rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.45); }
-    .side-time-val { font-family: var(--font-brand); font-size: 1.1rem; font-weight: 700; color: var(--color-gold); }
-    .side-time-sep { width: 1px; background: rgba(255,255,255,.12); align-self: stretch; }
+    .side-shabat-label {
+      position: relative; display: block; background: var(--color-gold); color: var(--color-primary);
+      padding: 9px 16px; font-size: .625rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+    }
+    .side-shabat-parasha { position: relative; font-family: var(--font-brand); font-size: 1.6rem; font-weight: 800; color: var(--color-primary); line-height: 1.15; margin: 16px 16px 0; }
+    .side-shabat-he { position: relative; font-family: var(--font-brand); font-style: italic; font-size: .9rem; color: var(--color-gold-dark); direction: rtl; display: block; margin: 4px 16px 0; }
+    .side-shabat-especial { position: relative; font-size: .7rem; font-weight: 700; color: var(--color-gold-dark); margin: 6px 16px 0; }
+    .side-shabat-times {
+      position: relative; display: flex; gap: 26px; margin: 16px 16px 0;
+      padding-top: 14px; border-top: 1px solid rgba(27,46,94,.1); flex-wrap: wrap;
+    }
+    .side-time-item { display: flex; flex-direction: column; gap: 2px; }
+    .side-time-label { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--color-gold-dark); }
+    .side-time-val { font-family: var(--font-brand); font-size: 1.25rem; font-weight: 800; color: var(--color-primary); }
+    .side-time-sep { display: none; }
     .side-city-badge {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: .65rem; font-weight: 600; color: rgba(255,255,255,.5);
-      margin-top: 8px; letter-spacing: .06em;
+      position: relative; display: block;
+      font-size: .68rem; font-weight: 500; color: var(--color-text-muted);
+      margin: 12px 16px 16px; letter-spacing: .03em;
     }
 
     /* ── Tarjeta festividad en el panel ── */
@@ -375,8 +383,8 @@ const _calUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
 const _calIsAdmin = _calUser?.role === 'admin';
 
 // Ciudad activa
-const _savedCityKey = localStorage.getItem('kehila_city') || 'madrid';
-let selectedCity = CITIES[_savedCityKey] || CITIES['madrid'];
+const _savedCityKey = localStorage.getItem('kehila_city') || 'barcelona';
+let selectedCity = CITIES[_savedCityKey] || CITIES['barcelona'];
 
 /* ─── Traducciones ─── */
 const PARASHA = {
@@ -512,10 +520,10 @@ function isoDate(y,m,d) {
 
 /* ─── Carga de datos HebCal para la ciudad activa ─── */
 async function ensureData(year) {
-  const cityKey = localStorage.getItem('kehila_city') || 'madrid';
+  const cityKey = localStorage.getItem('kehila_city') || 'barcelona';
   if (loadedYear === year && loadedCityKey === cityKey) return;
 
-  selectedCity = CITIES[cityKey] || CITIES['madrid'];
+  selectedCity = CITIES[cityKey] || CITIES['barcelona'];
   const c = selectedCity;
   const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&nx=off&year=${year}&month=x&ss=on&mf=on&c=on&geo=pos&latitude=${c.lat}&longitude=${c.lon}&tzid=${encodeURIComponent(c.tz)}&m=${c.m}&b=${c.b}&s=on&lg=s`;
 
@@ -1091,7 +1099,7 @@ async function navMonth(delta) {
   // ensureData() es caro y cubre todo el año — solo hace falta si cambió
   // el año o la ciudad. Los eventos son por mes: hay que recargarlos SIEMPRE
   // al navegar, o el mes nuevo se queda sin sus propios eventos.
-  const needsYearData = curYear !== loadedYear || loadedCityKey !== (localStorage.getItem('kehila_city') || 'madrid');
+  const needsYearData = curYear !== loadedYear || loadedCityKey !== (localStorage.getItem('kehila_city') || 'barcelona');
 
   document.getElementById('cal-container').innerHTML = `
     <div class="loading-state"><div class="loading-spinner"></div><p>Cargando calendario…</p></div>`;
@@ -1122,8 +1130,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNav('calendario');
 
   // Restaurar ciudad guardada
-  const savedKey = localStorage.getItem('kehila_city') || 'madrid';
-  selectedCity = CITIES[savedKey] || CITIES['madrid'];
+  const savedKey = localStorage.getItem('kehila_city') || 'barcelona';
+  selectedCity = CITIES[savedKey] || CITIES['barcelona'];
   const sel = document.getElementById('city-select');
   if (sel) sel.value = savedKey;
   updateCityUI();
