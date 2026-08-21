@@ -6,6 +6,16 @@
 /* Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Frank+Ruhl+Libre:wght@300;400;500;700;900&display=swap');
 
+/* ─── Transición entre páginas (View Transitions API, cross-document) ───
+   Sustituye el hueco en blanco de la navegación MPA por un crossfade suave.
+   Sin soporte (navegadores viejos): no pasa nada, sigue como navegación normal. */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-group(root) {
+  animation-duration: 180ms;
+}
+
 /* ─── Variables CSS ─── */
 :root {
   /* Colores */

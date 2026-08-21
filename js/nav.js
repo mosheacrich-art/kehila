@@ -765,18 +765,8 @@ function renderSubTabs(pageId) {
       a.addEventListener('mouseenter', function() { a.style.color = 'var(--color-text)'; });
       a.addEventListener('mouseleave', function() { a.style.color = 'var(--color-text-muted)'; });
     }
-    // Smooth fade-out before navigating
-    a.addEventListener('click', function(e) {
-      if (a.href === window.location.href) return;
-      e.preventDefault();
-      var mc = document.querySelector('.main-content');
-      if (mc) {
-        mc.style.transition = 'opacity 0.13s ease, transform 0.13s ease';
-        mc.style.opacity = '0';
-        mc.style.transform = 'translateY(-4px)';
-      }
-      setTimeout(function() { window.location.href = a.href; }, 130);
-    });
+    // La transición suave entre páginas la hace ahora la View Transitions API
+    // nativa (ver css/main.css) — este handler ya no retrasa la navegación.
     row.appendChild(a);
   });
 }
