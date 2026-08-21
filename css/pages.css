@@ -265,6 +265,9 @@
   box-shadow: 0 -4px 20px rgba(27,46,94,0.08);
   z-index: var(--z-sidebar);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* Grupo propio en la transición entre páginas (ver css/main.css) para que
+     la barra se quede fija en vez de desvanecerse junto al resto de la pantalla. */
+  view-transition-name: bottom-nav;
 }
 
 @media (max-width: 768px) {

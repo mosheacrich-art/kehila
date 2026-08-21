@@ -12,9 +12,12 @@
 @view-transition {
   navigation: auto;
 }
-::view-transition-group(root) {
+::view-transition-group(*) {
   animation-duration: 180ms;
 }
+/* La barra inferior (view-transition-name: bottom-nav, ver css/pages.css)
+   es idéntica entre página y página: al no moverse ni cambiar de tamaño,
+   queda fija en vez de desvanecerse con el resto de la pantalla. */
 
 /* ─── Variables CSS ─── */
 :root {
