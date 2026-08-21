@@ -198,13 +198,21 @@
     .banner-slide {
       flex: 0 0 100%;
       height: 100%;
-      position: relative;
-      overflow: hidden;
+      display: flex;
+      gap: 8px;
     }
 
-    .banner-slide img {
-      position: absolute;
-      inset: 0;
+    /* Cada slide es un grupo de hasta 3 fotos en fila (nunca una sola foto). */
+    .banner-photo-cell {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 100%;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      cursor: pointer;
+      background: #1a1a2e;
+    }
+    .banner-photo-cell img {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -1174,7 +1182,7 @@
        FOTOS DE LA COMUNIDAD (carrusel del mes hebreo anterior)
        Gestionadas desde admin.html → "Fotos de la comunidad".
     ══════════════════════════════════════ */
-    let cPhotos = [];
+    let cPhotoGroups = [];
     let cPhotoCurrent = 0;
     let cPhotoTimer = null;
 
@@ -1197,37 +1205,35 @@
       document.body.style.overflow = 'hidden';
     }
 
-    function buildPhotoSlide(url) {
+    // Cada slide muestra un grupo de hasta 3 fotos en fila (nunca una foto sola).
+    function buildPhotoSlide(urls) {
       const slide = document.createElement('div');
       slide.className = 'banner-slide';
-      slide.style.cursor = 'pointer';
-      slide.addEventListener('click', () => openImageLightbox(url));
-      slide.innerHTML = `
-        <div class="banner-img-wrap">
-          <img class="banner-img-blur" src="${url}" aria-hidden="true" loading="lazy">
-          <img class="banner-img-main" src="${url}" alt="" loading="lazy">
-        </div>`;
-      slide.querySelector('.banner-img-main').addEventListener('load', function() {
-        if (this.naturalWidth > 0 && this.naturalHeight > 0 && this.naturalWidth / this.naturalHeight < 1.4) {
-          this.classList.add('is-portrait');
-        }
+      slide.innerHTML = urls.map(url => `
+        <div class="banner-photo-cell">
+          <img src="${url}" alt="" loading="lazy">
+        </div>`).join('');
+      slide.querySelectorAll('.banner-photo-cell').forEach((cell, i) => {
+        cell.addEventListener('click', () => openImageLightbox(urls[i]));
       });
       return slide;
     }
 
     function cPhotoGoTo(idx) {
-      cPhotoCurrent = (idx + cPhotos.length) % cPhotos.length;
+      cPhotoCurrent = (idx + cPhotoGroups.length) % cPhotoGroups.length;
       document.getElementById('banner-slides-track').style.transform = `translateX(-${cPhotoCurrent * 100}%)`;
       document.querySelectorAll('.banner-dot').forEach((d, i) => d.classList.toggle('active', i === cPhotoCurrent));
     }
 
     function startCPhotoTimer() {
       clearInterval(cPhotoTimer);
-      if (cPhotos.length > 1) cPhotoTimer = setInterval(() => cPhotoGoTo(cPhotoCurrent + 1), 4500);
+      if (cPhotoGroups.length > 1) cPhotoTimer = setInterval(() => cPhotoGoTo(cPhotoCurrent + 1), 4500);
     }
 
     function renderCommunityPhotos(urls) {
-      cPhotos = urls;
+      cPhotoGroups = [];
+      for (let i = 0; i < urls.length; i += 3) cPhotoGroups.push(urls.slice(i, i + 3));
+
       const section = document.getElementById('community-photos-section');
       const track = document.getElementById('banner-slides-track');
       const dots = document.getElementById('banner-dots');
@@ -1240,11 +1246,11 @@
       document.getElementById('community-photos-title').textContent =
         `Momentos inolvidables de nuestra comunidad en ${prevHebrewMonthLabel()}`;
 
-      urls.forEach((url, i) => {
-        track.appendChild(buildPhotoSlide(url));
+      cPhotoGroups.forEach((group, i) => {
+        track.appendChild(buildPhotoSlide(group));
         const dot = document.createElement('button');
         dot.className = 'banner-dot' + (i === 0 ? ' active' : '');
-        dot.setAttribute('aria-label', 'Foto ' + (i + 1));
+        dot.setAttribute('aria-label', 'Grupo ' + (i + 1));
         dot.addEventListener('click', () => { cPhotoGoTo(i); startCPhotoTimer(); });
         dots.appendChild(dot);
       });
