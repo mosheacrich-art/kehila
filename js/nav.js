@@ -785,6 +785,46 @@ function renderSubTabs(pageId) {
   }, { passive: false });
 })();
 
+/* ─── Tracking de analíticas ──────────────────────────────────────
+   Estas dos funciones viven aquí (no en analytics.js) porque nav.js
+   se carga en TODAS las páginas, mientras que analytics.js solo se
+   carga en admin.html. Escriben en Supabase; el dashboard del panel
+   admin (js/analytics.js) las lee. Fallo silencioso: nunca deben
+   romper la navegación.
+   ───────────────────────────────────────────────────────────────── */
+
+/** Registra una visita a una sección. Llamada desde initNav(). */
+async function trackPageView(page) {
+  try {
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb || !page) return;
+    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    const { error } = await sb.from('page_views').insert({
+      page: String(page),
+      user_id: user?.userId || null
+    });
+    if (error) console.warn('[analytics] page_views:', error.message);
+  } catch (e) {
+    console.warn('[analytics] page_views falló:', e);
+  }
+}
+
+/** Registra la lectura de una noticia. Llamada desde abrirNoticia() en noticias.js. */
+async function trackNewsRead(newsId) {
+  try {
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb || !newsId) return;
+    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    const { error } = await sb.from('news_reads').insert({
+      news_id: String(newsId),
+      user_id: user?.userId || null
+    });
+    if (error) console.warn('[analytics] news_reads:', error.message);
+  } catch (e) {
+    console.warn('[analytics] news_reads falló:', e);
+  }
+}
+
 function initNav(activePage) {
   if (typeof trackPageView === 'function') trackPageView(activePage);
   // Cargar i18n.js si no está disponible

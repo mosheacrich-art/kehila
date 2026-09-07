@@ -23,9 +23,9 @@
  * PUNTO DE ENTRADA: loadAnalyticsDashboard() — se llama desde admin.html al
  * activar la pestaña de Analíticas.
  *
- * Además expone el tracking que alimenta estas tablas:
- *  - trackPageView(page)   → se llama solo desde initNav() en nav.js
- *  - trackNewsRead(newsId) → se llama solo desde abrirNoticia() en noticias.js
+ * El tracking que alimenta page_views / news_reads (trackPageView,
+ * trackNewsRead) vive en js/nav.js, porque nav.js se carga en todas las
+ * páginas y analytics.js solo en admin.html.
  */
 
 'use strict';
@@ -35,51 +35,7 @@ function _anSB() {
   return typeof getSupabase === 'function' ? getSupabase() : null;
 }
 
-function _anUser() {
-  return typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-}
-
-// ─── 2. Tracking — escribe en Supabase ───────────────────────────
-
-/**
- * Registra una visita a una sección.
- * Ya se llama automáticamente desde initNav() en nav.js.
- */
-async function trackPageView(page) {
-  const sb = _anSB();
-  if (!sb || !page) return;
-  try {
-    const user = _anUser();
-    const { error } = await sb.from('page_views').insert({
-      page: page,
-      user_id: user?.userId || null
-    });
-    if (error) console.warn('[analytics] page_views insert:', error.message);
-  } catch (e) {
-    console.warn('[analytics] page_views insert falló:', e);
-  }
-}
-
-/**
- * Registra que un usuario leyó una noticia.
- * Se llama automáticamente desde abrirNoticia() en noticias.js.
- */
-async function trackNewsRead(newsId) {
-  const sb = _anSB();
-  if (!sb || !newsId) return;
-  try {
-    const user = _anUser();
-    const { error } = await sb.from('news_reads').insert({
-      news_id: String(newsId),
-      user_id: user?.userId || null
-    });
-    if (error) console.warn('[analytics] news_reads insert:', error.message);
-  } catch (e) {
-    console.warn('[analytics] news_reads insert falló:', e);
-  }
-}
-
-// ─── 3. Utilidades ───────────────────────────────────────────────
+// ─── 2. Utilidades ───────────────────────────────────────────────
 
 function _anEsc(str) {
   if (typeof escHtml === 'function') return escHtml(str == null ? '' : String(str));
