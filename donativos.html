@@ -136,6 +136,7 @@
     .area-photo-ph.religioso { background: linear-gradient(135deg, #EDE9FE, #C4B5FD); }
     .area-photo-ph.social    { background: linear-gradient(135deg, #E0F2FE, #BAE6FD); }
     .area-photo-ph.chai      { background: linear-gradient(135deg, #FEF9C3, #FDE68A); }
+    .area-photo-ph.israel    { background: linear-gradient(135deg, #DBEAFE, #93C5FD); }
 
     /* Boton editar foto — solo admin */
     .btn-edit-area {
@@ -155,6 +156,7 @@
     .area-badge.religioso { background: #FEF3DC; color: #A06010; }
     .area-badge.social    { background: #FEF3DC; color: #A06010; }
     .area-badge.chai      { background: #FEF7E8; color: #B8620E; }
+    .area-badge.israel    { background: #DBEAFE; color: #1D4ED8; }
 
     .area-card-body { padding: 4px 14px 12px; flex: 1; }
     .area-title { font-size: 1rem; font-weight: 600; color: #B8820A; margin-bottom: 6px; }
@@ -580,6 +582,33 @@
         </div>
       </div>
 
+      <!-- Donativo para Israel -->
+      <div class="area-card israel" id="card-israel" onclick="openModal('israel')">
+        <div class="area-photo">
+          <img id="img-israel" src="img/donativo-israel.jpg" alt="Donativo para Israel" style="display:none;" class="area-photo-img"
+               onload="this.style.display='block';var p=document.getElementById('ph-israel');if(p)p.style.display='none';"
+               onerror="this.style.display='none';">
+          <div class="area-photo-ph israel" id="ph-israel">🇮🇱</div>
+          <button class="btn-edit-area hidden admin-btn" onclick="event.stopPropagation();openEdit('israel')">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"/></svg>
+            Editar
+          </button>
+        </div>
+        <div class="area-card-header">
+        </div>
+        <div class="area-card-body">
+          <p class="area-title" id="title-israel">Donativo para Israel</p>
+          <p class="area-desc" id="desc-israel">Haz llegar tu ayuda directamente a Israel: apoyo a familias, soldados y proyectos de Jesed en Eretz Israel a traves de la red de Jabad y My Pushka.</p>
+        </div>
+        <div class="area-card-footer">
+          <span class="area-meta">My Pushka</span>
+          <button class="btn-donar" onclick="event.stopPropagation();openModal('israel')">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+            Donar
+          </button>
+        </div>
+      </div>
+
     </div><!-- /areas-grid -->
 
     <!-- CHAI CLUB BANNER -->
@@ -819,6 +848,7 @@
     educativo: { amounts:[18,36,72,180], longDesc:'Nuestros programas educativos abarcan desde el Talmud Tora para los mas pequenos hasta clases de hebreo e historia judia para adultos. Con tu donativo garantizamos que ningun nino se quede sin educacion judia por motivos economicos.' },
     religioso:  { amounts:[18,54,108,360], longDesc:'El area religiosa sostiene los servicios diarios y de Shabat, las festividades del ciclo judio, la adquisicion de sefarim y materiales religiosos, y el mantenimiento del espacio sagrado de la comunidad.' },
     social:    { amounts:[18,36,54,180], longDesc:'Jabad Barcelona acompana a las familias mas necesitadas con Tzedaka, distribucion de comida kosher para Shabat y festividades, asistencia economica y acompanamiento personal en momentos dificiles.' },
+    israel:    { amounts:[18,36,100,360], longDesc:'Campana permanente de apoyo a Eretz Israel. Tu donativo se canaliza a traves de la red de Jabad y de My Pushka para asistir a familias, soldados, victimas del terror y proyectos de Jesed en Israel durante todo el ano.' },
     chai:      { amounts:[18,36,72,180], isChai:true, longDesc:'El Chai Club es la red de socios que garantizan la continuidad de Jabad Barcelona con aportaciones mensuales en multiples de 18 — el valor numerico de vida (חי) en hebreo. Cada socio es un pilar de la comunidad.' }
   };
 
@@ -826,6 +856,7 @@
     educativo:'background:#DCFCE7;color:#15803D;',
     religioso:'background:#EDE9FE;color:#6D28D9;',
     social:'background:#E0F2FE;color:#0369A1;',
+    israel:'background:#DBEAFE;color:#1D4ED8;',
     chai:'background:#FEF7E8;color:#B8620E;'
   };
 
@@ -1049,11 +1080,11 @@
     const cfg = AREA_CFG[id];
     const tagEl = document.getElementById('don-tag');
     const badgeEl = document.querySelector('#card-' + id + ' .area-badge');
-    const badgeLabels = { educativo:'Educacion', religioso:'Religioso', social:'Social', chai:'Socios' };
+    const badgeLabels = { educativo:'Educacion', religioso:'Religioso', social:'Social', israel:'Israel', chai:'Socios' };
     tagEl.textContent = badgeEl ? badgeEl.textContent : (badgeLabels[id] || id);
     tagEl.style.cssText = TAG_CSS[id] || '';
     const titleEl = document.getElementById('title-' + id);
-    const defaultTitles = { educativo:'Area Educativo', religioso:'Area Religioso', social:'Area Ayuda Social', chai:'Chai Club' };
+    const defaultTitles = { educativo:'Area Educativo', religioso:'Area Religioso', social:'Area Ayuda Social', israel:'Donativo para Israel', chai:'Chai Club' };
     document.getElementById('don-title').textContent = titleEl ? titleEl.textContent : (defaultTitles[id] || id);
     document.getElementById('don-desc').textContent  = cfg.longDesc;
     const img = document.getElementById('don-img');
