@@ -472,7 +472,9 @@ const hoy = new Date();
     if (e) e.stopPropagation();
     const ev = MOCK_EVENTOS.find(x => x.id === id);
     if (!ev) return;
-    const url = `${location.origin}${location.pathname}?evento=${encodeURIComponent(id)}`;
+    // Dominio público fijo — el enlace compartido siempre apunta a bcnkehila.com,
+    // aunque la app se abra desde github.io o como PWA instalada.
+    const url = `https://bcnkehila.com/eventos.html?evento=${encodeURIComponent(id)}`;
     const fecha = new Date(ev.fecha + 'T00:00:00');
     const partes = [`*${ev.titulo}*`];
     let linea = `${fecha.getDate()} ${MESES_S[fecha.getMonth()]}`;
