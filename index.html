@@ -961,8 +961,8 @@
                 </div>
               </div>
 
-              <!-- Upload zona -->
-              <div class="form-group">
+              <!-- Upload zona — DESACTIVADA temporalmente. Para reactivar: quitar style="display:none;" de este div. -->
+              <div class="form-group" id="r2-upload-block" style="display:none;">
                 <label class="form-label required">Documento de identidad (foto o escaneo)</label>
                 <div id="r2-upload-zone" class="upload-zone">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--color-text-light);margin-bottom:8px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
@@ -979,7 +979,7 @@
               <div class="form-group">
                 <label class="reg-checkbox-label">
                   <input type="checkbox" id="r2-confirm-ck">
-                  <span>Confirmo que el documento que adjunto me pertenece y que los datos proporcionados son verídicos. Entiendo que proporcionar información falsa resulta en la denegación permanente del acceso.</span>
+                  <span>Confirmo que los datos proporcionados son verídicos. Entiendo que proporcionar información falsa resulta en la denegación permanente del acceso.</span>
                 </label>
                 <span class="form-error" id="r2-ck-err" style="display:none;"></span>
               </div>
@@ -1138,7 +1138,7 @@
                   <div class="reg-timeline-dot"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z"/></svg></div>
                   <span>Revisión por el administrador (24-48h)</span>
                 </div>
-                <div class="reg-timeline-item pending">
+                <div class="reg-timeline-item pending" id="reg-timeline-doc" style="display:none;">
                   <div class="reg-timeline-dot"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg></div>
                   <span>Verificación de documento</span>
                 </div>

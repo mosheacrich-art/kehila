@@ -253,7 +253,11 @@ function regValidateStep2() {
     ok = false;
   } else { regClearFieldError('r2-pais-nac', 'r2-paisnac-err'); }
 
-  if (!REG.data.docFile) {
+  // La subida del documento se exige solo si el bloque está visible en el formulario
+  // (se puede desactivar temporalmente con display:none en #r2-upload-block sin tocar esta lógica).
+  const uploadBlock = document.getElementById('r2-upload-block');
+  const uploadRequired = uploadBlock && uploadBlock.style.display !== 'none';
+  if (uploadRequired && !REG.data.docFile) {
     const err = document.getElementById('r2-upload-err');
     if (err) { err.textContent = 'Sube tu documento de identidad'; err.style.display = ''; }
     ok = false;
@@ -344,10 +348,10 @@ function regRenderSummary() {
       <div class="summary-title">Documento de identidad</div>
       <div class="summary-row"><span>Tipo</span><strong>${d.docTipo || '—'}</strong></div>
       <div class="summary-row"><span>Número</span><strong>${docMask}</strong></div>
-      <div class="summary-row"><span>Archivo</span><strong style="display:flex;align-items:center;gap:6px;">
+      ${d.docFileName ? `<div class="summary-row"><span>Archivo</span><strong style="display:flex;align-items:center;gap:6px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-        ${d.docFileName || 'No subido'}
-      </strong></div>
+        ${d.docFileName}
+      </strong></div>` : ''}
     </div>
     <div class="summary-section">
       <div class="summary-title">Residencia</div>
