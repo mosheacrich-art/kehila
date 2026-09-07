@@ -2,32 +2,35 @@
  * @file analytics.js
  * @description Dashboard de métricas para el panel de administración.
  *
- * Estrategia de datos (dos capas):
- *  1. Datos base simulados (_AN_PAGE_VIEWS_BASE, etc.) — se muestran inmediatamente
- *     para dar una UI con contenido mientras llegan los datos reales.
- *  2. Datos reales de Supabase — se suman a los base cuando lleguen.
- *     Si Supabase falla o las tablas están vacías, se conservan los datos base.
+ * TODOS los datos son reales y salen de Supabase. Si una tabla no existe,
+ * está vacía o la consulta falla, esa sección muestra un estado vacío
+ * ("Sin datos todavía") en vez de romper el resto del panel.
  *
- * Tablas Supabase requeridas (ver supabase_analytics.sql):
- *  - page_views  (page TEXT, user_id UUID, created_at TIMESTAMPTZ)
- *  - news_reads  (news_id TEXT, user_id UUID, created_at TIMESTAMPTZ)
+ * Tablas Supabase que consume:
+ *  - profiles       (status, created_at)                → usuarios / nuevos miembros
+ *  - eventos        (id, titulo, fecha, aforo)          → inscripciones por evento
+ *  - inscripciones  (evento_id)                         → recuento de inscritos
+ *  - donaciones     (usuario_id, campana_nombre,        → total donado / campañas
+ *                    cantidad, recurrente, created_at)
+ *  - noticias       (id, titulo, categoria)             → catálogo de artículos
+ *  - news_reads     (news_id)                           → noticias más leídas
+ *  - page_views     (page)                              → visitas por sección
  *
- * DEPENDENCIAS (en orden):
+ * DEPENDENCIAS (en orden de carga):
  *  - auth.js       → getSupabase(), getCurrentUser()
- *  - data.js       → MOCK_USUARIOS, MOCK_EVENTOS, MOCK_DONATIVOS, MOCK_NOTICIAS_V2
  *  - chart.js CDN  → window.Chart
  *
- * PUNTO DE ENTRADA: loadAnalyticsDashboard() — llamar desde admin.html al
- * activar la pestaña de Analytics.
+ * PUNTO DE ENTRADA: loadAnalyticsDashboard() — se llama desde admin.html al
+ * activar la pestaña de Analíticas.
  *
- * NOTA: Las KPIs de usuarios, eventos y donaciones leen de MOCK_* (data.js).
- * Cuando se complete la migración a Supabase completo, reemplazar esas referencias
- * por queries reales y eliminar data.js.
+ * Además expone el tracking que alimenta estas tablas:
+ *  - trackPageView(page)   → se llama solo desde initNav() en nav.js
+ *  - trackNewsRead(newsId) → se llama solo desde abrirNoticia() en noticias.js
  */
 
 'use strict';
 
-// ─── 1. Supabase helper ───────────────────────────────────────────
+// ─── 1. Helpers Supabase ─────────────────────────────────────────
 function _anSB() {
   return typeof getSupabase === 'function' ? getSupabase() : null;
 }
@@ -36,40 +39,10 @@ function _anUser() {
   return typeof getCurrentUser === 'function' ? getCurrentUser() : null;
 }
 
-// ─── 2. Datos base simulados ──────────────────────────────────────
-//  Se usan de fallback cuando las tablas aún están vacías.
-//  Cuando el tráfico real supere estos valores, se mostrarán los reales.
-
-const _AN_PAGE_VIEWS_BASE = {
-  'home':      { label: 'Inicio',      views: 453 },
-  'noticias':  { label: 'Noticias',    views: 318 },
-  'eventos':   { label: 'Eventos',     views: 287 },
-  'comunidad': { label: 'Comunidad',   views: 193 },
-  'donativos': { label: 'Donativos',   views: 152 },
-  'rav-hub':   { label: 'Rav Hub',     views: 97  },
-  'shiurim':   { label: 'Shiurim',     views: 89  },
-  'kosher':    { label: 'Kosher App',  views: 74  },
-  'wallap':    { label: 'Wallap',      views: 71  },
-  'servicios': { label: 'Servicios',   views: 45  }
-};
-
-const _AN_NEWS_READS_BASE = {
-  'n1': 142, 'n2': 128, 'n3': 87,
-  'n4': 76,  'n5': 63,  'n6': 45,
-  'n7': 38,  'n8': 31
-};
-
-const _AN_MONTHLY_MEMBERS_BASE = [
-  { month: 'Nov', count: 3 }, { month: 'Dic', count: 5 },
-  { month: 'Ene', count: 4 }, { month: 'Feb', count: 7 },
-  { month: 'Mar', count: 9 }, { month: 'Abr', count: 6 }
-];
-
-// ─── 3. Tracking — escribe en Supabase ───────────────────────────
+// ─── 2. Tracking — escribe en Supabase ───────────────────────────
 
 /**
  * Registra una visita a una sección.
- * Llamar desde cada página al cargar: trackPageView('noticias')
  * Ya se llama automáticamente desde initNav() en nav.js.
  */
 async function trackPageView(page) {
@@ -77,11 +50,14 @@ async function trackPageView(page) {
   if (!sb || !page) return;
   try {
     const user = _anUser();
-    await sb.from('page_views').insert({
+    const { error } = await sb.from('page_views').insert({
       page: page,
       user_id: user?.userId || null
     });
-  } catch (e) { /* silently ignore — non-critical tracking */ }
+    if (error) console.warn('[analytics] page_views insert:', error.message);
+  } catch (e) {
+    console.warn('[analytics] page_views insert falló:', e);
+  }
 }
 
 /**
@@ -93,74 +69,40 @@ async function trackNewsRead(newsId) {
   if (!sb || !newsId) return;
   try {
     const user = _anUser();
-    await sb.from('news_reads').insert({
-      news_id: newsId,
+    const { error } = await sb.from('news_reads').insert({
+      news_id: String(newsId),
       user_id: user?.userId || null
     });
-  } catch (e) {}
+    if (error) console.warn('[analytics] news_reads insert:', error.message);
+  } catch (e) {
+    console.warn('[analytics] news_reads insert falló:', e);
+  }
 }
 
-// ─── 4. Fetchers de Supabase ──────────────────────────────────────
+// ─── 3. Utilidades ───────────────────────────────────────────────
 
-async function _fetchPageViewCounts() {
-  const sb = _anSB();
-  if (!sb) return null;
-  try {
-    const { data, error } = await sb.from('page_views').select('page');
-    if (error || !data?.length) return null;
-    const counts = {};
-    data.forEach(r => { counts[r.page] = (counts[r.page] || 0) + 1; });
-    return counts;
-  } catch (e) { return null; }
+function _anEsc(str) {
+  if (typeof escHtml === 'function') return escHtml(str == null ? '' : String(str));
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
-
-async function _fetchNewsReadCounts() {
-  const sb = _anSB();
-  if (!sb) return null;
-  try {
-    const { data, error } = await sb.from('news_reads').select('news_id');
-    if (error || !data?.length) return null;
-    const counts = {};
-    data.forEach(r => { counts[r.news_id] = (counts[r.news_id] || 0) + 1; });
-    return counts;
-  } catch (e) { return null; }
-}
-
-async function _fetchMonthlyMembers() {
-  const sb = _anSB();
-  if (!sb) return null;
-  try {
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    const { data, error } = await sb
-      .from('profiles')
-      .select('created_at')
-      .gte('created_at', sixMonthsAgo.toISOString())
-      .order('created_at', { ascending: true });
-    if (error || !data?.length) return null;
-    // Agrupar por mes
-    const monthly = {};
-    data.forEach(row => {
-      const d = new Date(row.created_at);
-      const key = d.toLocaleDateString('es-ES', { month: 'short' });
-      monthly[key] = (monthly[key] || 0) + 1;
-    });
-    const result = Object.entries(monthly).map(([month, count]) => ({ month, count }));
-    return result.length >= 2 ? result : null;
-  } catch (e) { return null; }
-}
-
-// ─── 5. Helpers ───────────────────────────────────────────────────
 
 function _fmtEur(n) {
-  return '\u20AC\u202F' + Number(n).toLocaleString('es-ES');
+  return Number(n || 0).toLocaleString('es-ES', {
+    style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0
+  });
+}
+
+function _fmtNum(n) {
+  return Number(n || 0).toLocaleString('es-ES');
 }
 
 function _fmtDate(dateStr) {
-  if (!dateStr) return '\u2014';
-  const parts = dateStr.split('-');
-  const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  return parseInt(parts[2]) + ' ' + (months[parseInt(parts[1]) - 1] || parts[1]);
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '—';
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
 }
 
 function _pct(a, b) { return b > 0 ? Math.round((a / b) * 100) : 0; }
@@ -178,176 +120,307 @@ function _destroyChart(id) {
   }
 }
 
-// Combina datos reales de Supabase con los datos base simulados
-function _mergeNewsReads(realCounts) {
-  if (!realCounts) return _AN_NEWS_READS_BASE;
-  const merged = Object.assign({}, _AN_NEWS_READS_BASE);
-  Object.keys(realCounts).forEach(k => {
-    merged[k] = (merged[k] || 0) + realCounts[k];
-  });
-  return merged;
-}
-
-function _mergePageViews(realCounts) {
-  const merged = {};
-  Object.keys(_AN_PAGE_VIEWS_BASE).forEach(k => {
-    const real = realCounts ? (realCounts[k] || 0) : 0;
-    merged[k] = { label: _AN_PAGE_VIEWS_BASE[k].label, views: _AN_PAGE_VIEWS_BASE[k].views + real };
-  });
-  if (realCounts) {
-    Object.keys(realCounts).forEach(k => {
-      if (!merged[k]) merged[k] = { label: k, views: realCounts[k] };
+// Últimos 6 meses como buckets year-mes, en orden cronológico.
+function _lastSixMonths() {
+  const out = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    out.push({
+      key: d.getFullYear() + '-' + d.getMonth(),
+      label: d.toLocaleDateString('es-ES', { month: 'short' }),
+      count: 0
     });
   }
-  return merged;
+  return out;
 }
 
-// ─── 6. KPI Cards ─────────────────────────────────────────────────
+const _PAGE_LABELS = {
+  home: 'Inicio', noticias: 'Noticias', eventos: 'Eventos', comunidad: 'Comunidad',
+  donativos: 'Donativos', 'rav-hub': 'Rav Hub', rav: 'Preguntas al Rav', shiurim: 'Shiurim',
+  kosher: 'Kosher', 'kosher-app': 'Kosher App', wallap: 'Wallap', servicios: 'Servicios',
+  calendario: 'Calendario', mikve: 'Mikvé', perfil: 'Perfil', 'citas-rabino': 'Citas con el Rav',
+  citas: 'Citas', esencial: 'Esencial', business: 'Business', professionals: 'Profesionales',
+  galeria: 'Galería', siddur: 'Siddur', voluntariado: 'Voluntariado', tienda: 'Tienda',
+  jconnect: 'JConnect'
+};
+function _pageLabel(id) { return _PAGE_LABELS[id] || (id ? id.charAt(0).toUpperCase() + id.slice(1) : 'Otra'); }
 
-function _renderAnKPIs(newsReadCounts) {
-  const users  = (typeof MOCK_USERS      !== 'undefined') ? MOCK_USERS      : [];
-  const events = (typeof MOCK_EVENTOS    !== 'undefined') ? MOCK_EVENTOS    : [];
-  const dons   = (typeof MOCK_DONATIVOS  !== 'undefined') ? MOCK_DONATIVOS  : [];
-  const nots   = (typeof MOCK_NOTICIAS_V2 !== 'undefined') ? MOCK_NOTICIAS_V2 : [];
+// ─── 4. Fetchers ─────────────────────────────────────────────────
 
-  const activos    = users.filter(u => u.status === 'active').length   || 5;
-  const pendientes = users.filter(u => u.status === 'pending').length  || 2;
-  const totalUsers = users.length || 8;
+async function _fetchAll() {
+  const sb = _anSB();
+  if (!sb) return {};
 
-  const inscripciones = events.reduce((s, e) => s + (e.inscritos || 0), 0);
-  const totalAforo    = events.reduce((s, e) => s + (e.aforo    || 0), 0);
+  const safe = (p) => p.then(r => r).catch(e => ({ data: null, error: e }));
+  const sixAgo = new Date();
+  sixAgo.setMonth(sixAgo.getMonth() - 6, 1);
+  sixAgo.setHours(0, 0, 0, 0);
 
-  const reads = _mergeNewsReads(newsReadCounts);
-  const totalReads = Object.values(reads).reduce((s, v) => s + v, 0);
+  const [
+    profiles, eventos, inscripciones, donaciones,
+    noticias, newsReads, pageViews
+  ] = await Promise.all([
+    safe(sb.from('profiles').select('status, created_at')),
+    safe(sb.from('eventos').select('id, titulo, fecha, aforo')),
+    safe(sb.from('inscripciones').select('evento_id')),
+    safe(sb.from('donaciones').select('usuario_id, usuario_nombre, campana_nombre, cantidad, recurrente, created_at')),
+    safe(sb.from('noticias').select('id, titulo, categoria')),
+    safe(sb.from('news_reads').select('news_id')),
+    safe(sb.from('page_views').select('page'))
+  ]);
 
-  const totalDonado   = dons.reduce((s, d) => s + (d.actual   || 0), 0);
-  const totalDonantes = dons.reduce((s, d) => s + (d.donantes || 0), 0);
+  return {
+    profiles: profiles.data || [],
+    eventos: eventos.data || [],
+    inscripciones: inscripciones.data || [],
+    donaciones: donaciones.data || [],
+    noticias: noticias.data || [],
+    newsReads: newsReads.data || [],
+    pageViews: pageViews.data || [],
+    _sixAgo: sixAgo
+  };
+}
 
-  _el('an-activos').textContent           = activos;
-  _el('an-activos-sub').textContent       = totalUsers + ' registrados \u00B7 ' + pendientes + ' pendientes';
-  _el('an-inscripciones').textContent     = inscripciones.toLocaleString('es-ES');
-  _el('an-inscripciones-sub').textContent = events.length + ' eventos \u00B7 ' + totalAforo + ' plazas totales';
-  _el('an-lecturas').textContent          = totalReads.toLocaleString('es-ES');
-  _el('an-lecturas-sub').textContent      = nots.length + ' art\u00EDculos publicados';
+// ─── 5. KPIs ─────────────────────────────────────────────────────
+
+function _renderKPIs(d) {
+  const activos    = d.profiles.filter(p => p.status === 'active').length;
+  const pendientes = d.profiles.filter(p => p.status === 'pending').length;
+  const totalUsers = d.profiles.length;
+  const nuevos7d   = d.profiles.filter(p => {
+    const c = new Date(p.created_at);
+    return !isNaN(c) && (Date.now() - c.getTime()) < 7 * 864e5;
+  }).length;
+
+  const totalInscritos = d.inscripciones.length;
+  const totalAforo     = d.eventos.reduce((s, e) => s + (Number(e.aforo) || 0), 0);
+
+  const totalLecturas  = d.newsReads.length;
+
+  const totalDonado    = d.donaciones.reduce((s, x) => s + (parseFloat(x.cantidad) || 0), 0);
+  const donantes       = new Set(d.donaciones.map(x => x.usuario_id).filter(Boolean)).size;
+  const nCampanas      = new Set(d.donaciones.map(x => x.campana_nombre).filter(Boolean)).size;
+
+  _el('an-activos').textContent           = _fmtNum(activos);
+  _el('an-activos-sub').textContent       = totalUsers + ' registrados · ' + nuevos7d + ' esta semana';
+  _el('an-inscripciones').textContent     = _fmtNum(totalInscritos);
+  _el('an-inscripciones-sub').textContent = d.eventos.length + ' eventos · ' + _fmtNum(totalAforo) + ' plazas';
+  _el('an-lecturas').textContent          = _fmtNum(totalLecturas);
+  _el('an-lecturas-sub').textContent      = d.noticias.length + ' artículos publicados';
   _el('an-donado').textContent            = _fmtEur(totalDonado);
-  _el('an-donado-sub').textContent        = totalDonantes + ' donantes \u00B7 ' + dons.length + ' campa\u00F1as';
+  _el('an-donado-sub').textContent        = donantes + ' donantes · ' + nCampanas + ' campañas';
 
-  const tsEl = _el('an-last-updated');
-  const ts = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-  tsEl.textContent = 'Datos en tiempo real \u00B7 ' + ts;
+  const ts = new Date().toLocaleString('es-ES', {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+  _el('an-last-updated').textContent = 'Datos reales · actualizado ' + ts;
 }
 
-// ─── 7. Tabla: Eventos con inscripciones ─────────────────────────
+// ─── 6. Lista: eventos con inscripciones ─────────────────────────
 
-function _renderAnEventos() {
+function _inscritosPorEvento(d) {
+  const counts = {};
+  d.inscripciones.forEach(r => {
+    const k = String(r.evento_id);
+    counts[k] = (counts[k] || 0) + 1;
+  });
+  return counts;
+}
+
+function _renderEventos(d) {
   const container = document.getElementById('an-eventos-list');
   if (!container) return;
-  const eventos = (typeof MOCK_EVENTOS !== 'undefined') ? MOCK_EVENTOS : [];
-  if (!eventos.length) { container.innerHTML = '<p class="an-empty">Sin eventos disponibles</p>'; return; }
-  container.innerHTML = eventos.map(ev => {
+  if (!d.eventos.length) {
+    container.innerHTML = '<p class="an-empty" style="color:var(--color-text-muted);font-size:.82rem;padding:12px 0;">Sin eventos publicados.</p>';
+    return;
+  }
+  const counts = _inscritosPorEvento(d);
+  const rows = d.eventos
+    .map(e => ({
+      titulo: e.titulo || 'Evento',
+      fecha: e.fecha,
+      aforo: Number(e.aforo) || 0,
+      inscritos: counts[String(e.id)] || 0
+    }))
+    .sort((a, b) => {
+      const fa = a.fecha ? new Date(a.fecha).getTime() : 0;
+      const fb = b.fecha ? new Date(b.fecha).getTime() : 0;
+      return fb - fa;
+    })
+    .slice(0, 12);
+
+  container.innerHTML = rows.map(ev => {
     const pct = _pct(ev.inscritos, ev.aforo);
-    const fillCls  = pct >= 85 ? 'an-fill-danger' : pct >= 60 ? 'an-fill-warn' : 'an-fill-ok';
+    const fillCls = pct >= 85 ? 'an-fill-danger' : pct >= 60 ? 'an-fill-warn' : 'an-fill-ok';
     const badgeCls = pct >= 85 ? 'badge badge-danger' : pct >= 60 ? 'badge badge-warning' : 'badge badge-success';
+    const pctTxt = ev.aforo ? pct + '%' : '—';
     return '<div class="an-event-row">'
-      + '<div class="an-event-name">' + ev.titulo + '</div>'
+      + '<div class="an-event-name">' + _anEsc(ev.titulo) + '</div>'
       + '<div class="an-event-meta">'
       + '<span class="an-event-date">' + _fmtDate(ev.fecha) + '</span>'
       + '<span class="an-inscritos"><strong>' + ev.inscritos + '</strong>' + (ev.aforo ? ' / ' + ev.aforo : '') + '</span>'
       + '<div class="an-bar-wrap"><div class="an-bar-fill ' + fillCls + '" style="width:' + Math.min(pct, 100) + '%"></div></div>'
-      + '<span class="' + badgeCls + '" style="font-size:.7rem;padding:2px 8px;">' + pct + '%</span>'
+      + '<span class="' + badgeCls + '" style="font-size:.7rem;padding:2px 8px;">' + pctTxt + '</span>'
       + '</div></div>';
   }).join('');
 }
 
-// ─── 8. Tabla: Campañas de donación ───────────────────────────────
+// ─── 7. Lista: campañas de donación ─────────────────────────────
 
-function _renderAnDonativos() {
+function _campanasAgregadas(d) {
+  const map = {};
+  d.donaciones.forEach(x => {
+    const nombre = x.campana_nombre || 'Donativo general';
+    if (!map[nombre]) map[nombre] = { nombre, total: 0, donantes: new Set(), n: 0 };
+    map[nombre].total += parseFloat(x.cantidad) || 0;
+    if (x.usuario_id) map[nombre].donantes.add(x.usuario_id);
+    map[nombre].n += 1;
+  });
+  return Object.values(map)
+    .map(c => ({ nombre: c.nombre, total: c.total, donantes: c.donantes.size, n: c.n }))
+    .sort((a, b) => b.total - a.total);
+}
+
+function _renderDonativos(d) {
   const container = document.getElementById('an-donativos-list');
   if (!container) return;
-  const dons = (typeof MOCK_DONATIVOS !== 'undefined') ? MOCK_DONATIVOS : [];
-  if (!dons.length) { container.innerHTML = '<p class="an-empty">Sin campa\u00F1as activas</p>'; return; }
-  container.innerHTML = dons.map(d => {
-    const pct = _pct(d.actual, d.meta);
-    const fillCls = pct >= 80 ? 'an-fill-success' : pct >= 50 ? 'an-fill-warn' : 'an-fill-ok';
+  const camps = _campanasAgregadas(d);
+  if (!camps.length) {
+    container.innerHTML = '<p class="an-empty" style="color:var(--color-text-muted);font-size:.82rem;padding:12px 0;">Sin donativos todavía.</p>';
+    return;
+  }
+  const max = camps[0].total || 1;
+  container.innerHTML = camps.map(c => {
+    const pct = Math.round((c.total / max) * 100);
     return '<div class="an-donation-row">'
-      + '<div class="an-donation-name">' + d.titulo + '</div>'
+      + '<div class="an-donation-name">' + _anEsc(c.nombre) + '</div>'
       + '<div class="an-donation-amounts">'
-      + '<span class="an-amount-raised">' + _fmtEur(d.actual) + '</span>'
-      + '<span class="an-amount-goal">de ' + _fmtEur(d.meta) + '</span>'
-      + '<span class="an-donation-donantes">' + d.donantes + ' donantes</span>'
-      + '<span class="an-donation-days">' + d.diasRestantes + 'd restantes</span>'
+      + '<span class="an-amount-raised">' + _fmtEur(c.total) + '</span>'
+      + '<span class="an-donation-donantes">' + c.donantes + ' donante' + (c.donantes === 1 ? '' : 's') + '</span>'
+      + '<span class="an-donation-days">' + c.n + ' donativo' + (c.n === 1 ? '' : 's') + '</span>'
       + '</div>'
       + '<div class="an-bar-row">'
-      + '<div class="an-bar-wrap" style="flex:1;"><div class="an-bar-fill ' + fillCls + '" style="width:' + Math.min(pct, 100) + '%"></div></div>'
+      + '<div class="an-bar-wrap" style="flex:1;"><div class="an-bar-fill an-fill-success" style="width:' + Math.min(pct, 100) + '%"></div></div>'
       + '<span class="an-pct-label">' + pct + '%</span>'
       + '</div></div>';
   }).join('');
 }
 
-// ─── 9. Tabla: Noticias más leídas ────────────────────────────────
+// ─── 8. Lista: noticias más leídas ─────────────────────────────
 
-function _renderAnNoticias(newsReadCounts) {
+function _lecturasPorNoticia(d) {
+  const counts = {};
+  d.newsReads.forEach(r => {
+    const k = String(r.news_id);
+    counts[k] = (counts[k] || 0) + 1;
+  });
+  return counts;
+}
+
+function _renderNoticias(d) {
   const container = document.getElementById('an-noticias-list');
   if (!container) return;
-  const reads = _mergeNewsReads(newsReadCounts);
-  const noticias = (typeof MOCK_NOTICIAS_V2 !== 'undefined') ? MOCK_NOTICIAS_V2 : [];
-  const sorted = noticias
-    .map(n => Object.assign({}, n, { totalReads: reads[n.id] || 0 }))
-    .sort((a, b) => b.totalReads - a.totalReads);
+  const counts = _lecturasPorNoticia(d);
+
+  let filas;
+  if (d.noticias.length) {
+    filas = d.noticias.map(n => ({
+      titulo: n.titulo || 'Sin título',
+      categoria: n.categoria || '',
+      reads: counts[String(n.id)] || 0
+    }));
+  } else {
+    // No hay catálogo de noticias legible: mostrar solo por id leído
+    filas = Object.keys(counts).map(id => ({ titulo: 'Noticia ' + id, categoria: '', reads: counts[id] }));
+  }
+
+  filas = filas.sort((a, b) => b.reads - a.reads).slice(0, 8);
+
+  if (!filas.length) {
+    container.innerHTML = '<p class="an-empty" style="color:var(--color-text-muted);font-size:.82rem;padding:12px 0;">Sin lecturas registradas.</p>';
+    return;
+  }
+
   const eyeSVG = '<svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:13px;height:13px;vertical-align:-2px;margin-right:3px;opacity:.6;">'
     + '<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/>'
     + '<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>';
-  container.innerHTML = sorted.map((n, i) =>
+
+  container.innerHTML = filas.map((n, i) =>
     '<div class="an-news-row">'
     + '<span class="an-news-rank ' + (i < 3 ? 'an-rank-top' : '') + '">#' + (i + 1) + '</span>'
     + '<div class="an-news-info">'
-    + '<div class="an-news-title" title="' + n.titulo + '">' + n.titulo + '</div>'
-    + '<div class="an-news-meta">' + n.categoria + (n.isPinned ? ' &nbsp;\u00B7&nbsp; \uD83D\uDCCC' : '') + '</div>'
+    + '<div class="an-news-title" title="' + _anEsc(n.titulo) + '">' + _anEsc(n.titulo) + '</div>'
+    + '<div class="an-news-meta">' + _anEsc(n.categoria) + '</div>'
     + '</div>'
-    + '<div class="an-news-views">' + eyeSVG + n.totalReads.toLocaleString('es-ES') + '</div>'
+    + '<div class="an-news-views">' + eyeSVG + _fmtNum(n.reads) + '</div>'
     + '</div>'
   ).join('');
 }
 
-// ─── 10. Charts ───────────────────────────────────────────────────
+// ─── 9. Gráficos ─────────────────────────────────────────────────
 
-function _renderChartEventos() {
+function _renderChartEventos(d) {
   _destroyChart('eventos');
   const canvas = document.getElementById('chart-eventos');
   if (!canvas || typeof Chart === 'undefined') return;
-  const ev = (typeof MOCK_EVENTOS !== 'undefined') ? MOCK_EVENTOS : [];
-  const labels    = ev.map(e => e.titulo.length > 20 ? e.titulo.slice(0, 20) + '\u2026' : e.titulo);
-  const inscritos = ev.map(e => e.inscritos || 0);
-  const aforos    = ev.map(e => e.aforo    || 0);
+  const counts = _inscritosPorEvento(d);
+  const evs = d.eventos
+    .map(e => ({
+      titulo: e.titulo || 'Evento',
+      inscritos: counts[String(e.id)] || 0,
+      aforo: Number(e.aforo) || 0,
+      fecha: e.fecha ? new Date(e.fecha).getTime() : 0
+    }))
+    .sort((a, b) => b.fecha - a.fecha)
+    .slice(0, 8)
+    .reverse();
+
   _anCharts['eventos'] = new Chart(canvas, {
     type: 'bar',
     data: {
-      labels,
+      labels: evs.map(e => e.titulo.length > 20 ? e.titulo.slice(0, 20) + '…' : e.titulo),
       datasets: [
-        { label: 'Inscritos', data: inscritos, backgroundColor: 'rgba(27,46,94,0.85)', borderRadius: 5, borderSkipped: false },
-        { label: 'Aforo',     data: aforos,    backgroundColor: 'rgba(201,168,76,0.2)', borderColor: 'rgba(201,168,76,0.7)', borderWidth: 1.5, borderRadius: 5, borderSkipped: false }
+        { label: 'Inscritos', data: evs.map(e => e.inscritos), backgroundColor: 'rgba(27,46,94,0.85)', borderRadius: 5, borderSkipped: false },
+        { label: 'Aforo', data: evs.map(e => e.aforo), backgroundColor: 'rgba(201,168,76,0.2)', borderColor: 'rgba(201,168,76,0.7)', borderWidth: 1.5, borderRadius: 5, borderSkipped: false }
       ]
     },
     options: {
       responsive: true,
       plugins: {
         legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12, usePointStyle: true } },
-        tooltip: { callbacks: { afterLabel(ctx) { if (ctx.datasetIndex === 0) return 'Ocupaci\u00F3n: ' + _pct(inscritos[ctx.dataIndex], aforos[ctx.dataIndex]) + '%'; } } }
+        tooltip: { callbacks: { afterLabel(ctx) { if (ctx.datasetIndex === 0) return 'Ocupación: ' + _pct(evs[ctx.dataIndex].inscritos, evs[ctx.dataIndex].aforo) + '%'; } } }
       },
       scales: {
         x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 30 } },
-        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 11 } } }
+        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 11 }, precision: 0 } }
       }
     }
   });
 }
 
-function _renderChartSecciones(pageViewCounts) {
+function _renderChartSecciones(d) {
   _destroyChart('secciones');
   const canvas = document.getElementById('chart-secciones');
   if (!canvas || typeof Chart === 'undefined') return;
-  const merged = _mergePageViews(pageViewCounts);
-  const sorted = Object.values(merged).sort((a, b) => b.views - a.views);
+
+  const counts = {};
+  d.pageViews.forEach(r => { counts[r.page] = (counts[r.page] || 0) + 1; });
+  const sorted = Object.entries(counts)
+    .map(([page, views]) => ({ label: _pageLabel(page), views }))
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 12);
+
+  if (!sorted.length) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '13px system-ui, sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.textAlign = 'center';
+    ctx.fillText('Sin visitas registradas todavía', canvas.width / 2, 40);
+    return;
+  }
+
   _anCharts['secciones'] = new Chart(canvas, {
     type: 'bar',
     data: {
@@ -368,21 +441,21 @@ function _renderChartSecciones(pageViewCounts) {
         tooltip: { callbacks: { label(ctx) { return ' ' + ctx.parsed.x + ' visitas'; } } }
       },
       scales: {
-        x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 } } },
+        x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 }, precision: 0 } },
         y: { grid: { display: false }, ticks: { font: { size: 11 } } }
       }
     }
   });
 }
 
-function _renderChartUsuarios() {
+function _renderChartUsuarios(d) {
   _destroyChart('usuarios');
   const canvas = document.getElementById('chart-usuarios');
   if (!canvas || typeof Chart === 'undefined') return;
-  const users      = (typeof MOCK_USERS !== 'undefined') ? MOCK_USERS : [];
-  const activos    = users.filter(u => u.status === 'active').length  || 5;
-  const pendientes = users.filter(u => u.status === 'pending').length || 2;
-  const baneados   = users.filter(u => u.status === 'banned').length  || 1;
+  const activos    = d.profiles.filter(p => p.status === 'active').length;
+  const pendientes = d.profiles.filter(p => p.status === 'pending').length;
+  const baneados   = d.profiles.filter(p => p.status === 'banned').length;
+
   _anCharts['usuarios'] = new Chart(canvas, {
     type: 'doughnut',
     data: {
@@ -397,24 +470,34 @@ function _renderChartUsuarios() {
       responsive: true, cutout: '70%',
       plugins: {
         legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 14, usePointStyle: true } },
-        tooltip: { callbacks: { label(ctx) { const t = ctx.dataset.data.reduce((a, b) => a + b, 0); return ' ' + ctx.label + ': ' + ctx.parsed + ' (' + Math.round((ctx.parsed / t) * 100) + '%)'; } } }
+        tooltip: { callbacks: { label(ctx) { const t = ctx.dataset.data.reduce((a, b) => a + b, 0); return ' ' + ctx.label + ': ' + ctx.parsed + (t ? ' (' + Math.round((ctx.parsed / t) * 100) + '%)' : ''); } } }
       }
     }
   });
 }
 
-function _renderChartNuevos(monthlyData) {
+function _renderChartNuevos(d) {
   _destroyChart('nuevos');
   const canvas = document.getElementById('chart-nuevos');
   if (!canvas || typeof Chart === 'undefined') return;
-  const data = (monthlyData && monthlyData.length >= 2) ? monthlyData : _AN_MONTHLY_MEMBERS_BASE;
+
+  const buckets = _lastSixMonths();
+  const idx = {};
+  buckets.forEach((b, i) => { idx[b.key] = i; });
+  d.profiles.forEach(p => {
+    const c = new Date(p.created_at);
+    if (isNaN(c)) return;
+    const k = c.getFullYear() + '-' + c.getMonth();
+    if (k in idx) buckets[idx[k]].count += 1;
+  });
+
   _anCharts['nuevos'] = new Chart(canvas, {
     type: 'line',
     data: {
-      labels: data.map(m => m.month),
+      labels: buckets.map(m => m.label),
       datasets: [{
         label: 'Nuevos miembros',
-        data: data.map(m => m.count),
+        data: buckets.map(m => m.count),
         borderColor: '#1B2E5E',
         backgroundColor: 'rgba(27,46,94,0.07)',
         borderWidth: 2.5,
@@ -435,52 +518,52 @@ function _renderChartNuevos(monthlyData) {
       },
       scales: {
         x: { grid: { display: false }, ticks: { font: { size: 12 } } },
-        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { stepSize: 1, font: { size: 11 } } }
+        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { stepSize: 1, font: { size: 11 }, precision: 0 } }
       }
     }
   });
 }
 
-// ─── 11. Función principal ────────────────────────────────────────
+// ─── 10. Entrada principal ───────────────────────────────────────
 
 /**
- * Punto de entrada principal del dashboard de analytics.
- * Renderiza inmediatamente con datos fallback y luego actualiza con datos reales.
- * Llamar desde admin.html al activar la pestaña de Analytics.
- *
+ * Punto de entrada del dashboard de analíticas.
+ * Se llama desde admin.html al activar la pestaña de Analíticas.
  * @returns {Promise<void>}
  */
 async function loadAnalyticsDashboard() {
-  // 1. Render inmediato con datos mock/fallback
-  _renderAnKPIs(null);
-  _renderAnEventos();
-  _renderAnDonativos();
-  _renderAnNoticias(null);
-  setTimeout(function () {
-    _renderChartEventos();
-    _renderChartSecciones(null);
-    _renderChartUsuarios();
-    _renderChartNuevos(null);
-  }, 60);
-
-  // 2. Fetch datos reales de Supabase en paralelo
-  try {
-    const [pageViews, newsReads, monthlyMembers] = await Promise.all([
-      _fetchPageViewCounts(),
-      _fetchNewsReadCounts(),
-      _fetchMonthlyMembers()
-    ]);
-
-    // 3. Actualizar UI con datos reales cuando lleguen
-    if (newsReads) {
-      _renderAnKPIs(newsReads);
-      _renderAnNoticias(newsReads);
-    }
-    setTimeout(function () {
-      if (pageViews)        _renderChartSecciones(pageViews);
-      if (monthlyMembers)   _renderChartNuevos(monthlyMembers);
-    }, 50);
-  } catch (e) {
-    console.warn('[Analytics] Supabase fetch failed, using simulated data:', e);
+  const sb = _anSB();
+  if (!sb) {
+    _el('an-last-updated').textContent = 'Sin conexión a Supabase';
+    return;
   }
+
+  // Estado "cargando" en las listas
+  ['an-eventos-list', 'an-donativos-list', 'an-noticias-list'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<p style="color:var(--color-text-muted);font-size:.82rem;padding:12px 0;">Cargando…</p>';
+  });
+  _el('an-last-updated').textContent = 'Cargando…';
+
+  let d;
+  try {
+    d = await _fetchAll();
+  } catch (e) {
+    console.error('[analytics] fallo al cargar datos:', e);
+    _el('an-last-updated').textContent = 'No se pudieron cargar los datos';
+    return;
+  }
+
+  _renderKPIs(d);
+  _renderEventos(d);
+  _renderDonativos(d);
+  _renderNoticias(d);
+
+  // Los gráficos necesitan que el panel sea visible para medir el canvas
+  setTimeout(function () {
+    _renderChartEventos(d);
+    _renderChartSecciones(d);
+    _renderChartUsuarios(d);
+    _renderChartNuevos(d);
+  }, 60);
 }
