@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" type="image/png" sizes="48x48" href="img/icon-48.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
+  <link rel="apple-touch-icon" href="img/icon-180.png">
+  <title>Descargar la app — Jabad Barcelona</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { background: var(--color-primary); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .dl-wrap { max-width: 420px; margin: 0 auto; padding: 40px 24px; text-align: center; color: #fff; }
+    .dl-logo { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; margin-bottom: 24px; }
+    .dl-wrap h1 { font-family: var(--font-brand); font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; }
+    .dl-wrap p { font-size: 0.95rem; opacity: 0.85; line-height: 1.6; margin-bottom: 28px; }
+    .dl-btn { display: block; width: 100%; background: var(--color-gold); color: var(--color-primary); font-weight: 700; padding: 14px; border-radius: var(--radius-md); text-decoration: none; margin-bottom: 12px; }
+    .dl-btn.secondary { background: rgba(255,255,255,0.12); color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="dl-wrap">
+    <img class="dl-logo" src="img/icon-180.png" alt="Jabad Barcelona">
+    <h1>Bcn Kehila</h1>
+    <p>Redirigiendo a la tienda de aplicaciones…</p>
+    <a class="dl-btn" id="dl-primary" href="https://apps.apple.com/us/app/bcn-kehila/id6781786203">Abrir en la App Store</a>
+    <a class="dl-btn secondary" id="dl-secondary" href="https://play.google.com/store/apps/details?id=com.kehilabcn.app">Abrir en Google Play</a>
+  </div>
+  <script>
+    // Un solo enlace/QR para toda la comunidad: detecta el sistema operativo
+    // y redirige automáticamente a la tienda correcta, en vez de obligar a
+    // imprimir/escanear dos códigos QR distintos (y tener que reimprimir el
+    // cartel el día que se publique en Android).
+    const APP_STORE_URL = 'https://apps.apple.com/us/app/bcn-kehila/id6781786203';
+    const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.kehilabcn.app';
+    const ua = navigator.userAgent || '';
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isAndroid = /Android/i.test(ua);
+
+    if (isIOS) {
+      location.replace(APP_STORE_URL);
+    } else if (isAndroid) {
+      location.replace(PLAY_STORE_URL);
+    }
+    // Escritorio / otros: se queda en esta página con los dos botones visibles.
+  </script>
+</body>
+</html>
