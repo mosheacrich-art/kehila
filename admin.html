@@ -402,6 +402,112 @@
     }
     .aforo-bar .progress-bar { flex: 1; height: 5px; max-width: 120px; }
 
+    /* ─── Inscritos por evento (desplegable dentro de la tarjeta) ─── */
+    .event-admin-wrap {
+      display: flex;
+      flex-direction: column;
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+    .event-admin-wrap > .event-admin-card { box-shadow: none; }
+    details.ev-inscritos {
+      border-top: 1px solid var(--color-border);
+      padding: 0 20px;
+    }
+    details.ev-inscritos > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 10px 0;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+    details.ev-inscritos > summary::-webkit-details-marker { display: none; }
+    details.ev-inscritos > summary::before {
+      content: '';
+      width: 0; height: 0;
+      border-left: 5px solid currentColor;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      transition: transform 0.15s ease;
+    }
+    details.ev-inscritos[open] > summary::before { transform: rotate(90deg); }
+
+    /* ─── Tabla genérica de personas (inscritos / donantes) ─── */
+    .people-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; margin: 4px 0 14px; }
+    .people-table th {
+      text-align: left;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-light);
+      font-weight: 700;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .people-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--color-border-light);
+      color: var(--color-text);
+      vertical-align: top;
+    }
+    .people-table tr:last-child td { border-bottom: none; }
+    .people-table .pt-muted { color: var(--color-text-muted); }
+    .people-table .pt-empty { text-align: center; color: var(--color-text-muted); padding: 18px 0; }
+    .pt-chip {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: var(--radius-full);
+      background: var(--color-gold-light);
+      color: var(--color-gold-dark);
+      white-space: nowrap;
+    }
+    .pt-chip.rec { background: var(--color-info-light); color: var(--color-info); }
+
+    /* ─── Donativos: cabecera de campaña ─── */
+    .don-group { margin-bottom: 26px; }
+    .don-group-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--color-bg);
+      border-radius: var(--radius-sm);
+      margin-bottom: 4px;
+    }
+    .don-group-head strong { font-size: 0.9375rem; color: var(--color-text); }
+    .don-group-head .don-group-total { font-size: 0.9375rem; font-weight: 700; color: var(--color-primary); white-space: nowrap; }
+    .don-metrics {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+    .don-metric {
+      flex: 1 1 150px;
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 14px 16px;
+    }
+    .don-metric .dm-value { font-size: 1.5rem; font-weight: 800; color: var(--color-primary); font-family: var(--font-brand); line-height: 1.1; }
+    .don-metric .dm-label { font-size: 0.75rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+
+    @media (max-width: 600px) {
+      .people-table thead { display: none; }
+      .people-table td { display: block; padding: 3px 10px; border: none; }
+      .people-table tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--color-border-light); }
+      details.ev-inscritos { padding: 0 14px; }
+    }
+
     /* ─── News list admin ─── */
     .news-admin-list { display: flex; flex-direction: column; gap: 10px; }
     .news-admin-row {
@@ -1080,6 +1186,10 @@
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5"/></svg>
         Eventos
       </button>
+      <button class="admin-tab" data-tab="donativos" id="tab-donativos" style="display:none;" onclick="loadDonativosAdmin()">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/></svg>
+        Donativos
+      </button>
       <button class="admin-tab" data-tab="noticias" onclick="loadBannersAdmin(); loadFotosComunidadAdmin();">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M13.5 12a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
         Banner
@@ -1276,6 +1386,26 @@
       </div>
 
       <div class="events-admin-list" id="events-admin-list"></div>
+    </div>
+
+    <!-- ════════════════════════════════
+         TAB: DONATIVOS  (solo admin / super_admin)
+    ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-donativos">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+        <div>
+          <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#64748b;margin:0 0 2px;">Donativos recibidos</p>
+          <p style="font-size:0.82rem;color:#94a3b8;margin:0;">Quién ha donado, cuánto y a qué campaña. Ordenado por campaña y fecha.</p>
+        </div>
+        <button class="btn btn-secondary" onclick="loadDonativosAdmin()">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+          Actualizar
+        </button>
+      </div>
+
+      <div class="don-metrics" id="don-metrics"></div>
+      <div id="donativos-admin-list"></div>
     </div>
 
     <!-- ════════════════════════════════
@@ -3507,20 +3637,79 @@
    * Si Supabase no tiene datos, usa MOCK_EVENTOS como fallback.
    * @returns {Promise<void>}
    */
+  // evento_id (string) -> [{ nombre, email, telefono, es_familiar, fecha }]
+  let _insByEvento = {};
+
   async function loadEventosAdmin() {
     const container = document.getElementById('events-admin-list');
     container.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Cargando eventos…</p>';
     const sb = typeof getSupabase === 'function' ? getSupabase() : null;
     if (sb) {
-      const [evRes, insRes] = await Promise.all([
+      const [evRes, insRes, profRes] = await Promise.all([
         sb.from('eventos').select('*').order('fecha', { ascending: true }),
-        sb.from('inscripciones').select('evento_id')
+        sb.from('inscripciones').select('evento_id, usuario_id, familiar_nombre, created_at'),
+        sb.from('profiles').select('id, name, email, telefono')
       ]);
+
+      const profMap = {};
+      (profRes.data || []).forEach(p => { profMap[p.id] = p; });
+
+      _insByEvento = {};
       const conteosMap = {};
-      if (insRes.data) insRes.data.forEach(r => { conteosMap[r.evento_id] = (conteosMap[r.evento_id] || 0) + 1; });
+      (insRes.data || []).forEach(r => {
+        const key = String(r.evento_id);
+        conteosMap[key] = (conteosMap[key] || 0) + 1;
+        const prof = profMap[r.usuario_id] || {};
+        (_insByEvento[key] = _insByEvento[key] || []).push({
+          nombre:      r.familiar_nombre ? r.familiar_nombre : (prof.name || '—'),
+          email:       r.familiar_nombre ? '' : (prof.email || ''),
+          telefono:    r.familiar_nombre ? '' : (prof.telefono || ''),
+          titular:     r.familiar_nombre ? (prof.name || '—') : '',
+          es_familiar: !!r.familiar_nombre,
+          fecha:       r.created_at || null
+        });
+      });
+      Object.values(_insByEvento).forEach(arr =>
+        arr.sort((a, b) => String(a.fecha || '').localeCompare(String(b.fecha || '')))
+      );
+
       eventsState = (evRes.data || []).map(ev => ({ ...ev, inscritos: conteosMap[String(ev.id)] || 0 }));
     }
     renderEventosAdmin();
+  }
+
+  /**
+   * HTML de la tabla de personas apuntadas a un evento.
+   * @param {string} eventoId
+   * @returns {string}
+   */
+  function renderInscritosTabla(eventoId) {
+    const rows = _insByEvento[String(eventoId)] || [];
+    if (!rows.length) {
+      return '<table class="people-table"><tr><td class="pt-empty">Nadie apuntado todavía.</td></tr></table>';
+    }
+    const fmtFecha = f => {
+      if (!f) return '—';
+      try { return new Date(f).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }); }
+      catch (_) { return '—'; }
+    };
+    return `
+      <table class="people-table">
+        <thead><tr><th>Persona</th><th>Contacto</th><th>Apuntado el</th></tr></thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td>
+                ${escHtml(r.nombre)}
+                ${r.es_familiar ? `<span class="pt-chip">Familiar${r.titular ? ' de ' + escHtml(r.titular) : ''}</span>` : ''}
+              </td>
+              <td class="pt-muted">
+                ${r.email ? escHtml(r.email) : ''}${r.email && r.telefono ? '<br>' : ''}${r.telefono ? escHtml(r.telefono) : ''}${!r.email && !r.telefono ? '—' : ''}
+              </td>
+              <td class="pt-muted">${fmtFecha(r.fecha)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
   }
 
   /**
@@ -3542,7 +3731,8 @@
       const fillColor = pct >= 90 ? 'var(--color-danger)' : pct >= 60 ? 'var(--color-warning)' : 'var(--color-success)';
 
       return `
-        <div class="event-admin-card" id="ev-card-${ev.id}">
+        <div class="event-admin-wrap" id="ev-card-${ev.id}">
+        <div class="event-admin-card">
           <div class="event-admin-date">
             <div class="event-admin-day">${dia}</div>
             <div class="event-admin-mon">${mes}</div>
@@ -3557,7 +3747,7 @@
               </span>
               <span>
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
-                ${escHtml(ev.lugar.split(',')[0])}
+                ${escHtml((ev.lugar || '').split(',')[0])}
               </span>
             </div>
             <div class="aforo-bar">
@@ -3574,6 +3764,11 @@
             <button class="btn btn-sm btn-secondary" onclick="editarEvento('${ev.id}')">Editar</button>
             <button class="btn btn-sm btn-danger" onclick="eliminarEvento('${ev.id}')">Eliminar</button>
           </div>
+        </div>
+        <details class="ev-inscritos">
+          <summary>Ver inscritos (${inscritos})</summary>
+          ${renderInscritosTabla(ev.id)}
+        </details>
         </div>`;
     }).join('');
   }
@@ -3721,6 +3916,102 @@
 
   loadEventosAdmin();
   uploadAreaSetup('ev');
+
+  /* ══════════════════════════════
+     TAB DONATIVOS  (solo admin / super_admin)
+     Lista quién ha donado, cuánto y a qué campaña.
+     Tabla: donaciones (usuario_id, usuario_nombre, campana_nombre,
+     cantidad, recurrente, dedicatoria, created_at)
+  ══════════════════════════════ */
+  let _donativosLoaded = false;
+
+  async function loadDonativosAdmin() {
+    const list = document.getElementById('donativos-admin-list');
+    const metrics = document.getElementById('don-metrics');
+    if (!list) return;
+    list.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Cargando donativos…</p>';
+    metrics.innerHTML = '';
+
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) { list.innerHTML = '<p style="text-align:center;color:var(--color-danger);padding:30px 0;">Sin conexión.</p>'; return; }
+
+    const [donRes, profRes] = await Promise.all([
+      sb.from('donaciones').select('usuario_id, usuario_nombre, campana_nombre, cantidad, recurrente, dedicatoria, created_at').order('created_at', { ascending: false }),
+      sb.from('profiles').select('id, name, email, telefono')
+    ]);
+
+    if (donRes.error) {
+      list.innerHTML = '<p style="text-align:center;color:var(--color-danger);padding:30px 0;">No se pudieron cargar los donativos: ' + escHtml(donRes.error.message) + '</p>';
+      return;
+    }
+
+    const profMap = {};
+    (profRes.data || []).forEach(p => { profMap[p.id] = p; });
+
+    const donaciones = donRes.data || [];
+    _donativosLoaded = true;
+
+    if (!donaciones.length) {
+      metrics.innerHTML = '';
+      list.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);padding:40px 0;">Todavía no hay donativos registrados.</p>';
+      return;
+    }
+
+    // ── Métricas globales ──
+    const totalRecaudado = donaciones.reduce((s, d) => s + (parseFloat(d.cantidad) || 0), 0);
+    const nDonantes = new Set(donaciones.map(d => d.usuario_id || d.usuario_nombre).filter(Boolean)).size;
+    const nRecurrentes = donaciones.filter(d => d.recurrente).length;
+    const eur = n => n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 });
+
+    metrics.innerHTML = `
+      <div class="don-metric"><div class="dm-value">${eur(totalRecaudado)}</div><div class="dm-label">Total recaudado</div></div>
+      <div class="don-metric"><div class="dm-value">${donaciones.length}</div><div class="dm-label">Donativos</div></div>
+      <div class="don-metric"><div class="dm-value">${nDonantes}</div><div class="dm-label">Personas distintas</div></div>
+      <div class="don-metric"><div class="dm-value">${nRecurrentes}</div><div class="dm-label">Mensuales activos</div></div>`;
+
+    // ── Agrupar por campaña ──
+    const grupos = {};
+    donaciones.forEach(d => {
+      const key = d.campana_nombre || 'Donativo general';
+      (grupos[key] = grupos[key] || []).push(d);
+    });
+
+    const fmtFecha = f => {
+      if (!f) return '—';
+      try { return new Date(f).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }); }
+      catch (_) { return '—'; }
+    };
+
+    list.innerHTML = Object.keys(grupos).sort().map(campana => {
+      const filas = grupos[campana];
+      const subtotal = filas.reduce((s, d) => s + (parseFloat(d.cantidad) || 0), 0);
+      return `
+        <div class="don-group">
+          <div class="don-group-head">
+            <strong>${escHtml(campana)}</strong>
+            <span class="don-group-total">${eur(subtotal)} · ${filas.length} donativo${filas.length === 1 ? '' : 's'}</span>
+          </div>
+          <table class="people-table">
+            <thead><tr><th>Donante</th><th>Contacto</th><th>Cantidad</th><th>Fecha</th><th>Dedicatoria</th></tr></thead>
+            <tbody>
+              ${filas.map(d => {
+                const prof = profMap[d.usuario_id] || {};
+                const nombre = prof.name || d.usuario_nombre || 'Anónimo';
+                const contacto = [prof.email, prof.telefono].filter(Boolean).map(escHtml).join('<br>') || '—';
+                return `
+                  <tr>
+                    <td>${escHtml(nombre)}${d.recurrente ? ' <span class="pt-chip rec">Mensual</span>' : ''}</td>
+                    <td class="pt-muted">${contacto}</td>
+                    <td><strong>${eur(parseFloat(d.cantidad) || 0)}</strong></td>
+                    <td class="pt-muted">${fmtFecha(d.created_at)}</td>
+                    <td class="pt-muted">${d.dedicatoria ? escHtml(d.dedicatoria) : '—'}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }).join('');
+  }
 
   /* ══════════════════════════════
      TAB NOTICIAS
@@ -6058,9 +6349,11 @@
     var role  = user.role;
     var areas = user.areas || [];
 
-    // admin y super_admin ven todo, incluido Equipo
+    // admin y super_admin ven todo, incluido Equipo y Donativos
     if (role === 'admin' || role === 'super_admin') {
       document.getElementById('tab-equipo').style.display = '';
+      var tabDon = document.getElementById('tab-donativos');
+      if (tabDon) tabDon.style.display = '';
       return;
     }
 
@@ -6075,7 +6368,7 @@
     // staff: mostrar solo las áreas asignadas
     document.querySelectorAll('.admin-tab').forEach(function(tab) {
       var t = tab.dataset.tab;
-      if (!t || t === 'equipo') return;
+      if (!t || t === 'equipo' || t === 'donativos') return;
       var needed = TAB_AREA_MAP[t];
       if (needed && !needed.some(function(a) { return areas.includes(a); })) {
         tab.style.display = 'none';
