@@ -2631,23 +2631,31 @@
      Oculta el body hasta confirmar el rol desde Supabase.
      Impide que manipular localStorage dé acceso al panel.
   ══════════════════════════════════════════════════════════════ */
-  document.body.style.visibility = 'hidden';
-  (async function checkAdminAccess() {
-    try {
-      const ok = await verifyAdminRealtime();
-      if (ok) {
-        document.body.style.visibility = 'visible';
-      }
-      // verifyAdminRealtime() already redirects on failure — no else needed
-    } catch(e) {
-      // Network error: fall back to localStorage check only
-      const localUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-      if (localUser && ['admin', 'super_admin', 'staff'].includes(localUser.role)) {
-        document.body.style.visibility = 'visible';
-      } else {
-        window.location.href = 'home.html';
-      }
-    }
+  /* Rendimiento + seguridad:
+     - Si localStorage YA dice que el rol es admin/staff, mostramos el panel
+       al instante y verificamos contra Supabase en segundo plano. Si la
+       verificación falla, verifyAdminRealtime() redirige igualmente (y los
+       datos están protegidos por RLS en el servidor). Así el admin legítimo
+       no ve pantalla en blanco esperando dos viajes de red.
+     - Si localStorage NO dice admin, mantenemos el body oculto hasta
+       confirmar el rol desde el servidor (comportamiento estricto de antes). */
+  (function checkAdminAccess() {
+    const localUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    const localLooksAdmin = !!localUser && ['admin', 'super_admin', 'staff'].includes(localUser.role);
+
+    if (!localLooksAdmin) document.body.style.visibility = 'hidden';
+
+    Promise.resolve()
+      .then(() => verifyAdminRealtime())
+      .then(ok => {
+        if (ok) document.body.style.visibility = 'visible';
+        // verifyAdminRealtime() ya redirige si el rol no es válido
+      })
+      .catch(() => {
+        // Error de red: si local dice admin, dejamos pasar; si no, fuera.
+        if (localLooksAdmin) document.body.style.visibility = 'visible';
+        else window.location.href = 'home.html';
+      });
   })();
 
   /* ══════════════════════════════════════════════════════════════

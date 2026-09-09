@@ -15,6 +15,20 @@
 ::view-transition-group(*) {
   animation-duration: 180ms;
 }
+
+/* Fundido de entrada en cada página. En navegadores con View Transitions
+   (Chrome / WebView de Android) el crossfade de arriba ya suaviza la
+   navegación; este fundido cubre el resto (iOS / WKWebView, Safari) para
+   que el cambio de pestaña nunca sea un corte seco a blanco. */
+@keyframes kh-page-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  body {
+    animation: kh-page-in 0.16s ease-out both;
+  }
+}
 /* La barra inferior (view-transition-name: bottom-nav, ver css/pages.css)
    es idéntica entre página y página: al no moverse ni cambiar de tamaño,
    queda fija en vez de desvanecerse con el resto de la pantalla. */
