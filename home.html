@@ -1151,6 +1151,24 @@
     /* ─── Init renders — carga desde Supabase ─── */
     const homeInscrito = new Set();
 
+    // Instantánea de los últimos eventos en localStorage: permite pintar las
+    // tarjetas del home AL INSTANTE en la siguiente visita, sin esperar a la
+    // consulta de Supabase. Luego se refresca con datos reales y se reescribe.
+    const HOME_SNAP_KEY = 'kehila_snap_home_eventos';
+
+    (function paintEventosFromSnapshot() {
+      try {
+        const raw = localStorage.getItem(HOME_SNAP_KEY);
+        if (!raw) return;
+        const snap = JSON.parse(raw);
+        if (Array.isArray(snap) && snap.length) {
+          MOCK_EVENTOS.length = 0;
+          snap.forEach(ev => MOCK_EVENTOS.push(ev));
+          renderEventos();
+        }
+      } catch (e) { /* instantánea corrupta: se ignora */ }
+    })();
+
     async function loadHomeData() {
       const sb = typeof getSupabase === 'function' ? getSupabase() : null;
       const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
@@ -1170,9 +1188,10 @@
           if (evRes.data && evRes.data.length) {
             MOCK_EVENTOS.length = 0;
             evRes.data.forEach(ev => { ev.inscritos = conteosMap[String(ev.id)] || 0; MOCK_EVENTOS.push(ev); });
+            try { localStorage.setItem(HOME_SNAP_KEY, JSON.stringify(MOCK_EVENTOS.slice(0, 4))); } catch (e) {}
           }
           if (insRes?.data) insRes.data.forEach(r => homeInscrito.add(r.evento_id));
-        } catch(e) { /* usa mock como fallback */ }
+        } catch(e) { /* usa mock/instantánea como fallback */ }
       }
       renderEventos();
     }
