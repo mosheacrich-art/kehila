@@ -587,6 +587,23 @@
       });
       if (error) throw error;
 
+      // 4. Avisar al encargado del mikve (email + push). Fire-and-forget:
+      //    si falla, la reserva ya está guardada y no debe romper el flujo.
+      fetch('https://vvrvuhugpvqytelhsdnk.supabase.co/functions/v1/notify-mikve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({
+          nombre:   user.name || '',
+          email:    user.email || '',
+          fecha:    formatDateLong(booking.date),
+          hora:     booking.time,
+          servicio: booking.gender === 'hombre' ? booking.service.name + ' (Hombres)' : booking.service.name,
+          precio:   booking.service.price,
+          donacion: booking.donation,
+          total
+        })
+      }).catch(() => {});
+
     } catch(err) {
       showToast(err.message || 'Error al procesar el pago', 'error');
       btn.disabled = false; btn.textContent = 'Confirmar reserva';
