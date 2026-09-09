@@ -472,9 +472,10 @@ const hoy = new Date();
     if (e) e.stopPropagation();
     const ev = MOCK_EVENTOS.find(x => x.id === id);
     if (!ev) return;
-    // Dominio público fijo — el enlace compartido siempre apunta a bcnkehila.com,
-    // aunque la app se abra desde github.io o como PWA instalada.
-    const url = `https://bcnkehila.com/eventos.html?evento=${encodeURIComponent(id)}`;
+    // Dominio público canónico (con www — el apex redirige y eso rompe los
+    // App Links). El enlace compartido siempre apunta aquí, aunque la app se
+    // abra desde github.io o como PWA instalada.
+    const url = `https://www.bcnkehila.com/eventos.html?evento=${encodeURIComponent(id)}`;
     const fecha = new Date(ev.fecha + 'T00:00:00');
     const partes = [`*${ev.titulo}*`];
     let linea = `${fecha.getDate()} ${MESES_S[fecha.getMonth()]}`;
