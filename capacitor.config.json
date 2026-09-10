@@ -2,6 +2,7 @@
   "appId": "com.bcnkehila",
   "appName": "Bcn Kehila",
   "webDir": "www",
+  "backgroundColor": "#FAF5EE",
   "server": {
     "url": "https://www.bcnkehila.com"
   },
