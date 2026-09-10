@@ -2468,6 +2468,31 @@
 <!-- ══════════════════════════════════
      MODAL: Banear usuario
 ══════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-info-usuario">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">Solicitar información</h3>
+      <button class="modal-close" onclick="closeModal('modal-info-usuario')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.9375rem;margin-bottom:16px;">
+        Le enviaremos un email a <strong id="info-usuario-nombre"></strong> pidiéndole lo que le falta.
+      </p>
+      <div class="form-group">
+        <label class="form-label required" for="info-usuario-mensaje">Qué necesitas de este usuario</label>
+        <textarea id="info-usuario-mensaje" class="form-textarea form-textarea-sm" placeholder="Ej: Falta el DNI/pasaporte legible, o confirmar tu dirección en Barcelona…"></textarea>
+        <span class="form-error" id="info-usuario-mensaje-error" style="display:none;">El mensaje es obligatorio.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-info-usuario')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirm-info-usuario">Enviar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay hidden" id="modal-banear">
   <div class="modal modal-sm">
     <div class="modal-header">
@@ -3422,14 +3447,49 @@
   }
 
   /**
-   * Pide información adicional a un usuario pendiente (envía email placeholder).
+   * Abre el modal para pedir información adicional a un usuario pendiente.
    * @param {string} userId
    */
   function solicitarInfoUsuario(userId) {
     const user = usersState.find(u => u.userId === userId);
     if (!user) return;
-    showToast(`Solicitud de información enviada a ${escHtml(user.name)}.`, 'info');
+    pendingTarget = userId;
+    document.getElementById('info-usuario-nombre').textContent = user.name;
+    document.getElementById('info-usuario-mensaje').value = '';
+    document.getElementById('info-usuario-mensaje-error').style.display = 'none';
+    openModal('modal-info-usuario');
   }
+
+  document.getElementById('btn-confirm-info-usuario').addEventListener('click', async () => {
+    const mensaje = document.getElementById('info-usuario-mensaje').value.trim();
+    if (!mensaje) {
+      document.getElementById('info-usuario-mensaje-error').style.display = '';
+      return;
+    }
+    if (!pendingTarget) return;
+    const user = usersState.find(u => u.userId === pendingTarget);
+    closeModal('modal-info-usuario');
+    showToast('Enviando…', 'info');
+
+    if (user.source === 'real') {
+      const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+      if (!sb) { showToast('Sin conexión a Supabase', 'error'); pendingTarget = null; return; }
+      try {
+        const { data, error } = await sb.functions.invoke('notify-info-request', { body: { userId: pendingTarget, mensaje } });
+        if (error) throw error;
+        if (data && data.email) {
+          showToast(`Email enviado a ${escHtml(user.name)}.`, 'success');
+        } else {
+          showToast(`No se pudo enviar el email a ${escHtml(user.name)}${data && data.emailError ? ': ' + escHtml(data.emailError) : ''}.`, 'warning');
+        }
+      } catch (e) {
+        showToast('Error al enviar: ' + escHtml(e.message || 'desconocido'), 'error');
+      }
+    } else {
+      showToast(`Solicitud de información enviada a ${escHtml(user.name)}.`, 'info');
+    }
+    pendingTarget = null;
+  });
 
   /**
    * Escribe status='suspended' en Supabase para un usuario.
