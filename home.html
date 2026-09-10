@@ -31,10 +31,13 @@
     }
 
     @media (max-width: 768px) {
-      .home-inner { padding: 16px 16px 88px; }
+      /* padding-top 60px: el botón hamburguesa es fixed, top:12/left:12,
+         40x40px (hb-btn en nav.js) — sin este espacio el saludo "¡Boker
+         tov!" queda debajo del botón. */
+      .home-inner { padding: 60px 16px 88px; }
     }
     @media (max-width: 480px) {
-      .home-inner { padding: 12px 14px 88px; }
+      .home-inner { padding: 60px 14px 88px; }
     }
 
     /* ─── 1. Header personalizado ─── */
