@@ -17,7 +17,10 @@
     .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
     @media (max-width: 768px) { .main-content { margin-left: 0; padding-bottom: 80px; } }
     .cal-heb-inner { padding: 32px 36px 60px; }
-    @media (max-width: 768px) { .cal-heb-inner { padding: 20px 14px 88px; } }
+    /* padding-top 60px: el botón hamburguesa es fixed, top:12/left:12,
+       40x40px (hb-btn en nav.js) — sin este espacio el título queda
+       debajo del botón. */
+    @media (max-width: 768px) { .cal-heb-inner { padding: 60px 14px 88px; } }
 
     /* ── Grid principal ── */
     .cal-wrap { display: grid; grid-template-columns: 1fr 400px; gap: 28px; align-items: start; }
