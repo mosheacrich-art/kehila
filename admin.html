@@ -3319,13 +3319,46 @@
     if (!await verifyAdminRealtime()) return;
     const user = usersState.find(u => u.userId === pendingTarget);
     user.status = 'active';
-    if (user.source === 'real') aprobarEnSupabase(user.userId);
     closeModal('modal-aprobar');
     filterUsers();
     initPendingBanner();
-    showToast(`Usuario aprobado. Email de bienvenida enviado a ${escHtml(user.email)}.`, 'success');
+    showToast('Aprobando usuario…', 'info');
+
+    if (user.source === 'real') {
+      await aprobarEnSupabase(user.userId);
+      const notif = await notificarAprobacion(user.userId);
+      if (notif.email && notif.pushSent) {
+        showToast(`${escHtml(user.name)} aprobado — email y notificación push enviados.`, 'success');
+      } else if (notif.email) {
+        showToast(`${escHtml(user.name)} aprobado — email enviado (sin push: app no instalada o sin tokens).`, 'success');
+      } else if (notif.error) {
+        showToast(`${escHtml(user.name)} aprobado, pero el aviso falló: ${escHtml(notif.error)}`, 'warning');
+      } else {
+        showToast(`${escHtml(user.name)} aprobado, pero no se pudo enviar el email (revisa RESEND_API_KEY).`, 'warning');
+      }
+    } else {
+      showToast(`${escHtml(user.name)} aprobado.`, 'success');
+    }
     pendingTarget = null;
   });
+
+  /**
+   * Llama a la Edge Function notify-approval: envía email de bienvenida
+   * (Resend) y push (APNs/FCM) al usuario recién aprobado.
+   * @param {string} userId
+   * @returns {Promise<{email?: boolean, pushSent?: number, pushFailed?: number, error?: string}>}
+   */
+  async function notificarAprobacion(userId) {
+    const sb = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!sb) return { error: 'Sin conexión a Supabase' };
+    try {
+      const { data, error } = await sb.functions.invoke('notify-approval', { body: { userId } });
+      if (error) return { error: error.message || 'Error al invocar notify-approval' };
+      return data || {};
+    } catch (e) {
+      return { error: e.message || 'Error de red' };
+    }
+  }
 
   /**
    * Muestra el modal de confirmación para banear un usuario activo.
