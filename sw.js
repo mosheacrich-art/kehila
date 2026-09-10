@@ -13,7 +13,7 @@
    Push: muestra notificación nativa cuando la app está cerrada.
    ============================================= */
 
-const CACHE = 'kehila-v23';
+const CACHE = 'kehila-v24';
 
 // El cascarón completo de la app. Se precachea al instalar el SW para que
 // la navegación entre secciones sea instantánea.
