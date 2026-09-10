@@ -50,24 +50,27 @@ function getSupabase() {
 
 const SESSION_KEY = 'kehila_user';
 
-// Native app (PWAShell WKWebView): use sessionStorage so session is cleared
-// when the app is killed, forcing re-login on next open.
-// Web browsers: use localStorage for persistent sessions.
-const SESSION_STORAGE = /PWAShell/.test(navigator.userAgent)
-  ? window.sessionStorage
-  : window.localStorage;
+// Sesión SIEMPRE persistente, tanto en web como en la app nativa (Capacitor).
+// El usuario introduce la contraseña una sola vez y no vuelve a salir hasta
+// que pulse "Cerrar sesión". En la app, guardar el token en sessionStorage
+// hacía que Android/iOS lo borraran al matar el WebView en segundo plano →
+// al reabrir no había sesión de Supabase → RLS devolvía 0 filas (sin eventos,
+// sin noticias…) y re-login forzado en cada apertura.
+const SESSION_STORAGE = window.localStorage;
 
-// Migración: en la app nativa, sesiones antiguas quedaron en localStorage.
-// Si no se limpian, index.html las ve como sesión activa mientras
-// requireAuth() lee sessionStorage vacío → bucle login↔home infinito.
-if (SESSION_STORAGE === window.sessionStorage) {
-  try {
-    localStorage.removeItem(SESSION_KEY);
-    Object.keys(localStorage)
-      .filter(k => k.startsWith('sb-') && k.includes('-auth-token'))
-      .forEach(k => localStorage.removeItem(k));
-  } catch (e) { /* ignorar */ }
-}
+// Migración única: usuarios que quedaron con la sesión en sessionStorage
+// (builds antiguos que usaban ese almacenamiento). La copiamos a localStorage
+// para que no tengan que volver a entrar.
+try {
+  if (!localStorage.getItem(SESSION_KEY) && sessionStorage.getItem(SESSION_KEY)) {
+    localStorage.setItem(SESSION_KEY, sessionStorage.getItem(SESSION_KEY));
+  }
+  Object.keys(sessionStorage)
+    .filter(k => k.startsWith('sb-') && k.includes('-auth-token'))
+    .forEach(k => {
+      if (!localStorage.getItem(k)) localStorage.setItem(k, sessionStorage.getItem(k));
+    });
+} catch (e) { /* ignorar */ }
 
 // ─── Login ────────────────────────────────────
 /**

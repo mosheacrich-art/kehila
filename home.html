@@ -885,8 +885,9 @@
                 <svg class="tefila-shabat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25 12 15.75 4.5 8.25"/></svg>
               </div>
             </div>
-            <button id="btn-edit-horarios" onclick="abrirEditHorarios()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:var(--color-text-muted);transition:color 0.15s;flex-shrink:0;margin-left:auto;" title="Editar horarios">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+            <button id="btn-edit-horarios" onclick="abrirEditHorarios()" style="display:none;align-items:center;gap:5px;background:rgba(27,46,94,0.08);border:1px solid rgba(27,46,94,0.15);cursor:pointer;padding:5px 10px;border-radius:999px;color:var(--color-text-muted,#1b2e5e);font-size:0.72rem;font-weight:600;font-family:inherit;transition:background 0.15s;flex-shrink:0;margin-left:auto;" title="Editar horarios de tefilá" onmouseover="this.style.background='rgba(27,46,94,0.15)'" onmouseout="this.style.background='rgba(27,46,94,0.08)'">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+              Editar
             </button>
           </div>
         </div>
@@ -1418,8 +1419,8 @@
     }
 
     async function loadHorarios() {
-      // Mostrar botón de edición si es admin
-      if (user && user.role === 'admin') {
+      // Mostrar botón de edición a admin y super_admin
+      if (user && ['admin', 'super_admin'].includes(user.role)) {
         const btn = document.getElementById('btn-edit-horarios');
         if (btn) btn.style.display = 'flex';
       }
