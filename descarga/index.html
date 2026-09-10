@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/png" sizes="48x48" href="img/icon-48.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
+  <link rel="apple-touch-icon" href="img/icon-180.png">
+  <title>Descargar la app — Jabad Barcelona</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #0d1530;
+      overscroll-behavior: none;
+    }
+    body {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: var(--font-ui, 'Inter', sans-serif);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Soft ambient glow, Apple-product-page style — not a flat fill */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: -20%;
+      background:
+        radial-gradient(circle at 22% 20%, rgba(201,168,76,0.16), transparent 42%),
+        radial-gradient(circle at 78% 82%, rgba(88,110,220,0.20), transparent 45%),
+        radial-gradient(circle at 50% 50%, #172259, #0d1530 70%);
+      z-index: 0;
+    }
+
+    .dl-wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+      padding: 32px 28px;
+      text-align: center;
+      color: #fff;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: rise 0.6s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+    .dl-logo-ring {
+      width: 92px;
+      height: 92px;
+      margin: 0 auto 28px;
+      border-radius: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(155deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5);
+    }
+    .dl-logo-ring img {
+      width: 68px;
+      height: 68px;
+      border-radius: 18px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .dl-wrap h1 {
+      font-family: var(--font-brand);
+      font-size: 1.7rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin: 0 0 8px;
+    }
+    .dl-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.55);
+      margin: 0 0 36px;
+    }
+    .dl-status .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #C9A84C;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+
+    .dl-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 15px 18px;
+      border-radius: 15px;
+      text-decoration: none;
+      font-size: 0.97rem;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      margin-bottom: 12px;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    .dl-btn:active { transform: scale(0.97); opacity: 0.9; }
+    .dl-btn svg { width: 19px; height: 19px; flex-shrink: 0; }
+
+    .dl-btn.primary {
+      background: #fff;
+      color: #10173a;
+      box-shadow: 0 10px 24px -8px rgba(0,0,0,0.45);
+    }
+    .dl-btn.secondary {
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(8px);
+    }
+
+    .dl-footer {
+      margin-top: 28px;
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.32);
+      letter-spacing: 0.01em;
+    }
+  </style>
+</head>
+<body>
+  <div class="dl-wrap">
+    <div class="dl-logo-ring">
+      <img src="img/icon-180.png" alt="Jabad Barcelona">
+    </div>
+    <h1>Bcn Kehila</h1>
+    <p class="dl-status" id="dl-status"><span class="dot"></span>Abriendo la tienda…</p>
+
+    <a class="dl-btn primary" id="dl-primary" href="https://apps.apple.com/us/app/bcn-kehila/id6781786203">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.365 1.43c0 1.14-.463 2.09-1.14 2.83-.75.85-1.98 1.51-2.98 1.44-.14-1.1.42-2.26 1.14-2.98.75-.77 2.03-1.35 2.98-1.29zM20.5 17.15c-.42.98-.62 1.42-1.16 2.29-.75 1.2-1.8 2.7-3.11 2.71-1.16.02-1.46-.76-3.03-.75-1.57.01-1.9.77-3.06.75-1.31-.02-2.3-1.36-3.05-2.56-2.1-3.31-2.32-7.2-1.02-9.27.92-1.47 2.38-2.33 3.74-2.33 1.39 0 2.27.79 3.42.79 1.12 0 1.8-.79 3.42-.79 1.22 0 2.51.66 3.43 1.81-3.01 1.65-2.53 5.96.42 7.35z"/></svg>
+      App Store
+    </a>
+    <a class="dl-btn secondary" id="dl-secondary" href="https://play.google.com/store/apps/details?id=com.kehilabcn.app">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.6 2.6c-.35.36-.55.9-.55 1.6v15.6c0 .7.2 1.24.55 1.6l.1.09L13 12.2v-.4L3.7 2.5l-.1.1z"/><path d="M16.1 15.3l-3.1-3.1v-.4l3.1-3.1 3.6 2.05c1.03.58 1.03 1.53 0 2.11l-3.6 2.05z" opacity="0.55"/><path d="M16.1 8.7l-3.1 3.1-9.4-9.4c.28-.22.65-.24 1.06 0l11.44 6.3z"/><path d="M16.1 15.3L4.66 21.6c-.4.24-.78.22-1.06 0l9.4-9.4 3.1 3.1z" opacity="0.75"/></svg>
+      Google Play
+    </a>
+
+    <p class="dl-footer">Jabad Barcelona</p>
+  </div>
+  <script>
+    // Un solo enlace/QR para toda la comunidad: detecta el sistema operativo
+    // y redirige automáticamente a la tienda correcta, en vez de obligar a
+    // imprimir/escanear dos códigos QR distintos (y tener que reimprimir el
+    // cartel el día que se publique en Android).
+    const APP_STORE_URL = 'https://apps.apple.com/us/app/bcn-kehila/id6781786203';
+    const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.kehilabcn.app';
+    const ua = navigator.userAgent || '';
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isAndroid = /Android/i.test(ua);
+
+    if (isIOS) {
+      location.replace(APP_STORE_URL);
+    } else if (isAndroid) {
+      location.replace(PLAY_STORE_URL);
+    } else {
+      document.getElementById('dl-status').textContent = 'Elige tu tienda de aplicaciones';
+      document.querySelector('.dl-status .dot')?.remove();
+    }
+  </script>
+</body>
+</html>
