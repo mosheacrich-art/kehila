@@ -28,6 +28,28 @@
  */
 
 /**
+ * Universal Links (iOS) / App Links (Android): cuando el usuario toca un
+ * enlace de bcnkehila.com estando la app instalada, iOS/Android la abren y
+ * disparan 'appUrlOpen' con la URL externa completa — pero el WebView no
+ * navega solo. Traducimos esa URL a la ruta local equivalente dentro del
+ * shell de Capacitor (ej. https://www.bcnkehila.com/eventos.html?evento=5
+ * → eventos.html?evento=5) para que aterrice en la página/evento correctos
+ * en vez de quedarse en la pantalla de inicio.
+ * Se registra en carga del script (no en DOMContentLoaded) para no perder
+ * la URL de un cold start.
+ */
+if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+  const { App } = window.Capacitor.Plugins;
+  App.addListener('appUrlOpen', (data) => {
+    try {
+      const incoming = new URL(data.url);
+      const target = incoming.pathname.replace(/^\//, '') + incoming.search + incoming.hash;
+      if (target) window.location.href = target;
+    } catch (e) { /* URL externa no reconocida: ignorar */ }
+  });
+}
+
+/**
  * Escapa caracteres HTML peligrosos para prevenir XSS.
  * Disponible globalmente — se usa en nav.js, noticias.js, wallap.html y otros.
  * @param {*} str

@@ -171,37 +171,37 @@ function regValidateStep1() {
 
   // Nombre: mínimo 2 palabras
   if (!REG.data.nombre || REG.data.nombre.split(/\s+/).length < 1 || REG.data.nombre.length < 2) {
-    regShowFieldError('r1-nombre', 'r1-nombre-err', 'Introduce tu nombre completo');
+    regShowFieldError('r1-nombre', 'r1-nombre-err', t('err_nombre_completo'));
     ok = false;
   } else { regClearFieldError('r1-nombre', 'r1-nombre-err'); }
 
   if (!REG.data.apellidos || REG.data.apellidos.length < 2) {
-    regShowFieldError('r1-apellidos', 'r1-apellidos-err', 'Introduce tus apellidos');
+    regShowFieldError('r1-apellidos', 'r1-apellidos-err', t('err_apellidos'));
     ok = false;
   } else { regClearFieldError('r1-apellidos', 'r1-apellidos-err'); }
 
   if (!REG.data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(REG.data.email)) {
-    regShowFieldError('r1-email', 'r1-email-err', 'Introduce un email válido');
+    regShowFieldError('r1-email', 'r1-email-err', t('err_email_valido'));
     ok = false;
   } else { regClearFieldError('r1-email', 'r1-email-err'); }
 
   if (REG.data.telefono && REG.data.telefono.length < 6) {
-    regShowFieldError('r1-telefono', 'r1-telefono-err', 'Introduce un teléfono válido');
+    regShowFieldError('r1-telefono', 'r1-telefono-err', t('err_telefono_valido'));
     ok = false;
   } else { regClearFieldError('r1-telefono', 'r1-telefono-err'); }
 
   const pw = REG.data.password;
   const pwStrong = pw.length >= 8 && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw);
   if (!pw || pw.length < 8) {
-    regShowFieldError('r1-password', 'r1-password-err', 'Mínimo 8 caracteres');
+    regShowFieldError('r1-password', 'r1-password-err', t('err_pw_min'));
     ok = false;
   } else if (!pwStrong) {
-    regShowFieldError('r1-password', 'r1-password-err', 'Incluye mayúscula, minúscula, número y símbolo');
+    regShowFieldError('r1-password', 'r1-password-err', t('err_pw_reglas'));
     ok = false;
   } else { regClearFieldError('r1-password', 'r1-password-err'); }
 
   if (pw !== confirm) {
-    regShowFieldError('r1-confirm', 'r1-confirm-err', 'Las contraseñas no coinciden');
+    regShowFieldError('r1-confirm', 'r1-confirm-err', t('err_pw_no_coincide'));
     ok = false;
   } else if (confirm) { regClearFieldError('r1-confirm', 'r1-confirm-err'); }
 
@@ -220,36 +220,36 @@ function regValidateStep2() {
   REG.data.paisNac = document.getElementById('r2-pais-nac')?.value || '';
 
   if (!REG.data.docTipo) {
-    regShowFieldError('r2-doc-tipo', 'r2-doc-tipo-err', 'Selecciona el tipo de documento');
+    regShowFieldError('r2-doc-tipo', 'r2-doc-tipo-err', t('err_doctipo'));
     ok = false;
   } else { regClearFieldError('r2-doc-tipo', 'r2-doc-tipo-err'); }
 
   if (!REG.data.docNumero || REG.data.docNumero.length < 5) {
-    regShowFieldError('r2-doc-num', 'r2-doc-num-err', 'Introduce el número de documento');
+    regShowFieldError('r2-doc-num', 'r2-doc-num-err', t('err_docnum'));
     ok = false;
   } else { regClearFieldError('r2-doc-num', 'r2-doc-num-err'); }
 
   if (!dia || !mes || !anio) {
     const err = document.getElementById('r2-fecha-err');
-    if (err) { err.textContent = 'Introduce tu fecha de nacimiento completa'; err.style.display = ''; }
+    if (err) { err.textContent = t('err_fecha_completa'); err.style.display = ''; }
     ok = false;
   } else {
     const birthDate = new Date(parseInt(anio), parseInt(mes)-1, parseInt(dia));
     const age = Math.floor((Date.now() - birthDate) / (365.25*24*60*60*1000));
     const err = document.getElementById('r2-fecha-err');
     if (age < 13) {
-      if (err) { err.textContent = 'Debes tener al menos 13 años'; err.style.display = ''; }
+      if (err) { err.textContent = t('err_edad_min'); err.style.display = ''; }
       ok = false;
     } else if (err) { err.textContent = ''; err.style.display = 'none'; }
   }
 
   if (!REG.data.nacionalidad) {
-    regShowFieldError('r2-nacionalidad', 'r2-nac-err', 'Selecciona tu nacionalidad');
+    regShowFieldError('r2-nacionalidad', 'r2-nac-err', t('err_nacionalidad'));
     ok = false;
   } else { regClearFieldError('r2-nacionalidad', 'r2-nac-err'); }
 
   if (!REG.data.paisNac) {
-    regShowFieldError('r2-pais-nac', 'r2-paisnac-err', 'Selecciona tu país de nacimiento');
+    regShowFieldError('r2-pais-nac', 'r2-paisnac-err', t('err_paisnac'));
     ok = false;
   } else { regClearFieldError('r2-pais-nac', 'r2-paisnac-err'); }
 
@@ -259,7 +259,7 @@ function regValidateStep2() {
   const uploadRequired = uploadBlock && uploadBlock.style.display !== 'none';
   if (uploadRequired && !REG.data.docFile) {
     const err = document.getElementById('r2-upload-err');
-    if (err) { err.textContent = 'Sube tu documento de identidad'; err.style.display = ''; }
+    if (err) { err.textContent = t('err_upload_doc'); err.style.display = ''; }
     ok = false;
   } else {
     const err = document.getElementById('r2-upload-err');
@@ -269,7 +269,7 @@ function regValidateStep2() {
   const ck = document.getElementById('r2-confirm-ck');
   if (!ck?.checked) {
     const err = document.getElementById('r2-ck-err');
-    if (err) { err.textContent = 'Debes confirmar que los datos son verídicos'; err.style.display = ''; }
+    if (err) { err.textContent = t('err_ck_verdad'); err.style.display = ''; }
     ok = false;
   } else {
     const err = document.getElementById('r2-ck-err');
@@ -289,22 +289,22 @@ function regValidateStep3() {
   REG.data.familiarNombre = document.getElementById('r3-familiar-nombre')?.value.trim() || '';
 
   if (!REG.data.pais) {
-    regShowFieldError('r3-pais', 'r3-pais-err', 'Selecciona tu país de residencia');
+    regShowFieldError('r3-pais', 'r3-pais-err', t('err_paisres'));
     ok = false;
   } else { regClearFieldError('r3-pais', 'r3-pais-err'); }
 
   if (!REG.data.ciudad || REG.data.ciudad.length < 2) {
-    regShowFieldError('r3-ciudad', 'r3-ciudad-err', 'Introduce tu ciudad');
+    regShowFieldError('r3-ciudad', 'r3-ciudad-err', t('err_ciudad'));
     ok = false;
   } else { regClearFieldError('r3-ciudad', 'r3-ciudad-err'); }
 
   if (!REG.data.cp || REG.data.cp.length < 4) {
-    regShowFieldError('r3-cp', 'r3-cp-err', 'Introduce un código postal válido');
+    regShowFieldError('r3-cp', 'r3-cp-err', t('err_cp_valido'));
     ok = false;
   } else { regClearFieldError('r3-cp', 'r3-cp-err'); }
 
   if (!REG.data.direccion || REG.data.direccion.length < 5) {
-    regShowFieldError('r3-direccion', 'r3-dir-err', 'Introduce tu dirección');
+    regShowFieldError('r3-direccion', 'r3-dir-err', t('err_direccion'));
     ok = false;
   } else { regClearFieldError('r3-direccion', 'r3-dir-err'); }
 
@@ -319,7 +319,7 @@ function regValidateStep4() {
   REG.data.ck4 = document.getElementById('r4-ck4')?.checked || false;
   if (!REG.data.ck1 || !REG.data.ck2 || !REG.data.ck3 || !REG.data.ck4) {
     const err = document.getElementById('r4-ck-err');
-    if (err) { err.textContent = 'Debes aceptar todos los consentimientos para continuar'; err.style.display = ''; }
+    if (err) { err.textContent = t('err_ck_todos'); err.style.display = ''; }
     return false;
   }
   const err = document.getElementById('r4-ck-err');
@@ -338,27 +338,27 @@ function regRenderSummary() {
   if (!el) return;
   el.innerHTML = `
     <div class="summary-section">
-      <div class="summary-title">Datos personales</div>
-      <div class="summary-row"><span>Nombre</span><strong>${d.nombre} ${d.apellidos}</strong></div>
-      <div class="summary-row"><span>Email</span><strong>${d.email}</strong></div>
-      ${d.telefono ? `<div class="summary-row"><span>Teléfono</span><strong>${d.telefonoPrefijo} ${d.telefono}</strong></div>` : ''}
-      <div class="summary-row"><span>Edad</span><strong>${age} años</strong></div>
+      <div class="summary-title">${t('sum_datos_personales')}</div>
+      <div class="summary-row"><span>${t('sum_nombre')}</span><strong>${d.nombre} ${d.apellidos}</strong></div>
+      <div class="summary-row"><span>${t('sum_email')}</span><strong>${d.email}</strong></div>
+      ${d.telefono ? `<div class="summary-row"><span>${t('sum_telefono')}</span><strong>${d.telefonoPrefijo} ${d.telefono}</strong></div>` : ''}
+      <div class="summary-row"><span>${t('sum_edad')}</span><strong>${age} ${t('sum_anios')}</strong></div>
     </div>
     <div class="summary-section">
-      <div class="summary-title">Documento de identidad</div>
-      <div class="summary-row"><span>Tipo</span><strong>${d.docTipo || '—'}</strong></div>
-      <div class="summary-row"><span>Número</span><strong>${docMask}</strong></div>
-      ${d.docFileName ? `<div class="summary-row"><span>Archivo</span><strong style="display:flex;align-items:center;gap:6px;">
+      <div class="summary-title">${t('sum_documento')}</div>
+      <div class="summary-row"><span>${t('sum_tipo')}</span><strong>${d.docTipo || '—'}</strong></div>
+      <div class="summary-row"><span>${t('sum_numero')}</span><strong>${docMask}</strong></div>
+      ${d.docFileName ? `<div class="summary-row"><span>${t('sum_archivo')}</span><strong style="display:flex;align-items:center;gap:6px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
         ${d.docFileName}
       </strong></div>` : ''}
     </div>
     <div class="summary-section">
-      <div class="summary-title">Residencia</div>
-      <div class="summary-row"><span>País</span><strong>${d.pais || '—'}</strong></div>
-      <div class="summary-row"><span>Ciudad</span><strong>${d.ciudad || '—'}</strong></div>
-      <div class="summary-row"><span>Código postal</span><strong>${d.cp || '—'}</strong></div>
-      <div class="summary-row"><span>Comunidad</span><strong>${d.comunidad || '—'}</strong></div>
+      <div class="summary-title">${t('sum_residencia')}</div>
+      <div class="summary-row"><span>${t('sum_pais')}</span><strong>${d.pais || '—'}</strong></div>
+      <div class="summary-row"><span>${t('sum_ciudad')}</span><strong>${d.ciudad || '—'}</strong></div>
+      <div class="summary-row"><span>${t('sum_cp')}</span><strong>${d.cp || '—'}</strong></div>
+      <div class="summary-row"><span>${t('sum_comunidad')}</span><strong>${d.comunidad || '—'}</strong></div>
     </div>
   `;
 }
@@ -370,7 +370,7 @@ async function regSubmit() {
   const btn = document.getElementById('r4-submit-btn');
   const label = document.getElementById('r4-submit-label');
   btn.disabled = true;
-  label.innerHTML = `<span class="reg-spinner"></span> Enviando solicitud...`;
+  label.innerHTML = `<span class="reg-spinner"></span> ${t('reg_enviando')}`;
 
   // ── Registrar en Supabase ──
   const fullName = (REG.data.nombre + ' ' + REG.data.apellidos).trim();
@@ -380,7 +380,7 @@ async function regSubmit() {
       btn.disabled = false;
       label.innerHTML = 'Enviar solicitud';
       const errEl = document.getElementById('r4-submit-err');
-      if (errEl) { errEl.textContent = result.error || 'Error al registrar. Inténtalo de nuevo.'; errEl.style.display = 'block'; }
+      if (errEl) { errEl.textContent = result.error || t('err_registro_generico'); errEl.style.display = 'block'; }
       return;
     }
     // ── Guardar campos extra en profiles ──
@@ -543,12 +543,12 @@ function regHandleFile(file) {
   const err = document.getElementById('r2-upload-err');
 
   if (file.size > maxSize) {
-    if (err) { err.textContent = 'El archivo no puede superar 5MB'; err.style.display = ''; }
+    if (err) { err.textContent = t('err_file_5mb'); err.style.display = ''; }
     return;
   }
   const allowed = ['image/jpeg', 'image/png', 'application/pdf'];
   if (!allowed.includes(file.type)) {
-    if (err) { err.textContent = 'Solo se aceptan JPG, PNG o PDF'; err.style.display = ''; }
+    if (err) { err.textContent = t('err_file_formato'); err.style.display = ''; }
     return;
   }
   if (err) { err.textContent = ''; err.style.display = 'none'; }
@@ -706,7 +706,7 @@ function regBuildYearSelect() {
   const select = document.getElementById('r2-anio');
   if (!select) return;
   const current = new Date().getFullYear();
-  select.innerHTML = '<option value="">Año</option>';
+  select.innerHTML = `<option value="">${t('reg_anio')}</option>`;
   for (let y = current - 13; y >= current - 100; y--) {
     select.innerHTML += `<option value="${y}">${y}</option>`;
   }
@@ -721,7 +721,7 @@ function regInit() {
 
   const diaSelect = document.getElementById('r2-dia');
   if (diaSelect) {
-    diaSelect.innerHTML = '<option value="">Día</option>';
+    diaSelect.innerHTML = `<option value="">${t('reg_dia')}</option>`;
     for (let d = 1; d <= 31; d++) diaSelect.innerHTML += `<option value="${d}">${d}</option>`;
   }
 }
