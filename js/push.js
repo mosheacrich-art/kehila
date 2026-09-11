@@ -34,14 +34,18 @@ const PUSH_ROUTES = {
 };
 
 /**
- * Punto de entrada. Llamar desde home.html después de requireAuth().
+ * Punto de entrada. Llamar desde home.html después de requireAuth(), o desde
+ * registro.js justo tras un signUp con sesión (antes de que exista getCurrentUser()
+ * — por eso acepta userId explícito) para no perder el permiso de notificaciones
+ * si el usuario no vuelve a abrir la app hasta que le aprueben.
  * Es seguro llamarlo en web — detecta el entorno automáticamente.
+ * @param {string} [userId] - si se omite, usa getCurrentUser().userId
  */
-async function initPush() {
+async function initPush(userId) {
   if (IS_NATIVE) {
-    await initNativePush();
+    await initNativePush(userId);
   } else {
-    await initWebPush();
+    await initWebPush(userId);
   }
 }
 
@@ -49,7 +53,7 @@ async function initPush() {
    MODO NATIVO (Capacitor)
 ───────────────────────────────────────────── */
 
-async function initNativePush() {
+async function initNativePush(userId) {
   // Todo el flujo nativo va protegido: si Firebase no está configurado
   // (falta google-services.json) el plugin lanza una excepción nativa al
   // pedir permisos o registrar, y sin este try/catch eso tira abajo la app
@@ -73,7 +77,7 @@ async function initNativePush() {
       try {
         const token = tokenData.value;
         if (PUSH_DEBUG) console.log('[push] Token registrado:', token);
-        await savePushToken(token, IS_NATIVE ? detectPlatform() : 'web');
+        await savePushToken(token, IS_NATIVE ? detectPlatform() : 'web', userId);
       } catch (e) {
         if (PUSH_DEBUG) console.warn('[push] Error guardando token:', e);
       }
@@ -107,7 +111,7 @@ async function initNativePush() {
    MODO WEB PWA (Web Push API)
 ───────────────────────────────────────────── */
 
-async function initWebPush() {
+async function initWebPush(userId) {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
   const vapidKey = window.VAPID_PUBLIC_KEY;
@@ -120,7 +124,7 @@ async function initWebPush() {
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(vapidKey),
     });
-    await savePushToken(JSON.stringify(subscription), 'web');
+    await savePushToken(JSON.stringify(subscription), 'web', userId);
   } catch (e) {
     if (PUSH_DEBUG) console.warn('[push] Web Push no disponible:', e);
   }
@@ -130,14 +134,21 @@ async function initWebPush() {
    HELPERS
 ───────────────────────────────────────────── */
 
-/** Guarda el token FCM/APNs/Web en Supabase. Hace upsert por user_id + platform. */
-async function savePushToken(token, platform) {
+/**
+ * Guarda el token FCM/APNs/Web en Supabase. Hace upsert por user_id + platform.
+ * @param {string} token
+ * @param {string} platform
+ * @param {string} [userId] - si se omite, usa getCurrentUser().userId (caso normal,
+ *   llamado desde home.html ya logueado). Se pasa explícito desde el registro,
+ *   donde todavía no existe sesión local en getCurrentUser().
+ */
+async function savePushToken(token, platform, userId) {
   const sb = getSupabase();
-  const user = getCurrentUser();
-  if (!sb || !user || !user.userId) return;
+  const uid = userId || getCurrentUser()?.userId;
+  if (!sb || !uid) return;
 
   await sb.from('push_tokens').upsert({
-    user_id: user.userId,
+    user_id: uid,
     token,
     platform,
     updated_at: new Date().toISOString(),

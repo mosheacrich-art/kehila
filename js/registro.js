@@ -466,6 +466,14 @@ async function regSubmit() {
           }).catch(() => {});
         }
       }).catch(() => {});
+
+      // Pedir permiso de notificaciones ya en el registro (fire and forget):
+      // así, si el usuario no vuelve a abrir la app hasta que le aprueben,
+      // el push de aprobación igual le llega. Solo tiene sentido si hay
+      // sesión real (signUp sin confirmación de email pendiente).
+      if (hasSession && typeof initPush === 'function') {
+        initPush(result.userId).catch(() => {});
+      }
     }
   }
 
