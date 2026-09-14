@@ -1105,11 +1105,18 @@
       const mes = meses[hoy.getMonth()];
       const año = hoy.getFullYear();
 
-      // Fecha hebrea aproximada (mock para el prototipo)
-      const fechaHebrea = '25 Adar 5785';
+      let fechaHebrea = '';
+      try {
+        const parts = new Intl.DateTimeFormat('en-u-ca-hebrew', { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(hoy);
+        const hDia = parts.find(p => p.type === 'day')?.value || '';
+        const hMesRaw = parts.find(p => p.type === 'month')?.value || '';
+        const hMes = hMesRaw.charAt(0).toUpperCase() + hMesRaw.slice(1).toLowerCase();
+        const hAño = parts.find(p => p.type === 'year')?.value || '';
+        fechaHebrea = `${hDia} ${hMes} ${hAño}`;
+      } catch (e) { /* Intl sin soporte de calendario hebreo: se omite */ }
 
       const el = document.getElementById('home-date-display');
-      el.innerHTML = `${diaNombre}, ${dia} de ${mes} de ${año} <span class="dot"></span> ${fechaHebrea}`;
+      el.innerHTML = `${diaNombre}, ${dia} de ${mes} de ${año}` + (fechaHebrea ? ` <span class="dot"></span> ${fechaHebrea}` : '');
     })();
 
     /* ─── Renderizar eventos ─── */
