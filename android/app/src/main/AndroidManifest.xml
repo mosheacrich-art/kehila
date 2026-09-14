@@ -9,6 +9,23 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!--
+          Evita que Firebase Cloud Messaging se auto-inicialice al arrancar la app
+          (antes incluso de que cargue el WebView/JS). Si en algún build falta o
+          está mal configurado google-services.json, ese auto-init nativo lanza
+          "FirebaseApp.getInstance() IllegalStateException" y tumba la app entera
+          en el arranque — el try/catch de js/push.js no puede protegerlo porque
+          ocurre en código nativo, antes de que corra ningún JS.
+          Con esto, Firebase solo se inicializa cuando initNativePush() lo pide
+          explícitamente desde home.html, ya protegido por try/catch.
+        -->
+        <meta-data
+            android:name="firebase_messaging_auto_init_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"

@@ -23,8 +23,8 @@ android {
         applicationId "com.kehilabcn.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "1.2"
+        versionCode 5
+        versionName "1.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -61,11 +61,29 @@ dependencies {
 
 apply from: 'capacitor.build.gradle'
 
-try {
-    def servicesJSON = file('google-services.json')
-    if (servicesJSON.text) {
-        apply plugin: 'com.google.gms.google-services'
+def servicesJSON = file('google-services.json')
+if (servicesJSON.exists()) {
+    def jsonText = servicesJSON.text
+    // Guarda de seguridad: si el archivo existe pero no tiene un cliente para
+    // el applicationId real (com.kehilabcn.app), el plugin generaría recursos
+    // de Firebase inútiles y la app CRASHEARÍA en producción al arrancar
+    // (FirebaseApp.getInstance() IllegalStateException). Mejor fallar el build
+    // ya, con un mensaje claro, que descubrirlo en Play Console días después.
+    if (!jsonText.contains('"com.kehilabcn.app"')) {
+        throw new GradleException(
+            "google-services.json existe pero NO contiene un cliente para " +
+            "com.kehilabcn.app. Firebase no se inicializará y la app crasheará " +
+            "en producción. Descarga el google-services.json correcto desde " +
+            "Firebase Console (proyecto kehila-f49e6 → Configuración del proyecto " +
+            "→ tu app Android com.kehilabcn.app) y sustituye android/app/google-services.json."
+        )
     }
-} catch(Exception e) {
-    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+    apply plugin: 'com.google.gms.google-services'
+    logger.lifecycle("✅ google-services.json OK para com.kehilabcn.app — plugin google-services aplicado")
+} else {
+    logger.warn(
+        "⚠️  android/app/google-services.json NO encontrado. El plugin google-services " +
+        "no se aplica: Firebase no se inicializará. Con firebase_messaging_auto_init_enabled=false " +
+        "en el manifest la app no debería crashear, pero las notificaciones push nativas no funcionarán."
+    )
 }
