@@ -1378,7 +1378,7 @@
     }).join('');
     return '<div class="biz-card" data-id="' + b.id + '">'
       + '<div class="biz-card-header">'
-        + (b.logoImg ? '<img src="' + b.logoImg + '" class="biz-logo-img" alt="' + b.nombre + '">' : '<div class="biz-logo" style="background:' + b.color + '">' + initials + '</div>')
+        + (b.logoImg ? '<img src="' + b.logoImg + '" class="biz-logo-img" alt="' + b.nombre + '" loading="lazy" decoding="async">' : '<div class="biz-logo" style="background:' + b.color + '">' + initials + '</div>')
         + '<div class="biz-card-meta">'
           + '<div class="biz-card-name">' + b.nombre + '</div>'
           + '<div class="biz-card-owner">Por ' + b.propietario + '</div>'

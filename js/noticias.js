@@ -224,7 +224,7 @@ function renderGrid(filtro) {
         ? `<span class="chip" style="font-size:.7rem;padding:3px 8px;background:#FEF9C3;color:#92400E;border-color:#FDE68A">★ Dest.</span>`
         : '';
       const imgHTML = n.imagen_url
-        ? `<img src="${n.imagen_url}" style="width:100%;height:120px;object-fit:cover;" alt="">`
+        ? `<img src="${n.imagen_url}" loading="lazy" decoding="async" style="width:100%;height:120px;object-fit:cover;" alt="">`
         : '';
       const trashBtn = _isAdmin
         ? `<button class="btn-trash" onclick="deleteNoticia('${n.id ?? ''}',event)" title="Eliminar noticia">${_TRASH_ICON}</button>`
@@ -367,7 +367,7 @@ function abrirNoticia(id) {
         <span class="np-cat-label">${catLabel(n.categoria).toUpperCase()}</span>
         <button class="np-close-btn" data-action="cerrar-modal" title="Cerrar">✕</button>
       </div>
-      ${n.imagen_url ? `<img src="${n.imagen_url}" class="np-img" alt="">` : ''}
+      ${n.imagen_url ? `<img src="${n.imagen_url}" class="np-img" alt="" decoding="async">` : ''}
       <div class="np-scroll">
         <div class="np-content">
           <div class="np-rule-double"><span>— ${catLabel(n.categoria).toUpperCase()} —</span></div>

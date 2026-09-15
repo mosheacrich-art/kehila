@@ -623,7 +623,7 @@
         const isOwner = me && p.usuario_id && String(p.usuario_id) === String(me.userId);
         return `
         <div class="prof-card">
-          ${p.foto ? `<img src="${p.foto}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 4px;display:block;">` : `<div class="prof-avatar" data-color="${p.color||'0'}">${p.nombre.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>`}
+          ${p.foto ? `<img src="${p.foto}" loading="lazy" decoding="async" style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 4px;display:block;">` : `<div class="prof-avatar" data-color="${p.color||'0'}">${p.nombre.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>`}
           <div class="prof-name">${p.nombre}</div>
           <div style="text-align:center"><span class="prof-badge-main">${p.especialidad}</span></div>
           <p class="prof-bio">${p.bio||''}</p>
@@ -669,7 +669,7 @@
         <div>
           <div class="section-divider">Fotos de experiencia</div>
           <div class="prof-gallery n${Math.min(p.galeria.length,6)}">
-            ${p.galeria.map(src => `<img src="${src}" onclick="openLightbox('${src}')" alt="foto experiencia">`).join('')}
+            ${p.galeria.map(src => `<img src="${src}" onclick="openLightbox('${src}')" alt="foto experiencia" loading="lazy" decoding="async">`).join('')}
           </div>
         </div>` : ''}
         <div>

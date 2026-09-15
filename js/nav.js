@@ -108,13 +108,19 @@ document.addEventListener('click', (e) => {
 /**
  * Pull-to-refresh nativo: solo dentro de la app (Capacitor), para no
  * interferir con el scroll normal en navegador de escritorio/móvil web.
+ * Usa preventDefault() en touchmove mientras se arrastra: sin esto, en
+ * WKWebView (iOS) el rubber-band/bounce nativo se adelanta al gesto y el
+ * indicador nunca llega a mostrarse de forma fiable — con preventDefault
+ * el gesto lo controlamos por completo desde JS.
  */
 (() => {
   if (!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) return;
 
   const THRESHOLD = 70;
+  const MAX = 100;
   let startY = 0;
   let pulling = false;
+  let dragging = false;
   let indicator = null;
 
   const ensureIndicator = () => {
@@ -126,7 +132,7 @@ document.addEventListener('click', (e) => {
     style.textContent = `
       #kh-ptr{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;
         align-items:flex-start;padding-top:14px;height:70px;z-index:9998;
-        transform:translateY(-70px);transition:transform .15s ease;pointer-events:none}
+        transform:translateY(-70px);pointer-events:none}
       #kh-ptr .kh-ptr-spinner{width:28px;height:28px;border-radius:50%;
         border:3px solid rgba(27,46,94,.15);border-top-color:#1B2E5E;
         animation:kh-ptr-spin .7s linear infinite}
@@ -137,31 +143,40 @@ document.addEventListener('click', (e) => {
     return indicator;
   };
 
+  const setDist = (dist, withTransition) => {
+    const el = ensureIndicator();
+    el.style.transition = withTransition ? 'transform .18s ease' : 'none';
+    el.style.transform = `translateY(${dist - 70}px)`;
+  };
+
   document.addEventListener('touchstart', (e) => {
     if (window.scrollY > 0 || e.touches.length !== 1) { pulling = false; return; }
     startY = e.touches[0].clientY;
     pulling = true;
+    dragging = false;
   }, { passive: true });
 
   document.addEventListener('touchmove', (e) => {
     if (!pulling) return;
     const dy = e.touches[0].clientY - startY;
-    if (dy <= 0) return;
-    const el = ensureIndicator();
-    const dist = Math.min(dy, THRESHOLD * 1.4);
-    el.style.transform = `translateY(${dist - 70}px)`;
-  }, { passive: true });
+    if (dy <= 0 || window.scrollY > 0) { pulling = false; return; }
+    dragging = true;
+    if (e.cancelable) e.preventDefault();
+    const dist = Math.min(dy * 0.55, MAX);
+    setDist(dist, false);
+  }, { passive: false });
 
-  document.addEventListener('touchend', (e) => {
-    if (!pulling) return;
+  document.addEventListener('touchend', () => {
+    if (!pulling || !dragging) { pulling = false; dragging = false; return; }
     pulling = false;
-    const dy = (e.changedTouches[0]?.clientY || 0) - startY;
+    dragging = false;
     if (!indicator) return;
-    if (dy > THRESHOLD) {
-      indicator.style.transform = 'translateY(0)';
+    const currentDist = parseFloat(indicator.style.transform.match(/-?\d+(\.\d+)?/)?.[0] || '-70') + 70;
+    if (currentDist > THRESHOLD) {
+      setDist(70, true);
       window.location.reload();
     } else {
-      indicator.style.transform = 'translateY(-70px)';
+      setDist(0, true);
     }
   }, { passive: true });
 })();

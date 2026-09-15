@@ -409,7 +409,7 @@
         var da = 'data-id="' + v.id + '" data-likes="' + (v.likes||0) + '" data-vistas="' + (v.vistas||0) + '"' + (id ? ' data-ytid="' + id + '"' : '') + (v.video_url ? ' data-url="' + v.video_url + '"' : '');
         return '<div class="vid-card" ' + da + '>'
           + '<div class="vid-thumb vid-open-click" ' + da + '>'
-          + (thumb ? '<img src="' + thumb + '" alt="" onerror="this.style.display=\'none\'">' : '')
+          + (thumb ? '<img src="' + thumb + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'">' : '')
           + '<div class="vid-play-btn"><div class="vid-play-circle">' + PLAY + '</div></div>'
           + (v.duracion ? '<span class="vid-duration">' + v.duracion + '</span>' : '')
           + '</div><div class="vid-info">'
