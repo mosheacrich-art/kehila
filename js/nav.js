@@ -108,8 +108,10 @@ document.addEventListener('click', (e) => {
     prefetched.add(url.href);
     fetch(url.href, { credentials: 'same-origin' }).catch(() => {});
   };
+  // Solo touchstart: un "mouseover" en escritorio dispara un fetch por cada
+  // enlace que el cursor cruza al pasar por el menu (sin debounce), lo que
+  // en una sesion larga genera un volumen de peticiones grande e innecesario.
   document.addEventListener('touchstart', (e) => tryPrefetch(e.target), { passive: true, capture: true });
-  document.addEventListener('mouseover', (e) => tryPrefetch(e.target), { capture: true });
 })();
 
 /**

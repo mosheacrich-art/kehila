@@ -138,22 +138,18 @@
 
   let currentFile = fileOf(location.pathname);
 
-  window.__spaTryNavigate = function (url, href) {
-    const targetFile = isSpaPage(url.pathname);
-    if (!targetFile) return false;
-    if (!isSpaPage(currentFile)) return false;
-    if (url.pathname === location.pathname) return false;
-    navigate(targetFile, url, true);
-    return true;
+  // DESACTIVADO TEMPORALMENTE (2026-09-15): el swap solo reemplaza <body>,
+  // nunca <head> -> el <style> propio de cada pagina nunca se aplica al
+  // navegar por SPA, dejando la pagina destino con el CSS de la pagina
+  // anterior (iconos SVG sin su tamano real, texto decorativo sin contener,
+  // grids rotos). Reactivar solo despues de que navigate() tambien
+  // reconcilie <head> (o inyecte los <style> de la pagina destino).
+  window.__spaTryNavigate = function () {
+    return false;
   };
 
   window.addEventListener('popstate', () => {
-    const file = isSpaPage(location.pathname);
-    if (file && isSpaPage(currentFile)) {
-      navigate(file, new URL(location.href), false);
-    } else {
-      window.location.reload();
-    }
+    window.location.reload();
   });
 
   installTracking();
