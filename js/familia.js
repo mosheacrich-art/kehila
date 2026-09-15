@@ -14,20 +14,6 @@ const RELACIONES_FAMILIA = [
   { value: 'otro',     label: 'Otro familiar' },
 ];
 
-// Miembros mock para búsqueda en prototipo
-const MOCK_MIEMBROS_BUSQUEDA = [
-  { id: 'user-moshe',   name: 'Moshe Acrich',      initials: 'MA', email: 'moshe@jabad.barcelona' },
-  { id: 'user-sarah',   name: 'Sarah Cohen',        initials: 'SC', email: 'sarah@jabad.barcelona' },
-  { id: 'user-david',   name: 'David Levy',         initials: 'DL', email: 'david@jabad.barcelona' },
-  { id: 'user-rachel',  name: 'Rachel Goldberg',    initials: 'RG', email: 'rachel@jabad.barcelona' },
-  { id: 'user-yosef',   name: 'Yosef Ben-David',    initials: 'YB', email: 'yosef@jabad.barcelona' },
-  { id: 'user-miriam',  name: 'Miriam Peretz',      initials: 'MP', email: 'miriam@jabad.barcelona' },
-  { id: 'user-aron',    name: 'Aron Steinberg',     initials: 'AS', email: 'aron@jabad.barcelona' },
-  { id: 'user-leah',    name: 'Leah Friedman',      initials: 'LF', email: 'leah@jabad.barcelona' },
-  { id: 'user-daniel',  name: 'Daniel Mizrahi',     initials: 'DM', email: 'daniel@jabad.barcelona' },
-  { id: 'user-ruth',    name: 'Ruth Shapiro',       initials: 'RS', email: 'ruth@jabad.barcelona' },
-];
-
 function getFamilyLinks(userId) {
   try {
     const all = JSON.parse(localStorage.getItem(FAMILIA_KEY) || '{}');
@@ -56,11 +42,17 @@ function removeFamilyLink(userId, memberId) {
   _saveFamilyLinks(userId, links);
 }
 
-function searchMembers(query, excludeIds) {
-  const q = (query || '').toLowerCase().trim();
+async function searchMembers(query, excludeIds) {
+  const q = (query || '').trim();
   if (q.length < 2) return [];
-  return MOCK_MIEMBROS_BUSQUEDA.filter(m =>
-    !excludeIds.includes(m.id) &&
-    (m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q))
-  ).slice(0, 6);
+  const sb = getSupabase();
+  if (!sb) return [];
+  const { data, error } = await sb
+    .from('profiles')
+    .select('id, name, email, initials')
+    .eq('status', 'active')
+    .ilike('name', `%${q}%`)
+    .limit(10);
+  if (error || !data) return [];
+  return data.filter(m => !excludeIds.includes(m.id)).slice(0, 6);
 }

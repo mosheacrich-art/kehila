@@ -1172,25 +1172,33 @@
       document.getElementById('modal-familiar-overlay').classList.remove('open');
     }
 
-    function onFamiliarSearch(query) {
+    let _familiarResults = [];
+
+    async function onFamiliarSearch(query) {
       const userId = user.userId || user.email;
       const existing = getFamilyLinks(userId).map(l => l.id);
       existing.push(userId);
-      const results = searchMembers(query, existing);
       const container = document.getElementById('familiar-search-results');
+      if ((query || '').trim().length < 2) {
+        container.innerHTML = '<p style="font-size:.8rem;color:var(--color-text-light);">Escribe al menos 2 caracteres para buscar.</p>';
+        _familiarSelected = null;
+        updateConfirmBtn();
+        return;
+      }
+      const results = await searchMembers(query, existing);
+      _familiarResults = results;
       if (!results.length) {
-        const msg = query.length < 2 ? 'Escribe al menos 2 caracteres para buscar.' : 'Sin resultados.';
-        container.innerHTML = `<p style="font-size:.8rem;color:var(--color-text-light);">${msg}</p>`;
+        container.innerHTML = '<p style="font-size:.8rem;color:var(--color-text-light);">Sin resultados.</p>';
         _familiarSelected = null;
         updateConfirmBtn();
         return;
       }
       container.innerHTML = results.map(m => `
-        <div class="familia-result-item" id="res-${m.id}" onclick="selectFamiliarResult('${m.id}')">
-          <div class="avatar" data-color="${getAvatarColor(m.name)}" style="width:32px;height:32px;font-size:.75rem;flex-shrink:0;">${m.initials}</div>
+        <div class="familia-result-item" id="res-${escHtml(m.id)}" onclick="selectFamiliarResult('${escHtml(m.id)}')">
+          <div class="avatar" data-color="${getAvatarColor(m.name)}" style="width:32px;height:32px;font-size:.75rem;flex-shrink:0;">${escHtml(m.initials || '')}</div>
           <div>
-            <div class="familia-result-name">${m.name}</div>
-            <div class="familia-result-email">${m.email}</div>
+            <div class="familia-result-name">${escHtml(m.name)}</div>
+            <div class="familia-result-email">${escHtml(m.email)}</div>
           </div>
         </div>`).join('');
       _familiarSelected = null;
@@ -1201,7 +1209,7 @@
       document.querySelectorAll('.familia-result-item').forEach(el => el.classList.remove('selected'));
       const el = document.getElementById('res-' + id);
       if (el) el.classList.add('selected');
-      _familiarSelected = MOCK_MIEMBROS_BUSQUEDA.find(m => m.id === id) || null;
+      _familiarSelected = _familiarResults.find(m => m.id === id) || null;
       updateConfirmBtn();
     }
 

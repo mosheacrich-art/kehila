@@ -79,13 +79,6 @@ function formatearFecha(fechaStr) {
   } catch (e) { return fechaStr ?? ''; }
 }
 
-function formatearFechaCorta(fechaStr) {
-  try {
-    const fecha = new Date(fechaStr + 'T12:00:00');
-    return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-  } catch (e) { return fechaStr ?? ''; }
-}
-
 function getNoticias() {
   return (typeof MOCK_NOTICIAS_V2 !== 'undefined') ? MOCK_NOTICIAS_V2 : [];
 }
@@ -96,10 +89,6 @@ function getCfg() {
 
 function catLabel(cat) {
   return getCfg()[cat]?.label ?? cat ?? '';
-}
-
-function catColor(n) {
-  return n?.colorCategoria ?? getCfg()[n?.categoria]?.color ?? '#1B2E5E';
 }
 
 /* ── Page Header ── */

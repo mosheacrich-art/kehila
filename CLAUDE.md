@@ -37,7 +37,7 @@ kehila/
 │   ├── auth.js            <- [CRÍTICO] Autenticación, sesión, guards de ruta
 │   ├── nav.js             <- Sidebar y bottom nav (todas las páginas)
 │   ├── analytics.js       <- Dashboard de métricas del panel admin
-│   ├── data.js            <- [TEMP] Datos mock — eliminar en producción completa
+│   ├── data.js            <- Contenedores de estado compartido en memoria (sin datos mock)
 │   ├── i18n.js            <- Internacionalización (es/en/he)
 │   ├── media.js           <- Upload de imágenes a Supabase Storage
 │   ├── noticias.js        <- Lógica de noticias.html
@@ -214,7 +214,7 @@ el.innerHTML = `<span>${escHtml(user.name)}</span>`;
 | SEC-07 | SW cachea respuestas autenticadas | MEDIO | Pendiente |
 | SEC-08 | Password mínimo 6 chars (NIST: 8+) | MEDIO | RESUELTO 2026-04-18 — subido a 8 chars |
 | SEC-09 | Sin rate limiting en auth | MEDIO | Parcial — defaults Supabase OK; CAPTCHA Turnstile pendiente de activar |
-| SEC-10 | data.js con mock data en producción | MEDIO | Pendiente eliminar |
+| SEC-10 | data.js con mock data en producción | MEDIO | ✅ RESUELTO 2026-09-15 — eliminados exports muertos de data.js y familia.js (MOCK_MIEMBROS_BUSQUEDA con 10 personas inventadas); búsqueda de familiares ahora consulta profiles real en Supabase |
 | SEC-11 | usuario_id como text (sin FK ni validación) | ALTO | ✅ RESUELTO 2026-04-17 — migrado a uuid + FK |
 | SEC-12 | RLS pendiente en citas, inscripciones_voluntariado, voluntariados | MEDIO | ✅ RESUELTO 2026-04-17 — tablas creadas con RLS |
 
