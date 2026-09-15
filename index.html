@@ -4,6 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
+  <script>
+    // Redirección instantánea si ya hay sesión activa, ANTES de que se
+    // cargue/pinte nada del login — se ejecuta de forma síncrona y bloquea
+    // el resto del parseo del <head>, así el navegador ni siquiera llega a
+    // renderizar el formulario de login. Duplica a propósito la lectura de
+    // localStorage que hace getCurrentUser() en auth.js: no puede esperar a
+    // que carguen ese script ni el CDN de Supabase, o ya se vería el flash.
+    (function () {
+      try {
+        const raw = localStorage.getItem('kehila_user');
+        if (!raw) return;
+        const user = JSON.parse(raw);
+        if (user && user.status === 'active') {
+          window.location.replace(user.role === 'admin' ? 'admin.html' : 'home.html');
+        }
+      } catch (e) { /* localStorage corrupto o bloqueado: se queda en el login */ }
+    })();
+  </script>
   <link rel="icon" type="image/png" sizes="48x48" href="img/icon-48.png">
   <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
   <link rel="apple-touch-icon" href="img/icon-180.png">
