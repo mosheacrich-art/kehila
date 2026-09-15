@@ -82,6 +82,91 @@ document.addEventListener('click', (e) => {
 }, true);
 
 /**
+ * Prefetch al tocar/pasar sobre un enlace interno, antes del clic.
+ * Calienta la cache del Service Worker para que la navegación real
+ * (arriba) llegue casi instantánea en vez de esperar la red.
+ */
+(() => {
+  const prefetched = new Set();
+  const tryPrefetch = (target) => {
+    const a = target && target.closest && target.closest('a[href]');
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    const href = a.getAttribute('href');
+    if (!href || /^(#|mailto:|tel:|javascript:)/i.test(href)) return;
+    let url;
+    try { url = new URL(href, location.href); } catch (_) { return; }
+    if (url.origin !== location.origin) return;
+    if (url.pathname === location.pathname) return;
+    if (prefetched.has(url.href)) return;
+    prefetched.add(url.href);
+    fetch(url.href, { credentials: 'same-origin' }).catch(() => {});
+  };
+  document.addEventListener('touchstart', (e) => tryPrefetch(e.target), { passive: true, capture: true });
+  document.addEventListener('mouseover', (e) => tryPrefetch(e.target), { capture: true });
+})();
+
+/**
+ * Pull-to-refresh nativo: solo dentro de la app (Capacitor), para no
+ * interferir con el scroll normal en navegador de escritorio/móvil web.
+ */
+(() => {
+  if (!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) return;
+
+  const THRESHOLD = 70;
+  let startY = 0;
+  let pulling = false;
+  let indicator = null;
+
+  const ensureIndicator = () => {
+    if (indicator) return indicator;
+    indicator = document.createElement('div');
+    indicator.id = 'kh-ptr';
+    indicator.innerHTML = '<div class="kh-ptr-spinner"></div>';
+    const style = document.createElement('style');
+    style.textContent = `
+      #kh-ptr{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;
+        align-items:flex-start;padding-top:14px;height:70px;z-index:9998;
+        transform:translateY(-70px);transition:transform .15s ease;pointer-events:none}
+      #kh-ptr .kh-ptr-spinner{width:28px;height:28px;border-radius:50%;
+        border:3px solid rgba(27,46,94,.15);border-top-color:#1B2E5E;
+        animation:kh-ptr-spin .7s linear infinite}
+      @keyframes kh-ptr-spin{to{transform:rotate(360deg)}}
+    `;
+    document.head.appendChild(style);
+    document.body.appendChild(indicator);
+    return indicator;
+  };
+
+  document.addEventListener('touchstart', (e) => {
+    if (window.scrollY > 0 || e.touches.length !== 1) { pulling = false; return; }
+    startY = e.touches[0].clientY;
+    pulling = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!pulling) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy <= 0) return;
+    const el = ensureIndicator();
+    const dist = Math.min(dy, THRESHOLD * 1.4);
+    el.style.transform = `translateY(${dist - 70}px)`;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (!pulling) return;
+    pulling = false;
+    const dy = (e.changedTouches[0]?.clientY || 0) - startY;
+    if (!indicator) return;
+    if (dy > THRESHOLD) {
+      indicator.style.transform = 'translateY(0)';
+      window.location.reload();
+    } else {
+      indicator.style.transform = 'translateY(-70px)';
+    }
+  }, { passive: true });
+})();
+
+/**
  * Escapa caracteres HTML peligrosos para prevenir XSS.
  * Disponible globalmente — se usa en nav.js, noticias.js, wallap.html y otros.
  * @param {*} str
