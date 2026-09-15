@@ -1,12 +1,14 @@
 /**
  * @file router.js
- * @description Router SPA piloto (Tramo 1): home.html, eventos.html, noticias.html.
+ * @description Router SPA para todas las páginas internas de la app (excepto
+ * index.html, reset-password.html, eliminar-cuenta.html, admin.html y las
+ * páginas puramente estáticas/de redirección).
  *
- * Intercepta navegaciones internas entre estas 3 páginas (vía el hook
+ * Intercepta navegaciones internas entre páginas de SPA_PAGES (vía el hook
  * window.__spaTryNavigate, consumido por el listener de clics ya existente
  * en nav.js) y las resuelve con un fetch + swap de <body>, sin recarga
- * completa. Fuera de estas 3 páginas, todo sigue funcionando igual que
- * antes (recarga normal con el overlay de nav.js).
+ * completa. Fuera de esta lista, todo sigue funcionando igual que antes
+ * (recarga normal con el overlay de nav.js).
  *
  * LIMPIEZA: los intervals/timeouts y los listeners de document/window que
  * registre el script de la página se registran automáticamente (parcheando
@@ -15,7 +17,13 @@
  * dentro del mismo documento.
  */
 (function () {
-  const SPA_PAGES = ['home.html', 'eventos.html', 'noticias.html'];
+  const SPA_PAGES = [
+    'home.html', 'eventos.html', 'noticias.html',
+    'calendario.html', 'galeria.html', 'mikve.html', 'siddur.html',
+    'business.html', 'citas-rabino.html', 'contacto.html', 'donativos.html',
+    'kosher.html', 'linkedin-kehila.html', 'noticia.html', 'perfil.html',
+    'rav.html', 'servicios.html', 'shiurim.html', 'voluntariado.html'
+  ];
 
   // Scripts compartidos que ya están cargados en el documento persistente:
   // no se vuelven a añadir en cada navegación. Cualquier <script src> que
