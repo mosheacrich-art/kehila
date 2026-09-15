@@ -10,6 +10,7 @@
     #pt-overlay .pt-spinner{width:40px;height:40px;border-radius:50%;border:3px solid rgba(27,46,94,.15);border-top-color:#1B2E5E;animation:pt-spin .8s linear infinite}
     @keyframes pt-spin{to{transform:rotate(360deg)}}
     body.page-ready #pt-overlay{opacity:0;pointer-events:none}
+    body:not(.page-ready) .main-content{visibility:hidden}
   </style>
   <link rel="icon" type="image/png" sizes="48x48" href="img/icon-48.png">
   <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">

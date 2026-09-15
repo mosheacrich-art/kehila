@@ -132,8 +132,8 @@
 
     installTracking();
     await runScripts(scripts);
-    document.body.classList.add('page-ready');
     window.scrollTo(0, 0);
+    document.body.classList.add('page-ready');
   }
 
   let currentFile = fileOf(location.pathname);
