@@ -979,6 +979,26 @@ const hoy = new Date();
   document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target===o) closeModal(o.id); }));
   document.addEventListener('keydown', e => { if (e.key==='Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id)); });
 
+  /* ─── Instantánea en localStorage: pinta la lista completa al instante en
+     la primera visita de la sesión (sin esperar a Supabase), igual que el
+     patrón ya usado en home.html para sus 4 eventos destacados. En
+     revisitas dentro de la misma sesión SPA, MOCK_EVENTOS ya tiene datos
+     reales en memoria y se pinta directo con eso. ─── */
+  const EVENTOS_SNAP_KEY = 'kehila_snap_eventos';
+
+  (function paintEventosFromSnapshot() {
+    if (MOCK_EVENTOS.length) { renderLista(); return; }
+    try {
+      const raw = localStorage.getItem(EVENTOS_SNAP_KEY);
+      if (!raw) return;
+      const snap = JSON.parse(raw);
+      if (Array.isArray(snap) && snap.length) {
+        snap.forEach(ev => MOCK_EVENTOS.push(ev));
+        renderLista();
+      }
+    } catch (e) { /* instantánea corrupta: se ignora */ }
+  })();
+
   /* ─── Init: cargar eventos e inscripciones desde Supabase ─── */
   async function loadEventos() {
     const sb = getSupabase();
@@ -993,10 +1013,17 @@ const hoy = new Date();
         // Contar inscritos por evento
         const conteosMap = {};
         if (allInsRes.data) allInsRes.data.forEach(r => { conteosMap[r.evento_id] = (conteosMap[r.evento_id] || 0) + 1; });
-        if (evRes.data?.length) evRes.data.forEach(ev => {
-          ev.inscritos = conteosMap[String(ev.id)] || 0;
-          MOCK_EVENTOS.unshift(ev);
-        });
+        if (evRes.data?.length) {
+          // Se limpia antes de repoblar: MOCK_EVENTOS vive en data.js y persiste
+          // entre navegaciones SPA, así que sin este reset cada revisita a
+          // eventos.html duplicaba todas las tarjetas (unshift sobre lo ya cargado).
+          MOCK_EVENTOS.length = 0;
+          evRes.data.forEach(ev => {
+            ev.inscritos = conteosMap[String(ev.id)] || 0;
+            MOCK_EVENTOS.unshift(ev);
+          });
+          try { localStorage.setItem(EVENTOS_SNAP_KEY, JSON.stringify(MOCK_EVENTOS)); } catch (e) {}
+        }
         if (insRes.data?.length) insRes.data.forEach(r => inscrito.add(r.evento_id));
       } catch(e) {}
     }

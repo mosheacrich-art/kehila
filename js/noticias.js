@@ -29,11 +29,39 @@
  *  de casos, pero revisar títulos/autores si el contenido viene de usuarios finales.
  */
 
+/* ─── Instantánea en localStorage: pinta el grid al instante en la primera
+   visita de la sesión (sin esperar a Supabase), igual que el patrón de
+   home.html/eventos.html. En revisitas dentro de la misma sesión SPA,
+   MOCK_NOTICIAS_V2 ya tiene datos reales en memoria (data.js persiste
+   entre navegaciones) y se pinta directo con eso. ─── */
+const NOTICIAS_SNAP_KEY = 'kehila_snap_noticias';
+
+function paintNoticiasFromSnapshot() {
+  if (MOCK_NOTICIAS_V2.length) {
+    renderDestacadas();
+    renderFiltros();
+    renderGrid('todas');
+    return;
+  }
+  try {
+    const raw = localStorage.getItem(NOTICIAS_SNAP_KEY);
+    if (!raw) return;
+    const snap = JSON.parse(raw);
+    if (Array.isArray(snap) && snap.length) {
+      snap.forEach(n => MOCK_NOTICIAS_V2.push(n));
+      renderDestacadas();
+      renderFiltros();
+      renderGrid('todas');
+    }
+  } catch (e) { /* instantánea corrupta: se ignora */ }
+}
+
 async function __noticiasInit() {
   try {
     requireAuth();
     initNav('noticias');
     renderPageHeader();
+    paintNoticiasFromSnapshot();
     // Cargar noticias desde Supabase
     await loadNoticiasSupabase();
     renderDestacadas();
@@ -67,6 +95,7 @@ async function loadNoticiasSupabase() {
         // Reemplazar mock con datos reales de Supabase
         MOCK_NOTICIAS_V2.length = 0;
         data.forEach(n => MOCK_NOTICIAS_V2.push(n));
+        try { localStorage.setItem(NOTICIAS_SNAP_KEY, JSON.stringify(MOCK_NOTICIAS_V2)); } catch (e) {}
       }
       // Si no hay datos en Supabase, conservar mock como fallback
     }
