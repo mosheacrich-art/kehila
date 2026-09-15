@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
+  <style>html,body{background:#FAF5EE}</style>
+  <style>
+    #pt-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#FAF5EE;transition:opacity .2s ease}
+    #pt-overlay .pt-spinner{width:40px;height:40px;border-radius:50%;border:3px solid rgba(27,46,94,.15);border-top-color:#1B2E5E;animation:pt-spin .8s linear infinite}
+    @keyframes pt-spin{to{transform:rotate(360deg)}}
+    body.page-ready #pt-overlay{opacity:0;pointer-events:none}
+    body:not(.page-ready) .main-content{visibility:hidden}
+  </style>
   <link rel="icon" type="image/png" sizes="48x48" href="img/icon-48.png">
   <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
   <link rel="apple-touch-icon" href="img/icon-180.png">
@@ -194,6 +202,8 @@
   <script defer src='/_vercel/speed-insights/script.js'></script>
 </head>
 <body>
+<div id="pt-overlay"><div class="pt-spinner"></div></div>
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.add("page-ready");});</script>
   <div id="sidebar-placeholder"></div>
   <div class="main-content">
     <div class="page-inner">
@@ -456,10 +466,9 @@
     <img id="lightbox-img" src="" alt="">
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/auth.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>  <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
+  <script src="js/router.js"></script>
   <script>
     /* ── Utilidad resize imagen ── */
     function resizeImage(file, maxDim, quality) {
@@ -614,7 +623,7 @@
         const isOwner = me && p.usuario_id && String(p.usuario_id) === String(me.userId);
         return `
         <div class="prof-card">
-          ${p.foto ? `<img src="${p.foto}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 4px;display:block;">` : `<div class="prof-avatar" data-color="${p.color||'0'}">${p.nombre.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>`}
+          ${p.foto ? `<img src="${p.foto}" loading="lazy" decoding="async" style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 4px;display:block;">` : `<div class="prof-avatar" data-color="${p.color||'0'}">${p.nombre.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>`}
           <div class="prof-name">${p.nombre}</div>
           <div style="text-align:center"><span class="prof-badge-main">${p.especialidad}</span></div>
           <p class="prof-bio">${p.bio||''}</p>
@@ -660,7 +669,7 @@
         <div>
           <div class="section-divider">Fotos de experiencia</div>
           <div class="prof-gallery n${Math.min(p.galeria.length,6)}">
-            ${p.galeria.map(src => `<img src="${src}" onclick="openLightbox('${src}')" alt="foto experiencia">`).join('')}
+            ${p.galeria.map(src => `<img src="${src}" onclick="openLightbox('${src}')" alt="foto experiencia" loading="lazy" decoding="async">`).join('')}
           </div>
         </div>` : ''}
         <div>

@@ -16,7 +16,9 @@
  *  - analytics.js → trackPageView(), trackNewsRead()
  *  - media.js     → uploadMedia() (solo para subir fotos)
  *
- * PUNTO DE ENTRADA: DOMContentLoaded al final de este archivo.
+ * PUNTO DE ENTRADA: __noticiasInit(), invocado en DOMContentLoaded en carga
+ * normal, o inmediatamente si el documento ya está listo (navegación SPA
+ * vía js/router.js, que reinyecta este script sobre un documento ya cargado).
  *
  * DATOS:
  *  Los datos se cargan de Supabase (tabla `noticias`) al iniciar.
@@ -27,11 +29,39 @@
  *  de casos, pero revisar títulos/autores si el contenido viene de usuarios finales.
  */
 
-document.addEventListener('DOMContentLoaded', async () => {
+/* ─── Instantánea en localStorage: pinta el grid al instante en la primera
+   visita de la sesión (sin esperar a Supabase), igual que el patrón de
+   home.html/eventos.html. En revisitas dentro de la misma sesión SPA,
+   MOCK_NOTICIAS_V2 ya tiene datos reales en memoria (data.js persiste
+   entre navegaciones) y se pinta directo con eso. ─── */
+const NOTICIAS_SNAP_KEY = 'kehila_snap_noticias';
+
+function paintNoticiasFromSnapshot() {
+  if (MOCK_NOTICIAS_V2.length) {
+    renderDestacadas();
+    renderFiltros();
+    renderGrid('todas');
+    return;
+  }
+  try {
+    const raw = localStorage.getItem(NOTICIAS_SNAP_KEY);
+    if (!raw) return;
+    const snap = JSON.parse(raw);
+    if (Array.isArray(snap) && snap.length) {
+      snap.forEach(n => MOCK_NOTICIAS_V2.push(n));
+      renderDestacadas();
+      renderFiltros();
+      renderGrid('todas');
+    }
+  } catch (e) { /* instantánea corrupta: se ignora */ }
+}
+
+async function __noticiasInit() {
   try {
     requireAuth();
     initNav('noticias');
     renderPageHeader();
+    paintNoticiasFromSnapshot();
     // Cargar noticias desde Supabase
     await loadNoticiasSupabase();
     renderDestacadas();
@@ -42,7 +72,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (e) {
     console.error('Error iniciando noticias:', e);
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', __noticiasInit);
+} else {
+  __noticiasInit();
+}
 
 /**
  * Carga todas las noticias desde Supabase y sobrescribe el array MOCK_NOTICIAS_V2.
@@ -59,6 +95,7 @@ async function loadNoticiasSupabase() {
         // Reemplazar mock con datos reales de Supabase
         MOCK_NOTICIAS_V2.length = 0;
         data.forEach(n => MOCK_NOTICIAS_V2.push(n));
+        try { localStorage.setItem(NOTICIAS_SNAP_KEY, JSON.stringify(MOCK_NOTICIAS_V2)); } catch (e) {}
       }
       // Si no hay datos en Supabase, conservar mock como fallback
     }
@@ -79,13 +116,6 @@ function formatearFecha(fechaStr) {
   } catch (e) { return fechaStr ?? ''; }
 }
 
-function formatearFechaCorta(fechaStr) {
-  try {
-    const fecha = new Date(fechaStr + 'T12:00:00');
-    return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-  } catch (e) { return fechaStr ?? ''; }
-}
-
 function getNoticias() {
   return (typeof MOCK_NOTICIAS_V2 !== 'undefined') ? MOCK_NOTICIAS_V2 : [];
 }
@@ -96,10 +126,6 @@ function getCfg() {
 
 function catLabel(cat) {
   return getCfg()[cat]?.label ?? cat ?? '';
-}
-
-function catColor(n) {
-  return n?.colorCategoria ?? getCfg()[n?.categoria]?.color ?? '#1B2E5E';
 }
 
 /* ── Page Header ── */
@@ -224,7 +250,7 @@ function renderGrid(filtro) {
         ? `<span class="chip" style="font-size:.7rem;padding:3px 8px;background:#FEF9C3;color:#92400E;border-color:#FDE68A">★ Dest.</span>`
         : '';
       const imgHTML = n.imagen_url
-        ? `<img src="${n.imagen_url}" style="width:100%;height:120px;object-fit:cover;" alt="">`
+        ? `<img src="${n.imagen_url}" loading="lazy" decoding="async" style="width:100%;height:120px;object-fit:cover;" alt="">`
         : '';
       const trashBtn = _isAdmin
         ? `<button class="btn-trash" onclick="deleteNoticia('${n.id ?? ''}',event)" title="Eliminar noticia">${_TRASH_ICON}</button>`
@@ -367,7 +393,7 @@ function abrirNoticia(id) {
         <span class="np-cat-label">${catLabel(n.categoria).toUpperCase()}</span>
         <button class="np-close-btn" data-action="cerrar-modal" title="Cerrar">✕</button>
       </div>
-      ${n.imagen_url ? `<img src="${n.imagen_url}" class="np-img" alt="">` : ''}
+      ${n.imagen_url ? `<img src="${n.imagen_url}" class="np-img" alt="" decoding="async">` : ''}
       <div class="np-scroll">
         <div class="np-content">
           <div class="np-rule-double"><span>— ${catLabel(n.categoria).toUpperCase()} —</span></div>

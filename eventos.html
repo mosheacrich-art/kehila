@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
+  <style>html,body{background:#FAF5EE}</style>
+  <style>
+    #pt-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#FAF5EE;transition:opacity .2s ease}
+    #pt-overlay .pt-spinner{width:40px;height:40px;border-radius:50%;border:3px solid rgba(27,46,94,.15);border-top-color:#1B2E5E;animation:pt-spin .8s linear infinite}
+    @keyframes pt-spin{to{transform:rotate(360deg)}}
+    body.page-ready #pt-overlay{opacity:0;pointer-events:none}
+    body:not(.page-ready) .main-content{visibility:hidden}
+  </style>
   <link rel="icon" type="image/png" sizes="48x48" href="img/icon-48.png">
   <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
   <link rel="apple-touch-icon" href="img/icon-180.png">
@@ -213,6 +221,8 @@
   <script defer src='/_vercel/speed-insights/script.js'></script>
 </head>
 <body>
+<div id="pt-overlay"><div class="pt-spinner"></div></div>
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.add("page-ready");});</script>
 <div id="sidebar-placeholder"></div>
 <div class="main-content">
   <div class="eventos-inner">
@@ -250,7 +260,7 @@
         <button class="chip" data-filter="mes" onclick="setChip(this,'mes')">Este mes</button>
         <button class="chip" data-filter="para-mi" onclick="setChip(this,'para-mi')">Para mí</button>
       </div>
-      <div class="eventos-grid" id="eventos-list"></div>
+      <div class="eventos-grid" id="eventos-list"><div class="kh-skel-card"></div><div class="kh-skel-card"></div><div class="kh-skel-card"></div><div class="kh-skel-card"></div></div>
     </div>
 
     <!-- ─── VISTA CALENDARIO ─── -->
@@ -412,6 +422,7 @@
 <script src="js/familia.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/media.js"></script>
+<script src="js/router.js"></script>
 <script>
   // Evita que el navegador restaure su propio scroll y pelee con el salto
   // manual a una tarjeta concreta (ver deep-link ?evento=ID más abajo).
@@ -535,7 +546,7 @@ const hoy = new Date();
       return `
         <div class="evento-card-full ${cat}" id="evcard-${ev.id}">
           ${_isAdmin ? `<button class="btn-trash" onclick="deleteEvento('${ev.id}',event)" title="Eliminar evento">${TRASH_ICON}</button>` : ''}
-          ${ev.imagen_url ? `<img src="${ev.imagen_url}" alt="${ev.titulo}" style="width:100%;height:auto;border-radius:14px 14px 0 0;display:block;">` : ''}
+          ${ev.imagen_url ? `<img src="${ev.imagen_url}" alt="${ev.titulo}" loading="lazy" decoding="async" style="width:100%;height:auto;border-radius:14px 14px 0 0;display:block;">` : ''}
           <div class="ev-card-header">
             <div class="ev-date-block">
               <span class="ev-day">${fecha.getDate()}</span>
@@ -969,6 +980,26 @@ const hoy = new Date();
   document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target===o) closeModal(o.id); }));
   document.addEventListener('keydown', e => { if (e.key==='Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id)); });
 
+  /* ─── Instantánea en localStorage: pinta la lista completa al instante en
+     la primera visita de la sesión (sin esperar a Supabase), igual que el
+     patrón ya usado en home.html para sus 4 eventos destacados. En
+     revisitas dentro de la misma sesión SPA, MOCK_EVENTOS ya tiene datos
+     reales en memoria y se pinta directo con eso. ─── */
+  const EVENTOS_SNAP_KEY = 'kehila_snap_eventos';
+
+  (function paintEventosFromSnapshot() {
+    if (MOCK_EVENTOS.length) { renderLista(); return; }
+    try {
+      const raw = localStorage.getItem(EVENTOS_SNAP_KEY);
+      if (!raw) return;
+      const snap = JSON.parse(raw);
+      if (Array.isArray(snap) && snap.length) {
+        snap.forEach(ev => MOCK_EVENTOS.push(ev));
+        renderLista();
+      }
+    } catch (e) { /* instantánea corrupta: se ignora */ }
+  })();
+
   /* ─── Init: cargar eventos e inscripciones desde Supabase ─── */
   async function loadEventos() {
     const sb = getSupabase();
@@ -983,10 +1014,17 @@ const hoy = new Date();
         // Contar inscritos por evento
         const conteosMap = {};
         if (allInsRes.data) allInsRes.data.forEach(r => { conteosMap[r.evento_id] = (conteosMap[r.evento_id] || 0) + 1; });
-        if (evRes.data?.length) evRes.data.forEach(ev => {
-          ev.inscritos = conteosMap[String(ev.id)] || 0;
-          MOCK_EVENTOS.unshift(ev);
-        });
+        if (evRes.data?.length) {
+          // Se limpia antes de repoblar: MOCK_EVENTOS vive en data.js y persiste
+          // entre navegaciones SPA, así que sin este reset cada revisita a
+          // eventos.html duplicaba todas las tarjetas (unshift sobre lo ya cargado).
+          MOCK_EVENTOS.length = 0;
+          evRes.data.forEach(ev => {
+            ev.inscritos = conteosMap[String(ev.id)] || 0;
+            MOCK_EVENTOS.unshift(ev);
+          });
+          try { localStorage.setItem(EVENTOS_SNAP_KEY, JSON.stringify(MOCK_EVENTOS)); } catch (e) {}
+        }
         if (insRes.data?.length) insRes.data.forEach(r => inscrito.add(r.evento_id));
       } catch(e) {}
     }

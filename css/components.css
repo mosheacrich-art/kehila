@@ -3,6 +3,32 @@
    Botones, Cards, Badges, Avatares, Modales, Toasts
    ============================================= */
 
+/* ─── SKELETON SCREENS ───
+   Placeholders con shimmer para listas que cargan datos de Supabase
+   (eventos, noticias...). Se muestran mientras el fetch está en vuelo
+   y se sobreescriben al asignar el innerHTML real. */
+.kh-skel-card {
+  border-radius: var(--radius-sm);
+  background: #EDE7DC;
+  overflow: hidden;
+  height: 220px;
+  position: relative;
+}
+.kh-skel-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: translateX(-100%);
+  animation: kh-skel-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes kh-skel-shimmer {
+  100% { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kh-skel-card::after { animation: none; }
+}
+
 /* ─── BOTONES ─── */
 .btn {
   display: inline-flex;

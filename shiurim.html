@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
+  <style>html,body{background:#FAF5EE}</style>
+  <style>
+    #pt-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#FAF5EE;transition:opacity .2s ease}
+    #pt-overlay .pt-spinner{width:40px;height:40px;border-radius:50%;border:3px solid rgba(27,46,94,.15);border-top-color:#1B2E5E;animation:pt-spin .8s linear infinite}
+    @keyframes pt-spin{to{transform:rotate(360deg)}}
+    body.page-ready #pt-overlay{opacity:0;pointer-events:none}
+    body:not(.page-ready) .main-content{visibility:hidden}
+  </style>
   <link rel="icon" type="image/png" sizes="48x48" href="img/icon-48.png">
   <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
   <link rel="apple-touch-icon" href="img/icon-180.png">
@@ -170,6 +178,8 @@
   <script defer src='/_vercel/speed-insights/script.js'></script>
 </head>
 <body>
+<div id="pt-overlay"><div class="pt-spinner"></div></div>
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.add("page-ready");});</script>
   <div id="sidebar-placeholder"></div>
   <main class="main-content">
     <div class="sh-inner">
@@ -320,6 +330,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
+  <script src="js/router.js"></script>
   <script src="js/media.js"></script>
   <script>
   (async function () {
@@ -400,7 +411,7 @@
         var da = 'data-id="' + v.id + '" data-likes="' + (v.likes||0) + '" data-vistas="' + (v.vistas||0) + '"' + (id ? ' data-ytid="' + id + '"' : '') + (v.video_url ? ' data-url="' + v.video_url + '"' : '');
         return '<div class="vid-card" ' + da + '>'
           + '<div class="vid-thumb vid-open-click" ' + da + '>'
-          + (thumb ? '<img src="' + thumb + '" alt="" onerror="this.style.display=\'none\'">' : '')
+          + (thumb ? '<img src="' + thumb + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'">' : '')
           + '<div class="vid-play-btn"><div class="vid-play-circle">' + PLAY + '</div></div>'
           + (v.duracion ? '<span class="vid-duration">' + v.duracion + '</span>' : '')
           + '</div><div class="vid-info">'

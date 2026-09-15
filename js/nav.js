@@ -50,6 +50,145 @@ if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.is
 }
 
 /**
+ * Muestra el overlay #pt-overlay (spinner) al pulsar un enlace interno,
+ * ANTES de que el navegador descargue la página actual. Sin esto, en
+ * WKWebView (iOS) se ve un corte seco a blanco/negro entre el clic y el
+ * primer pintado de la página siguiente — con esto, lo último que se ve
+ * es el mismo spinner que ya trae la página nueva en su <head>, así el
+ * cambio se percibe continuo en vez de un parpadeo.
+ * Se registra en carga del script (no en DOMContentLoaded) para no perder
+ * clics tempranos.
+ */
+document.addEventListener('click', (e) => {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = e.target.closest('a[href]');
+  if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+
+  const href = a.getAttribute('href');
+  if (!href || /^(#|mailto:|tel:|javascript:)/i.test(href)) return;
+
+  let url;
+  try { url = new URL(href, location.href); } catch (_) { return; }
+  if (url.origin !== location.origin) return;
+  // Mismo documento con solo cambio de #hash: no hay navegación real.
+  if (url.pathname === location.pathname && url.hash) return;
+
+  // Router SPA (js/router.js): si la página actual y el destino están en el
+  // piloto, navega sin recarga. Si no lo consume, cae al flujo normal.
+  if (window.__spaTryNavigate && window.__spaTryNavigate(url, href)) {
+    e.preventDefault();
+    return;
+  }
+
+  const overlay = document.getElementById('pt-overlay');
+  if (!overlay) return; // página sin overlay propio (ej. redirecciones): navegación normal
+
+  e.preventDefault();
+  document.body.classList.remove('page-ready');
+  setTimeout(() => { window.location.href = href; }, 60);
+}, true);
+
+/**
+ * Prefetch al tocar/pasar sobre un enlace interno, antes del clic.
+ * Calienta la cache del Service Worker para que la navegación real
+ * (arriba) llegue casi instantánea en vez de esperar la red.
+ */
+(() => {
+  const prefetched = new Set();
+  const tryPrefetch = (target) => {
+    const a = target && target.closest && target.closest('a[href]');
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    const href = a.getAttribute('href');
+    if (!href || /^(#|mailto:|tel:|javascript:)/i.test(href)) return;
+    let url;
+    try { url = new URL(href, location.href); } catch (_) { return; }
+    if (url.origin !== location.origin) return;
+    if (url.pathname === location.pathname) return;
+    if (prefetched.has(url.href)) return;
+    prefetched.add(url.href);
+    fetch(url.href, { credentials: 'same-origin' }).catch(() => {});
+  };
+  document.addEventListener('touchstart', (e) => tryPrefetch(e.target), { passive: true, capture: true });
+  document.addEventListener('mouseover', (e) => tryPrefetch(e.target), { capture: true });
+})();
+
+/**
+ * Pull-to-refresh nativo: solo dentro de la app (Capacitor), para no
+ * interferir con el scroll normal en navegador de escritorio/móvil web.
+ * Usa preventDefault() en touchmove mientras se arrastra: sin esto, en
+ * WKWebView (iOS) el rubber-band/bounce nativo se adelanta al gesto y el
+ * indicador nunca llega a mostrarse de forma fiable — con preventDefault
+ * el gesto lo controlamos por completo desde JS.
+ */
+(() => {
+  if (!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) return;
+
+  const THRESHOLD = 70;
+  const MAX = 100;
+  let startY = 0;
+  let pulling = false;
+  let dragging = false;
+  let indicator = null;
+
+  const ensureIndicator = () => {
+    if (indicator) return indicator;
+    indicator = document.createElement('div');
+    indicator.id = 'kh-ptr';
+    indicator.innerHTML = '<div class="kh-ptr-spinner"></div>';
+    const style = document.createElement('style');
+    style.textContent = `
+      #kh-ptr{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;
+        align-items:flex-start;padding-top:14px;height:70px;z-index:9998;
+        transform:translateY(-70px);pointer-events:none}
+      #kh-ptr .kh-ptr-spinner{width:28px;height:28px;border-radius:50%;
+        border:3px solid rgba(27,46,94,.15);border-top-color:#1B2E5E;
+        animation:kh-ptr-spin .7s linear infinite}
+      @keyframes kh-ptr-spin{to{transform:rotate(360deg)}}
+    `;
+    document.head.appendChild(style);
+    document.body.appendChild(indicator);
+    return indicator;
+  };
+
+  const setDist = (dist, withTransition) => {
+    const el = ensureIndicator();
+    el.style.transition = withTransition ? 'transform .18s ease' : 'none';
+    el.style.transform = `translateY(${dist - 70}px)`;
+  };
+
+  document.addEventListener('touchstart', (e) => {
+    if (window.scrollY > 0 || e.touches.length !== 1) { pulling = false; return; }
+    startY = e.touches[0].clientY;
+    pulling = true;
+    dragging = false;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!pulling) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy <= 0 || window.scrollY > 0) { pulling = false; return; }
+    dragging = true;
+    if (e.cancelable) e.preventDefault();
+    const dist = Math.min(dy * 0.55, MAX);
+    setDist(dist, false);
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => {
+    if (!pulling || !dragging) { pulling = false; dragging = false; return; }
+    pulling = false;
+    dragging = false;
+    if (!indicator) return;
+    const currentDist = parseFloat(indicator.style.transform.match(/-?\d+(\.\d+)?/)?.[0] || '-70') + 70;
+    if (currentDist > THRESHOLD) {
+      setDist(70, true);
+      window.location.reload();
+    } else {
+      setDist(0, true);
+    }
+  }, { passive: true });
+})();
+
+/**
  * Escapa caracteres HTML peligrosos para prevenir XSS.
  * Disponible globalmente — se usa en nav.js, noticias.js, wallap.html y otros.
  * @param {*} str

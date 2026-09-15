@@ -13,7 +13,7 @@
    Push: muestra notificación nativa cuando la app está cerrada.
    ============================================= */
 
-const CACHE = 'kehila-v25';
+const CACHE = 'kehila-v35';
 
 // El cascarón completo de la app. Se precachea al instalar el SW para que
 // la navegación entre secciones sea instantánea.
@@ -62,6 +62,7 @@ const PRECACHE = [
   '/js/noticias.js',
   '/js/push.js',
   '/js/registro.js',
+  '/js/router.js',
   '/manifest.json',
   '/img/icon-192.png',
   '/img/icon-512.png',

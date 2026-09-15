@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
+  <style>html,body{background:#FAF5EE}</style>
   <link rel="icon" type="image/png" sizes="48x48" href="img/icon-48.png">
   <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
   <link rel="apple-touch-icon" href="img/icon-180.png">
@@ -12,6 +13,25 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
   <style>
+    /* ─── Loader inicial: oculta el dashboard hasta que TODAS las
+       secciones (eventos, banner, horarios, shabat) tienen datos, para que
+       no aparezcan por partes en el orden en que responde cada consulta ─── */
+    #pt-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--color-bg, #FAF5EE);
+      transition: opacity 0.2s ease;
+    }
+    #pt-overlay .pt-spinner {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 3px solid rgba(27,46,94,0.15);
+      border-top-color: var(--color-primary, #1B2E5E);
+      animation: pt-spin 0.8s linear infinite;
+    }
+    @keyframes pt-spin { to { transform: rotate(360deg); } }
+    body.page-ready #pt-overlay { opacity: 0; pointer-events: none; }
+    body:not(.page-ready) .main-content { visibility: hidden; }
+
     /* ─── Layout principal ─── */
     .main-content {
       margin-left: var(--sidebar-width);
@@ -850,6 +870,9 @@
 </head>
 <body>
 
+  <!-- Loader: se oculta cuando todas las secciones han cargado, ver revealHome() -->
+  <div id="pt-overlay"><div class="pt-spinner"></div></div>
+
   <!-- Sidebar placeholder -->
   <div id="sidebar-placeholder"></div>
 
@@ -864,7 +887,7 @@
         <div>
           <p class="home-greeting-label">שלום</p>
           <h1 class="home-greeting">
-            ¡Boker tov, <span class="name-accent" id="greeting-name">Amigo</span>!
+            ¡Shalom, <span class="name-accent" id="greeting-name">Amigo</span>!
           </h1>
           <p class="home-date" id="home-date-display">
             Cargando fecha...
@@ -1084,6 +1107,7 @@
   <script src="js/i18n.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
+  <script src="js/router.js"></script>
   <script>
     /* ─── Init ─── */
     const user = requireAuth();
@@ -1210,8 +1234,12 @@
     // El banner es lo primero que se ve (above the fold): se carga en paralelo
     // con los eventos, no encadenado detrás — antes esperaba a que terminara
     // loadHomeData() (~1s por la consulta de eventos) para siquiera empezar.
-    loadHomeData();
-    loadBanner();
+    // Todas las secciones se acumulan en __homeReady y el dashboard entero
+    // se revela de golpe (revealHome, definido más abajo) cuando todas
+    // terminan, en vez de ir apareciendo por partes según responde cada una.
+    window.__homeReady = [];
+    window.__homeReady.push(loadHomeData());
+    window.__homeReady.push(loadBanner());
 
     document.addEventListener('langchange', () => {
       renderEventos();
@@ -1548,7 +1576,7 @@
     }
 
     // Cargar horarios al inicio
-    loadHorarios();
+    window.__homeReady.push(loadHorarios());
 
     /* ══════════════════════════════════════════
        SHABAT CARD — Datos reales via HebCal API
@@ -1692,7 +1720,7 @@
     }
 
     // ── Cargar foto banner Shabat (sólo lectura; se gestiona desde Ajustes) ──
-    (async function() {
+    window.__homeReady.push((async function() {
       const sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
       try {
         const { data } = await sb.from('servicios_config').select('image_url').eq('id', 'shabat_banner').single();
@@ -1701,10 +1729,21 @@
           img.src = data.image_url; img.style.display = 'block';
         }
       } catch(e) {}
-    })();
+    })());
 
+    window.__homeReady.push(loadShabatCard());
 
-    loadShabatCard();
+    // Revela el dashboard entero de golpe cuando todas las secciones están
+    // listas, en vez de ir mostrándolas por partes según van respondiendo.
+    // Timeout de seguridad: si algo se cuelga (red lenta, error), no deja al
+    // usuario mirando el loader para siempre — se revela igual a los 4s.
+    function revealHome() {
+      document.body.classList.add('page-ready');
+    }
+    Promise.race([
+      Promise.all(window.__homeReady).catch(() => {}),
+      new Promise((resolve) => setTimeout(resolve, 4000)),
+    ]).then(revealHome);
   </script>
   <script>
     if ("serviceWorker" in navigator) {
