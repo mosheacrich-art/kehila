@@ -12,6 +12,25 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
   <style>
+    /* ─── Loader inicial: oculta el dashboard hasta que TODAS las
+       secciones (eventos, banner, horarios, shabat) tienen datos, para que
+       no aparezcan por partes en el orden en que responde cada consulta ─── */
+    #home-loader {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--color-bg, #F7F8FA);
+      transition: opacity 0.25s ease;
+    }
+    #home-loader .home-loader-spinner {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 3px solid rgba(27,46,94,0.15);
+      border-top-color: var(--color-primary, #1B2E5E);
+      animation: home-loader-spin 0.8s linear infinite;
+    }
+    @keyframes home-loader-spin { to { transform: rotate(360deg); } }
+    body.home-ready #home-loader { opacity: 0; pointer-events: none; }
+    body:not(.home-ready) .main-content { visibility: hidden; }
+
     /* ─── Layout principal ─── */
     .main-content {
       margin-left: var(--sidebar-width);
@@ -850,6 +869,9 @@
 </head>
 <body>
 
+  <!-- Loader: se oculta cuando todas las secciones han cargado, ver revealHome() -->
+  <div id="home-loader"><div class="home-loader-spinner"></div></div>
+
   <!-- Sidebar placeholder -->
   <div id="sidebar-placeholder"></div>
 
@@ -1210,8 +1232,12 @@
     // El banner es lo primero que se ve (above the fold): se carga en paralelo
     // con los eventos, no encadenado detrás — antes esperaba a que terminara
     // loadHomeData() (~1s por la consulta de eventos) para siquiera empezar.
-    loadHomeData();
-    loadBanner();
+    // Todas las secciones se acumulan en __homeReady y el dashboard entero
+    // se revela de golpe (revealHome, definido más abajo) cuando todas
+    // terminan, en vez de ir apareciendo por partes según responde cada una.
+    window.__homeReady = [];
+    window.__homeReady.push(loadHomeData());
+    window.__homeReady.push(loadBanner());
 
     document.addEventListener('langchange', () => {
       renderEventos();
@@ -1548,7 +1574,7 @@
     }
 
     // Cargar horarios al inicio
-    loadHorarios();
+    window.__homeReady.push(loadHorarios());
 
     /* ══════════════════════════════════════════
        SHABAT CARD — Datos reales via HebCal API
@@ -1692,7 +1718,7 @@
     }
 
     // ── Cargar foto banner Shabat (sólo lectura; se gestiona desde Ajustes) ──
-    (async function() {
+    window.__homeReady.push((async function() {
       const sb = typeof getSupabase === 'function' ? getSupabase() : null; if (!sb) return;
       try {
         const { data } = await sb.from('servicios_config').select('image_url').eq('id', 'shabat_banner').single();
@@ -1701,10 +1727,21 @@
           img.src = data.image_url; img.style.display = 'block';
         }
       } catch(e) {}
-    })();
+    })());
 
+    window.__homeReady.push(loadShabatCard());
 
-    loadShabatCard();
+    // Revela el dashboard entero de golpe cuando todas las secciones están
+    // listas, en vez de ir mostrándolas por partes según van respondiendo.
+    // Timeout de seguridad: si algo se cuelga (red lenta, error), no deja al
+    // usuario mirando el loader para siempre — se revela igual a los 4s.
+    function revealHome() {
+      document.body.classList.add('home-ready');
+    }
+    Promise.race([
+      Promise.all(window.__homeReady).catch(() => {}),
+      new Promise((resolve) => setTimeout(resolve, 4000)),
+    ]).then(revealHome);
   </script>
   <script>
     if ("serviceWorker" in navigator) {
