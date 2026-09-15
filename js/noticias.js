@@ -16,7 +16,9 @@
  *  - analytics.js → trackPageView(), trackNewsRead()
  *  - media.js     → uploadMedia() (solo para subir fotos)
  *
- * PUNTO DE ENTRADA: DOMContentLoaded al final de este archivo.
+ * PUNTO DE ENTRADA: __noticiasInit(), invocado en DOMContentLoaded en carga
+ * normal, o inmediatamente si el documento ya está listo (navegación SPA
+ * vía js/router.js, que reinyecta este script sobre un documento ya cargado).
  *
  * DATOS:
  *  Los datos se cargan de Supabase (tabla `noticias`) al iniciar.
@@ -27,7 +29,7 @@
  *  de casos, pero revisar títulos/autores si el contenido viene de usuarios finales.
  */
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function __noticiasInit() {
   try {
     requireAuth();
     initNav('noticias');
@@ -42,7 +44,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (e) {
     console.error('Error iniciando noticias:', e);
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', __noticiasInit);
+} else {
+  __noticiasInit();
+}
 
 /**
  * Carga todas las noticias desde Supabase y sobrescribe el array MOCK_NOTICIAS_V2.

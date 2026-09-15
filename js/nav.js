@@ -73,6 +73,13 @@ document.addEventListener('click', (e) => {
   // Mismo documento con solo cambio de #hash: no hay navegación real.
   if (url.pathname === location.pathname && url.hash) return;
 
+  // Router SPA (js/router.js): si la página actual y el destino están en el
+  // piloto, navega sin recarga. Si no lo consume, cae al flujo normal.
+  if (window.__spaTryNavigate && window.__spaTryNavigate(url, href)) {
+    e.preventDefault();
+    return;
+  }
+
   const overlay = document.getElementById('pt-overlay');
   if (!overlay) return; // página sin overlay propio (ej. redirecciones): navegación normal
 
