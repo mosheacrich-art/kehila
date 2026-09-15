@@ -31,6 +31,14 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Borrar el escaneo del DNI/NIE/pasaporte del bucket 'documentos' antes de
+    // borrar el perfil (ya no queda ninguna fila que apunte a el).
+    const { data: profileRow } = await adminClient.from('profiles').select('doc_url').eq('id', userId).single();
+    if (profileRow?.doc_url) {
+      const docPath = profileRow.doc_url.includes('/documentos/') ? profileRow.doc_url.split('/documentos/')[1] : profileRow.doc_url;
+      await adminClient.storage.from('documentos').remove([docPath]);
+    }
+
     // Delete user data from all tables
     await adminClient.from('mikve_reservas').delete().eq('usuario_id', userId);
     await adminClient.from('donaciones').delete().eq('usuario_id', userId);

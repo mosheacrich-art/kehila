@@ -3610,6 +3610,7 @@
     const sb = getSupabase();
     if (!sb) return;
     await sb.from('profiles').update({ status: 'active' }).eq('id', userId);
+    await borrarDocumentoIdentidad(userId);
   }
 
   // Banear usuario real en Supabase
@@ -3623,6 +3624,28 @@
     const sb = getSupabase();
     if (!sb) return;
     await sb.from('profiles').update({ status: 'banned' }).eq('id', userId);
+    await borrarDocumentoIdentidad(userId);
+  }
+
+  /**
+   * Borra el escaneo del DNI/NIE/pasaporte del bucket 'documentos' tras
+   * aprobar o rechazar (banear) a un usuario. Ya cumplió su unico proposito
+   * -verificar la identidad al registrarse- y no hay motivo para conservarlo
+   * (minimizacion de datos, RGPD art. 5.1.c). No bloquea la aprobacion/rechazo
+   * si falla: el estado del usuario ya se guardo por separado.
+   * @param {string} userId
+   */
+  async function borrarDocumentoIdentidad(userId) {
+    try {
+      const sb = getSupabase();
+      const { data: profile } = await sb.from('profiles').select('doc_url').eq('id', userId).single();
+      if (!profile?.doc_url) return;
+      const docPath = profile.doc_url.includes('/documentos/') ? profile.doc_url.split('/documentos/')[1] : profile.doc_url;
+      await sb.storage.from('documentos').remove([docPath]);
+      await sb.from('profiles').update({ doc_url: null, doc_filename: null }).eq('id', userId);
+    } catch (e) {
+      console.warn('[admin] No se pudo borrar el documento de identidad:', e);
+    }
   }
 
   // ── Crear cuenta de prueba ──────────────────────────────────────
