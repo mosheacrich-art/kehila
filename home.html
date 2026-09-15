@@ -16,21 +16,21 @@
     /* ─── Loader inicial: oculta el dashboard hasta que TODAS las
        secciones (eventos, banner, horarios, shabat) tienen datos, para que
        no aparezcan por partes en el orden en que responde cada consulta ─── */
-    #home-loader {
+    #pt-overlay {
       position: fixed; inset: 0; z-index: 9999;
       display: flex; align-items: center; justify-content: center;
-      background: var(--color-bg, #F7F8FA);
-      transition: opacity 0.25s ease;
+      background: var(--color-bg, #FAF5EE);
+      transition: opacity 0.2s ease;
     }
-    #home-loader .home-loader-spinner {
+    #pt-overlay .pt-spinner {
       width: 40px; height: 40px; border-radius: 50%;
       border: 3px solid rgba(27,46,94,0.15);
       border-top-color: var(--color-primary, #1B2E5E);
-      animation: home-loader-spin 0.8s linear infinite;
+      animation: pt-spin 0.8s linear infinite;
     }
-    @keyframes home-loader-spin { to { transform: rotate(360deg); } }
-    body.home-ready #home-loader { opacity: 0; pointer-events: none; }
-    body:not(.home-ready) .main-content { visibility: hidden; }
+    @keyframes pt-spin { to { transform: rotate(360deg); } }
+    body.page-ready #pt-overlay { opacity: 0; pointer-events: none; }
+    body:not(.page-ready) .main-content { visibility: hidden; }
 
     /* ─── Layout principal ─── */
     .main-content {
@@ -871,7 +871,7 @@
 <body>
 
   <!-- Loader: se oculta cuando todas las secciones han cargado, ver revealHome() -->
-  <div id="home-loader"><div class="home-loader-spinner"></div></div>
+  <div id="pt-overlay"><div class="pt-spinner"></div></div>
 
   <!-- Sidebar placeholder -->
   <div id="sidebar-placeholder"></div>
@@ -1737,7 +1737,7 @@
     // Timeout de seguridad: si algo se cuelga (red lenta, error), no deja al
     // usuario mirando el loader para siempre — se revela igual a los 4s.
     function revealHome() {
-      document.body.classList.add('home-ready');
+      document.body.classList.add('page-ready');
     }
     Promise.race([
       Promise.all(window.__homeReady).catch(() => {}),

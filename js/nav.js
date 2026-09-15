@@ -50,6 +50,38 @@ if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.is
 }
 
 /**
+ * Muestra el overlay #pt-overlay (spinner) al pulsar un enlace interno,
+ * ANTES de que el navegador descargue la página actual. Sin esto, en
+ * WKWebView (iOS) se ve un corte seco a blanco/negro entre el clic y el
+ * primer pintado de la página siguiente — con esto, lo último que se ve
+ * es el mismo spinner que ya trae la página nueva en su <head>, así el
+ * cambio se percibe continuo en vez de un parpadeo.
+ * Se registra en carga del script (no en DOMContentLoaded) para no perder
+ * clics tempranos.
+ */
+document.addEventListener('click', (e) => {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = e.target.closest('a[href]');
+  if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+
+  const href = a.getAttribute('href');
+  if (!href || /^(#|mailto:|tel:|javascript:)/i.test(href)) return;
+
+  let url;
+  try { url = new URL(href, location.href); } catch (_) { return; }
+  if (url.origin !== location.origin) return;
+  // Mismo documento con solo cambio de #hash: no hay navegación real.
+  if (url.pathname === location.pathname && url.hash) return;
+
+  const overlay = document.getElementById('pt-overlay');
+  if (!overlay) return; // página sin overlay propio (ej. redirecciones): navegación normal
+
+  e.preventDefault();
+  document.body.classList.remove('page-ready');
+  setTimeout(() => { window.location.href = href; }, 60);
+}, true);
+
+/**
  * Escapa caracteres HTML peligrosos para prevenir XSS.
  * Disponible globalmente — se usa en nav.js, noticias.js, wallap.html y otros.
  * @param {*} str
