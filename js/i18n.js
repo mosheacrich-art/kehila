@@ -56,7 +56,7 @@ const TRANSLATIONS = {
     inscrito:         'Inscrito',
 
     // Home
-    home_greeting:       'Boker tov',
+    home_greeting:       'Shalom',
     home_shabbat:        'Shabbat esta semana',
     home_quick:          'Accesos rápidos',
     home_quick_rav:      'Preg. al Rav',
@@ -358,7 +358,7 @@ const TRANSLATIONS = {
     inscrito:         'Registered',
 
     // Home
-    home_greeting:       'Boker tov',
+    home_greeting:       'Shalom',
     home_shabbat:        'This week\'s Shabbat',
     home_quick:          'Quick access',
     home_quick_rav:      'Ask Rabbi',
