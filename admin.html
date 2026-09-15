@@ -3395,11 +3395,32 @@
    */
   function promptBanear(userId) {
     const user = usersState.find(u => u.userId === userId);
+    // Rechazar una solicitud pendiente no necesita motivo (a diferencia de
+    // banear a un usuario ya activo): se rechaza directo, sin modal.
+    if (user.status === 'pending') {
+      rechazarUsuarioPendiente(userId);
+      return;
+    }
     pendingTarget = userId;
     document.getElementById('banear-nombre').textContent = user.name;
     document.getElementById('ban-reason').value = '';
     document.getElementById('ban-reason-error').style.display = 'none';
     openModal('modal-banear');
+  }
+
+  /**
+   * Rechaza una solicitud de inscripción pendiente, sin pedir motivo.
+   * @param {string} userId - UUID del usuario a rechazar
+   */
+  async function rechazarUsuarioPendiente(userId) {
+    const user = usersState.find(u => u.userId === userId);
+    if (!confirm(`¿Rechazar la solicitud de ${user.name}?`)) return;
+    if (!await verifyAdminRealtime()) return;
+    user.status = 'banned';
+    if (user.source === 'real') banearEnSupabase(user.userId);
+    filterUsers();
+    initPendingBanner();
+    showToast(`${escHtml(user.name)} rechazado.`, 'warning');
   }
 
   document.getElementById('btn-confirm-banear').addEventListener('click', async () => {
